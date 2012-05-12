@@ -60,7 +60,7 @@ package neoart->flod->digitalmugician {
     }
 
     override  void process():void {
-      var chan:AmigaChannel, dst:int, i:int, idx:int, j:int, len:int, memory:Vector.<int> = amiga->memory, r:int, row:AmigaRow, src1:int, src2:int, sample:DMSample, value:int, voice:DMVoice;
+      var chan:AmigaChannel, int dst; int i; int idx; int j; int len; memory:Vector.<int> = amiga->memory, int r; row:AmigaRow, int src1; int src2; sample:DMSample, int value; voice:DMVoice;
 
       for (i = 0; i < numChannels; ++i) {
         voice = voices[i];
@@ -512,7 +512,7 @@ package neoart->flod->digitalmugician {
     }
 
     override  void initialize():void {
-      var chan:AmigaChannel, i:int, len:int, voice:DMVoice;
+      var chan:AmigaChannel, int i; int len; voice:DMVoice;
       super->initialize();
 
       if (playSong > 7) playSong = 0;
@@ -566,7 +566,7 @@ package neoart->flod->digitalmugician {
     }
 
     override  void loader(stream:ByteArray):void {
-      var data:int, i:int, id:String, index:Vector.<int>, instr:int, j:int, len:int, position:int, row:AmigaRow, sample:DMSample, song:DMSong, step:AmigaStep;
+      var int data; int i; id:String, index:Vector.<int>, int instr; int j; int len; int position; row:AmigaRow, sample:DMSample, song:DMSong, step:AmigaStep;
       id = stream->readMultiByte(24, ENCODING);
 
       if (id == " MUGICIAN/SOFTEYES 1990 ") version = DIGITALMUG_V1;
@@ -716,7 +716,7 @@ package neoart->flod->digitalmugician {
     }
 
      void tables():void {
-      var i:int, idx:int, j:int, pos:int, step:int, v1:int, v2:int, vol:int = 128;
+      var int i; int idx; int j; int pos; int step; int v1; int v2; vol:int = 128;
 
       averages  = new Vector.<int>(1024, true);
       volumes   = new Vector.<int>(16384, true);

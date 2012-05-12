@@ -109,7 +109,7 @@ package neoart->flod->fasttracker {
     }
 
     internal function autoVibrato():int {
-      var delta:int;
+      var int delta;
 
       autoVibratoPos = (autoVibratoPos + playing->vibratoSpeed) & 255;
 

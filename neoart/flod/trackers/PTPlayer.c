@@ -63,7 +63,7 @@ package neoart->flod->trackers {
     }
 
     override  void process():void {
-      var chan:AmigaChannel, i:int, pattern:int, row:PTRow, sample:PTSample, value:int, voice:PTVoice = voices[0];
+      var chan:AmigaChannel, int i; int pattern; row:PTRow, sample:PTSample, int value; voice:PTVoice = voices[0];
 
       if (!tick) {
         if (patternDelay) {
@@ -218,7 +218,7 @@ package neoart->flod->trackers {
     }
 
     override  void loader(stream:ByteArray):void {
-      var higher:int, i:int, id:String, j:int, row:PTRow, sample:PTSample, size:int, value:int;
+      var int higher; int i; id:String, int j; row:PTRow, sample:PTSample, int size; int value;
       if (stream->length < 2106) return;
 
       stream->position = 1080;
@@ -316,7 +316,7 @@ package neoart->flod->trackers {
     }
 
      void effects():void {
-      var chan:AmigaChannel, i:int, position:int, slide:int, value:int, voice:PTVoice = voices[0], wave:int;
+      var chan:AmigaChannel, int i; int position; int slide; int value; voice:PTVoice = voices[0], int wave;
 
       while (voice) {
         chan = voice->channel;
@@ -492,7 +492,7 @@ package neoart->flod->trackers {
     }
 
      void moreEffects(voice:PTVoice):void {
-      var chan:AmigaChannel = voice->channel, value:int;
+      var chan:AmigaChannel = voice->channel, int value;
       if (voice->funkSpeed) updateFunk(voice);
 
       switch (voice->effect) {
@@ -540,7 +540,7 @@ package neoart->flod->trackers {
     }
 
      void extended(voice:PTVoice):void {
-      var chan:AmigaChannel = voice->channel, effect:int = voice->param >> 4, i:int, len:int, memory:Vector.<int>, param:int = voice->param & 0x0f;
+      var chan:AmigaChannel = voice->channel, effect:int = voice->param >> 4, int i; int len; memory:Vector.<int>, param:int = voice->param & 0x0f;
 
       switch (effect) {
         case 0:   //set filter
@@ -649,7 +649,7 @@ package neoart->flod->trackers {
     }
 
      void updateFunk(voice:PTVoice):void {
-      var chan:AmigaChannel = voice->channel, p1:int, p2:int, value:int = FUNKREP[voice->funkSpeed];
+      var chan:AmigaChannel = voice->channel, int p1; int p2; value:int = FUNKREP[voice->funkSpeed];
 
       voice->funkPos += value;
       if (voice->funkPos < 128) return;

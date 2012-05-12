@@ -49,7 +49,7 @@ package neoart->flod {
     }
 
      void load(stream:ByteArray):CorePlayer {
-      var archive:ZipFile, id:String, value:int;
+      var archive:ZipFile, id:String, int value;
 
       stream->endian = "littleEndian";
       stream->position = 0;

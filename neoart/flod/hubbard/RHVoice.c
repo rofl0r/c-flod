@@ -39,7 +39,7 @@ package neoart->flod->hubbard {
  int vibratoPos;
  int synthPos;
 
-     void RHVoice(index:int, bitFlag:int) {
+     void RHVoice( int index; bitFlag:int) {
       this->index = index;
       this->bitFlag = bitFlag;
     }

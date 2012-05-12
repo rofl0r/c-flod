@@ -40,7 +40,7 @@ package neoart->flod->fasttracker {
     }
 
     override  void process():void {
-      var com:int, curr:F2Point, instr:F2Instrument, i:int, jumpFlag:int, next:F2Point, paramx:int, paramy:int, porta:int, row:F2Row, sample:F2Sample, slide:int, value:int, voice:F2Voice = voices[0];
+      var int com; curr:F2Point, instr:F2Instrument, int i; int jumpFlag; next:F2Point, int paramx; int paramy; int porta; row:F2Row, sample:F2Sample, int slide; int value; voice:F2Voice = voices[0];
 
       if (!tick) {
         if (nextOrder >= 0) order = nextOrder;
@@ -582,7 +582,7 @@ package neoart->flod->fasttracker {
     }
 
     override  void fast():void {
-      var chan:SBChannel, delta:int, flags:int, instr:F2Instrument, panning:int, voice:F2Voice = voices[0], volume:Number;
+      var chan:SBChannel, int delta; int flags; instr:F2Instrument, int panning; voice:F2Voice = voices[0], volume:Number;
 
       while (voice) {
         chan  = voice->channel;
@@ -683,7 +683,7 @@ package neoart->flod->fasttracker {
     }
 
     override  void accurate():void {
-      var chan:SBChannel, delta:int, flags:int, instr:F2Instrument, lpan:Number, lvol:Number, panning:int, rpan:Number, rvol:Number, voice:F2Voice = voices[0], volume:Number; 
+      var chan:SBChannel, int delta; int flags; instr:F2Instrument, lpan:Number, lvol:Number, int panning; rpan:Number, rvol:Number, voice:F2Voice = voices[0], volume:Number; 
 
       while (voice) {
         chan  = voice->channel;
@@ -861,7 +861,7 @@ package neoart->flod->fasttracker {
     }
 
     override  void loader(stream:ByteArray):void {
-      var header:int, i:int, id:String, iheader:int, instr:F2Instrument, ipos:int, j:int, len:int, pattern:F2Pattern, pos:int, reserved:int = 22, row:F2Row, rows:int, sample:F2Sample, value:int;
+      var int header; int i; id:String, int iheader; instr:F2Instrument, int ipos; int j; int len; pattern:F2Pattern, int pos; reserved:int = 22, row:F2Row, int rows; sample:F2Sample, int value;
       if (stream->length < 360) return;
       stream->position = 17;
 
@@ -1108,7 +1108,7 @@ package neoart->flod->fasttracker {
       envelope->frame++;
     }
 
-     void amiga(note:int, finetune:int):int {
+     void amiga( int note; finetune:int):int {
       var delta:Number = 0.0, period:int = PERIODS[++note];
 
       if (finetune < 0) {

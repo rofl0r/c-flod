@@ -42,7 +42,7 @@ package neoart->flod->core {
       r0 = r1 = r2 = r3 = r4 = 0.0;
     }
 
-    internal function process(model:int, sample:Sample):void {
+    internal function process( int model; sample:Sample):void {
       var FL:Number = 0.5213345843532200, P0:Number = 0.4860348337215757, P1:Number = 0.9314955486749749, d:Number = 1.0 - P0;
 
       if (model == 0) {

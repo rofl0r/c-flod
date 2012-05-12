@@ -43,7 +43,7 @@ package neoart->flip {
     }
 
      void inflate():int {
-      var err:int, last:int, type:int;
+      var int err; int last; int type;
 
       do {
         last = bits(1);
@@ -73,7 +73,7 @@ package neoart->flip {
     }
 
      void codes(lencode:Huffman, discode:Huffman):int {
-      var dis:int, len:int, pos:int, sym:int;
+      var int dis; int len; int pos; int sym;
 
       do {
         sym = decode(lencode);
@@ -100,7 +100,7 @@ package neoart->flip {
     }
 
      void construct(huff:Huffman, length:Vector.<int>, n:int):int {
-      var len:int, left:int = 1, offs:Vector.<int> = new Vector.<int>(16, true), sym:int;
+      var int len; left:int = 1, offs:Vector.<int> = new Vector.<int>(16, true), int sym;
 
       for (len = 0; len < 16; ++len) huff->count[len] = 0;
       for (sym = 0; sym <  n; ++sym) huff->count[length[sym]]++;
@@ -122,7 +122,7 @@ package neoart->flip {
     }
 
      void decode(huff:Huffman):int {
-      var buff:int = bitbuf, code:int, count:int, first:int, index:int, inplen:uint = inpbuf->length, left:int = bitcnt, len:int = 1;
+      var buff:int = bitbuf, int code; int count; int first; int index; inplen:uint = inpbuf->length, left:int = bitcnt, len:int = 1;
 
       while (1) {
         while (left--) {
@@ -154,7 +154,7 @@ package neoart->flip {
     }
 
      void stored():int {
-      var inplen:uint = inpbuf->length, len:int;
+      var inplen:uint = inpbuf->length, int len;
       bitbuf = bitcnt = 0;
 
       if ((inpcnt + 4) > inplen) throw new Error(ERROR2, 2);
@@ -170,7 +170,7 @@ package neoart->flip {
     }
 
      void initialize():void {
-      var length:Vector.<int> = new Vector.<int>(288, true), sym:int;
+      var length:Vector.<int> = new Vector.<int>(288, true), int sym;
       flencode = new Huffman(288);
       fdiscode = new Huffman(30);
 
@@ -188,7 +188,7 @@ package neoart->flip {
     }
 
      void dynamic():int {
-      var err:int, index:int, len:int, length:Vector.<int> = new Vector.<int>(316, true), nlen:int = bits(5) + 257, ndis:int = bits(5) + 1, ncode:int = bits(4) + 4, max:int = nlen + ndis, sym:int;
+      var int err; int index; int len; length:Vector.<int> = new Vector.<int>(316, true), nlen:int = bits(5) + 257, ndis:int = bits(5) + 1, ncode:int = bits(4) + 4, max:int = nlen + ndis, int sym;
 
       if (nlen > 286 || ndis > 30) throw new Error(ERROR6, 6);
       for (index = 0; index < ncode; ++index) length[ORDER[index]] = bits(3);

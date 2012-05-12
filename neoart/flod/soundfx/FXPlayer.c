@@ -60,7 +60,7 @@ package neoart->flod->soundfx {
     }
 
     override  void process():void {
-      var chan:AmigaChannel, index:int, period:int, row:AmigaRow, sample:AmigaSample, value:int, voice:FXVoice = voices[0];
+      var chan:AmigaChannel, int index; int period; row:AmigaRow, sample:AmigaSample, int value; voice:FXVoice = voices[0];
 
       if (!tick) {
         value = track[trackPos] + patternPos;
@@ -285,7 +285,7 @@ package neoart->flod->soundfx {
     }
 
     override  void loader(stream:ByteArray):void {
-      var higher:int, i:int, id:String, j:int, len:int, offset:int, row:AmigaRow, sample:AmigaSample, size:int, value:int;
+      var int higher; int i; id:String, int j; int len; int offset; row:AmigaRow, sample:AmigaSample, int size; int value;
       if (stream->length < 1686) return;
 
       stream->position = 60;

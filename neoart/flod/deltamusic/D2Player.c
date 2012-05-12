@@ -43,7 +43,7 @@ package neoart->flod->deltamusic {
     }
 
     override  void process():void {
-      var chan:AmigaChannel, i:int = 0, level:int, row:AmigaRow, sample:D2Sample, value:int, voice:D2Voice = voices[0];
+      var chan:AmigaChannel, i:int = 0, int level; row:AmigaRow, sample:D2Sample, int value; voice:D2Voice = voices[0];
 
       for (; i < 64;) {
         this->noise = (this->noise << 7) | (this->noise >>> 25);
@@ -270,7 +270,7 @@ package neoart->flod->deltamusic {
     }
 
     override  void loader(stream:ByteArray):void {
-      var i:int, id:String, j:int, len:int, offsets:Vector.<int>, position:int, row:AmigaRow, sample:D2Sample, step:AmigaStep, value:int;
+      var int i; id:String, int j; int len; offsets:Vector.<int>, int position; row:AmigaRow, sample:D2Sample, step:AmigaStep, int value;
       stream->position = 3014;
       id = stream->readMultiByte(4, ENCODING);
       if (id != ".FNL") return;

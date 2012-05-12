@@ -31,7 +31,7 @@ package neoart->flip {
     }
 
      void extract(filename:String):ByteArray {
-      var entry:ZipEntry, i:int, len:int = entries->length;
+      var entry:ZipEntry, int i; len:int = entries->length;
       if (!filename) return null;
 
       for (i = 0; i < len; ++i) {
@@ -43,7 +43,7 @@ package neoart->flip {
     }
 
      void uncompress(entry:ZipEntry):ByteArray {
-      var buffer:ByteArray, inflater:Inflater, size:int;
+      var buffer:ByteArray, inflater:Inflater, int size;
       if (entry == null) return null;
 
       stream->position = entry->offset + 28;
@@ -69,7 +69,7 @@ package neoart->flip {
     }
 
      void parseCentral():void {
-      var entry:ZipEntry, i:int, header:ByteArray = new ByteArray, len:int = entries->length, size:int;
+      var entry:ZipEntry, int i; header:ByteArray = new ByteArray, len:int = entries->length, int size;
       header->endian = ENDIAN;
 
       for (i = 0; i < len; ++i) {

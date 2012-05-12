@@ -69,7 +69,7 @@ package neoart->flod->trackers {
     }
 
     override  void process():void {
-      var chan:AmigaChannel, i:int, len:int, pattern:int, period:int, row:AmigaRow, sample:AmigaSample, slide:int, value:int, voice:MKVoice = voices[0];
+      var chan:AmigaChannel, int i; int len; int pattern; int period; row:AmigaRow, sample:AmigaSample, int slide; int value; voice:MKVoice = voices[0];
 
       if (!tick) {
         pattern = track[trackPos] + patternPos;
@@ -289,7 +289,7 @@ package neoart->flod->trackers {
     }
 
     override  void loader(stream:ByteArray):void {
-      var higher:int, i:int, id:String, j:int, row:AmigaRow, sample:AmigaSample, size:int, value:int;
+      var int higher; int i; id:String, int j; row:AmigaRow, sample:AmigaSample, int size; int value;
       if (stream->length < 2106) return;
 
       stream->position = 1080;

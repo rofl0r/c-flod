@@ -43,7 +43,7 @@ package neoart->flod->futurecomposer {
     }
 
     override  void process():void {
-      var base:int, chan:AmigaChannel, delta:int, i:int, info:int, loopEffect:int, loopSustain:int, period:int, sample:AmigaSample, temp:int, voice:FCVoice = voices[0];
+      var int base; chan:AmigaChannel, int delta; int i; int info; int loopEffect; int loopSustain; int period; sample:AmigaSample, int temp; voice:FCVoice = voices[0];
 
       if (--tick == 0) {
         base = seqs->position;
@@ -338,7 +338,7 @@ package neoart->flod->futurecomposer {
     }
 
     override  void loader(stream:ByteArray):void {
-      var i:int = 0, id:String, j:int, len:int, offset:int, position:int, sample:AmigaSample, size:int, temp:int, total:int;
+      var i:int = 0, id:String, int j; int len; int offset; int position; sample:AmigaSample, int size; int temp; int total;
       id = stream->readMultiByte(4, ENCODING);
 
       if (id == "SMOD") version = FUTURECOMP_10;

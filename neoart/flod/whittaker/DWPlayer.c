@@ -67,7 +67,7 @@ package neoart->flod->whittaker {
     }
 
     override  void process():void {
-      var chan:AmigaChannel, loop:int, pos:int, sample:DWSample, value:int, voice:DWVoice = voices[active], volume:int;
+      var chan:AmigaChannel, int loop; int pos; sample:DWSample, int value; voice:DWVoice = voices[active], int volume;
 
       if (slower) {
         if (--slowerCounter == 0) {
@@ -372,7 +372,7 @@ package neoart->flod->whittaker {
     }
 
     override  void initialize():void {
-      var i:int, len:int, voice:DWVoice = voices[active];
+      var int i; int len; voice:DWVoice = voices[active];
       super->initialize();
 
       song    = songs[playSong];
@@ -420,7 +420,7 @@ package neoart->flod->whittaker {
     }
 
     override  void loader(stream:ByteArray):void {
-      var flag:int, headers:int, i:int, index:int, info:int, lower:int, pos:int, sample:DWSample, size:int = 10, song:DWSong, total:int, value:int;
+      var int flag; int headers; int i; int index; int info; int lower; int pos; sample:DWSample, size:int = 10, song:DWSong, int total; int value;
 
       master  = 64;
       readMix = "readUnsignedShort";

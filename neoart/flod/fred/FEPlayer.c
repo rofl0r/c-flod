@@ -40,7 +40,7 @@ package neoart->flod->fred {
     }
 
     override  void process():void {
-      var chan:AmigaChannel, i:int, j:int, len:int, loop:int, pos:int, sample:FESample, value:int, voice:FEVoice = voices[3];
+      var chan:AmigaChannel, int i; int j; int len; int loop; int pos; sample:FESample, int value; voice:FEVoice = voices[3];
 
       while (voice) {
         chan = voice->channel;
@@ -403,7 +403,7 @@ package neoart->flod->fred {
     }
 
     override  void initialize():void {
-      var i:int, len:int, voice:FEVoice = voices[3];
+      var int i; int len; voice:FEVoice = voices[3];
       super->initialize();
 
       song  = songs[playSong];
@@ -425,7 +425,7 @@ package neoart->flod->fred {
     }
 
     override  void loader(stream:ByteArray):void {
-      var basePtr:int, dataPtr:int, i:int, j:int, len:int, pos:int, ptr:int, sample:FESample, size:int, song:FESong, tracksLen:int, value:int;
+      var int basePtr; int dataPtr; int i; int j; int len; int pos; int ptr; sample:FESample, int size; song:FESong, int tracksLen; int value;
 
       while (stream->position < 16) {
         value = stream->readUnsignedShort();

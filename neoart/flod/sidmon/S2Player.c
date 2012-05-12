@@ -51,7 +51,7 @@ package neoart->flod->sidmon {
     }
 
     override  void process():void {
-      var chan:AmigaChannel, instr:S2Instrument, row:SMRow, sample:S2Sample, value:int, voice:S2Voice = voices[0];
+      var chan:AmigaChannel, instr:S2Instrument, row:SMRow, sample:S2Sample, int value; voice:S2Voice = voices[0];
       arpeggioPos = ++arpeggioPos & 3;
 
       if (++tick >= speed) {
@@ -358,7 +358,7 @@ package neoart->flod->sidmon {
     }
 
     override  void loader(stream:ByteArray):void {
-      var higher:int, i:int = 0, id:String, instr:S2Instrument, j:int, len:int, pointers:Vector.<int>, position:int, pos:int, row:SMRow, step:S2Step, sample:S2Sample, sampleData:int, value:int;
+      var int higher; i:int = 0, id:String, instr:S2Instrument, int j; int len; pointers:Vector.<int>, int position; int pos; row:SMRow, step:S2Step, sample:S2Sample, int sampleData; int value;
       stream->position = 58;
       id = stream->readMultiByte(28, ENCODING);
       if (id != "SIDMON II - THE MIDI VERSION") return;

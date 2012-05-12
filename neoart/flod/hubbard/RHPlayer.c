@@ -41,7 +41,7 @@ package neoart->flod->hubbard {
     }
 
     override  void process():void {
-      var chan:AmigaChannel, loop:int, sample:RHSample, value:int, voice:RHVoice = voices[3];
+      var chan:AmigaChannel, int loop; sample:RHSample, int value; voice:RHVoice = voices[3];
 
       while (voice) {
         chan = voice->channel;
@@ -190,7 +190,7 @@ package neoart->flod->hubbard {
     }
 
     override  void initialize():void {
-      var i:int, j:int, sample:RHSample, voice:RHVoice = voices[3];
+      var int i; int j; sample:RHSample, voice:RHVoice = voices[3];
       super->initialize();
 
       song = songs[playSong];
@@ -220,7 +220,7 @@ package neoart->flod->hubbard {
     }
 
     override  void loader(stream:ByteArray):void {
-      var i:int, j:int, len:int, pos:int, sample:RHSample, samplesData:int, samplesHeaders:int, samplesLen:int, song:RHSong, songsHeaders:int, wavesHeaders:int, wavesPointers:int, value:int;
+      var int i; int j; int len; int pos; sample:RHSample, int samplesData; int samplesHeaders; int samplesLen; song:RHSong, int songsHeaders; int wavesHeaders; int wavesPointers; int value;
       stream->position = 44;
 
       while (stream->position < 1024) {

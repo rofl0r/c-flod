@@ -48,7 +48,7 @@ package neoart->flod->trackers {
     }
 
     override  void process():void {
-      var chan:AmigaChannel, pattern:int, row:AmigaRow, sample:HMSample, value:int, voice:HMVoice = voices[0];
+      var chan:AmigaChannel, int pattern; row:AmigaRow, sample:HMSample, int value; voice:HMVoice = voices[0];
 
       if (!this->tick) {
         pattern = track[trackPos] + patternPos;
@@ -192,7 +192,7 @@ package neoart->flod->trackers {
     }
 
     override  void loader(stream:ByteArray):void {
-      var count:int, higher:int, i:int, id:String, j:int, mupp:int, position:int, row:AmigaRow, sample:HMSample, size:int, value:int;
+      var int count; int higher; int i; id:String, int j; int mupp; int position; row:AmigaRow, sample:HMSample, int size; int value;
       if (stream->length < 2106) return;
 
       stream->position = 1080;
@@ -328,7 +328,7 @@ package neoart->flod->trackers {
     }
 
      void effects(voice:HMVoice):void {
-      var chan:AmigaChannel = voice->channel, i:int, len:int, period:int = voice->period & 0x0fff, slide:int, value:int;
+      var chan:AmigaChannel = voice->channel, int i; int len; period:int = voice->period & 0x0fff, int slide; int value;
 
       if (voice->effect || voice->param) {
         switch (voice->effect) {

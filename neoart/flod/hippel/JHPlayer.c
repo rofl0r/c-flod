@@ -46,7 +46,7 @@ package neoart->flod->hippel {
     }
 
     override  void process():void {
-      var chan:AmigaChannel, loop:int, period:int, pos1:int, pos2:int, sample:AmigaSample, value:int, voice:JHVoice = voices[0];
+      var chan:AmigaChannel, int loop; int period; int pos1; int pos2; sample:AmigaSample, int value; voice:JHVoice = voices[0];
 
       if (--tick == 0) {
         tick = speed;
@@ -649,7 +649,7 @@ package neoart->flod->hippel {
     }
 
     override  void loader(stream:ByteArray):void {
-      var headers:int, i:int, id:int, len:int, pos:int, sample:AmigaSample, song:JHSong, songsData:int, tracks:int, value:int;
+      var int headers; int i; int id; int len; int pos; sample:AmigaSample, song:JHSong, int songsData; int tracks; int value;
 
       base = periods = 0;
       coso = int(stream->readMultiByte(4, ENCODING) == "COSO");

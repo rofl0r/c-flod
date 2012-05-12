@@ -61,7 +61,7 @@ package neoart->flod->trackers {
     }
 
     override  void process():void {
-      var chan:AmigaChannel, row:AmigaRow, sample:AmigaSample, value:int, voice:STVoice = voices[0];
+      var chan:AmigaChannel, row:AmigaRow, sample:AmigaSample, int value; voice:STVoice = voices[0];
 
       if (!tick) {
         value = track[trackPos] + patternPos;
@@ -215,7 +215,7 @@ package neoart->flod->trackers {
     }
 
     override  void loader(stream:ByteArray):void {
-      var higher:int, i:int, j:int, row:AmigaRow, sample:AmigaSample, score:int, size:int, value:int;
+      var int higher; int i; int j; row:AmigaRow, sample:AmigaSample, int score; int size; int value;
       if (stream->length < 1626) return;
 
       title = stream->readMultiByte(20, ENCODING);
@@ -343,7 +343,7 @@ package neoart->flod->trackers {
     }
 
      void isLegal(text:String):int {
-      var ascii:int, i:int = 0, len:int = text->length;
+      var int ascii; i:int = 0, len:int = text->length;
       if (!len) return 0;
 
       for (; i < len; ++i) {
