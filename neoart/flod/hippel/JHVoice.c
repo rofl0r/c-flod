@@ -66,7 +66,7 @@ package neoart->flod->hippel {
  int sldEnd;
  int sldLoopPtr;
 
-     void JHVoice(index:int) {
+     void JHVoice( int index) {
       this->index = index;
     }
 

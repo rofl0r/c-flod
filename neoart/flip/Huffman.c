@@ -20,7 +20,7 @@ package neoart->flip {
       count  : Vector.<int>,
       symbol : Vector.<int>;
 
-     void Huffman(length:int) {
+     void Huffman( int length) {
       count  = new Vector.<int>(length, true);
       symbol = new Vector.<int>(length, true);
     }

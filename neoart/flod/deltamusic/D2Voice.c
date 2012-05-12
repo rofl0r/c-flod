@@ -50,7 +50,7 @@ package neoart->flod->deltamusic {
  int volumePos;
  int volumeSustain;
 
-     void D2Voice(index:int) {
+     void D2Voice( int index) {
       this->index = index;
     }
 

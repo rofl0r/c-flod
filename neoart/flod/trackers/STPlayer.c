@@ -44,7 +44,7 @@ package neoart->flod->trackers {
       voices[2].next = voices[3] = new STVoice(3);
     }
 
-    override  void set force(value:int):void {
+    override  void set force( int value):void {
       if (value < ULTIMATE_SOUNDTRACKER)
         value = ULTIMATE_SOUNDTRACKER;
       else if (value > DOC_SOUNDTRACKER_20)
@@ -53,7 +53,7 @@ package neoart->flod->trackers {
       version = value;
     }
 
-    override  void set ntsc(value:int):void {
+    override  void set ntsc( int value):void {
       super->ntsc = value;
 
       if (version < DOC_SOUNDTRACKER_9)

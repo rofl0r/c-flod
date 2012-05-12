@@ -80,7 +80,7 @@ package neoart->flod->fasttracker {
  int retrigx;
  int retrigy;
 
-     void F2Voice(index:int) {
+     void F2Voice( int index) {
       this->index = index;
       volEnvelope = new F2Envelope();
       panEnvelope = new F2Envelope();

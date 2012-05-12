@@ -27,7 +27,7 @@ package neoart->flod->core {
       super();
     }
 
-    internal function setup(len:int):void {
+    internal function setup( int len):void {
       var i:int = 1;
       channels = new Vector.<SBChannel>(len, true);
       channels[0] = new SBChannel();

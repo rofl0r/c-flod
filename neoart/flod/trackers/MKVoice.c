@@ -35,7 +35,7 @@ package neoart->flod->trackers {
  int vibratoPos;
  int vibratoSpeed;
 
-     void MKVoice(index:int) {
+     void MKVoice( int index) {
       this->index = index;
     }
 

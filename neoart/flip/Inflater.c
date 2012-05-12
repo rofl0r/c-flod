@@ -58,7 +58,7 @@ package neoart->flip {
       return 0;
     }
 
-     void bits(need:int):int {
+     void bits( int need):int {
       var buff:int = bitbuf, inplen:uint = inpbuf->length;
 
       while (bitcnt < need) {
@@ -99,7 +99,7 @@ package neoart->flip {
       return 0;
     }
 
-     void construct(huff:Huffman, length:Vector.<int>, n:int):int {
+     void construct(huff:Huffman, length:Vector.<int>, int n):int {
       var int len; left:int = 1, offs:Vector.<int> = new Vector.<int>(16, true), int sym;
 
       for (len = 0; len < 16; ++len) huff->count[len] = 0;

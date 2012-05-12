@@ -48,7 +48,7 @@ package neoart->flod->sidmon {
  int vibratoPos;
  int speed;
 
-     void S2Voice(index:int) {
+     void S2Voice( int index) {
       this->index = index;
     }
 

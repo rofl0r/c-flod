@@ -34,7 +34,7 @@ package neoart->flod->core {
       tempo    = 125;
     }
 
-    override  void set ntsc(value:int):void {
+    override  void set ntsc( int value):void {
       standard = value;
 
       if (value) {
@@ -65,7 +65,7 @@ package neoart->flod->core {
       amiga->master = value * 0.00390625;
     }
 
-    override  void toggle(index:int):void {
+    override  void toggle( int index):void {
       amiga->channels[index].mute ^= 1;
     }
   }

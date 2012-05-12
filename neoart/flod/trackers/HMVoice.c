@@ -38,7 +38,7 @@ package neoart->flod->trackers {
  int vibratoSpeed;
  int wavePos;
 
-     void HMVoice(index:int) {
+     void HMVoice( int index) {
       this->index = index;
     }
 

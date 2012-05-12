@@ -42,7 +42,7 @@ package neoart->flod->core {
       master = value * 64;
     }
 
-    override  void toggle(index:int):void {
+    override  void toggle( int index):void {
       mixer->channels[index].mute ^= 1;
     }
 

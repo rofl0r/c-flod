@@ -36,14 +36,14 @@ package neoart->flod->core {
  Number ldata;
  Number rdata;
 
-     void AmigaChannel(index:int) {
+     void AmigaChannel( int index) {
       if ((++index & 2) == 0) panning = -panning;
       level = panning;
     }
 
      void get enabled():int { return audena; }
 
-     void set enabled(value:int):void {
+     void set enabled( int value):void {
       if (value == audena) return;
 
       audena = value;
@@ -54,14 +54,14 @@ package neoart->flod->core {
       if (value) delay += 2;
     }
 
-     void set period(value:int):void {
+     void set period( int value):void {
       if (value < 0) value = 0;
         else if(value > 65535) value = 65535;
 
       audper = value;
     }
 
-     void set volume(value:int):void {
+     void set volume( int value):void {
       if (value < 0) value = 0;
         else if (value > 64) value = 64;
 

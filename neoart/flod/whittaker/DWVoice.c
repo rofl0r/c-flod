@@ -50,7 +50,7 @@ package neoart->flod->whittaker {
  int vibratoSpeed;
  int vibratoDepth;
 
-     void DWVoice( int index; bitFlag:int) {
+     void DWVoice( int index; int bitFlag) {
       this->index = index;
       this->bitFlag = bitFlag;
     }

@@ -43,7 +43,7 @@ CorePlayer_get_waveform(struct CorePlayer* self):ByteArray {
 return self->hardware->waveform();
 }
 
-    void CorePlayer_toggle(struct CorePlayer* self, index:int):void { }
+    void CorePlayer_toggle(struct CorePlayer* self, int index):void { }
 
     CorePlayer_load(struct CorePlayer* self, stream:ByteArray):int {
       struct ZipFile* zip;

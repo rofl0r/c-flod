@@ -1108,7 +1108,7 @@ package neoart->flod->fasttracker {
       envelope->frame++;
     }
 
-     void amiga( int note; finetune:int):int {
+     void amiga( int note; int finetune):int {
       var delta:Number = 0.0, period:int = PERIODS[++note];
 
       if (finetune < 0) {

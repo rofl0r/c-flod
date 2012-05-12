@@ -44,7 +44,7 @@ package neoart->flod->soundfx {
       voices[2].next = voices[3] = new FXVoice(3);
     }
 
-    override  void set force(value:int):void {
+    override  void set force( int value):void {
       if (value < SOUNDFX_10)
         value = SOUNDFX_10;
       else if (value > SOUNDFX_20)
@@ -53,7 +53,7 @@ package neoart->flod->soundfx {
       version = value;
     }
 
-    override  void set ntsc(value:int):void {
+    override  void set ntsc( int value):void {
       super->ntsc = value;
 
       amiga->samplesTick = int((tempo / 122) * (value ? 7.5152005551 : 7.58437970472));

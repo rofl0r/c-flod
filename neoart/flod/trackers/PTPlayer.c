@@ -50,7 +50,7 @@ package neoart->flod->trackers {
       voices[2].next = voices[3] = new PTVoice(3);
     }
 
-    override  void set force(value:int):void {
+    override  void set force( int value):void {
       if (value < PROTRACKER_10)
         value = PROTRACKER_10;
       else if (value > PROTRACKER_12)
