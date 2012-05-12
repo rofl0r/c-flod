@@ -20,8 +20,8 @@ struct Amiga {
 	struct AmigaChannel *channels; //Vector
 	int loopPtr;
 	int loopLen;
-	float clock;
-	float master;
+	Number clock;
+	Number master;
 }
 
 #endif
