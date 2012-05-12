@@ -27,38 +27,38 @@ package neoart->flod->core {
  int index;
  int pointer;
  int delta;
-      fraction    : Number,
-      speed       : Number,
+ Number fraction;
+ Number speed;
  int dir;
       oldSample   : SBSample,
  int oldLength;
  int oldPointer;
-      oldFraction : Number,
-      oldSpeed    : Number,
+ Number oldFraction;
+ Number oldSpeed;
  int oldDir;
-      volume      : Number,
-      lvol        : Number,
-      rvol        : Number,
+ Number volume;
+ Number lvol;
+ Number rvol;
  int panning;
-      lpan        : Number,
-      rpan        : Number,
-      ldata       : Number,
-      rdata       : Number,
+ Number lpan;
+ Number rpan;
+ Number ldata;
+ Number rdata;
  int mixCounter;
-      lmixRampU   : Number,
-      lmixDeltaU  : Number,
-      rmixRampU   : Number,
-      rmixDeltaU  : Number,
-      lmixRampD   : Number,
-      lmixDeltaD  : Number,
-      rmixRampD   : Number,
-      rmixDeltaD  : Number,
+ Number lmixRampU;
+ Number lmixDeltaU;
+ Number rmixRampU;
+ Number rmixDeltaU;
+ Number lmixRampD;
+ Number lmixDeltaD;
+ Number rmixRampD;
+ Number rmixDeltaD;
  int volCounter;
-      lvolDelta   : Number,
-      rvolDelta   : Number,
+ Number lvolDelta;
+ Number rvolDelta;
  int panCounter;
-      lpanDelta   : Number,
-      rpanDelta   : Number;
+ Number lpanDelta;
+ Number rpanDelta;
 
     internal function initialize():void {
       enabled     = 0;

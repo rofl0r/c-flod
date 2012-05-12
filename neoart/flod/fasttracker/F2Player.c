@@ -582,7 +582,7 @@ package neoart->flod->fasttracker {
     }
 
     override  void fast():void {
-      var chan:SBChannel, int delta; int flags; instr:F2Instrument, int panning; voice:F2Voice = voices[0], volume:Number;
+      var chan:SBChannel, int delta; int flags; instr:F2Instrument, int panning; voice:F2Voice = voices[0], Number volume;
 
       while (voice) {
         chan  = voice->channel;
@@ -683,7 +683,7 @@ package neoart->flod->fasttracker {
     }
 
     override  void accurate():void {
-      var chan:SBChannel, int delta; int flags; instr:F2Instrument, lpan:Number, lvol:Number, int panning; rpan:Number, rvol:Number, voice:F2Voice = voices[0], volume:Number; 
+      var chan:SBChannel, int delta; int flags; instr:F2Instrument, Number lpan; Number lvol; int panning; Number rpan; Number rvol; voice:F2Voice = voices[0], Number volume; 
 
       while (voice) {
         chan  = voice->channel;

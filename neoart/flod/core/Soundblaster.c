@@ -47,7 +47,7 @@ package neoart->flod->core {
     }
 
     override internal function fast(e:SampleDataEvent):void {
-      var chan:SBChannel, d:Vector.<Number>, data:ByteArray = e->data, int i; int mixed; int mixLen; int mixPos; s:SBSample, sample:Sample, size:int = bufferSize, int toMix; value:Number;
+      var chan:SBChannel, d:Vector.<Number>, data:ByteArray = e->data, int i; int mixed; int mixLen; int mixPos; s:SBSample, sample:Sample, size:int = bufferSize, int toMix; Number value;
 
       if (completed) {
         if (!remains) return;
@@ -173,7 +173,7 @@ package neoart->flod->core {
     }
 
     override internal function accurate(e:SampleDataEvent):void {
-      var chan:SBChannel, d1:Vector.<Number>, d2:Vector.<Number>, data:ByteArray = e->data, int delta; int i; int mixed; int mixLen; int mixPos; mixValue:Number, s1:SBSample, s2:SBSample, sample:Sample, size:int = bufferSize, int toMix; value:Number;
+      var chan:SBChannel, d1:Vector.<Number>, d2:Vector.<Number>, data:ByteArray = e->data, int delta; int i; int mixed; int mixLen; int mixPos; Number mixValue; s1:SBSample, s2:SBSample, sample:Sample, size:int = bufferSize, int toMix; Number value;
 
       if (completed) {
         if (!remains) return;

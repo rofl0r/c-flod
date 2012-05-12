@@ -26,16 +26,16 @@ package neoart->flod->core {
  int active;
       forced    : int = FORCE_OFF;
     private var
-      l0        : Number,
-      l1        : Number,
-      l2        : Number,
-      l3        : Number,
-      l4        : Number,
-      r0        : Number,
-      r1        : Number,
-      r2        : Number,
-      r3        : Number,
-      r4        : Number;
+ Number l0;
+ Number l1;
+ Number l2;
+ Number l3;
+ Number l4;
+ Number r0;
+ Number r1;
+ Number r2;
+ Number r3;
+ Number r4;
 
     internal function initialize():void {
       l0 = l1 = l2 = l3 = l4 = 0.0;

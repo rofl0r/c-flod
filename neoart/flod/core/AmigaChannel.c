@@ -31,10 +31,10 @@ package neoart->flod->core {
  int audloc;
  int audper;
  int audvol;
-      timer   : Number,
-      level   : Number,
-      ldata   : Number,
-      rdata   : Number;
+ Number timer;
+ Number level;
+ Number ldata;
+ Number rdata;
 
      void AmigaChannel(index:int) {
       if ((++index & 2) == 0) panning = -panning;
