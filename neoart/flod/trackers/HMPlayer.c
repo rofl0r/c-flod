@@ -31,7 +31,7 @@ package neoart->flod->trackers {
       patternPos : int,
       jumpFlag   : int;
 
-    public function HMPlayer(amiga:Amiga = null) {
+     void HMPlayer(amiga:Amiga = null) {
       super(amiga);
       MEGARPEGGIO->fixed = true;
       PERIODS->fixed = true;
@@ -47,7 +47,7 @@ package neoart->flod->trackers {
       voices[2].next = voices[3] = new HMVoice(3);
     }
 
-    override public function process():void {
+    override  void process():void {
       var chan:AmigaChannel, pattern:int, row:AmigaRow, sample:HMSample, value:int, voice:HMVoice = voices[0];
 
       if (!this->tick) {
@@ -172,7 +172,7 @@ package neoart->flod->trackers {
       }
     }
 
-    override protected function initialize():void {
+    override  void initialize():void {
       var voice:HMVoice = voices[0];
       super->initialize();
 
@@ -191,7 +191,7 @@ package neoart->flod->trackers {
       }
     }
 
-    override protected function loader(stream:ByteArray):void {
+    override  void loader(stream:ByteArray):void {
       var count:int, higher:int, i:int, id:String, j:int, mupp:int, position:int, row:AmigaRow, sample:HMSample, size:int, value:int;
       if (stream->length < 2106) return;
 
@@ -327,7 +327,7 @@ package neoart->flod->trackers {
       samples[0] = sample;
     }
 
-    private function effects(voice:HMVoice):void {
+     void effects(voice:HMVoice):void {
       var chan:AmigaChannel = voice->channel, i:int, len:int, period:int = voice->period & 0x0fff, slide:int, value:int;
 
       if (voice->effect || voice->param) {
@@ -424,7 +424,7 @@ package neoart->flod->trackers {
       }
     }
 
-    private function handler(voice:HMVoice):void {
+     void handler(voice:HMVoice):void {
       var sample:HMSample;
 
       if (voice->handler) {

@@ -23,7 +23,7 @@ package neoart->flod->core {
     public var
       channels : Vector.<SBChannel>;
 
-    public function Soundblaster() {
+     void Soundblaster() {
       super();
     }
 

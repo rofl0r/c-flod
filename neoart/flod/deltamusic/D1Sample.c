@@ -37,7 +37,7 @@ package neoart->flod->deltamusic {
       vibratoStep  : int,
       vibratoLen   : int;
 
-    public function D1Sample() {
+     void D1Sample() {
       arpeggio = new Vector.<int>( 8, true);
       table    = new Vector.<int>(48, true);
     }

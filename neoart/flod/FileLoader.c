@@ -39,16 +39,16 @@ package neoart->flod {
       amiga  : Amiga,
       mixer  : Soundblaster;
 
-    public function FileLoader() {
+     void FileLoader() {
       amiga = new Amiga();
       mixer = new Soundblaster();
     }
 
-    public function get tracker():String {
+     void get tracker():String {
       return (player) ? TRACKERS[index + player->version] : TRACKERS[0];
     }
 
-    public function load(stream:ByteArray):CorePlayer {
+     void load(stream:ByteArray):CorePlayer {
       var archive:ZipFile, id:String, value:int;
 
       stream->endian = "littleEndian";

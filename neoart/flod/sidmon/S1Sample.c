@@ -34,7 +34,7 @@ package neoart->flod->sidmon {
       finetune     : int,
       pitchFall    : int;
 
-    public function S1Sample() {
+     void S1Sample() {
       arpeggio = new Vector.<int>(16, true);
     }
   }

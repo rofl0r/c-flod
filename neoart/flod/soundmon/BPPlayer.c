@@ -35,7 +35,7 @@ package neoart->flod->soundmon {
       arpeggioCtr : int,
       vibratoPos  : int;
 
-    public function BPPlayer(amiga:Amiga = null) {
+     void BPPlayer(amiga:Amiga = null) {
       super(amiga);
       PERIODS->fixed = true;
       VIBRATO->fixed = true;
@@ -50,7 +50,7 @@ package neoart->flod->soundmon {
       voices[2].next = voices[3] = new BPVoice(3);
     }
 
-    override public function process():void {
+    override  void process():void {
       var chan:AmigaChannel, data:int, dst:int, instr:int, len:int, memory:Vector.<int> = amiga->memory, note:int, option:int, row:AmigaRow, sample:BPSample, src:int, step:BPStep, voice:BPVoice = voices[0];
       arpeggioCtr = --arpeggioCtr & 3;
       vibratoPos  = ++vibratoPos  & 7;
@@ -435,7 +435,7 @@ package neoart->flod->soundmon {
       }
     }
 
-    override protected function initialize():void {
+    override  void initialize():void {
       var i:int, voice:BPVoice = voices[0];
       super->initialize();
 
@@ -459,7 +459,7 @@ package neoart->flod->soundmon {
       }
     }
 
-    override protected function reset():void {
+    override  void reset():void {
       var i:int, len:int, pos:int, voice:BPVoice = voices[0];
 
       while (voice) {
@@ -475,7 +475,7 @@ package neoart->flod->soundmon {
       }
     }
 
-    override protected function loader(stream:ByteArray):void {
+    override  void loader(stream:ByteArray):void {
       var higher:int, i:int = 0, id:String, len:int, row:AmigaRow, sample:BPSample, step:BPStep, tables:int;
       title = stream->readMultiByte(26, ENCODING);
 

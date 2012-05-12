@@ -30,7 +30,7 @@ package neoart->flod->trackers {
       patternPos : int,
       jumpFlag   : int;
 
-    public function STPlayer(amiga:Amiga = null) {
+     void STPlayer(amiga:Amiga = null) {
       super(amiga);
       PERIODS->fixed = true;
 
@@ -44,7 +44,7 @@ package neoart->flod->trackers {
       voices[2].next = voices[3] = new STVoice(3);
     }
 
-    override public function set force(value:int):void {
+    override  void set force(value:int):void {
       if (value < ULTIMATE_SOUNDTRACKER)
         value = ULTIMATE_SOUNDTRACKER;
       else if (value > DOC_SOUNDTRACKER_20)
@@ -53,14 +53,14 @@ package neoart->flod->trackers {
       version = value;
     }
 
-    override public function set ntsc(value:int):void {
+    override  void set ntsc(value:int):void {
       super->ntsc = value;
 
       if (version < DOC_SOUNDTRACKER_9)
         amiga->samplesTick = int((240 - tempo) * (value ? 7.5152005551 : 7.58437970472));
     }
 
-    override public function process():void {
+    override  void process():void {
       var chan:AmigaChannel, row:AmigaRow, sample:AmigaSample, value:int, voice:STVoice = voices[0];
 
       if (!tick) {
@@ -196,7 +196,7 @@ package neoart->flod->trackers {
       }
     }
 
-    override protected function initialize():void {
+    override  void initialize():void {
       var voice:STVoice = voices[0];
       super->initialize();
       ntsc = standard;
@@ -214,7 +214,7 @@ package neoart->flod->trackers {
       }
     }
 
-    override protected function loader(stream:ByteArray):void {
+    override  void loader(stream:ByteArray):void {
       var higher:int, i:int, j:int, row:AmigaRow, sample:AmigaSample, score:int, size:int, value:int;
       if (stream->length < 1626) return;
 
@@ -327,7 +327,7 @@ package neoart->flod->trackers {
       if (score < 1) version = 0;
     }
 
-    private function arpeggio(voice:STVoice):void {
+     void arpeggio(voice:STVoice):void {
       var chan:AmigaChannel = voice->channel, i:int = 0, param:int = tick % 3;
 
       if (!param) {
@@ -342,7 +342,7 @@ package neoart->flod->trackers {
       chan->period = PERIODS[int(i + param)];
     }
 
-    private function isLegal(text:String):int {
+     void isLegal(text:String):int {
       var ascii:int, i:int = 0, len:int = text->length;
       if (!len) return 0;
 

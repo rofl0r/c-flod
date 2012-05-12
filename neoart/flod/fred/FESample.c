@@ -50,7 +50,7 @@ package neoart->flod->fred {
       blendDelay    : int,
       blendRate     : int;
 
-    public function FESample() {
+     void FESample() {
       arpeggio = new Vector.<int>(16, true);
     }
   }

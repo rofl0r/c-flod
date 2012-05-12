@@ -30,7 +30,7 @@ package neoart->flod->trackers {
       effect  : int,
       param   : int;
 
-    public function STVoice(index:int) {
+     void STVoice(index:int) {
       this->index = index;
     }
 

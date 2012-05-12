@@ -27,7 +27,7 @@ package neoart->flod->digitalmugician {
       loopStep : int,
       tracks   : Vector.<AmigaStep>;
 
-    public function DMSong() {
+     void DMSong() {
       tracks = new Vector.<AmigaStep>();
     }
   }

@@ -23,7 +23,7 @@ package neoart->flod->fred {
       length : int,
       tracks : Vector.<Vector.<int>>;
 
-    public function FESong() {
+     void FESong() {
       tracks = new Vector.<Vector.<int>>(4, true);
     }
   }

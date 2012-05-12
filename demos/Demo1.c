@@ -34,7 +34,7 @@ package {
       loader : FileLoader,
       player : CorePlayer;
 
-    public function Demo1() {
+     void Demo1() {
       loader = new FileLoader();
 
       stage->addEventListener(MouseEvent->CLICK, function(e:MouseEvent):void {
@@ -45,19 +45,19 @@ package {
       });
     }
 
-    private function cancelHandler(e:Event):void {
+     void cancelHandler(e:Event):void {
       file->removeEventListener(Event->CANCEL, cancelHandler);
       file->removeEventListener(Event->SELECT, selectHandler);
     }
 
-    private function selectHandler(e:Event):void {
+     void selectHandler(e:Event):void {
       cancelHandler(e);
       if (player) player->stop();
       file->addEventListener(Event->COMPLETE, completeHandler);
       file->load();
     }
 
-    private function completeHandler(e:Event):void {
+     void completeHandler(e:Event):void {
       file->removeEventListener(Event->COMPLETE, completeHandler);
       player = loader->load(file->data);
       if (player && player->version) player->play();

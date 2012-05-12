@@ -22,7 +22,7 @@ package neoart->flod->fasttracker {
       frame : int,
       value : int;
 
-    public function F2Point(x:int = 0, y:int = 0) {
+     void F2Point(x:int = 0, y:int = 0) {
       frame = x;
       value = y;
     }

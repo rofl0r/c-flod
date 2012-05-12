@@ -36,7 +36,7 @@ package {
       loader : FileLoader,
       player : CorePlayer;
 
-    public function Demo5() {
+     void Demo5() {
       loader = new FileLoader();
 
       url = new URLLoader();
@@ -45,7 +45,7 @@ package {
       url->load(new URLRequest("filename->mod"));
     }
 
-    private function completeHandler(e:Event):void {
+     void completeHandler(e:Event):void {
       url->removeEventListener(Event->COMPLETE, completeHandler);
       player = loader->load(url->data);
       if (player && player->version) player->play();

@@ -27,7 +27,7 @@ package neoart->flod->deltamusic {
       vibratos  : Vector.<int>,
       volumes   : Vector.<int>;
 
-    public function D2Sample() {
+     void D2Sample() {
       table    = new Vector.<int>(48, true);
       vibratos = new Vector.<int>(15, true);
       volumes  = new Vector.<int>(15, true);

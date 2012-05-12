@@ -27,7 +27,7 @@ package neoart->flod->deltamusic {
       samples  : Vector.<D1Sample>,
       voices   : Vector.<D1Voice>;
 
-    public function D1Player(amiga:Amiga = null) {
+     void D1Player(amiga:Amiga = null) {
       super(amiga);
       PERIODS->fixed = true;
 
@@ -40,7 +40,7 @@ package neoart->flod->deltamusic {
       voices[2].next = voices[3] = new D1Voice(3);
     }
 
-    override public function process():void {
+    override  void process():void {
       var adsr:int, chan:AmigaChannel, loop:int, row:AmigaRow, sample:D1Sample, value:int, voice:D1Voice = voices[0];
 
       while (voice) {
@@ -328,7 +328,7 @@ package neoart->flod->deltamusic {
       }
     }
 
-    override protected function initialize():void {
+    override  void initialize():void {
       var voice:D1Voice = voices[0];
       super->initialize();
 
@@ -342,7 +342,7 @@ package neoart->flod->deltamusic {
       }
     }
 
-    override protected function loader(stream:ByteArray):void {
+    override  void loader(stream:ByteArray):void {
       var data:Vector.<int>, i:int, id:String, index:int, j:int, len:int, position:int, row:AmigaRow, sample:D1Sample, step:AmigaStep, value:int;
       id = stream->readMultiByte(4, ENCODING);
       if (id != "ALL ") return;

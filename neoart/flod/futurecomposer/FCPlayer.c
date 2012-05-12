@@ -29,7 +29,7 @@ package neoart->flod->futurecomposer {
       samples : Vector.<AmigaSample>,
       voices  : Vector.<FCVoice>;
 
-    public function FCPlayer(amiga:Amiga = null) {
+     void FCPlayer(amiga:Amiga = null) {
       super(amiga);
       PERIODS->fixed = true;
       WAVES->fixed   = true;
@@ -42,7 +42,7 @@ package neoart->flod->futurecomposer {
       voices[2].next = voices[3] = new FCVoice(3);
     }
 
-    override public function process():void {
+    override  void process():void {
       var base:int, chan:AmigaChannel, delta:int, i:int, info:int, loopEffect:int, loopSustain:int, period:int, sample:AmigaSample, temp:int, voice:FCVoice = voices[0];
 
       if (--tick == 0) {
@@ -312,7 +312,7 @@ package neoart->flod->futurecomposer {
       }
     }
 
-    override protected function initialize():void {
+    override  void initialize():void {
       var voice:FCVoice = voices[0];
       super->initialize();
 
@@ -337,7 +337,7 @@ package neoart->flod->futurecomposer {
       tick = speed;
     }
 
-    override protected function loader(stream:ByteArray):void {
+    override  void loader(stream:ByteArray):void {
       var i:int = 0, id:String, j:int, len:int, offset:int, position:int, sample:AmigaSample, size:int, temp:int, total:int;
       id = stream->readMultiByte(4, ENCODING);
 

@@ -35,11 +35,11 @@ package neoart->flod->fasttracker {
       patternOffset : int,
       complete      : int;
 
-    public function F2Player(mixer:Soundblaster = null) {
+     void F2Player(mixer:Soundblaster = null) {
       super(mixer);
     }
 
-    override public function process():void {
+    override  void process():void {
       var com:int, curr:F2Point, instr:F2Instrument, i:int, jumpFlag:int, next:F2Point, paramx:int, paramy:int, porta:int, row:F2Row, sample:F2Sample, slide:int, value:int, voice:F2Voice = voices[0];
 
       if (!tick) {
@@ -581,7 +581,7 @@ package neoart->flod->fasttracker {
       }
     }
 
-    override public function fast():void {
+    override  void fast():void {
       var chan:SBChannel, delta:int, flags:int, instr:F2Instrument, panning:int, voice:F2Voice = voices[0], volume:Number;
 
       while (voice) {
@@ -682,7 +682,7 @@ package neoart->flod->fasttracker {
       }
     }
 
-    override public function accurate():void {
+    override  void accurate():void {
       var chan:SBChannel, delta:int, flags:int, instr:F2Instrument, lpan:Number, lvol:Number, panning:int, rpan:Number, rvol:Number, voice:F2Voice = voices[0], volume:Number; 
 
       while (voice) {
@@ -832,7 +832,7 @@ package neoart->flod->fasttracker {
       }
     }
 
-    override protected function initialize():void {
+    override  void initialize():void {
       var i:int = 0, voice:F2Voice;
       super->initialize();
 
@@ -860,7 +860,7 @@ package neoart->flod->fasttracker {
       }
     }
 
-    override protected function loader(stream:ByteArray):void {
+    override  void loader(stream:ByteArray):void {
       var header:int, i:int, id:String, iheader:int, instr:F2Instrument, ipos:int, j:int, len:int, pattern:F2Pattern, pos:int, reserved:int = 22, row:F2Row, rows:int, sample:F2Sample, value:int;
       if (stream->length < 360) return;
       stream->position = 17;
@@ -1074,7 +1074,7 @@ package neoart->flod->fasttracker {
       instruments[0] = instr;
     }
 
-    private function envelope(voice:F2Voice, envelope:F2Envelope, data:F2Data):void {
+     void envelope(voice:F2Voice, envelope:F2Envelope, data:F2Data):void {
       var pos:int = envelope->position, curr:F2Point = data->points[pos], next:F2Point;
 
       if (envelope->frame == curr->frame) {
@@ -1108,7 +1108,7 @@ package neoart->flod->fasttracker {
       envelope->frame++;
     }
 
-    private function amiga(note:int, finetune:int):int {
+     void amiga(note:int, finetune:int):int {
       var delta:Number = 0.0, period:int = PERIODS[++note];
 
       if (finetune < 0) {
@@ -1120,7 +1120,7 @@ package neoart->flod->fasttracker {
       return int(period - (delta * finetune));
     }
     
-    private function retrig(voice:F2Voice):void {
+     void retrig(voice:F2Voice):void {
       switch (voice->retrigx) {
         case 1:
           voice->volume--;

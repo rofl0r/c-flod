@@ -56,7 +56,7 @@ package neoart->flod->whittaker {
       readMix       : String,
       readLen       : int;
 
-    public function DWPlayer(amiga:Amiga = null) {
+     void DWPlayer(amiga:Amiga = null) {
       super(amiga);
       voices = new Vector.<DWVoice>(4, true);
 
@@ -66,7 +66,7 @@ package neoart->flod->whittaker {
       voices[3] = new DWVoice(3,8);
     }
 
-    override public function process():void {
+    override  void process():void {
       var chan:AmigaChannel, loop:int, pos:int, sample:DWSample, value:int, voice:DWVoice = voices[active], volume:int;
 
       if (slower) {
@@ -371,7 +371,7 @@ package neoart->flod->whittaker {
       }
     }
 
-    override protected function initialize():void {
+    override  void initialize():void {
       var i:int, len:int, voice:DWVoice = voices[active];
       super->initialize();
 
@@ -419,7 +419,7 @@ package neoart->flod->whittaker {
       }
     }
 
-    override protected function loader(stream:ByteArray):void {
+    override  void loader(stream:ByteArray):void {
       var flag:int, headers:int, i:int, index:int, info:int, lower:int, pos:int, sample:DWSample, size:int = 10, song:DWSong, total:int, value:int;
 
       master  = 64;

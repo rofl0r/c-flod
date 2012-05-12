@@ -24,13 +24,13 @@ package neoart->flip {
     private var
       stream  : ByteArray;
 
-    public function ZipFile(stream:ByteArray) {
+     void ZipFile(stream:ByteArray) {
       this->stream = stream;
       this->stream->endian = ENDIAN;
       parseEnd();
     }
 
-    public function extract(filename:String):ByteArray {
+     void extract(filename:String):ByteArray {
       var entry:ZipEntry, i:int, len:int = entries->length;
       if (!filename) return null;
 
@@ -42,7 +42,7 @@ package neoart->flip {
       return null;
     }
 
-    public function uncompress(entry:ZipEntry):ByteArray {
+     void uncompress(entry:ZipEntry):ByteArray {
       var buffer:ByteArray, inflater:Inflater, size:int;
       if (entry == null) return null;
 
@@ -68,7 +68,7 @@ package neoart->flip {
       }
     }
 
-    private function parseCentral():void {
+     void parseCentral():void {
       var entry:ZipEntry, i:int, header:ByteArray = new ByteArray, len:int = entries->length, size:int;
       header->endian = ENDIAN;
 
@@ -108,7 +108,7 @@ package neoart->flip {
       }
     }
 
-    private function parseEnd():void {
+     void parseEnd():void {
       var i:int = stream->length - 22, l:int = (i - 65536) > 0 ? i - 65536 : 0;
 
       do {

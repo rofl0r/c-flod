@@ -31,7 +31,7 @@ package neoart->flod->soundfx {
       jumpFlag   : int,
       delphine   : int;
 
-    public function FXPlayer(amiga:Amiga = null) {
+     void FXPlayer(amiga:Amiga = null) {
       super(amiga);
       PERIODS->fixed = true;
 
@@ -44,7 +44,7 @@ package neoart->flod->soundfx {
       voices[2].next = voices[3] = new FXVoice(3);
     }
 
-    override public function set force(value:int):void {
+    override  void set force(value:int):void {
       if (value < SOUNDFX_10)
         value = SOUNDFX_10;
       else if (value > SOUNDFX_20)
@@ -53,13 +53,13 @@ package neoart->flod->soundfx {
       version = value;
     }
 
-    override public function set ntsc(value:int):void {
+    override  void set ntsc(value:int):void {
       super->ntsc = value;
 
       amiga->samplesTick = int((tempo / 122) * (value ? 7.5152005551 : 7.58437970472));
     }
 
-    override public function process():void {
+    override  void process():void {
       var chan:AmigaChannel, index:int, period:int, row:AmigaRow, sample:AmigaSample, value:int, voice:FXVoice = voices[0];
 
       if (!tick) {
@@ -266,7 +266,7 @@ package neoart->flod->soundfx {
       }
     }
 
-    override protected function initialize():void {
+    override  void initialize():void {
       var voice:FXVoice = voices[0];
       super->initialize();
       ntsc = standard;
@@ -284,7 +284,7 @@ package neoart->flod->soundfx {
       }
     }
 
-    override protected function loader(stream:ByteArray):void {
+    override  void loader(stream:ByteArray):void {
       var higher:int, i:int, id:String, j:int, len:int, offset:int, row:AmigaRow, sample:AmigaSample, size:int, value:int;
       if (stream->length < 1686) return;
 

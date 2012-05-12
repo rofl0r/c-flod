@@ -51,7 +51,7 @@ package {
       file   : FileReference,
       player : F2Player;
 
-    public function Demo2() {
+     void Demo2() {
       player = new F2Player();
 
       stage->addEventListener(MouseEvent->CLICK, function(e:MouseEvent):void {
@@ -62,19 +62,19 @@ package {
       });
     }
 
-    private function cancelHandler(e:Event):void {
+     void cancelHandler(e:Event):void {
       file->removeEventListener(Event->CANCEL, cancelHandler);
       file->removeEventListener(Event->SELECT, selectHandler);
     }
 
-    private function selectHandler(e:Event):void {
+     void selectHandler(e:Event):void {
       cancelHandler(e);
       player->stop();
       file->addEventListener(Event->COMPLETE, completeHandler);
       file->load();
     }
 
-    private function completeHandler(e:Event):void {
+     void completeHandler(e:Event):void {
       file->removeEventListener(Event->COMPLETE, completeHandler);
       player->load(file->data);
       if (player->version) player->play();

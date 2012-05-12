@@ -26,7 +26,7 @@ package neoart->flod->fasttracker {
       loopEnd   : int,
       flags     : int;
 
-    public function F2Data() {
+     void F2Data() {
       points = new Vector.<F2Point>(12, true);
     }
   }

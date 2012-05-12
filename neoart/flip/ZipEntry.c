@@ -29,7 +29,7 @@ package neoart->flip {
       size       : uint,
       offset     : uint;
 
-    public function get date():Date {
+     void get date():Date {
       return new Date(
         ((time >> 25) & 0x7f) + 1980,
         ((time >> 21) & 0x0f) - 1,
@@ -40,7 +40,7 @@ package neoart->flip {
       );
     }
 
-    public function get isDirectory():Boolean {
+     void get isDirectory():Boolean {
       return Boolean(name->charAt(name->length - 1) == "/");
     }
   }

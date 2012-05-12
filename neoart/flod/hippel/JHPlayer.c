@@ -35,7 +35,7 @@ package neoart->flod->hippel {
       voices      : Vector.<JHVoice>,
       coso        : int;
 
-    public function JHPlayer(amiga:Amiga = null) {
+     void JHPlayer(amiga:Amiga = null) {
       super(amiga);
       voices = new Vector.<JHVoice>(4, true);
 
@@ -45,7 +45,7 @@ package neoart->flod->hippel {
       voices[2].next = voices[3] = new JHVoice(3);
     }
 
-    override public function process():void {
+    override  void process():void {
       var chan:AmigaChannel, loop:int, period:int, pos1:int, pos2:int, sample:AmigaSample, value:int, voice:JHVoice = voices[0];
 
       if (--tick == 0) {
@@ -618,7 +618,7 @@ package neoart->flod->hippel {
       }
     }
 
-    override protected function initialize():void {
+    override  void initialize():void {
       var voice:JHVoice = voices[0];
       super->initialize();
 
@@ -648,7 +648,7 @@ package neoart->flod->hippel {
       }
     }
 
-    override protected function loader(stream:ByteArray):void {
+    override  void loader(stream:ByteArray):void {
       var headers:int, i:int, id:int, len:int, pos:int, sample:AmigaSample, song:JHSong, songsData:int, tracks:int, value:int;
 
       base = periods = 0;

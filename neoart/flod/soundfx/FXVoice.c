@@ -39,7 +39,7 @@ package neoart->flod->soundfx {
       stepSpeed   : int,
       stepWanted  : int;
 
-    public function FXVoice(index:int) {
+     void FXVoice(index:int) {
       this->index = index;
     }
 

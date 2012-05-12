@@ -29,7 +29,7 @@ package neoart->flod->fred {
       complete : int,
       sampFlag : int;
 
-    public function FEPlayer(amiga:Amiga = null) {
+     void FEPlayer(amiga:Amiga = null) {
       super(amiga);
       voices = new Vector.<FEVoice>(4, true);
 
@@ -39,7 +39,7 @@ package neoart->flod->fred {
       voices[1].next = voices[0] = new FEVoice(0,1);
     }
 
-    override public function process():void {
+    override  void process():void {
       var chan:AmigaChannel, i:int, j:int, len:int, loop:int, pos:int, sample:FESample, value:int, voice:FEVoice = voices[3];
 
       while (voice) {
@@ -402,7 +402,7 @@ package neoart->flod->fred {
       }
     }
 
-    override protected function initialize():void {
+    override  void initialize():void {
       var i:int, len:int, voice:FEVoice = voices[3];
       super->initialize();
 
@@ -424,7 +424,7 @@ package neoart->flod->fred {
       }
     }
 
-    override protected function loader(stream:ByteArray):void {
+    override  void loader(stream:ByteArray):void {
       var basePtr:int, dataPtr:int, i:int, j:int, len:int, pos:int, ptr:int, sample:FESample, size:int, song:FESong, tracksLen:int, value:int;
 
       while (stream->position < 16) {

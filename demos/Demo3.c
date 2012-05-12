@@ -35,7 +35,7 @@ package {
       loader : FileLoader,
       player : CorePlayer;
 
-    public function Demo3() {
+     void Demo3() {
       loader = new FileLoader();
       player = loader->load(new Song() as ByteArray);
       if (player && player->version) player->play();

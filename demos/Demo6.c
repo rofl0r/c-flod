@@ -51,7 +51,7 @@ package {
       url    : URLLoader,
       player : S1Player;
 
-    public function Demo6() {
+     void Demo6() {
       player = new S1Player();
 
       url = new URLLoader();
@@ -60,7 +60,7 @@ package {
       url->load(new URLRequest("filename->mod"));
     }
 
-    private function completeHandler(e:Event):void {
+     void completeHandler(e:Event):void {
       url->removeEventListener(Event->COMPLETE, completeHandler);
       player->load(url->data);
       if (player->version) player->play();

@@ -30,7 +30,7 @@ package neoart->flod->hubbard {
       stream   : ByteArray,
       complete : int;
 
-    public function RHPlayer(amiga:Amiga = null) {
+     void RHPlayer(amiga:Amiga = null) {
       super(amiga);
       voices = new Vector.<RHVoice>(4, true);
 
@@ -40,7 +40,7 @@ package neoart->flod->hubbard {
       voices[1].next = voices[0] = new RHVoice(0,1);
     }
 
-    override public function process():void {
+    override  void process():void {
       var chan:AmigaChannel, loop:int, sample:RHSample, value:int, voice:RHVoice = voices[3];
 
       while (voice) {
@@ -189,7 +189,7 @@ package neoart->flod->hubbard {
       }
     }
 
-    override protected function initialize():void {
+    override  void initialize():void {
       var i:int, j:int, sample:RHSample, voice:RHVoice = voices[3];
       super->initialize();
 
@@ -219,7 +219,7 @@ package neoart->flod->hubbard {
       }
     }
 
-    override protected function loader(stream:ByteArray):void {
+    override  void loader(stream:ByteArray):void {
       var i:int, j:int, len:int, pos:int, sample:RHSample, samplesData:int, samplesHeaders:int, samplesLen:int, song:RHSong, songsHeaders:int, wavesHeaders:int, wavesPointers:int, value:int;
       stream->position = 44;
 

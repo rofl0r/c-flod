@@ -27,7 +27,7 @@ package neoart->flod->core {
       timer   : int,
       master  : int;
 
-    public function SBPlayer(mixer:Soundblaster = null) {
+     void SBPlayer(mixer:Soundblaster = null) {
       this->mixer = mixer || new Soundblaster();
       super(this->mixer);
 
@@ -35,22 +35,22 @@ package neoart->flod->core {
       quality = 1;
   }
 
-    override public function set volume(value:Number):void {
+    override  void set volume(value:Number):void {
       if (value < 0.0) value = 0.0;
         else if (value > 1.0) value = 1.0;
 
       master = value * 64;
     }
 
-    override public function toggle(index:int):void {
+    override  void toggle(index:int):void {
       mixer->channels[index].mute ^= 1;
     }
 
-    override protected function setup():void {
+    override  void setup():void {
       mixer->setup(channels);
     }
 
-    override protected function initialize():void {
+    override  void initialize():void {
       super->initialize();
       timer  = speed;
       master = 64;

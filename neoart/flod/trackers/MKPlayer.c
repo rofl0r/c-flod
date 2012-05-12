@@ -33,7 +33,7 @@ package neoart->flod->trackers {
       vibratoDepth : int,
       restartSave  : int;
 
-    public function MKPlayer(amiga:Amiga = null) {
+     void MKPlayer(amiga:Amiga = null) {
       super(amiga);
       PERIODS->fixed = true;
       VIBRATO->fixed = true;
@@ -48,7 +48,7 @@ package neoart->flod->trackers {
       voices[2].next = voices[3] = new MKVoice(3);
     }
 
-    override public function set force(value:int):void {
+    override  void set force(value:int):void {
       if (value < SOUNDTRACKER_23)
         value = SOUNDTRACKER_23;
       else if (value > NOISETRACKER_20)
@@ -68,7 +68,7 @@ package neoart->flod->trackers {
       }
     }
 
-    override public function process():void {
+    override  void process():void {
       var chan:AmigaChannel, i:int, len:int, pattern:int, period:int, row:AmigaRow, sample:AmigaSample, slide:int, value:int, voice:MKVoice = voices[0];
 
       if (!tick) {
@@ -270,7 +270,7 @@ package neoart->flod->trackers {
       }
     }
 
-    override protected function initialize():void {
+    override  void initialize():void {
       var voice:MKVoice = voices[0];
       super->initialize();
       force = version;
@@ -288,7 +288,7 @@ package neoart->flod->trackers {
       }
     }
 
-    override protected function loader(stream:ByteArray):void {
+    override  void loader(stream:ByteArray):void {
       var higher:int, i:int, id:String, j:int, row:AmigaRow, sample:AmigaSample, size:int, value:int;
       if (stream->length < 2106) return;
 

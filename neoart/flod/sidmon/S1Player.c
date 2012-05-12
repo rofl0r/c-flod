@@ -55,7 +55,7 @@ package neoart->flod->sidmon {
       audPer      : int,
       audVol      : int;
 
-    public function S1Player(amiga:Amiga = null) {
+     void S1Player(amiga:Amiga = null) {
       super(amiga);
       PERIODS->fixed = true;
 
@@ -68,7 +68,7 @@ package neoart->flod->sidmon {
       voices[2].next = voices[3] = new S1Voice(3);
     }
 
-    override public function process():void {
+    override  void process():void {
       var chan:AmigaChannel, dst:int, i:int, index:int, memory:Vector.<int> = amiga->memory, row:SMRow, sample:S1Sample, src1:int, src2:int, step:AmigaStep, value:int, voice:S1Voice = voices[0];
 
       while (voice) {
@@ -333,7 +333,7 @@ package neoart->flod->sidmon {
       }
     }
 
-    override protected function initialize():void {
+    override  void initialize():void {
       var chan:AmigaChannel, step:AmigaStep, voice:S1Voice = voices[0];
       super->initialize();
 
@@ -366,7 +366,7 @@ package neoart->flod->sidmon {
       }
     }
 
-    override protected function loader(stream:ByteArray):void {
+    override  void loader(stream:ByteArray):void {
       var data:int, i:int, id:String, j:int, headers:int, len:int, position:int, row:SMRow, sample:S1Sample, start:int, step:AmigaStep, totInstruments:int, totPatterns:int, totSamples:int, totWaveforms:int, ver:int;
 
       while (stream->bytesAvailable > 8) {

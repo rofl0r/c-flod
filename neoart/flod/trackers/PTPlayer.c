@@ -34,7 +34,7 @@ package neoart->flod->trackers {
       jumpFlag     : int,
       vibratoDepth : int;
 
-    public function PTPlayer(amiga:Amiga = null) {
+     void PTPlayer(amiga:Amiga = null) {
       super(amiga);
       PERIODS->fixed = true;
       VIBRATO->fixed = true;
@@ -50,7 +50,7 @@ package neoart->flod->trackers {
       voices[2].next = voices[3] = new PTVoice(3);
     }
 
-    override public function set force(value:int):void {
+    override  void set force(value:int):void {
       if (value < PROTRACKER_10)
         value = PROTRACKER_10;
       else if (value > PROTRACKER_12)
@@ -62,7 +62,7 @@ package neoart->flod->trackers {
         else vibratoDepth = 7;
     }
 
-    override public function process():void {
+    override  void process():void {
       var chan:AmigaChannel, i:int, pattern:int, row:PTRow, sample:PTSample, value:int, voice:PTVoice = voices[0];
 
       if (!tick) {
@@ -194,7 +194,7 @@ package neoart->flod->trackers {
       }
     }
 
-    override protected function initialize():void {
+    override  void initialize():void {
       var voice:PTVoice = voices[0];
 
       tempo        = 125;
@@ -217,7 +217,7 @@ package neoart->flod->trackers {
       }
     }
 
-    override protected function loader(stream:ByteArray):void {
+    override  void loader(stream:ByteArray):void {
       var higher:int, i:int, id:String, j:int, row:PTRow, sample:PTSample, size:int, value:int;
       if (stream->length < 2106) return;
 
@@ -315,7 +315,7 @@ package neoart->flod->trackers {
       samples[0] = sample;
     }
 
-    private function effects():void {
+     void effects():void {
       var chan:AmigaChannel, i:int, position:int, slide:int, value:int, voice:PTVoice = voices[0], wave:int;
 
       while (voice) {
@@ -491,7 +491,7 @@ package neoart->flod->trackers {
       }
     }
 
-    private function moreEffects(voice:PTVoice):void {
+     void moreEffects(voice:PTVoice):void {
       var chan:AmigaChannel = voice->channel, value:int;
       if (voice->funkSpeed) updateFunk(voice);
 
@@ -539,7 +539,7 @@ package neoart->flod->trackers {
       }
     }
 
-    private function extended(voice:PTVoice):void {
+     void extended(voice:PTVoice):void {
       var chan:AmigaChannel = voice->channel, effect:int = voice->param >> 4, i:int, len:int, memory:Vector.<int>, param:int = voice->param & 0x0f;
 
       switch (effect) {
@@ -648,7 +648,7 @@ package neoart->flod->trackers {
       }
     }
 
-    private function updateFunk(voice:PTVoice):void {
+     void updateFunk(voice:PTVoice):void {
       var chan:AmigaChannel = voice->channel, p1:int, p2:int, value:int = FUNKREP[voice->funkSpeed];
 
       voice->funkPos += value;

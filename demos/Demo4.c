@@ -53,7 +53,7 @@ package {
       Song   : Class,
       player : FEPlayer;
 
-    public function Demo4() {
+     void Demo4() {
       player = new FEPlayer();
       player->load(new Song() as ByteArray);
       if (player->version) player->play();

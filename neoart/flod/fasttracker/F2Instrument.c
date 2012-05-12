@@ -32,7 +32,7 @@ package neoart->flod->fasttracker {
       vibratoSpeed : int,
       vibratoDepth : int;
 
-    public function F2Instrument() {
+     void F2Instrument() {
       noteSamples = new Vector.<int>(96, true);
       volData = new F2Data();
       panData = new F2Data();

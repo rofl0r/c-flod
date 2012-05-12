@@ -30,11 +30,11 @@ package neoart->flip {
       dlencode : Huffman,
       ddiscode : Huffman;
 
-    public function Inflater() {
+     void Inflater() {
       initialize();
     }
 
-    public function set input(stream:ByteArray):void {
+     void set input(stream:ByteArray):void {
       inpbuf = stream;
       output = new ByteArray();
       inpbuf->endian   = output->endian   = ZipFile->ENDIAN;
@@ -42,7 +42,7 @@ package neoart->flip {
       inpcnt = outcnt = 0;
     }
 
-    public function inflate():int {
+     void inflate():int {
       var err:int, last:int, type:int;
 
       do {
@@ -58,7 +58,7 @@ package neoart->flip {
       return 0;
     }
 
-    private function bits(need:int):int {
+     void bits(need:int):int {
       var buff:int = bitbuf, inplen:uint = inpbuf->length;
 
       while (bitcnt < need) {
@@ -72,7 +72,7 @@ package neoart->flip {
       return buff & ((1 << need) - 1);
     }
 
-    private function codes(lencode:Huffman, discode:Huffman):int {
+     void codes(lencode:Huffman, discode:Huffman):int {
       var dis:int, len:int, pos:int, sym:int;
 
       do {
@@ -99,7 +99,7 @@ package neoart->flip {
       return 0;
     }
 
-    private function construct(huff:Huffman, length:Vector.<int>, n:int):int {
+     void construct(huff:Huffman, length:Vector.<int>, n:int):int {
       var len:int, left:int = 1, offs:Vector.<int> = new Vector.<int>(16, true), sym:int;
 
       for (len = 0; len < 16; ++len) huff->count[len] = 0;
@@ -121,7 +121,7 @@ package neoart->flip {
       return left;
     }
 
-    private function decode(huff:Huffman):int {
+     void decode(huff:Huffman):int {
       var buff:int = bitbuf, code:int, count:int, first:int, index:int, inplen:uint = inpbuf->length, left:int = bitcnt, len:int = 1;
 
       while (1) {
@@ -153,7 +153,7 @@ package neoart->flip {
       return -9;
     }
 
-    private function stored():int {
+     void stored():int {
       var inplen:uint = inpbuf->length, len:int;
       bitbuf = bitcnt = 0;
 
@@ -169,7 +169,7 @@ package neoart->flip {
       return 0;
     }
 
-    private function initialize():void {
+     void initialize():void {
       var length:Vector.<int> = new Vector.<int>(288, true), sym:int;
       flencode = new Huffman(288);
       fdiscode = new Huffman(30);
@@ -187,7 +187,7 @@ package neoart->flip {
       ddiscode = new Huffman(30);
     }
 
-    private function dynamic():int {
+     void dynamic():int {
       var err:int, index:int, len:int, length:Vector.<int> = new Vector.<int>(316, true), nlen:int = bits(5) + 257, ndis:int = bits(5) + 1, ncode:int = bits(4) + 4, max:int = nlen + ndis, sym:int;
 
       if (nlen > 286 || ndis > 30) throw new Error(ERROR6, 6);

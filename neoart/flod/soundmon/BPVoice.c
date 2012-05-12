@@ -54,7 +54,7 @@ package neoart->flod->soundmon {
       modPtr       : int,
       modCtr       : int;
 
-    public function BPVoice(index:int) {
+     void BPVoice(index:int) {
       this->index = index;
     }
 

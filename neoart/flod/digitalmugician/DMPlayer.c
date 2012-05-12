@@ -41,7 +41,7 @@ package neoart->flod->digitalmugician {
       mixChannel  : AmigaChannel,
       mixPeriod   : int;
 
-    public function DMPlayer(amiga:Amiga = null) {
+     void DMPlayer(amiga:Amiga = null) {
       super(amiga);
       PERIODS->fixed = true;
 
@@ -59,7 +59,7 @@ package neoart->flod->digitalmugician {
       tables();
     }
 
-    override public function process():void {
+    override  void process():void {
       var chan:AmigaChannel, dst:int, i:int, idx:int, j:int, len:int, memory:Vector.<int> = amiga->memory, r:int, row:AmigaRow, src1:int, src2:int, sample:DMSample, value:int, voice:DMVoice;
 
       for (i = 0; i < numChannels; ++i) {
@@ -511,7 +511,7 @@ package neoart->flod->digitalmugician {
       }
     }
 
-    override protected function initialize():void {
+    override  void initialize():void {
       var chan:AmigaChannel, i:int, len:int, voice:DMVoice;
       super->initialize();
 
@@ -565,7 +565,7 @@ package neoart->flod->digitalmugician {
       }
     }
 
-    override protected function loader(stream:ByteArray):void {
+    override  void loader(stream:ByteArray):void {
       var data:int, i:int, id:String, index:Vector.<int>, instr:int, j:int, len:int, position:int, row:AmigaRow, sample:DMSample, song:DMSong, step:AmigaStep;
       id = stream->readMultiByte(24, ENCODING);
 
@@ -715,7 +715,7 @@ package neoart->flod->digitalmugician {
       }
     }
 
-    private function tables():void {
+     void tables():void {
       var i:int, idx:int, j:int, pos:int, step:int, v1:int, v2:int, vol:int = 128;
 
       averages  = new Vector.<int>(1024, true);
