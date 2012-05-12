@@ -15,95 +15,86 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->core {
-  import flash.events.*;
-  import flash.utils.*;
+#include "../flod.h"
+#include "CoreMixer.h"
 
-  public class CoreMixer {
-    public var
-      player      : CorePlayer,
-      samplesTick : int;
-    protected var
-      buffer      : Vector.<Sample>,
-      samplesLeft : int,
-      remains     : int,
-      completed   : int,
-      wave        : ByteArray;
-
-    public function CoreMixer() {
-      wave = new ByteArray();
-      wave->endian = "littleEndian";
-      bufferSize = 8192;
-    }
-
-    public function get bufferSize():int { return buffer->length; }
-    public function set bufferSize(value:int):void {
-      var i:int, len:int;
-      if (value == len || value < 2048) return;
-
-      if (!buffer) {
-        buffer = new Vector.<Sample>(value, true);
-      } else {
-        len = buffer->length;
-        buffer->fixed = false;
-        buffer->length = value;
-        buffer->fixed = true;
-      }
-
-      if (value > len) {
-        buffer[len] = new Sample();
-
-        for (i = ++len; i < value; ++i)
-          buffer[i] = buffer[int(i - 1)].next = new Sample();
-      }
-    }
-
-    public function get complete():int { return completed; }
-    public function set complete(value:int):void {
-      completed = value ^ player->loopSong;
-    }
-
-    //js function reset
-    internal function initialize():void {
-      var sample:Sample = buffer[0];
-
-      samplesLeft = 0;
-      remains     = 0;
-      completed   = 0;
-
-      while (sample) {
-        sample->l = sample->r = 0.0;
-        sample = sample->next;
-      }
-    }
-
-    //js function restore
-    internal function reset():void { }
-
-    internal function fast(e:SampleDataEvent):void { }
-
-    internal function accurate(e:SampleDataEvent):void { }
-
-    internal function waveform():ByteArray {
-      var file:ByteArray = new ByteArray();
-      file->endian = "littleEndian";
-
-      file->writeUTFBytes("RIFF");
-      file->writeInt(wave->length + 44);
-      file->writeUTFBytes("WAVEfmt ");
-      file->writeInt(16);
-      file->writeShort(1);
-      file->writeShort(2);
-      file->writeInt(44100);
-      file->writeInt(44100 << 2);
-      file->writeShort(4);
-      file->writeShort(16);
-      file->writeUTFBytes("data");
-      file->writeInt(wave->length);
-      file->writeBytes(wave);
-
-      file->position = 0;
-      return file;
-    }
-  }
+struct CoreMixer* CoreMixer_new(void) {
+	struct CoreMixer* self = malloc(sizeof(*self));
+	if(self) {
+		self->wave = ByteArray_new();
+		self->wave->endian = "littleEndian";
+		self->bufferSize = 8192;
+	}
+	return self;
 }
+
+//js function reset
+void CoreMixer_initialize(struct CoreMixer* self) {
+	Sample* sample = self->buffer[0];
+
+	self->samplesLeft = 0;
+	self->remains     = 0;
+	self->completed   = 0;
+
+	while (sample) {
+		sample->l = sample->r = 0.0;
+		sample = sample->next;
+	}
+}
+
+int CoreMixer_get_complete(struct CoreMixer* self) {
+	return self->completed;
+}
+
+void CoreMixer_set_complete(struct CoreMixer* self, int value) {
+	self->completed = value ^ self->player->loopSong;
+}
+void CoreMixer_reset(struct CoreMixer* self) {}
+void CoreMixer_fast(struct CoreMixer* self, struct SampleDataEvent *e) {}
+void CoreMixer_accurate(struct CoreMixer* self, struct SampleDataEvent *e) {}
+
+int CoreMixer_get_bufferSize(struct CoreMixer* self){ return self->buffer->length; }
+
+void CoreMixer_set_bufferSize(struct CoreMixer* self, int value) {
+	int i = 0; int len = 0;
+	if (value == len || value < 2048) return; // FIXME len == unitialized access ? struct member ? 0 ?
+
+	if (!self->buffer) {
+		self->buffer = new Vector.<Sample>(value, true);
+	} else {
+		len = self->buffer->length;
+		self->buffer->fixed = false;
+		self->buffer->length = value;
+		self->buffer->fixed = true;
+	}
+
+	if (value > len) {
+		self->buffer[len] = Sample_new();
+
+		for (i = ++len; i < value; ++i)
+		self->buffer[i] = self->buffer[i - 1].next = Sample_new();
+	}
+}
+
+struct ByteArray CoreMixer_waveform(struct CoreMixer* self) {
+	struct ByteArray file = ByteArray_new();
+	file->endian = "littleEndian";
+
+	file->writeUTFBytes("RIFF");
+	file->writeInt(wave->length + 44);
+	file->writeUTFBytes("WAVEfmt ");
+	file->writeInt(16);
+	file->writeShort(1);
+	file->writeShort(2);
+	file->writeInt(44100);
+	file->writeInt(44100 << 2);
+	file->writeShort(4);
+	file->writeShort(16);
+	file->writeUTFBytes("data");
+	file->writeInt(wave->length);
+	file->writeBytes(wave);
+
+	file->position = 0;
+	return file;
+}
+

@@ -15,57 +15,37 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->core {
-  import flash.events.*;
-  import flash.media.*;
-  import flash.utils.*;
-  import neoart.flip.*;
 
-  public class CorePlayer extends EventDispatcher {
-    public static const
-      ENCODING : String = "us-ascii";
-    public var
-      quality   : int,
-      record    : int,
-      playSong  : int,
-      lastSong  : int,
-      version   : int,
-      variant   : int,
-      title     : String = "",
-      channels  : int,
-      loopSong  : int,
-      speed     : int,
-      tempo     : int;
-    protected var
-      hardware  : CoreMixer,
-      sound     : Sound,
-      soundChan : SoundChannel,
-      soundPos  : Number = 0.0,
-      endian    : String,
-      tick      : int;
+#include "CorePlayer.h"
 
-    public function CorePlayer(hardware:CoreMixer) {
-      hardware->player = this;
-      this->hardware = hardware;
-    }
+CorePlayer_defaults(struct CorePlayer* self) {
+	self->encoding = ENCODING_US_ASCII;
+	self->title = "";
+	self->soundPos = 0.0;
+}
 
-    public function set force(value:int):void {
+void CorePlayer_dtor(struct CorePlayer* self, struct CoreMixer *hardware) {
+	hardware->player = this;
+	self->hardware = hardware;
+}
+
+    void CorePlayer_set_force(struct CorePlayer* self, value:int):void {
       version = 0;
     }
 
-    public function set ntsc(value:int):void { }
+    void CorePlayer_set_ntsc(struct CorePlayer* self, value:int):void { }
 
-    public function set stereo(value:Number):void { }
+    void CorePlayer_set_stereo(struct CorePlayer* self, value:Number):void { }
 
-    public function set volume(value:Number):void { }
+    CorePlayer_set_volume(struct CorePlayer* self, value:Number):void { }
 
-    public function get waveform():ByteArray {
+    CorePlayer_get_waveform(struct CorePlayer* self):ByteArray {
       return hardware->waveform();
     }
 
-    public function toggle(index:int):void { }
+    void CorePlayer_toggle(struct CorePlayer* self, index:int):void { }
 
-    public function load(stream:ByteArray):int {
+    CorePlayer_load(struct CorePlayer* self, stream:ByteArray):int {
       var zip:ZipFile;
       hardware->reset();
       stream->position = 0;
@@ -88,7 +68,17 @@ package neoart->flod->core {
       return version;
     }
 
-    public function play(processor:Sound = null):int {
+
+package neoart->flod->core {
+  import flash.events.*;
+  import flash.media.*;
+  import flash.utils.*;
+  import neoart.flip.*;
+
+  public class CorePlayer extends EventDispatcher {
+
+
+    CorePlayer_play(struct CorePlayer* self, processor:Sound = null):int {
       if (!version) return 0;
       if (soundPos == 0.0) initialize();
       sound = processor || new Sound();
@@ -105,44 +95,44 @@ package neoart->flod->core {
       return 1;
     }
 
-    public function pause():void {
+    void CorePlayer_pause(struct CorePlayer* self):void {
       if (!version || !soundChan) return;
       soundPos = soundChan->position;
       removeEvents();
     }
 
-    public function stop():void {
+    void CorePlayer_stop(struct CorePlayer* self):void {
       if (!version) return;
       if (soundChan) removeEvents();
       soundPos = 0.0;
       reset();
     }
 
-    public function process():void { }
+    void CorePlayer_process(struct CorePlayer* self):void { }
 
-    public function fast():void { }
+    void CorePlayer_fast(struct CorePlayer* self):void { }
 
-    public function accurate():void { }
+    void CorePlayer_accurate(struct CorePlayer* self):void { }
 
-    protected function setup():void { }
+    void CorePlayer_setup(struct CorePlayer* self):void { }
 
     //js function reset
-    protected function initialize():void {
+    void CorePlayer_initialize(struct CorePlayer* self):void {
       tick = 0;
       hardware->initialize();
       hardware->samplesTick = 110250 / tempo;
     }
 
-    protected function reset():void { }
+    void CorePlayer_reset(struct CorePlayer* self):void { }
 
-    protected function loader(stream:ByteArray):void { }
+    void CorePlayer_loader(struct CorePlayer* self, stream:ByteArray):void { }
 
-    private function completeHandler(e:Event):void {
+    void CorePlayer_completeHandler(struct CorePlayer* self, e:Event):void {
       stop();
       dispatchEvent(e);
     }
 
-    private function removeEvents():void {
+    void CorePlayer_removeEvents(struct CorePlayer* self):void {
       soundChan->stop();
       soundChan->removeEventListener(Event->SOUND_COMPLETE, completeHandler);
       soundChan->dispatchEvent(new Event(Event->SOUND_COMPLETE));
