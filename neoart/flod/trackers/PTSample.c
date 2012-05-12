@@ -20,7 +20,7 @@ package neoart->flod->trackers {
 
   public final class PTSample extends AmigaSample {
     internal var
-      finetune : int,
-      realLen  : int;
+ int finetune;
+ int realLen;
   }
 }

@@ -24,16 +24,16 @@ package neoart->flod->soundmon {
       tracks      : Vector.<BPStep>,
       patterns    : Vector.<AmigaRow>,
       samples     : Vector.<BPSample>,
-      length      : int,
+ int length;
       buffer      : Vector.<int>,
       voices      : Vector.<BPVoice>,
-      trackPos    : int,
-      patternPos  : int,
-      nextPos     : int,
-      jumpFlag    : int,
-      repeatCtr   : int,
-      arpeggioCtr : int,
-      vibratoPos  : int;
+ int trackPos;
+ int patternPos;
+ int nextPos;
+ int jumpFlag;
+ int repeatCtr;
+ int arpeggioCtr;
+ int vibratoPos;
 
      void BPPlayer(amiga:Amiga = null) {
       super(amiga);

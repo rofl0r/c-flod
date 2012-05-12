@@ -28,14 +28,14 @@ package neoart->flod->sidmon {
       arpeggios   : Vector.<int>,
       vibratos    : Vector.<int>,
       waves       : Vector.<int>,
-      length      : int,
-      speedDef    : int,
+ int length;
+ int speedDef;
       voices      : Vector.<S2Voice>,
-      trackPos    : int,
-      patternPos  : int,
-      patternLen  : int,
+ int trackPos;
+ int patternPos;
+ int patternLen;
       arpeggioFx  : Vector.<int>,
-      arpeggioPos : int;
+ int arpeggioPos;
 
      void S2Player(amiga:Amiga = null) {
       super(amiga);

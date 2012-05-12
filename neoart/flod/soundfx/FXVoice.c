@@ -20,24 +20,24 @@ package neoart->flod->soundfx {
 
   public final class FXVoice {
     internal var
-      index       : int,
+ int index;
       next        : FXVoice,
       channel     : AmigaChannel,
       sample      : AmigaSample,
-      enabled     : int,
-      period      : int,
-      effect      : int,
-      param       : int,
-      volume      : int,
-      last        : int,
-      slideCtr    : int,
-      slideDir    : int,
-      slideParam  : int,
-      slidePeriod : int,
-      slideSpeed  : int,
-      stepPeriod  : int,
-      stepSpeed   : int,
-      stepWanted  : int;
+ int enabled;
+ int period;
+ int effect;
+ int param;
+ int volume;
+ int last;
+ int slideCtr;
+ int slideDir;
+ int slideParam;
+ int slidePeriod;
+ int slideSpeed;
+ int stepPeriod;
+ int stepSpeed;
+ int stepWanted;
 
      void FXVoice(index:int) {
       this->index = index;

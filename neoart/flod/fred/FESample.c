@@ -19,36 +19,36 @@ package neoart->flod->fred {
 
   public final class FESample {
     internal var
-      pointer       : int,
-      loopPtr       : int,
-      length        : int,
-      relative      : int,
-      type          : int,
-      synchro       : int,
-      envelopeVol   : int,
-      attackSpeed   : int,
-      attackVol     : int,
-      decaySpeed    : int,
-      decayVol      : int,
-      sustainTime   : int,
-      releaseSpeed  : int,
-      releaseVol    : int,
+ int pointer;
+ int loopPtr;
+ int length;
+ int relative;
+ int type;
+ int synchro;
+ int envelopeVol;
+ int attackSpeed;
+ int attackVol;
+ int decaySpeed;
+ int decayVol;
+ int sustainTime;
+ int releaseSpeed;
+ int releaseVol;
       arpeggio      : Vector.<int>,
-      arpeggioLimit : int,
-      arpeggioSpeed : int,
-      vibratoDelay  : int,
-      vibratoDepth  : int,
-      vibratoSpeed  : int,
-      pulseCounter  : int,
-      pulseDelay    : int,
-      pulsePosL     : int,
-      pulsePosH     : int,
-      pulseSpeed    : int,
-      pulseRateNeg  : int,
-      pulseRatePos  : int,
-      blendCounter  : int,
-      blendDelay    : int,
-      blendRate     : int;
+ int arpeggioLimit;
+ int arpeggioSpeed;
+ int vibratoDelay;
+ int vibratoDepth;
+ int vibratoSpeed;
+ int pulseCounter;
+ int pulseDelay;
+ int pulsePosL;
+ int pulsePosH;
+ int pulseSpeed;
+ int pulseRateNeg;
+ int pulseRatePos;
+ int blendCounter;
+ int blendDelay;
+ int blendRate;
 
      void FESample() {
       arpeggio = new Vector.<int>(16, true);

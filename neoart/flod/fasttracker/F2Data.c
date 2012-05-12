@@ -20,11 +20,11 @@ package neoart->flod->fasttracker {
   public final class F2Data {
     internal var
       points    : Vector.<F2Point>,
-      total     : int,
-      sustain   : int,
-      loopStart : int,
-      loopEnd   : int,
-      flags     : int;
+ int total;
+ int sustain;
+ int loopStart;
+ int loopEnd;
+ int flags;
 
      void F2Data() {
       points = new Vector.<F2Point>(12, true);

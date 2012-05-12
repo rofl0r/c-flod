@@ -19,8 +19,8 @@ package neoart->flod->whittaker {
 
   public final class DWSong {
     internal var
-      speed  : int,
-      delay  : int,
+ int speed;
+ int delay;
       tracks : Vector.<int>;
   }
 }

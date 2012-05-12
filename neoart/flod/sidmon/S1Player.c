@@ -27,33 +27,33 @@ package neoart->flod->sidmon {
       patterns    : Vector.<SMRow>,
       samples     : Vector.<S1Sample>,
       waveLists   : Vector.<int>,
-      speedDef    : int,
-      trackLen    : int,
-      patternDef  : int,
-      mix1Speed   : int,
-      mix2Speed   : int,
-      mix1Dest    : int,
-      mix2Dest    : int,
-      mix1Source1 : int,
-      mix1Source2 : int,
-      mix2Source1 : int,
-      mix2Source2 : int,
-      doFilter    : int,
-      doReset     : int,
+ int speedDef;
+ int trackLen;
+ int patternDef;
+ int mix1Speed;
+ int mix2Speed;
+ int mix1Dest;
+ int mix2Dest;
+ int mix1Source1;
+ int mix1Source2;
+ int mix2Source1;
+ int mix2Source2;
+ int doFilter;
+ int doReset;
       voices      : Vector.<S1Voice>,
-      trackPos    : int,
-      trackEnd    : int,
-      patternPos  : int,
-      patternEnd  : int,
-      patternLen  : int,
-      mix1Ctr     : int,
-      mix2Ctr     : int,
-      mix1Pos     : int,
-      mix2Pos     : int,
-      audPtr      : int,
-      audLen      : int,
-      audPer      : int,
-      audVol      : int;
+ int trackPos;
+ int trackEnd;
+ int patternPos;
+ int patternEnd;
+ int patternLen;
+ int mix1Ctr;
+ int mix2Ctr;
+ int mix1Pos;
+ int mix2Pos;
+ int audPtr;
+ int audLen;
+ int audPer;
+ int audVol;
 
      void S1Player(amiga:Amiga = null) {
       super(amiga);

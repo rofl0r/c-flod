@@ -20,15 +20,15 @@ package neoart->flod->trackers {
 
   public final class STVoice {
     internal var
-      index   : int,
+ int index;
       next    : STVoice,
       channel : AmigaChannel,
       sample  : AmigaSample,
-      enabled : int,
-      period  : int,
-      last    : int,
-      effect  : int,
-      param   : int;
+ int enabled;
+ int period;
+ int last;
+ int effect;
+ int param;
 
      void STVoice(index:int) {
       this->index = index;

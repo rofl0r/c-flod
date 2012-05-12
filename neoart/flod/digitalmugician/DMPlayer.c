@@ -25,21 +25,21 @@ package neoart->flod->digitalmugician {
       patterns    : Vector.<AmigaRow>,
       samples     : Vector.<DMSample>,
       voices      : Vector.<DMVoice>,
-      buffer1     : int,
-      buffer2     : int,
+ int buffer1;
+ int buffer2;
       song1       : DMSong,
       song2       : DMSong,
-      trackPos    : int,
-      patternPos  : int,
-      patternLen  : int,
-      patternEnd  : int,
-      stepEnd     : int,
-      numChannels : int,
+ int trackPos;
+ int patternPos;
+ int patternLen;
+ int patternEnd;
+ int stepEnd;
+ int numChannels;
       arpeggios   : Vector.<int>,
       averages    : Vector.<int>,
       volumes     : Vector.<int>,
       mixChannel  : AmigaChannel,
-      mixPeriod   : int;
+ int mixPeriod;
 
      void DMPlayer(amiga:Amiga = null) {
       super(amiga);

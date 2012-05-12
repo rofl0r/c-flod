@@ -20,13 +20,13 @@ package neoart->flod->sidmon {
 
   public final class S2Sample extends AmigaSample {
     internal var
-      negStart  : int,
-      negLen    : int,
-      negSpeed  : int,
-      negDir    : int,
-      negOffset : int,
-      negPos    : int,
-      negCtr    : int,
-      negToggle : int;
+ int negStart;
+ int negLen;
+ int negSpeed;
+ int negDir;
+ int negOffset;
+ int negPos;
+ int negCtr;
+ int negToggle;
   }
 }

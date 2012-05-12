@@ -20,6 +20,6 @@ package neoart->flod->sidmon {
 
   public final class S2Step extends AmigaStep {
     internal var
-      soundTranspose : int;
+ int soundTranspose;
   }
 }

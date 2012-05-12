@@ -20,45 +20,45 @@ package neoart->flod->fred {
 
   public final class FEVoice {
     internal var
-      index         : int,
-      bitFlag       : int,
+ int index;
+ int bitFlag;
       next          : FEVoice,
       channel       : AmigaChannel,
       sample        : FESample,
-      trackPos      : int,
-      patternPos    : int,
-      tick          : int,
-      busy          : int,
-      synth         : int,
-      note          : int,
-      period        : int,
-      volume        : int,
-      envelopePos   : int,
-      sustainTime   : int,
-      arpeggioPos   : int,
-      arpeggioSpeed : int,
-      portamento    : int,
-      portaCounter  : int,
-      portaDelay    : int,
-      portaFlag     : int,
-      portaLimit    : int,
-      portaNote     : int,
-      portaPeriod   : int,
-      portaSpeed    : int,
-      vibrato       : int,
-      vibratoDelay  : int,
-      vibratoDepth  : int,
-      vibratoFlag   : int,
-      vibratoSpeed  : int,
-      pulseCounter  : int,
-      pulseDelay    : int,
-      pulseDir      : int,
-      pulsePos      : int,
-      pulseSpeed    : int,
-      blendCounter  : int,
-      blendDelay    : int,
-      blendDir      : int,
-      blendPos      : int;
+ int trackPos;
+ int patternPos;
+ int tick;
+ int busy;
+ int synth;
+ int note;
+ int period;
+ int volume;
+ int envelopePos;
+ int sustainTime;
+ int arpeggioPos;
+ int arpeggioSpeed;
+ int portamento;
+ int portaCounter;
+ int portaDelay;
+ int portaFlag;
+ int portaLimit;
+ int portaNote;
+ int portaPeriod;
+ int portaSpeed;
+ int vibrato;
+ int vibratoDelay;
+ int vibratoDepth;
+ int vibratoFlag;
+ int vibratoSpeed;
+ int pulseCounter;
+ int pulseDelay;
+ int pulseDir;
+ int pulsePos;
+ int pulseSpeed;
+ int blendCounter;
+ int blendDelay;
+ int blendDir;
+ int blendPos;
 
      void FEVoice(index:int, bitFlag:int) {
       this->index = index;

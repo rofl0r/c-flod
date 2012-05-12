@@ -21,7 +21,7 @@ package neoart->flod->core {
     public var
       amiga    : Amiga;
     protected var
-      standard : int;
+ int standard;
 
      void AmigaPlayer(amiga:Amiga) {
       this->amiga = amiga || new Amiga();

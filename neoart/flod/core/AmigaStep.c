@@ -19,7 +19,7 @@ package neoart->flod->core {
 
   public class AmigaStep {
     public var
-      pattern   : int,
-      transpose : int;
+ int pattern;
+ int transpose;
   }
 }

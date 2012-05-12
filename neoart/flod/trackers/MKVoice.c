@@ -20,20 +20,20 @@ package neoart->flod->trackers {
 
   public final class MKVoice {
     internal var
-      index        : int,
+ int index;
       next         : MKVoice,
       channel      : AmigaChannel,
       sample       : AmigaSample,
-      enabled      : int,
-      period       : int,
-      effect       : int,
-      param        : int,
-      volume       : int,
-      portaDir     : int,
-      portaPeriod  : int,
-      portaSpeed   : int,
-      vibratoPos   : int,
-      vibratoSpeed : int;
+ int enabled;
+ int period;
+ int effect;
+ int param;
+ int volume;
+ int portaDir;
+ int portaPeriod;
+ int portaSpeed;
+ int vibratoPos;
+ int vibratoSpeed;
 
      void MKVoice(index:int) {
       this->index = index;

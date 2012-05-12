@@ -19,8 +19,8 @@ package neoart->flod->fred {
 
   public final class FESong {
     internal var
-      speed  : int,
-      length : int,
+ int speed;
+ int length;
       tracks : Vector.<Vector.<int>>;
 
      void FESong() {

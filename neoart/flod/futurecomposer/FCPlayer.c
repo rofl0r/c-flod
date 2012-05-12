@@ -25,7 +25,7 @@ package neoart->flod->futurecomposer {
       pats    : ByteArray,
       vols    : ByteArray,
       frqs    : ByteArray,
-      length  : int,
+ int length;
       samples : Vector.<AmigaSample>,
       voices  : Vector.<FCVoice>;
 

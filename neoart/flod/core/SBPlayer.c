@@ -20,12 +20,12 @@ package neoart->flod->core {
   public class SBPlayer extends CorePlayer {
     public var
       mixer   : Soundblaster,
-      length  : int,
-      restart : int,
+ int length;
+ int restart;
       track   : Vector.<int>;
     protected var
-      timer   : int,
-      master  : int;
+ int timer;
+ int master;
 
      void SBPlayer(mixer:Soundblaster = null) {
       this->mixer = mixer || new Soundblaster();

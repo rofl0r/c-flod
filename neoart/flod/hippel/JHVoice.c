@@ -20,51 +20,51 @@ package neoart->flod->hippel {
 
   public final class JHVoice {
     internal var
-      index       : int,
+ int index;
       next        : JHVoice,
       channel     : AmigaChannel,
-      enabled     : int,
-      cosoCounter : int,
-      cosoSpeed   : int,
-      trackPtr    : int,
-      trackPos    : int,
-      trackTransp : int,
-      patternPtr  : int,
-      patternPos  : int,
-      frqseqPtr   : int,
-      frqseqPos   : int,
-      volseqPtr   : int,
-      volseqPos   : int,
-      sample      : int,
-      loopPtr     : int,
-      repeat      : int,
-      tick        : int,
-      note        : int,
-      transpose   : int,
-      info        : int,
-      infoPrev    : int,
-      volume      : int,
-      volCounter  : int,
-      volSpeed    : int,
-      volSustain  : int,
-      volTransp   : int,
-      volFade     : int,
-      portaDelta  : int,
-      vibrato     : int,
-      vibDelay    : int,
-      vibDelta    : int,
-      vibDepth    : int,
-      vibSpeed    : int,
-      slide       : int,
-      sldActive   : int,
-      sldDone     : int,
-      sldCounter  : int,
-      sldSpeed    : int,
-      sldDelta    : int,
-      sldPointer  : int,
-      sldLen      : int,
-      sldEnd      : int,
-      sldLoopPtr  : int;
+ int enabled;
+ int cosoCounter;
+ int cosoSpeed;
+ int trackPtr;
+ int trackPos;
+ int trackTransp;
+ int patternPtr;
+ int patternPos;
+ int frqseqPtr;
+ int frqseqPos;
+ int volseqPtr;
+ int volseqPos;
+ int sample;
+ int loopPtr;
+ int repeat;
+ int tick;
+ int note;
+ int transpose;
+ int info;
+ int infoPrev;
+ int volume;
+ int volCounter;
+ int volSpeed;
+ int volSustain;
+ int volTransp;
+ int volFade;
+ int portaDelta;
+ int vibrato;
+ int vibDelay;
+ int vibDelta;
+ int vibDepth;
+ int vibSpeed;
+ int slide;
+ int sldActive;
+ int sldDone;
+ int sldCounter;
+ int sldSpeed;
+ int sldDelta;
+ int sldPointer;
+ int sldLen;
+ int sldEnd;
+ int sldLoopPtr;
 
      void JHVoice(index:int) {
       this->index = index;

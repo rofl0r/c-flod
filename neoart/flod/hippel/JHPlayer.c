@@ -24,16 +24,16 @@ package neoart->flod->hippel {
       songs       : Vector.<JHSong>,
       samples     : Vector.<AmigaSample>,
       stream      : ByteArray,
-      base        : int,
-      patterns    : int,
-      patternLen  : int,
-      periods     : int,
-      frqseqs     : int,
-      volseqs     : int,
-      samplesData : int,
+ int base;
+ int patterns;
+ int patternLen;
+ int periods;
+ int frqseqs;
+ int volseqs;
+ int samplesData;
       song        : JHSong,
       voices      : Vector.<JHVoice>,
-      coso        : int;
+ int coso;
 
      void JHPlayer(amiga:Amiga = null) {
       super(amiga);

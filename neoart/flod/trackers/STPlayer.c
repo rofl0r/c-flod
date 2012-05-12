@@ -24,11 +24,11 @@ package neoart->flod->trackers {
       track      : Vector.<int>,
       patterns   : Vector.<AmigaRow>,
       samples    : Vector.<AmigaSample>,
-      length     : int,
+ int length;
       voices     : Vector.<STVoice>,
-      trackPos   : int,
-      patternPos : int,
-      jumpFlag   : int;
+ int trackPos;
+ int patternPos;
+ int jumpFlag;
 
      void STPlayer(amiga:Amiga = null) {
       super(amiga);

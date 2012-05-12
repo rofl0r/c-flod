@@ -25,36 +25,36 @@ package neoart->flod->whittaker {
       samples       : Vector.<DWSample>,
       stream        : ByteArray,
       song          : DWSong,
-      songvol       : int,
-      master        : int,
-      periods       : int,
-      frqseqs       : int,
-      volseqs       : int,
-      transpose     : int,
-      slower        : int,
-      slowerCounter : int,
-      delaySpeed    : int,
-      delayCounter  : int,
-      fadeSpeed     : int,
-      fadeCounter   : int,
+ int songvol;
+ int master;
+ int periods;
+ int frqseqs;
+ int volseqs;
+ int transpose;
+ int slower;
+ int slowerCounter;
+ int delaySpeed;
+ int delayCounter;
+ int fadeSpeed;
+ int fadeCounter;
       wave          : DWSample,
-      waveCenter    : int,
-      waveLo        : int,
-      waveHi        : int,
-      waveDir       : int,
-      waveLen       : int,
-      wavePos       : int,
-      waveRateNeg   : int,
-      waveRatePos   : int,
+ int waveCenter;
+ int waveLo;
+ int waveHi;
+ int waveDir;
+ int waveLen;
+ int wavePos;
+ int waveRateNeg;
+ int waveRatePos;
       voices        : Vector.<DWVoice>,
-      active        : int,
-      complete      : int,
-      base          : int,
-      com2          : int,
-      com3          : int,
-      com4          : int,
+ int active;
+ int complete;
+ int base;
+ int com2;
+ int com3;
+ int com4;
       readMix       : String,
-      readLen       : int;
+ int readLen;
 
      void DWPlayer(amiga:Amiga = null) {
       super(amiga);

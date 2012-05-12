@@ -24,12 +24,12 @@ package neoart->flod->soundfx {
       track      : Vector.<int>,
       patterns   : Vector.<AmigaRow>,
       samples    : Vector.<AmigaSample>,
-      length     : int,
+ int length;
       voices     : Vector.<FXVoice>,
-      trackPos   : int,
-      patternPos : int,
-      jumpFlag   : int,
-      delphine   : int;
+ int trackPos;
+ int patternPos;
+ int jumpFlag;
+ int delphine;
 
      void FXPlayer(amiga:Amiga = null) {
       super(amiga);

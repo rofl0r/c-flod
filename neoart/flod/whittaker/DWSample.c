@@ -20,7 +20,7 @@ package neoart->flod->whittaker {
 
   public final class DWSample extends AmigaSample {
     internal var
-      relative : int,
-      finetune : int;
+ int relative;
+ int finetune;
   }
 }

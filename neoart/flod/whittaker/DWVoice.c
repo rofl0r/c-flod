@@ -20,35 +20,35 @@ package neoart->flod->whittaker {
 
   public final class DWVoice {
     internal var
-      index         : int,
-      bitFlag       : int,
+ int index;
+ int bitFlag;
       next          : DWVoice,
       channel       : AmigaChannel,
       sample        : DWSample,
-      trackPtr      : int,
-      trackPos      : int,
-      patternPos    : int,
-      frqseqPtr     : int,
-      frqseqPos     : int,
-      volseqPtr     : int,
-      volseqPos     : int,
-      volseqSpeed   : int,
-      volseqCounter : int,
-      halve         : int,
-      speed         : int,
-      tick          : int,
-      busy          : int,
-      flags         : int,
-      note          : int,
-      period        : int,
-      transpose     : int,
-      portaDelay    : int,
-      portaDelta    : int,
-      portaSpeed    : int,
-      vibrato       : int,
-      vibratoDelta  : int,
-      vibratoSpeed  : int,
-      vibratoDepth  : int;
+ int trackPtr;
+ int trackPos;
+ int patternPos;
+ int frqseqPtr;
+ int frqseqPos;
+ int volseqPtr;
+ int volseqPos;
+ int volseqSpeed;
+ int volseqCounter;
+ int halve;
+ int speed;
+ int tick;
+ int busy;
+ int flags;
+ int note;
+ int period;
+ int transpose;
+ int portaDelay;
+ int portaDelta;
+ int portaSpeed;
+ int vibrato;
+ int vibratoDelta;
+ int vibratoSpeed;
+ int vibratoDepth;
 
      void DWVoice(index:int, bitFlag:int) {
       this->index = index;

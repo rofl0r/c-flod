@@ -20,65 +20,65 @@ package neoart->flod->fasttracker {
 
   public final class F2Voice {
     internal var
-      index          : int,
+ int index;
       next           : F2Voice,
-      flags          : int,
-      delay          : int,
+ int flags;
+ int delay;
       channel        : SBChannel,
-      patternLoop    : int,
-      patternLoopRow : int,
+ int patternLoop;
+ int patternLoopRow;
       playing        : F2Instrument,
-      note           : int,
-      keyoff         : int,
-      period         : int,
-      finetune       : int,
-      arpDelta       : int,
-      vibDelta       : int,
+ int note;
+ int keyoff;
+ int period;
+ int finetune;
+ int arpDelta;
+ int vibDelta;
       instrument     : F2Instrument,
-      autoVibratoPos : int,
-      autoSweep      : int,
-      autoSweepPos   : int,
+ int autoVibratoPos;
+ int autoSweep;
+ int autoSweepPos;
       sample         : F2Sample,
-      sampleOffset   : int,
-      volume         : int,
-      volEnabled     : int,
+ int sampleOffset;
+ int volume;
+ int volEnabled;
       volEnvelope    : F2Envelope,
-      volDelta       : int,
-      volSlide       : int,
-      volSlideMaster : int,
-      fineSlideU     : int,
-      fineSlideD     : int,
-      fadeEnabled    : int,
-      fadeDelta      : int,
-      fadeVolume     : int,
-      panning        : int,
-      panEnabled     : int,
+ int volDelta;
+ int volSlide;
+ int volSlideMaster;
+ int fineSlideU;
+ int fineSlideD;
+ int fadeEnabled;
+ int fadeDelta;
+ int fadeVolume;
+ int panning;
+ int panEnabled;
       panEnvelope    : F2Envelope,
-      panSlide       : int,
-      portaU         : int,
-      portaD         : int,
-      finePortaU     : int,
-      finePortaD     : int,
-      xtraPortaU     : int,
-      xtraPortaD     : int,
-      portaPeriod    : int,
-      portaSpeed     : int,
-      glissando      : int,
-      glissPeriod    : int,
-      vibratoPos     : int,
-      vibratoSpeed   : int,
-      vibratoDepth   : int,
-      vibratoReset   : int,
-      tremoloPos     : int,
-      tremoloSpeed   : int,
-      tremoloDepth   : int,
-      waveControl    : int,
-      tremorPos      : int,
-      tremorOn       : int,
-      tremorOff      : int,
-      tremorVolume   : int,
-      retrigx        : int,
-      retrigy        : int;
+ int panSlide;
+ int portaU;
+ int portaD;
+ int finePortaU;
+ int finePortaD;
+ int xtraPortaU;
+ int xtraPortaD;
+ int portaPeriod;
+ int portaSpeed;
+ int glissando;
+ int glissPeriod;
+ int vibratoPos;
+ int vibratoSpeed;
+ int vibratoDepth;
+ int vibratoReset;
+ int tremoloPos;
+ int tremoloSpeed;
+ int tremoloDepth;
+ int waveControl;
+ int tremorPos;
+ int tremorOn;
+ int tremorOff;
+ int tremorVolume;
+ int retrigx;
+ int retrigy;
 
      void F2Voice(index:int) {
       this->index = index;

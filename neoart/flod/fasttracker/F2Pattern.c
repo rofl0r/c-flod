@@ -20,8 +20,8 @@ package neoart->flod->fasttracker {
   public final class F2Pattern {
     internal var
       rows   : Vector.<F2Row>,
-      length : int,
-      size   : int;
+ int length;
+ int size;
 
      void F2Pattern(length, channels) {
       size = length * channels;

@@ -20,22 +20,22 @@ package neoart->flod->deltamusic {
 
   public final class D1Sample extends AmigaSample {
     internal var
-      synth        : int,
-      attackStep   : int,
-      attackDelay  : int,
-      decayStep    : int,
-      decayDelay   : int,
-      releaseStep  : int,
-      releaseDelay : int,
-      sustain      : int,
+ int synth;
+ int attackStep;
+ int attackDelay;
+ int decayStep;
+ int decayDelay;
+ int releaseStep;
+ int releaseDelay;
+ int sustain;
       arpeggio     : Vector.<int>,
-      pitchBend    : int,
-      portamento   : int,
+ int pitchBend;
+ int portamento;
       table        : Vector.<int>,
-      tableDelay   : int,
-      vibratoWait  : int,
-      vibratoStep  : int,
-      vibratoLen   : int;
+ int tableDelay;
+ int vibratoWait;
+ int vibratoStep;
+ int vibratoLen;
 
      void D1Sample() {
       arpeggio = new Vector.<int>( 8, true);

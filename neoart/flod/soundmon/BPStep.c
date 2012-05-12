@@ -20,6 +20,6 @@ package neoart->flod->soundmon {
 
   public final class BPStep extends AmigaStep {
     internal var
-      soundTranspose : int;
+ int soundTranspose;
   }
 }

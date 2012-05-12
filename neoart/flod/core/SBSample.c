@@ -22,12 +22,12 @@ package neoart->flod->core {
     public var
       name      : String = "",
       bits      : int = 8,
-      volume    : int,
-      length    : int,
+ int volume;
+ int length;
       data      : Vector.<Number>,
-      loopMode  : int,
-      loopStart : int,
-      loopLen   : int;
+ int loopMode;
+ int loopStart;
+ int loopLen;
 
      void store(stream:ByteArray):void {
       var delta:int, i:int, len:int = length, pos:int, sample:Number, total:int, value:int;

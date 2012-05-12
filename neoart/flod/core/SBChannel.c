@@ -20,31 +20,31 @@ package neoart->flod->core {
   public final class SBChannel {
     public var
       next        : SBChannel,
-      mute        : int,
-      enabled     : int,
+ int mute;
+ int enabled;
       sample      : SBSample,
-      length      : int,
-      index       : int,
-      pointer     : int,
-      delta       : int,
+ int length;
+ int index;
+ int pointer;
+ int delta;
       fraction    : Number,
       speed       : Number,
-      dir         : int,
+ int dir;
       oldSample   : SBSample,
-      oldLength   : int,
-      oldPointer  : int,
+ int oldLength;
+ int oldPointer;
       oldFraction : Number,
       oldSpeed    : Number,
-      oldDir      : int,
+ int oldDir;
       volume      : Number,
       lvol        : Number,
       rvol        : Number,
-      panning     : int,
+ int panning;
       lpan        : Number,
       rpan        : Number,
       ldata       : Number,
       rdata       : Number,
-      mixCounter  : int,
+ int mixCounter;
       lmixRampU   : Number,
       lmixDeltaU  : Number,
       rmixRampU   : Number,
@@ -53,10 +53,10 @@ package neoart->flod->core {
       lmixDeltaD  : Number,
       rmixRampD   : Number,
       rmixDeltaD  : Number,
-      volCounter  : int,
+ int volCounter;
       lvolDelta   : Number,
       rvolDelta   : Number,
-      panCounter  : int,
+ int panCounter;
       lpanDelta   : Number,
       rpanDelta   : Number;
 

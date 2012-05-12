@@ -24,14 +24,14 @@ package neoart->flod->trackers {
       track        : Vector.<int>,
       patterns     : Vector.<AmigaRow>,
       samples      : Vector.<AmigaSample>,
-      length       : int,
-      restart      : int,
+ int length;
+ int restart;
       voices       : Vector.<MKVoice>,
-      trackPos     : int,
-      patternPos   : int,
-      jumpFlag     : int,
-      vibratoDepth : int,
-      restartSave  : int;
+ int trackPos;
+ int patternPos;
+ int jumpFlag;
+ int vibratoDepth;
+ int restartSave;
 
      void MKPlayer(amiga:Amiga = null) {
       super(amiga);

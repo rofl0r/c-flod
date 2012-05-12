@@ -20,31 +20,31 @@ package neoart->flod->sidmon {
 
   public final class S1Voice {
     internal var
-      index        : int,
+ int index;
       next         : S1Voice,
       channel      : AmigaChannel,
-      step         : int,
-      row          : int,
-      sample       : int,
-      samplePtr    : int,
-      sampleLen    : int,
-      note         : int,
-      noteTimer    : int,
-      period       : int,
-      volume       : int,
-      bendTo       : int,
-      bendSpeed    : int,
-      arpeggioCtr  : int,
-      envelopeCtr  : int,
-      pitchCtr     : int,
-      pitchFallCtr : int,
-      sustainCtr   : int,
-      phaseTimer   : int,
-      phaseSpeed   : int,
-      wavePos      : int,
-      waveList     : int,
-      waveTimer    : int,
-      waitCtr      : int;
+ int step;
+ int row;
+ int sample;
+ int samplePtr;
+ int sampleLen;
+ int note;
+ int noteTimer;
+ int period;
+ int volume;
+ int bendTo;
+ int bendSpeed;
+ int arpeggioCtr;
+ int envelopeCtr;
+ int pitchCtr;
+ int pitchFallCtr;
+ int sustainCtr;
+ int phaseTimer;
+ int phaseSpeed;
+ int wavePos;
+ int waveList;
+ int waveTimer;
+ int waitCtr;
 
      void S1Voice(index:int) {
       this->index = index;

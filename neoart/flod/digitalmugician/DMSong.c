@@ -21,10 +21,10 @@ package neoart->flod->digitalmugician {
   public final class DMSong {
     internal var
       title    : String,
-      speed    : int,
-      length   : int,
-      loop     : int,
-      loopStep : int,
+ int speed;
+ int length;
+ int loop;
+ int loopStep;
       tracks   : Vector.<AmigaStep>;
 
      void DMSong() {

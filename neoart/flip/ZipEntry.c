@@ -20,9 +20,9 @@ package neoart->flip {
     public var
       name       : String,
       extra      : ByteArray,
-      version    : int,
-      flag       : int,
-      method     : int,
+ int version;
+ int flag;
+ int method;
       time       : uint,
       crc        : uint,
       compressed : uint,

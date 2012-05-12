@@ -24,12 +24,12 @@ package neoart->flod->trackers {
       track      : Vector.<int>,
       patterns   : Vector.<AmigaRow>,
       samples    : Vector.<HMSample>,
-      length     : int,
-      restart    : int,
+ int length;
+ int restart;
       voices     : Vector.<HMVoice>,
-      trackPos   : int,
-      patternPos : int,
-      jumpFlag   : int;
+ int trackPos;
+ int patternPos;
+ int jumpFlag;
 
      void HMPlayer(amiga:Amiga = null) {
       super(amiga);

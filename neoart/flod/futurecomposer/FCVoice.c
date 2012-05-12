@@ -20,40 +20,40 @@ package neoart->flod->futurecomposer {
 
   public final class FCVoice {
     internal var
-      index          : int,
+ int index;
       next           : FCVoice,
       channel        : AmigaChannel,
       sample         : AmigaSample,
-      enabled        : int,
-      pattern        : int,
-      soundTranspose : int,
-      transpose      : int,
-      patStep        : int,
-      frqStep        : int,
-      frqPos         : int,
-      frqSustain     : int,
-      frqTranspose   : int,
-      volStep        : int,
-      volPos         : int,
-      volCtr         : int,
-      volSpeed       : int,
-      volSustain     : int,
-      note           : int,
-      pitch          : int,
-      volume         : int,
-      pitchBendFlag  : int,
-      pitchBendSpeed : int,
-      pitchBendTime  : int,
-      portamentoFlag : int,
-      portamento     : int,
-      volBendFlag    : int,
-      volBendSpeed   : int,
-      volBendTime    : int,
-      vibratoFlag    : int,
-      vibratoSpeed   : int,
-      vibratoDepth   : int,
-      vibratoDelay   : int,
-      vibrato        : int;
+ int enabled;
+ int pattern;
+ int soundTranspose;
+ int transpose;
+ int patStep;
+ int frqStep;
+ int frqPos;
+ int frqSustain;
+ int frqTranspose;
+ int volStep;
+ int volPos;
+ int volCtr;
+ int volSpeed;
+ int volSustain;
+ int note;
+ int pitch;
+ int volume;
+ int pitchBendFlag;
+ int pitchBendSpeed;
+ int pitchBendTime;
+ int portamentoFlag;
+ int portamento;
+ int volBendFlag;
+ int volBendSpeed;
+ int volBendTime;
+ int vibratoFlag;
+ int vibratoSpeed;
+ int vibratoDepth;
+ int vibratoDelay;
+ int vibrato;
 
      void FCVoice(index:int) {
       this->index = index;

@@ -35,7 +35,7 @@ package neoart->flod {
   public final class FileLoader {
     private var
       player : CorePlayer,
-      index  : int,
+ int index;
       amiga  : Amiga,
       mixer  : Soundblaster;
 

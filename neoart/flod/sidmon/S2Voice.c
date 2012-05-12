@@ -20,33 +20,33 @@ package neoart->flod->sidmon {
 
   public final class S2Voice {
     internal var
-      index          : int,
+ int index;
       next           : S2Voice,
       channel        : AmigaChannel,
       step           : S2Step,
       row            : SMRow,
       instr          : S2Instrument,
       sample         : S2Sample,
-      enabled        : int,
-      pattern        : int,
-      instrument     : int,
-      note           : int,
-      period         : int,
-      volume         : int,
-      original       : int,
-      adsrPos        : int,
-      sustainCtr     : int,
-      pitchBend      : int,
-      pitchBendCtr   : int,
-      noteSlideTo    : int,
-      noteSlideSpeed : int,
-      waveCtr        : int,
-      wavePos        : int,
-      arpeggioCtr    : int,
-      arpeggioPos    : int,
-      vibratoCtr     : int,
-      vibratoPos     : int,
-      speed          : int;
+ int enabled;
+ int pattern;
+ int instrument;
+ int note;
+ int period;
+ int volume;
+ int original;
+ int adsrPos;
+ int sustainCtr;
+ int pitchBend;
+ int pitchBendCtr;
+ int noteSlideTo;
+ int noteSlideSpeed;
+ int waveCtr;
+ int wavePos;
+ int arpeggioCtr;
+ int arpeggioPos;
+ int vibratoCtr;
+ int vibratoPos;
+ int speed;
 
      void S2Voice(index:int) {
       this->index = index;

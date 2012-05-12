@@ -20,37 +20,37 @@ package neoart->flod->trackers {
 
   public final class PTVoice {
     internal var
-      index        : int,
+ int index;
       next         : PTVoice,
       channel      : AmigaChannel,
       sample       : PTSample,
-      enabled      : int,
-      loopCtr      : int,
-      loopPos      : int,
-      step         : int,
-      period       : int,
-      effect       : int,
-      param        : int,
-      volume       : int,
-      pointer      : int,
-      length       : int,
-      loopPtr      : int,
-      repeat       : int,
-      finetune     : int,
-      offset       : int,
-      portaDir     : int,
-      portaPeriod  : int,
-      portaSpeed   : int,
-      glissando    : int,
-      tremoloParam : int,
-      tremoloPos   : int,
-      tremoloWave  : int,
-      vibratoParam : int,
-      vibratoPos   : int,
-      vibratoWave  : int,
-      funkPos      : int,
-      funkSpeed    : int,
-      funkWave     : int;
+ int enabled;
+ int loopCtr;
+ int loopPos;
+ int step;
+ int period;
+ int effect;
+ int param;
+ int volume;
+ int pointer;
+ int length;
+ int loopPtr;
+ int repeat;
+ int finetune;
+ int offset;
+ int portaDir;
+ int portaPeriod;
+ int portaSpeed;
+ int glissando;
+ int tremoloParam;
+ int tremoloPos;
+ int tremoloWave;
+ int vibratoParam;
+ int vibratoPos;
+ int vibratoWave;
+ int funkPos;
+ int funkSpeed;
+ int funkWave;
 
      void PTVoice(index:int) {
       this->index = index;

@@ -22,15 +22,15 @@ package neoart->flod->fasttracker {
       name         : String = "",
       samples      : Vector.<F2Sample>,
       noteSamples  : Vector.<int>,
-      fadeout      : int,
+ int fadeout;
       volData      : F2Data,
-      volEnabled   : int,
+ int volEnabled;
       panData      : F2Data,
-      panEnabled   : int,
-      vibratoType  : int,
-      vibratoSweep : int,
-      vibratoSpeed : int,
-      vibratoDepth : int;
+ int panEnabled;
+ int vibratoType;
+ int vibratoSweep;
+ int vibratoSpeed;
+ int vibratoDepth;
 
      void F2Instrument() {
       noteSamples = new Vector.<int>(96, true);

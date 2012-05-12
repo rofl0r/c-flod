@@ -20,31 +20,31 @@ package neoart->flod->deltamusic {
 
   public final class D1Voice {
     internal var
-      index         : int,
+ int index;
       next          : D1Voice,
       channel       : AmigaChannel,
       sample        : D1Sample,
-      trackPos      : int,
-      patternPos    : int,
-      status        : int,
-      speed         : int,
+ int trackPos;
+ int patternPos;
+ int status;
+ int speed;
       step          : AmigaStep,
       row           : AmigaRow,
-      note          : int,
-      period        : int,
-      arpeggioPos   : int,
-      pitchBend     : int,
-      tableCtr      : int,
-      tablePos      : int,
-      vibratoCtr    : int,
-      vibratoDir    : int,
-      vibratoPos    : int,
-      vibratoPeriod : int,
-      volume        : int,
-      attackCtr     : int,
-      decayCtr      : int,
-      releaseCtr    : int,
-      sustain       : int;
+ int note;
+ int period;
+ int arpeggioPos;
+ int pitchBend;
+ int tableCtr;
+ int tablePos;
+ int vibratoCtr;
+ int vibratoDir;
+ int vibratoPos;
+ int vibratoPeriod;
+ int volume;
+ int attackCtr;
+ int decayCtr;
+ int releaseCtr;
+ int sustain;
 
      void D1Voice(index:int) {
       this->index = index;

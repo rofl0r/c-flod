@@ -23,17 +23,17 @@ package neoart->flod->fasttracker {
     internal var
       patterns      : Vector.<F2Pattern>,
       instruments   : Vector.<F2Instrument>,
-      linear        : int;
+ int linear;
     private var
       voices        : Vector.<F2Voice>,
-      order         : int,
-      position      : int,
-      nextOrder     : int,
-      nextPosition  : int,
+ int order;
+ int position;
+ int nextOrder;
+ int nextPosition;
       pattern       : F2Pattern,
-      patternDelay  : int,
-      patternOffset : int,
-      complete      : int;
+ int patternDelay;
+ int patternOffset;
+ int complete;
 
      void F2Player(mixer:Soundblaster = null) {
       super(mixer);

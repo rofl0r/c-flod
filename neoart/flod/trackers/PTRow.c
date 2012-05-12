@@ -20,6 +20,6 @@ package neoart->flod->trackers {
 
   public final class PTRow extends AmigaRow {
     internal var
-      step : int;
+ int step;
   }
 }

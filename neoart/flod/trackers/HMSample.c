@@ -20,9 +20,9 @@ package neoart->flod->trackers {
 
   public final class HMSample extends AmigaSample {
     internal var
-      finetune : int,
-      restart  : int,
-      waveLen  : int,
+ int finetune;
+ int restart;
+ int waveLen;
       waves    : Vector.<int>,
       volumes  : Vector.<int>;
   }

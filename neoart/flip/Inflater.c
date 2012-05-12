@@ -21,10 +21,10 @@ package neoart->flip {
       output   : ByteArray;
     private var
       inpbuf   : ByteArray,
-      inpcnt   : int,
-      outcnt   : int,
-      bitbuf   : int,
-      bitcnt   : int,
+ int inpcnt;
+ int outcnt;
+ int bitbuf;
+ int bitcnt;
       flencode : Huffman,
       fdiscode : Huffman,
       dlencode : Huffman,

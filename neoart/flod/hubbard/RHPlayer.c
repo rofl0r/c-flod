@@ -24,11 +24,11 @@ package neoart->flod->hubbard {
       songs    : Vector.<RHSong>,
       samples  : Vector.<RHSample>,
       song     : RHSong,
-      periods  : int,
-      vibrato  : int,
+ int periods;
+ int vibrato;
       voices   : Vector.<RHVoice>,
       stream   : ByteArray,
-      complete : int;
+ int complete;
 
      void RHPlayer(amiga:Amiga = null) {
       super(amiga);

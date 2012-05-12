@@ -19,8 +19,8 @@ package neoart->flod->hippel {
 
   public final class JHSong {
     internal var
-      pointer : int,
-      speed   : int,
-      length  : int;
+ int pointer;
+ int speed;
+ int length;
   }
 }

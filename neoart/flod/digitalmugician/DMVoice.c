@@ -23,26 +23,26 @@ package neoart->flod->digitalmugician {
       channel      : AmigaChannel,
       sample       : DMSample,
       step         : AmigaStep,
-      note         : int,
-      period       : int,
-      val1         : int,
-      val2         : int,
-      finalPeriod  : int,
-      arpeggioStep : int,
-      effectCtr    : int,
-      pitch        : int,
-      pitchCtr     : int,
-      pitchStep    : int,
-      portamento   : int,
-      volume       : int,
-      volumeCtr    : int,
-      volumeStep   : int,
-      mixMute      : int,
-      mixPtr       : int,
-      mixEnd       : int,
-      mixSpeed     : int,
-      mixStep      : int,
-      mixVolume    : int;
+ int note;
+ int period;
+ int val1;
+ int val2;
+ int finalPeriod;
+ int arpeggioStep;
+ int effectCtr;
+ int pitch;
+ int pitchCtr;
+ int pitchStep;
+ int portamento;
+ int volume;
+ int volumeCtr;
+ int volumeStep;
+ int mixMute;
+ int mixPtr;
+ int mixEnd;
+ int mixSpeed;
+ int mixStep;
+ int mixVolume;
 
     internal function initialize():void {
       sample       = null;

@@ -20,11 +20,11 @@ package neoart->flod->core {
   public class AmigaSample {
     public var
       name    : String = "",
-      length  : int,
-      loop    : int,
-      repeat  : int,
-      volume  : int,
-      pointer : int,
-      loopPtr : int;
+ int length;
+ int loop;
+ int repeat;
+ int volume;
+ int pointer;
+ int loopPtr;
   }
 }

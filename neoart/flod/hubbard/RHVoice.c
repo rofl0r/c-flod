@@ -20,24 +20,24 @@ package neoart->flod->hubbard {
 
   public final class RHVoice {
     internal var
-      index      : int,
-      bitFlag    : int,
+ int index;
+ int bitFlag;
       next       : RHVoice,
       channel    : AmigaChannel,
       sample     : RHSample,
-      trackPtr   : int,
-      trackPos   : int,
-      patternPos : int,
-      tick       : int,
-      busy       : int,
-      flags      : int,
-      note       : int,
-      period     : int,
-      volume     : int,
-      portaSpeed : int,
-      vibratoPtr : int,
-      vibratoPos : int,
-      synthPos   : int;
+ int trackPtr;
+ int trackPos;
+ int patternPos;
+ int tick;
+ int busy;
+ int flags;
+ int note;
+ int period;
+ int volume;
+ int portaSpeed;
+ int vibratoPtr;
+ int vibratoPos;
+ int synthPos;
 
      void RHVoice(index:int, bitFlag:int) {
       this->index = index;

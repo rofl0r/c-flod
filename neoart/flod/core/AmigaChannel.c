@@ -20,17 +20,17 @@ package neoart->flod->core {
   public final class AmigaChannel {
     public var
       next    : AmigaChannel,
-      mute    : int,
+ int mute;
       panning : Number = 1.0,
-      delay   : int,
-      pointer : int,
-      length  : int;
+ int delay;
+ int pointer;
+ int length;
     internal var
-      audena  : int,
-      audcnt  : int,
-      audloc  : int,
-      audper  : int,
-      audvol  : int,
+ int audena;
+ int audcnt;
+ int audloc;
+ int audper;
+ int audvol;
       timer   : Number,
       level   : Number,
       ldata   : Number,

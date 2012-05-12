@@ -20,9 +20,9 @@ package neoart->flod->deltamusic {
 
   public final class D2Sample extends AmigaSample {
     internal var
-      index     : int,
-      pitchBend : int,
-      synth     : int,
+ int index;
+ int pitchBend;
+ int synth;
       table     : Vector.<int>,
       vibratos  : Vector.<int>,
       volumes   : Vector.<int>;

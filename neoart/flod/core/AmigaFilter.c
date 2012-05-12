@@ -23,7 +23,7 @@ package neoart->flod->core {
       FORCE_ON  : int =  1,
       FORCE_OFF : int = -1;
     public var
-      active    : int,
+ int active;
       forced    : int = FORCE_OFF;
     private var
       l0        : Number,

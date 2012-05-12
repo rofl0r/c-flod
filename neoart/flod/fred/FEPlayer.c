@@ -26,8 +26,8 @@ package neoart->flod->fred {
       patterns : ByteArray,
       song     : FESong,
       voices   : Vector.<FEVoice>,
-      complete : int,
-      sampFlag : int;
+ int complete;
+ int sampFlag;
 
      void FEPlayer(amiga:Amiga = null) {
       super(amiga);

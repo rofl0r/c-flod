@@ -20,19 +20,19 @@ package neoart->flod->sidmon {
 
   public final class S1Sample extends AmigaSample {
     internal var
-      waveform     : int,
+ int waveform;
       arpeggio     : Vector.<int>,
-      attackSpeed  : int,
-      attackMax    : int,
-      decaySpeed   : int,
-      decayMin     : int,
-      sustain      : int,
-      releaseSpeed : int,
-      releaseMin   : int,
-      phaseShift   : int,
-      phaseSpeed   : int,
-      finetune     : int,
-      pitchFall    : int;
+ int attackSpeed;
+ int attackMax;
+ int decaySpeed;
+ int decayMin;
+ int sustain;
+ int releaseSpeed;
+ int releaseMin;
+ int phaseShift;
+ int phaseSpeed;
+ int finetune;
+ int pitchFall;
 
      void S1Sample() {
       arpeggio = new Vector.<int>(16, true);

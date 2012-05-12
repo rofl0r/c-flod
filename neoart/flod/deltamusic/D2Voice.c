@@ -20,35 +20,35 @@ package neoart->flod->deltamusic {
 
   public final class D2Voice {
     internal var
-      index          : int,
+ int index;
       next           : D2Voice,
       channel        : AmigaChannel,
       sample         : D2Sample,
-      trackPtr       : int,
-      trackPos       : int,
-      trackLen       : int,
-      patternPos     : int,
-      restart        : int,
+ int trackPtr;
+ int trackPos;
+ int trackLen;
+ int patternPos;
+ int restart;
       step           : AmigaStep,
       row            : AmigaRow,
-      note           : int,
-      period         : int,
-      finalPeriod    : int,
-      arpeggioPtr    : int,
-      arpeggioPos    : int,
-      pitchBend      : int,
-      portamento     : int,
-      tableCtr       : int,
-      tablePos       : int,
-      vibratoCtr     : int,
-      vibratoDir     : int,
-      vibratoPos     : int,
-      vibratoPeriod  : int,
-      vibratoSustain : int,
-      volume         : int,
-      volumeMax      : int,
-      volumePos      : int,
-      volumeSustain  : int;
+ int note;
+ int period;
+ int finalPeriod;
+ int arpeggioPtr;
+ int arpeggioPos;
+ int pitchBend;
+ int portamento;
+ int tableCtr;
+ int tablePos;
+ int vibratoCtr;
+ int vibratoDir;
+ int vibratoPos;
+ int vibratoPeriod;
+ int vibratoSustain;
+ int volume;
+ int volumeMax;
+ int volumePos;
+ int volumeSustain;
 
      void D2Voice(index:int) {
       this->index = index;

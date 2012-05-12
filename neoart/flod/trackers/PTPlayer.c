@@ -24,15 +24,15 @@ package neoart->flod->trackers {
       track        : Vector.<int>,
       patterns     : Vector.<PTRow>,
       samples      : Vector.<PTSample>,
-      length       : int,
+ int length;
       voices       : Vector.<PTVoice>,
-      trackPos     : int,
-      patternPos   : int,
-      patternBreak : int,
-      patternDelay : int,
-      breakPos     : int,
-      jumpFlag     : int,
-      vibratoDepth : int;
+ int trackPos;
+ int patternPos;
+ int patternBreak;
+ int patternDelay;
+ int breakPos;
+ int jumpFlag;
+ int vibratoDepth;
 
      void PTPlayer(amiga:Amiga = null) {
       super(amiga);

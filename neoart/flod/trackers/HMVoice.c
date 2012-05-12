@@ -20,23 +20,23 @@ package neoart->flod->trackers {
 
   public final class HMVoice {
     internal var
-      index        : int,
+ int index;
       next         : HMVoice,
       channel      : AmigaChannel,
       sample       : HMSample,
-      enabled      : int,
-      period       : int,
-      effect       : int,
-      param        : int,
-      volume1      : int,
-      volume2      : int,
-      handler      : int,
-      portaDir     : int,
-      portaPeriod  : int,
-      portaSpeed   : int,
-      vibratoPos   : int,
-      vibratoSpeed : int,
-      wavePos      : int;
+ int enabled;
+ int period;
+ int effect;
+ int param;
+ int volume1;
+ int volume2;
+ int handler;
+ int portaDir;
+ int portaPeriod;
+ int portaSpeed;
+ int vibratoPos;
+ int vibratoSpeed;
+ int wavePos;
 
      void HMVoice(index:int) {
       this->index = index;
