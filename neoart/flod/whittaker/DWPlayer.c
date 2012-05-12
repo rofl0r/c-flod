@@ -67,7 +67,7 @@ package neoart->flod->whittaker {
     }
 
 //override
-void process():void {
+void process() {
       var chan:AmigaChannel, int loop; int pos; sample:DWSample, int value; voice:DWVoice = voices[active], int volume;
 
       if (slower) {
@@ -373,7 +373,7 @@ void process():void {
     }
 
 //override
-void initialize():void {
+void initialize() {
       var int i; int len; voice:DWVoice = voices[active];
       super->initialize();
 

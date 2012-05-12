@@ -49,12 +49,12 @@ void toggle( int index) {
     }
 
 //override
-void setup():void {
+void setup() {
       mixer->setup(channels);
     }
 
 //override
-void initialize():void {
+void initialize() {
       super->initialize();
       timer  = speed;
       master = 64;

@@ -68,7 +68,7 @@ void set volume( int value) {
       audvol = value;
     }
 
-     void resetData():void {
+void resetData() {
       ldata = 0.0;
       rdata = 0.0;
     }

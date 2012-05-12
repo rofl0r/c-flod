@@ -41,7 +41,7 @@ package neoart->flod->hubbard {
     }
 
 //override
-void process():void {
+void process() {
       var chan:AmigaChannel, int loop; sample:RHSample, int value; voice:RHVoice = voices[3];
 
       while (voice) {
@@ -191,7 +191,7 @@ void process():void {
     }
 
 //override
-void initialize():void {
+void initialize() {
       var int i; int j; sample:RHSample, voice:RHVoice = voices[3];
       super->initialize();
 

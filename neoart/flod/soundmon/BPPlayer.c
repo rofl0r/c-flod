@@ -51,7 +51,7 @@ package neoart->flod->soundmon {
     }
 
 //override
-void process():void {
+void process() {
       var chan:AmigaChannel, int data; int dst; int instr; int len; memory:Vector.<int> = amiga->memory, int note; int option; row:AmigaRow, sample:BPSample, int src; step:BPStep, voice:BPVoice = voices[0];
       arpeggioCtr = --arpeggioCtr & 3;
       vibratoPos  = ++vibratoPos  & 7;
@@ -437,7 +437,7 @@ void process():void {
     }
 
 //override
-void initialize():void {
+void initialize() {
       var int i; voice:BPVoice = voices[0];
       super->initialize();
 
@@ -462,7 +462,7 @@ void initialize():void {
     }
 
 //override
-void reset():void {
+void reset() {
       var int i; int len; int pos; voice:BPVoice = voices[0];
 
       while (voice) {

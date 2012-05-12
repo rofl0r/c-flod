@@ -43,7 +43,7 @@ package neoart->flod->futurecomposer {
     }
 
 //override
-void process():void {
+void process() {
       var int base; chan:AmigaChannel, int delta; int i; int info; int loopEffect; int loopSustain; int period; sample:AmigaSample, int temp; voice:FCVoice = voices[0];
 
       if (--tick == 0) {
@@ -314,7 +314,7 @@ void process():void {
     }
 
 //override
-void initialize():void {
+void initialize() {
       var voice:FCVoice = voices[0];
       super->initialize();
 

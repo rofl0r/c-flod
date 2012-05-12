@@ -69,7 +69,7 @@ package neoart->flod->sidmon {
     }
 
 //override
-void process():void {
+void process() {
       var chan:AmigaChannel, int dst; int i; int index; memory:Vector.<int> = amiga->memory, row:SMRow, sample:S1Sample, int src1; int src2; step:AmigaStep, int value; voice:S1Voice = voices[0];
 
       while (voice) {
@@ -335,7 +335,7 @@ void process():void {
     }
 
 //override
-void initialize():void {
+void initialize() {
       var chan:AmigaChannel, step:AmigaStep, voice:S1Voice = voices[0];
       super->initialize();
 

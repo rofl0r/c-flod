@@ -40,7 +40,7 @@ package neoart->flod->fred {
     }
 
 //override
-void process():void {
+void process() {
       var chan:AmigaChannel, int i; int j; int len; int loop; int pos; sample:FESample, int value; voice:FEVoice = voices[3];
 
       while (voice) {
@@ -404,7 +404,7 @@ void process():void {
     }
 
 //override
-void initialize():void {
+void initialize() {
       var int i; int len; voice:FEVoice = voices[3];
       super->initialize();
 

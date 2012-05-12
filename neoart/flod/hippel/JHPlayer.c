@@ -46,7 +46,7 @@ package neoart->flod->hippel {
     }
 
 //override
-void process():void {
+void process() {
       var chan:AmigaChannel, int loop; int period; int pos1; int pos2; sample:AmigaSample, int value; voice:JHVoice = voices[0];
 
       if (--tick == 0) {
@@ -620,7 +620,7 @@ void process():void {
     }
 
 //override
-void initialize():void {
+void initialize() {
       var voice:JHVoice = voices[0];
       super->initialize();
 

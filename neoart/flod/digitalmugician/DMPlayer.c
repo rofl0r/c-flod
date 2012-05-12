@@ -60,7 +60,7 @@ package neoart->flod->digitalmugician {
     }
 
 //override
-void process():void {
+void process() {
       var chan:AmigaChannel, int dst; int i; int idx; int j; int len; memory:Vector.<int> = amiga->memory, int r; row:AmigaRow, int src1; int src2; sample:DMSample, int value; voice:DMVoice;
 
       for (i = 0; i < numChannels; ++i) {
@@ -513,7 +513,7 @@ void process():void {
     }
 
 //override
-void initialize():void {
+void initialize() {
       var chan:AmigaChannel, int i; int len; voice:DMVoice;
       super->initialize();
 
@@ -718,7 +718,7 @@ void loader(stream:ByteArray) {
       }
     }
 
-     void tables():void {
+void tables() {
       var int i; int idx; int j; int pos; int step; int v1; int v2; vol:int = 128;
 
       averages  = new Vector.<int>(1024, true);

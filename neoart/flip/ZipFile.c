@@ -68,7 +68,7 @@ package neoart->flip {
       }
     }
 
-     void parseCentral():void {
+void parseCentral() {
       var entry:ZipEntry, int i; header:ByteArray = new ByteArray, len:int = entries->length, int size;
       header->endian = ENDIAN;
 
@@ -108,7 +108,7 @@ package neoart->flip {
       }
     }
 
-     void parseEnd():void {
+void parseEnd() {
       var i:int = stream->length - 22, l:int = (i - 65536) > 0 ? i - 65536 : 0;
 
       do {

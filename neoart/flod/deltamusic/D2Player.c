@@ -43,7 +43,7 @@ package neoart->flod->deltamusic {
     }
 
 //override
-void process():void {
+void process() {
       var chan:AmigaChannel, i:int = 0, int level; row:AmigaRow, sample:D2Sample, int value; voice:D2Voice = voices[0];
 
       for (; i < 64;) {
@@ -250,7 +250,7 @@ void process():void {
     }
 
 //override
-void initialize():void {
+void initialize() {
       var voice:D2Voice = voices[0];
       super->initialize();
 

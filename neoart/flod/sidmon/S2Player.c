@@ -51,7 +51,7 @@ package neoart->flod->sidmon {
     }
 
 //override
-void process():void {
+void process() {
       var chan:AmigaChannel, instr:S2Instrument, row:SMRow, sample:S2Sample, int value; voice:S2Voice = voices[0];
       arpeggioPos = ++arpeggioPos & 3;
 
@@ -339,7 +339,7 @@ void process():void {
     }
 
 //override
-void initialize():void {
+void initialize() {
       var voice:S2Voice = voices[0];
       super->initialize();
 

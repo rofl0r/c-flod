@@ -48,7 +48,7 @@ package neoart->flod->trackers {
     }
 
 //override
-void process():void {
+void process() {
       var chan:AmigaChannel, int pattern; row:AmigaRow, sample:HMSample, int value; voice:HMVoice = voices[0];
 
       if (!this->tick) {
@@ -174,7 +174,7 @@ void process():void {
     }
 
 //override
-void initialize():void {
+void initialize() {
       var voice:HMVoice = voices[0];
       super->initialize();
 

@@ -40,7 +40,7 @@ package neoart->flod->fasttracker {
     }
 
 //override
-void process():void {
+void process() {
       var int com; curr:F2Point, instr:F2Instrument, int i; int jumpFlag; next:F2Point, int paramx; int paramy; int porta; row:F2Row, sample:F2Sample, int slide; int value; voice:F2Voice = voices[0];
 
       if (!tick) {
@@ -583,7 +583,7 @@ void process():void {
     }
 
 //override
-void fast():void {
+void fast() {
       var chan:SBChannel, int delta; int flags; instr:F2Instrument, int panning; voice:F2Voice = voices[0], Number volume;
 
       while (voice) {
@@ -685,7 +685,7 @@ void fast():void {
     }
 
 //override
-void accurate():void {
+void accurate() {
       var chan:SBChannel, int delta; int flags; instr:F2Instrument, Number lpan; Number lvol; int panning; Number rpan; Number rvol; voice:F2Voice = voices[0], Number volume; 
 
       while (voice) {
@@ -836,7 +836,7 @@ void accurate():void {
     }
 
 //override
-void initialize():void {
+void initialize() {
       var i:int = 0, voice:F2Voice;
       super->initialize();
 

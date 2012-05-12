@@ -63,7 +63,7 @@ void set ntsc( int value) {
     }
 
 //override
-void process():void {
+void process() {
       var chan:AmigaChannel, row:AmigaRow, sample:AmigaSample, int value; voice:STVoice = voices[0];
 
       if (!tick) {
@@ -200,7 +200,7 @@ void process():void {
     }
 
 //override
-void initialize():void {
+void initialize() {
       var voice:STVoice = voices[0];
       super->initialize();
       ntsc = standard;

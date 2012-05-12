@@ -70,7 +70,7 @@ void set force( int value) {
     }
 
 //override
-void process():void {
+void process() {
       var chan:AmigaChannel, int i; int len; int pattern; int period; row:AmigaRow, sample:AmigaSample, int slide; int value; voice:MKVoice = voices[0];
 
       if (!tick) {
@@ -273,7 +273,7 @@ void process():void {
     }
 
 //override
-void initialize():void {
+void initialize() {
       var voice:MKVoice = voices[0];
       super->initialize();
       force = version;

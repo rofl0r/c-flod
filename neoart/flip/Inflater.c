@@ -169,7 +169,7 @@ int stored() {
       return 0;
     }
 
-     void initialize():void {
+void initialize() {
       var length:Vector.<int> = new Vector.<int>(288, true), int sym;
       flencode = new Huffman(288);
       fdiscode = new Huffman(30);

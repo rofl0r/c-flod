@@ -64,7 +64,7 @@ void set force( int value) {
     }
 
 //override
-void process():void {
+void process() {
       var chan:AmigaChannel, int i; int pattern; row:PTRow, sample:PTSample, int value; voice:PTVoice = voices[0];
 
       if (!tick) {
@@ -197,7 +197,7 @@ void process():void {
     }
 
 //override
-void initialize():void {
+void initialize() {
       var voice:PTVoice = voices[0];
 
       tempo        = 125;
@@ -319,7 +319,7 @@ void loader(stream:ByteArray) {
       samples[0] = sample;
     }
 
-     void effects():void {
+void effects() {
       var chan:AmigaChannel, int i; int position; int slide; int value; voice:PTVoice = voices[0], int wave;
 
       while (voice) {
