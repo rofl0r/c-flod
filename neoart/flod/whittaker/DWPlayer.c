@@ -790,7 +790,7 @@ void loader(stream:ByteArray) {
       com3 -= 256;
       com4 -= 256;
 
-      this->stream = stream;
+      self->stream = stream;
       version = 1;
     }
   }

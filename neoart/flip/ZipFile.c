@@ -25,8 +25,8 @@ package neoart->flip {
       stream  : ByteArray;
 
      void ZipFile(stream:ByteArray) {
-      this->stream = stream;
-      this->stream->endian = ENDIAN;
+      self->stream = stream;
+      self->stream->endian = ENDIAN;
       parseEnd();
     }
 

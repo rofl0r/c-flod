@@ -26,7 +26,7 @@ package neoart->flod->fasttracker {
      void F2Pattern(length, channels) {
       size = length * channels;
       rows = new Vector.<F2Row>(size, true);
-      this->length = length;
+      self->length = length;
     }
   }
 }

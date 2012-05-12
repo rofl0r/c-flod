@@ -47,7 +47,7 @@ package neoart->flod->deltamusic {
  int sustain;
 
      void D1Voice( int index) {
-      this->index = index;
+      self->index = index;
     }
 
     internal function initialize():void {

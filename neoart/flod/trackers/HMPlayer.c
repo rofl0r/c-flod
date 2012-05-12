@@ -51,7 +51,7 @@ package neoart->flod->trackers {
 void process() {
       var chan:AmigaChannel, int pattern; row:AmigaRow, sample:HMSample, int value; voice:HMVoice = voices[0];
 
-      if (!this->tick) {
+      if (!self->tick) {
         pattern = track[trackPos] + patternPos;
 
         while (voice) {

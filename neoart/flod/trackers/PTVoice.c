@@ -53,7 +53,7 @@ package neoart->flod->trackers {
  int funkWave;
 
      void PTVoice( int index) {
-      this->index = index;
+      self->index = index;
     }
 
     internal function initialize():void {

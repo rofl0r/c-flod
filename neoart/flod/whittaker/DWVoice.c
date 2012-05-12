@@ -51,8 +51,8 @@ package neoart->flod->whittaker {
  int vibratoDepth;
 
      void DWVoice( int index; int bitFlag) {
-      this->index = index;
-      this->bitFlag = bitFlag;
+      self->index = index;
+      self->bitFlag = bitFlag;
     }
 
     internal function initialize():void {

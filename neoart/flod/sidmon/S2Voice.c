@@ -49,7 +49,7 @@ package neoart->flod->sidmon {
  int speed;
 
      void S2Voice( int index) {
-      this->index = index;
+      self->index = index;
     }
 
     internal function initialize():void {

@@ -24,8 +24,8 @@ package neoart->flod->core {
  int standard;
 
      void AmigaPlayer(amiga:Amiga) {
-      this->amiga = amiga || new Amiga();
-      super(this->amiga);
+      self->amiga = amiga || new Amiga();
+      super(self->amiga);
 
       channels = 4;
       endian   = "bigEndian";

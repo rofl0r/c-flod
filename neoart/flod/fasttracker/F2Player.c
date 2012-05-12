@@ -875,18 +875,18 @@ void loader(stream:ByteArray) {
       id = stream->readMultiByte(20, ENCODING);
 
       if (id == "FastTracker v2.00   " || id == "FastTracker v 2.00  ") {
-        this->version = 1;
+        self->version = 1;
       } else if (id == "Sk@le Tracker") {
         reserved = 2;
-        this->version = 2;
+        self->version = 2;
       } else if (id == "MadTracker 2.0") {
-        this->version = 3;
+        self->version = 3;
       } else if (id == "MilkyTracker        ") {
-        this->version = 4;
+        self->version = 4;
       } else if (id == "DigiBooster Pro 2.18") {
-        this->version = 5;
+        self->version = 5;
       } else if (id->indexOf("OpenMPT") != -1) {
-        this->version = 6;
+        self->version = 6;
       } else return;
 
       stream->readUnsignedShort();

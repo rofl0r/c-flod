@@ -56,7 +56,7 @@ package neoart->flod->futurecomposer {
  int vibrato;
 
      void FCVoice( int index) {
-      this->index = index;
+      self->index = index;
     }
 
     internal function initialize():void {

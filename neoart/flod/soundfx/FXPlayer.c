@@ -110,7 +110,7 @@ void process() {
                 chan->volume = 0;
                 break;
               case -4:
-                this->jumpFlag = 1;
+                self->jumpFlag = 1;
                 break;
               case -5:
                 break;

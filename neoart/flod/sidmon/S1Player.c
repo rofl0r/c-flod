@@ -150,11 +150,11 @@ void process() {
                     voice->waveTimer    = 0;
                     break;
                   case 2:
-                    this->speed = row->param;
+                    self->speed = row->param;
                     voice->waveTimer = 0;
                     break;
                   case 3:
-                    this->patternLen = row->param;
+                    self->patternLen = row->param;
                     voice->waveTimer = 0;
                     break;
                   default:
@@ -197,7 +197,7 @@ void process() {
             if (voice->sustainCtr == 0 || voice->sustainCtr == -256) voice->envelopeCtr += 2;
             break;
           case 6:   //release
-            this->audVol -= sample->releaseSpeed;
+            self->audVol -= sample->releaseSpeed;
 
             if (audVol <= sample->releaseMin || audVol < -256) {
               audVol = sample->releaseMin;

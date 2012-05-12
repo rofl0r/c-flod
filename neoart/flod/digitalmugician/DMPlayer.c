@@ -362,7 +362,7 @@ void process() {
             }
           }
         } else {
-          chan = (i < 3) ? voice->channel : this->mixChannel;
+          chan = (i < 3) ? voice->channel : self->mixChannel;
         }
 
         if (voice->volumeCtr) {

@@ -28,8 +28,8 @@ package neoart->flod->core {
  int master;
 
      void SBPlayer(mixer:Soundblaster = null) {
-      this->mixer = mixer || new Soundblaster();
-      super(this->mixer);
+      self->mixer = mixer || new Soundblaster();
+      super(self->mixer);
 
       endian  = "littleEndian";
       quality = 1;

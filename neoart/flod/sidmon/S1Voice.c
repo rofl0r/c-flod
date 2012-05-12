@@ -47,7 +47,7 @@ package neoart->flod->sidmon {
  int waitCtr;
 
      void S1Voice( int index) {
-      this->index = index;
+      self->index = index;
     }
 
     internal function initialize():void {

@@ -61,8 +61,8 @@ package neoart->flod->fred {
  int blendPos;
 
      void FEVoice( int index; int bitFlag) {
-      this->index = index;
-      this->bitFlag = bitFlag;
+      self->index = index;
+      self->bitFlag = bitFlag;
     }
 
     internal function initialize():void {

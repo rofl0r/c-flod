@@ -47,28 +47,28 @@ void process() {
       var chan:AmigaChannel, i:int = 0, int level; row:AmigaRow, sample:D2Sample, int value; voice:D2Voice = voices[0];
 
       for (; i < 64;) {
-        this->noise = (this->noise << 7) | (this->noise >>> 25);
-        this->noise += 0x6eca756d;
-        this->noise ^= 0x9e59a92b;
+        self->noise = (self->noise << 7) | (self->noise >>> 25);
+        self->noise += 0x6eca756d;
+        self->noise ^= 0x9e59a92b;
 
-        value = (this->noise >>> 24) & 255;
+        value = (self->noise >>> 24) & 255;
         if (value > 127) value |= -256;
         amiga->memory[i++] = value;
 
-        value = (this->noise >>> 16) & 255;
+        value = (self->noise >>> 16) & 255;
         if (value > 127) value |= -256;
         amiga->memory[i++] = value;
 
-        value = (this->noise >>> 8) & 255;
+        value = (self->noise >>> 8) & 255;
         if (value > 127) value |= -256;
         amiga->memory[i++] = value;
 
-        value = this->noise & 255;
+        value = self->noise & 255;
         if (value > 127) value |= -256;
         amiga->memory[i++] = value;
       }
 
-      if (--this->tick < 0) this->tick = this->speed;
+      if (--self->tick < 0) self->tick = self->speed;
 
       while (voice) {
         if (voice->trackLen < 1) {
@@ -84,7 +84,7 @@ void process() {
           chan->length  = sample->repeat;
         }
 
-        if (this->tick == 0) {
+        if (self->tick == 0) {
           if (voice->patternPos == 0) {
             voice->step = tracks[int(voice->trackPtr + voice->trackPos)];
 

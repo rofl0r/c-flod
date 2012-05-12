@@ -39,7 +39,7 @@ package neoart->flod->trackers {
  int wavePos;
 
      void HMVoice( int index) {
-      this->index = index;
+      self->index = index;
     }
 
     internal function initialize():void {

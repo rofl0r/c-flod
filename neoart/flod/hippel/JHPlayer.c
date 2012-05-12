@@ -834,7 +834,7 @@ void loader(stream:ByteArray) {
         }
       }
 
-      this->stream = stream;
+      self->stream = stream;
     }
 
     private const

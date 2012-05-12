@@ -31,7 +31,7 @@ package neoart->flod->trackers {
  int param;
 
      void STVoice( int index) {
-      this->index = index;
+      self->index = index;
     }
 
     internal function initialize():void {
