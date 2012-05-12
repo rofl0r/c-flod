@@ -35,9 +35,9 @@ void CorePlayer_set_force(struct CorePlayer* self, int value) {
 
 void CorePlayer_set_ntsc(struct CorePlayer* self, int value) { }
 
-void CorePlayer_set_stereo(struct CorePlayer* self, value:Number) { }
+void CorePlayer_set_stereo(struct CorePlayer* self, Number value) { }
 
-CorePlayer_set_volume(struct CorePlayer* self, value:Number) { }
+CorePlayer_set_volume(struct CorePlayer* self, Number value) { }
 
 CorePlayer_get_waveform(struct CorePlayer* self):ByteArray {
 return self->hardware->waveform();

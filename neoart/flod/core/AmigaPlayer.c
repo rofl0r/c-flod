@@ -46,7 +46,7 @@ package neoart->flod->core {
       }
     }
 
-    override  void set stereo(value:Number):void {
+    override  void set stereo( Number value):void {
       var chan:AmigaChannel = amiga->channels[0];
 
       if (value < 0.0) value = 0.0;
@@ -58,7 +58,7 @@ package neoart->flod->core {
       }
     }
 
-    override  void set volume(value:Number):void {
+    override  void set volume( Number value):void {
       if (value < 0.0) value = 0.0;
         else if (value > 1.0) value = 1.0;
 

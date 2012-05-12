@@ -35,7 +35,7 @@ package neoart->flod->core {
       quality = 1;
   }
 
-    override  void set volume(value:Number):void {
+    override  void set volume( Number value):void {
       if (value < 0.0) value = 0.0;
         else if (value > 1.0) value = 1.0;
 
