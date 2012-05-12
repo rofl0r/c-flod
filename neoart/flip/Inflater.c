@@ -42,7 +42,7 @@ void set input(stream:ByteArray) {
       inpcnt = outcnt = 0;
     }
 
-     void inflate():int {
+int inflate() {
       var int err; int last; int type;
 
       do {
@@ -153,7 +153,7 @@ int decode(huff:Huffman) {
       return -9;
     }
 
-     void stored():int {
+int stored() {
       var inplen:uint = inpbuf->length, int len;
       bitbuf = bitcnt = 0;
 
@@ -187,7 +187,7 @@ int decode(huff:Huffman) {
       ddiscode = new Huffman(30);
     }
 
-     void dynamic():int {
+int dynamic() {
       var int err; int index; int len; length:Vector.<int> = new Vector.<int>(316, true), nlen:int = bits(5) + 257, ndis:int = bits(5) + 1, ncode:int = bits(4) + 4, max:int = nlen + ndis, int sym;
 
       if (nlen > 286 || ndis > 30) throw new Error(ERROR6, 6);

@@ -41,7 +41,7 @@ package neoart->flod->core {
       level = panning;
     }
 
-     void get enabled():int { return audena; }
+int get enabled() {
 
 void set enabled( int value) {
       if (value == audena) return;
