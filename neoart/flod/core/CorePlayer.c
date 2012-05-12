@@ -29,25 +29,25 @@ void CorePlayer_dtor(struct CorePlayer* self, struct CoreMixer *hardware) {
 	self->hardware = hardware;
 }
 
-    void CorePlayer_set_force(struct CorePlayer* self, value:int):void {
-      version = 0;
-    }
+void CorePlayer_set_force(struct CorePlayer* self, int value) {
+	self->version = 0;
+}
 
-    void CorePlayer_set_ntsc(struct CorePlayer* self, value:int):void { }
+void CorePlayer_set_ntsc(struct CorePlayer* self, int value) { }
 
-    void CorePlayer_set_stereo(struct CorePlayer* self, value:Number):void { }
+void CorePlayer_set_stereo(struct CorePlayer* self, value:Number) { }
 
-    CorePlayer_set_volume(struct CorePlayer* self, value:Number):void { }
+CorePlayer_set_volume(struct CorePlayer* self, value:Number) { }
 
-    CorePlayer_get_waveform(struct CorePlayer* self):ByteArray {
-      return hardware->waveform();
-    }
+CorePlayer_get_waveform(struct CorePlayer* self):ByteArray {
+return self->hardware->waveform();
+}
 
     void CorePlayer_toggle(struct CorePlayer* self, index:int):void { }
 
     CorePlayer_load(struct CorePlayer* self, stream:ByteArray):int {
-      var zip:ZipFile;
-      hardware->reset();
+      struct ZipFile* zip;
+      self->hardware->reset();
       stream->position = 0;
 
       version  = 0;
