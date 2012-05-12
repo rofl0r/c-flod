@@ -15,7 +15,7 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart.flod.trackers {
+package neoart->flod->trackers {
   import flash.utils.*;
   import neoart.flod.core.*;
 
@@ -35,8 +35,8 @@ package neoart.flod.trackers {
 
     public function MKPlayer(amiga:Amiga = null) {
       super(amiga);
-      PERIODS.fixed = true;
-      VIBRATO.fixed = true;
+      PERIODS->fixed = true;
+      VIBRATO->fixed = true;
 
       track   = new Vector.<int>(128, true);
       samples = new Vector.<AmigaSample>(32, true);
@@ -75,61 +75,61 @@ package neoart.flod.trackers {
         pattern = track[trackPos] + patternPos;
 
         while (voice) {
-          chan = voice.channel;
-          voice.enabled = 0;
+          chan = voice->channel;
+          voice->enabled = 0;
 
-          row = patterns[int(pattern + voice.index)];
-          voice.effect = row.effect;
-          voice.param  = row.param;
+          row = patterns[int(pattern + voice->index)];
+          voice->effect = row->effect;
+          voice->param  = row->param;
 
-          if (row.sample) {
-            sample = voice.sample = samples[row.sample];
-            chan.volume = voice.volume = sample.volume;
+          if (row->sample) {
+            sample = voice->sample = samples[row->sample];
+            chan->volume = voice->volume = sample->volume;
           } else {
-            sample = voice.sample;
+            sample = voice->sample;
           }
 
-          if (row.note) {
-            if (voice.effect == 3 || voice.effect == 5) {
-              if (row.note < voice.period) {
-                voice.portaDir = 1;
-                voice.portaPeriod = row.note;
-              } else if (row.note > voice.period) {
-                voice.portaDir = 0;
-                voice.portaPeriod = row.note;
+          if (row->note) {
+            if (voice->effect == 3 || voice->effect == 5) {
+              if (row->note < voice->period) {
+                voice->portaDir = 1;
+                voice->portaPeriod = row->note;
+              } else if (row->note > voice->period) {
+                voice->portaDir = 0;
+                voice->portaPeriod = row->note;
               } else {
-                voice.portaPeriod = 0;
+                voice->portaPeriod = 0;
               }
             } else {
-              voice.enabled = 1;
-              voice.vibratoPos = 0;
+              voice->enabled = 1;
+              voice->vibratoPos = 0;
 
-              chan.enabled = 0;
-              chan.pointer = sample.pointer;
-              chan.length  = sample.length;
-              chan.period  = voice.period = row.note;
+              chan->enabled = 0;
+              chan->pointer = sample->pointer;
+              chan->length  = sample->length;
+              chan->period  = voice->period = row->note;
             }
           }
 
-          switch (voice.effect) {
+          switch (voice->effect) {
             case 11:  //position jump
-              trackPos = voice.param - 1;
+              trackPos = voice->param - 1;
               jumpFlag ^= 1;
               break;
             case 12:  //set volume
-              chan.volume = voice.param;
+              chan->volume = voice->param;
 
               if (version == NOISETRACKER_20)
-                voice.volume = voice.param;
+                voice->volume = voice->param;
               break;
             case 13:  //pattern break
               jumpFlag ^= 1;
               break;
             case 14:  //set filter
-              amiga.filter.active = voice.param ^ 1;
+              amiga->filter->active = voice->param ^ 1;
               break;
             case 15:  //set speed
-              value = voice.param;
+              value = voice->param;
 
               if (value < 1) value = 1;
                 else if (value > 31) value = 31;
@@ -139,99 +139,99 @@ package neoart.flod.trackers {
               break;
           }
 
-          if (voice.enabled) chan.enabled = 1;
-          chan.pointer = sample.loopPtr;
-          chan.length  = sample.repeat;
+          if (voice->enabled) chan->enabled = 1;
+          chan->pointer = sample->loopPtr;
+          chan->length  = sample->repeat;
 
-          voice = voice.next;
+          voice = voice->next;
         }
       } else {
         while (voice) {
-          chan = voice.channel;
+          chan = voice->channel;
 
-          if (!voice.effect && !voice.param) {
-            chan.period = voice.period;
-            voice = voice.next;
+          if (!voice->effect && !voice->param) {
+            chan->period = voice->period;
+            voice = voice->next;
             continue;
           }
 
-          switch (voice.effect) {
+          switch (voice->effect) {
             case 0:   //arpeggio
               value = tick % 3;
 
               if (!value) {
-                chan.period = voice.period;
-                voice = voice.next;
+                chan->period = voice->period;
+                voice = voice->next;
                 continue;
               }
 
-              if (value == 1) value = voice.param >> 4;
-                else value = voice.param & 0x0f;
+              if (value == 1) value = voice->param >> 4;
+                else value = voice->param & 0x0f;
 
-              period = voice.period & 0x0fff;
+              period = voice->period & 0x0fff;
               len = 37 - value;
 
               for (i = 0; i < len; ++i) {
                 if (period >= PERIODS[i]) {
-                  chan.period = PERIODS[int(i + value)];
+                  chan->period = PERIODS[int(i + value)];
                   break;
                 }
               }
               break;
             case 1:   //portamento up
-              voice.period -= voice.param;
-              if (voice.period < 113) voice.period = 113;
-              chan.period = voice.period;
+              voice->period -= voice->param;
+              if (voice->period < 113) voice->period = 113;
+              chan->period = voice->period;
               break;
             case 2:   //portamento down
-              voice.period += voice.param;
-              if (voice.period > 856) voice.period = 856;
-              chan.period = voice.period;
+              voice->period += voice->param;
+              if (voice->period > 856) voice->period = 856;
+              chan->period = voice->period;
               break;
             case 3:   //tone portamento
             case 5:   //tone portamento + volume slide
-              if (voice.effect == 5) {
+              if (voice->effect == 5) {
                 slide = 1;
-              } else if (voice.param) {
-                voice.portaSpeed = voice.param;
-                voice.param = 0;
+              } else if (voice->param) {
+                voice->portaSpeed = voice->param;
+                voice->param = 0;
               }
 
-              if (voice.portaPeriod) {
-                if (voice.portaDir) {
-                  voice.period -= voice.portaSpeed;
+              if (voice->portaPeriod) {
+                if (voice->portaDir) {
+                  voice->period -= voice->portaSpeed;
 
-                  if (voice.period <= voice.portaPeriod) {
-                    voice.period = voice.portaPeriod;
-                    voice.portaPeriod = 0;
+                  if (voice->period <= voice->portaPeriod) {
+                    voice->period = voice->portaPeriod;
+                    voice->portaPeriod = 0;
                   }
                 } else {
-                  voice.period += voice.portaSpeed;
+                  voice->period += voice->portaSpeed;
 
-                  if (voice.period >= voice.portaPeriod) {
-                    voice.period = voice.portaPeriod;
-                    voice.portaPeriod = 0;
+                  if (voice->period >= voice->portaPeriod) {
+                    voice->period = voice->portaPeriod;
+                    voice->portaPeriod = 0;
                   }
                 }
               }
-              chan.period = voice.period;
+              chan->period = voice->period;
               break;
             case 4:   //vibrato
             case 6:   //vibrato + volume slide
-              if (voice.effect == 6) {
+              if (voice->effect == 6) {
                 slide = 1
-              } else if (voice.param) {
-                voice.vibratoSpeed = voice.param;
+              } else if (voice->param) {
+                voice->vibratoSpeed = voice->param;
               }
 
-              value = (voice.vibratoPos >> 2) & 31;
-              value = ((voice.vibratoSpeed & 0x0f) * VIBRATO[value]) >> vibratoDepth;
+              value = (voice->vibratoPos >> 2) & 31;
+              value = ((voice->vibratoSpeed & 0x0f) * VIBRATO[value]) >> vibratoDepth;
 
-              if (voice.vibratoPos > 127) chan.period = voice.period - value;
-                else chan.period = voice.period + value;
+              if (voice->vibratoPos > 127) chan->period = voice->period - value;
+                else chan->period = voice->period + value;
 
-              value = (voice.vibratoSpeed >> 2) & 60;
-              voice.vibratoPos = (voice.vibratoPos + value) & 255;
+              value = (voice->vibratoSpeed >> 2) & 60;
+              voice->vibratoPos = (voice->vibratoPos + value) & 255;
               break;
             case 10:  //volume slide
               slide = 1;
@@ -239,18 +239,18 @@ package neoart.flod.trackers {
           }
 
           if (slide) {
-            value = voice.param >> 4;
+            value = voice->param >> 4;
             slide = 0;
 
-            if (value) voice.volume += value;
-              else voice.volume -= voice.param & 0x0f;
+            if (value) voice->volume += value;
+              else voice->volume -= voice->param & 0x0f;
 
-            if (voice.volume < 0) voice.volume = 0;
-              else if (voice.volume > 64) voice.volume = 64;
+            if (voice->volume < 0) voice->volume = 0;
+              else if (voice->volume > 64) voice->volume = 64;
 
-            chan.volume = voice.volume;
+            chan->volume = voice->volume;
           }
-          voice = voice.next;
+          voice = voice->next;
         }
       }
 
@@ -264,7 +264,7 @@ package neoart.flod.trackers {
 
           if (trackPos == length) {
             trackPos = restart;
-            amiga.complete = 1;
+            amiga->complete = 1;
           }
         }
       }
@@ -272,7 +272,7 @@ package neoart.flod.trackers {
 
     override protected function initialize():void {
       var voice:MKVoice = voices[0];
-      super.initialize();
+      super->initialize();
       force = version;
 
       speed      = 6;
@@ -281,118 +281,118 @@ package neoart.flod.trackers {
       jumpFlag   = 0;
 
       while (voice) {
-        voice.initialize();
-        voice.channel = amiga.channels[voice.index];
-        voice.sample  = samples[0];
-        voice = voice.next;
+        voice->initialize();
+        voice->channel = amiga->channels[voice->index];
+        voice->sample  = samples[0];
+        voice = voice->next;
       }
     }
 
     override protected function loader(stream:ByteArray):void {
       var higher:int, i:int, id:String, j:int, row:AmigaRow, sample:AmigaSample, size:int, value:int;
-      if (stream.length < 2106) return;
+      if (stream->length < 2106) return;
 
-      stream.position = 1080;
-      id = stream.readMultiByte(4, ENCODING);
-      if (id != "M.K." && id != "FLT4") return;
+      stream->position = 1080;
+      id = stream->readMultiByte(4, ENCODING);
+      if (id != "M->K." && id != "FLT4") return;
 
-      stream.position = 0;
-      title = stream.readMultiByte(20, ENCODING);
+      stream->position = 0;
+      title = stream->readMultiByte(20, ENCODING);
       version = SOUNDTRACKER_23;
-      stream.position += 22;
+      stream->position += 22;
 
       for (i = 1; i < 32; ++i) {
-        value = stream.readUnsignedShort();
+        value = stream->readUnsignedShort();
 
         if (!value) {
           samples[i] = null;
-          stream.position += 28;
+          stream->position += 28;
           continue;
         }
 
         sample = new AmigaSample();
-        stream.position -= 24;
+        stream->position -= 24;
 
-        sample.name = stream.readMultiByte(22, ENCODING);
-        sample.length = value << 1;
-        stream.position += 3;
+        sample->name = stream->readMultiByte(22, ENCODING);
+        sample->length = value << 1;
+        stream->position += 3;
 
-        sample.volume = stream.readUnsignedByte();
-        sample.loop   = stream.readUnsignedShort() << 1;
-        sample.repeat = stream.readUnsignedShort() << 1;
+        sample->volume = stream->readUnsignedByte();
+        sample->loop   = stream->readUnsignedShort() << 1;
+        sample->repeat = stream->readUnsignedShort() << 1;
 
-        stream.position += 22;
-        sample.pointer = size;
-        size += sample.length;
+        stream->position += 22;
+        sample->pointer = size;
+        size += sample->length;
         samples[i] = sample;
 
-        if (sample.length > 32768)
+        if (sample->length > 32768)
           version = SOUNDTRACKER_24;
       }
 
-      stream.position = 950;
-      length  = stream.readUnsignedByte();
-      value   = stream.readUnsignedByte();
+      stream->position = 950;
+      length  = stream->readUnsignedByte();
+      value   = stream->readUnsignedByte();
       restart =  value < length ? value : 0;
 
       for (i = 0; i < 128; ++i) {
-        value = stream.readUnsignedByte() << 8;
+        value = stream->readUnsignedByte() << 8;
         track[i] = value;
         if (value > higher) higher = value;
       }
 
-      stream.position = 1084;
+      stream->position = 1084;
       higher += 256;
       patterns = new Vector.<AmigaRow>(higher, true);
 
       for (i = 0; i < higher; ++i) {
         row = new AmigaRow();
-        value = stream.readUnsignedInt();
+        value = stream->readUnsignedInt();
 
-        row.note   = (value >> 16) & 0x0fff;
-        row.effect = (value >>  8) & 0x0f;
-        row.sample = (value >> 24) & 0xf0 | (value >> 12) & 0x0f;
-        row.param  = value & 0xff;
+        row->note   = (value >> 16) & 0x0fff;
+        row->effect = (value >>  8) & 0x0f;
+        row->sample = (value >> 24) & 0xf0 | (value >> 12) & 0x0f;
+        row->param  = value & 0xff;
 
         patterns[i] = row;
 
-        if (row.sample > 31 || !samples[row.sample]) row.sample = 0;
+        if (row->sample > 31 || !samples[row->sample]) row->sample = 0;
 
-        if (row.effect == 3 || row.effect == 4)
+        if (row->effect == 3 || row->effect == 4)
           version = NOISETRACKER_10;
 
-        if (row.effect == 5 || row.effect == 6)
+        if (row->effect == 5 || row->effect == 6)
           version = NOISETRACKER_20;
 
-        if (row.effect > 6 && row.effect < 10) {
+        if (row->effect > 6 && row->effect < 10) {
           version = 0;
           return;
         }
       }
 
-      amiga.store(stream, size);
+      amiga->store(stream, size);
 
       for (i = 1; i < 32; ++i) {
         sample = samples[i];
         if (!sample) continue;
 
-        if (sample.name.indexOf("2.0") > -1)
+        if (sample->name->indexOf("2.0") > -1)
           version = NOISETRACKER_20;
 
-        if (sample.loop) {
-          sample.loopPtr = sample.pointer + sample.loop;
-          sample.length  = sample.loop + sample.repeat;
+        if (sample->loop) {
+          sample->loopPtr = sample->pointer + sample->loop;
+          sample->length  = sample->loop + sample->repeat;
         } else {
-          sample.loopPtr = amiga.memory.length;
-          sample.repeat  = 2;
+          sample->loopPtr = amiga->memory->length;
+          sample->repeat  = 2;
         }
-        size = sample.pointer + 4;
-        for (j = sample.pointer; j < size; ++j) amiga.memory[j] = 0;
+        size = sample->pointer + 4;
+        for (j = sample->pointer; j < size; ++j) amiga->memory[j] = 0;
       }
 
       sample = new AmigaSample();
-      sample.pointer = sample.loopPtr = amiga.memory.length;
-      sample.length  = sample.repeat  = 2;
+      sample->pointer = sample->loopPtr = amiga->memory->length;
+      sample->length  = sample->repeat  = 2;
       samples[0] = sample;
 
       if (version < NOISETRACKER_20 && restart != 127)

@@ -15,7 +15,7 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart.flod.core {
+package neoart->flod->core {
   import flash.events.*;
   import flash.media.*;
   import flash.utils.*;
@@ -45,8 +45,8 @@ package neoart.flod.core {
       tick      : int;
 
     public function CorePlayer(hardware:CoreMixer) {
-      hardware.player = this;
-      this.hardware = hardware;
+      hardware->player = this;
+      this->hardware = hardware;
     }
 
     public function set force(value:int):void {
@@ -60,28 +60,28 @@ package neoart.flod.core {
     public function set volume(value:Number):void { }
 
     public function get waveform():ByteArray {
-      return hardware.waveform();
+      return hardware->waveform();
     }
 
     public function toggle(index:int):void { }
 
     public function load(stream:ByteArray):int {
       var zip:ZipFile;
-      hardware.reset();
-      stream.position = 0;
+      hardware->reset();
+      stream->position = 0;
 
       version  = 0;
       playSong = 0;
       lastSong = 0;
 
-      if (stream.readUnsignedInt() == 67324752) {
+      if (stream->readUnsignedInt() == 67324752) {
         zip = new ZipFile(stream);
-        stream = zip.uncompress(zip.entries[0]);
+        stream = zip->uncompress(zip->entries[0]);
       }
 
       if (stream) {
-        stream.endian = endian;
-        stream.position = 0;
+        stream->endian = endian;
+        stream->position = 0;
         loader(stream);
         if (version) setup();
       }
@@ -94,20 +94,20 @@ package neoart.flod.core {
       sound = processor || new Sound();
 
       if (quality && (hardware is Soundblaster)) {
-        sound.addEventListener(SampleDataEvent.SAMPLE_DATA, hardware.accurate);
+        sound->addEventListener(SampleDataEvent->SAMPLE_DATA, hardware->accurate);
       } else {
-        sound.addEventListener(SampleDataEvent.SAMPLE_DATA, hardware.fast);
+        sound->addEventListener(SampleDataEvent->SAMPLE_DATA, hardware->fast);
       }
 
-      soundChan = sound.play(soundPos);
-      soundChan.addEventListener(Event.SOUND_COMPLETE, completeHandler);
+      soundChan = sound->play(soundPos);
+      soundChan->addEventListener(Event->SOUND_COMPLETE, completeHandler);
       soundPos = 0.0;
       return 1;
     }
 
     public function pause():void {
       if (!version || !soundChan) return;
-      soundPos = soundChan.position;
+      soundPos = soundChan->position;
       removeEvents();
     }
 
@@ -129,8 +129,8 @@ package neoart.flod.core {
     //js function reset
     protected function initialize():void {
       tick = 0;
-      hardware.initialize();
-      hardware.samplesTick = 110250 / tempo;
+      hardware->initialize();
+      hardware->samplesTick = 110250 / tempo;
     }
 
     protected function reset():void { }
@@ -143,14 +143,14 @@ package neoart.flod.core {
     }
 
     private function removeEvents():void {
-      soundChan.stop();
-      soundChan.removeEventListener(Event.SOUND_COMPLETE, completeHandler);
-      soundChan.dispatchEvent(new Event(Event.SOUND_COMPLETE));
+      soundChan->stop();
+      soundChan->removeEventListener(Event->SOUND_COMPLETE, completeHandler);
+      soundChan->dispatchEvent(new Event(Event->SOUND_COMPLETE));
 
       if (quality) {
-        sound.removeEventListener(SampleDataEvent.SAMPLE_DATA, hardware.accurate);
+        sound->removeEventListener(SampleDataEvent->SAMPLE_DATA, hardware->accurate);
       } else {
-        sound.removeEventListener(SampleDataEvent.SAMPLE_DATA, hardware.fast);
+        sound->removeEventListener(SampleDataEvent->SAMPLE_DATA, hardware->fast);
       }
     }
   }

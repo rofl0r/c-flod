@@ -15,7 +15,7 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart.flod.fasttracker {
+package neoart->flod->fasttracker {
   import neoart.flod.core.*;
 
   public final class F2Voice {
@@ -81,15 +81,15 @@ package neoart.flod.fasttracker {
       retrigy        : int;
 
     public function F2Voice(index:int) {
-      this.index = index;
+      this->index = index;
       volEnvelope = new F2Envelope();
       panEnvelope = new F2Envelope();
     }
 
     internal function reset():void {
-      volume   = sample.volume;
-      panning  = sample.panning;
-      finetune = (sample.finetune >> 3) << 2;
+      volume   = sample->volume;
+      panning  = sample->panning;
+      finetune = (sample->finetune >> 3) << 2;
       keyoff   = 0;
       volDelta = 0;
 
@@ -111,9 +111,9 @@ package neoart.flod.fasttracker {
     internal function autoVibrato():int {
       var delta:int;
 
-      autoVibratoPos = (autoVibratoPos + playing.vibratoSpeed) & 255;
+      autoVibratoPos = (autoVibratoPos + playing->vibratoSpeed) & 255;
 
-      switch (playing.vibratoType) {
+      switch (playing->vibratoType) {
         case 0:
           delta = AUTOVIBRATO[autoVibratoPos];
           break;
@@ -129,22 +129,22 @@ package neoart.flod.fasttracker {
           break;
       }
 
-      delta *= playing.vibratoDepth;
+      delta *= playing->vibratoDepth;
 
       if (autoSweep) {
-        if (!playing.vibratoSweep) {
+        if (!playing->vibratoSweep) {
           autoSweep = 0;
         } else {
-          if (autoSweepPos > playing.vibratoSweep) {
-            if (autoSweepPos & 2) delta *= (autoSweepPos / playing.vibratoSweep);
+          if (autoSweepPos > playing->vibratoSweep) {
+            if (autoSweepPos & 2) delta *= (autoSweepPos / playing->vibratoSweep);
             autoSweep = 0;
           } else {
-            delta *= (++autoSweepPos / playing.vibratoSweep);
+            delta *= (++autoSweepPos / playing->vibratoSweep);
           }
         }
       }
 
-      flags |= F2Player.UPDATE_PERIOD;
+      flags |= F2Player->UPDATE_PERIOD;
       return (delta >> 6);
     }
 
@@ -155,7 +155,7 @@ package neoart.flod.fasttracker {
         glissPeriod += portaSpeed << 2;
 
         if (!glissando) period = glissPeriod;
-          else period = Math.round(glissPeriod / 64) << 6;
+          else period = Math->round(glissPeriod / 64) << 6;
 
         if (period >= portaPeriod) {
           period = portaPeriod;
@@ -165,7 +165,7 @@ package neoart.flod.fasttracker {
         glissPeriod -= portaSpeed << 2;
 
         if (!glissando) period = glissPeriod;
-          else period = Math.round(glissPeriod / 64) << 6;
+          else period = Math->round(glissPeriod / 64) << 6;
 
         if (period <= portaPeriod) {
           period = portaPeriod;
@@ -173,7 +173,7 @@ package neoart.flod.fasttracker {
         }
       }
 
-      flags |= F2Player.UPDATE_PERIOD;
+      flags |= F2Player->UPDATE_PERIOD;
     }
 
     internal function tremolo():void {
@@ -192,18 +192,18 @@ package neoart.flod.fasttracker {
       if (tremoloPos > 31) volDelta = -volDelta;
       tremoloPos = (tremoloPos + tremoloSpeed) & 63;
 
-      flags |= F2Player.UPDATE_VOLUME;
+      flags |= F2Player->UPDATE_VOLUME;
     }
 
     internal function tremor():void {
       if (tremorPos == tremorOn) {
         tremorVolume = volume;
         volume = 0;
-        flags |= F2Player.UPDATE_VOLUME;
+        flags |= F2Player->UPDATE_VOLUME;
       } else if (tremorPos == tremorOff) {
         tremorPos = 0;
         volume = tremorVolume;
-        flags |= F2Player.UPDATE_VOLUME;
+        flags |= F2Player->UPDATE_VOLUME;
       }
 
       ++tremorPos;
@@ -226,7 +226,7 @@ package neoart.flod.fasttracker {
       if (vibratoPos > 31) vibDelta = -vibDelta;
       vibratoPos = (vibratoPos + vibratoSpeed) & 63;
 
-      flags |= F2Player.UPDATE_PERIOD;
+      flags |= F2Player->UPDATE_PERIOD;
     }
 
     private static const

@@ -15,7 +15,7 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart.flod.fasttracker {
+package neoart->flod->fasttracker {
 
   public final class F2Pattern {
     internal var
@@ -26,7 +26,7 @@ package neoart.flod.fasttracker {
     public function F2Pattern(length, channels) {
       size = length * channels;
       rows = new Vector.<F2Row>(size, true);
-      this.length = length;
+      this->length = length;
     }
   }
 }

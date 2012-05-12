@@ -15,7 +15,7 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart.flod.fred {
+package neoart->flod->fred {
   import flash.utils.*;
   import neoart.flod.core.*;
 
@@ -43,413 +43,413 @@ package neoart.flod.fred {
       var chan:AmigaChannel, i:int, j:int, len:int, loop:int, pos:int, sample:FESample, value:int, voice:FEVoice = voices[3];
 
       while (voice) {
-        chan = voice.channel;
+        chan = voice->channel;
         loop = 0;
 
         do {
-          patterns.position = voice.patternPos;
-          sample = voice.sample;
+          patterns->position = voice->patternPos;
+          sample = voice->sample;
           sampFlag = 0;
 
-          if (!voice.busy) {
-            voice.busy = 1;
+          if (!voice->busy) {
+            voice->busy = 1;
 
-            if (sample.loopPtr == 0) {
-              chan.pointer = amiga.loopPtr;
-              chan.length  = amiga.loopLen;
-            } else if (sample.loopPtr > 0) {
-              chan.pointer = (sample.type) ? voice.synth : sample.pointer + sample.loopPtr;
-              chan.length  = sample.length - sample.loopPtr;
+            if (sample->loopPtr == 0) {
+              chan->pointer = amiga->loopPtr;
+              chan->length  = amiga->loopLen;
+            } else if (sample->loopPtr > 0) {
+              chan->pointer = (sample->type) ? voice->synth : sample->pointer + sample->loopPtr;
+              chan->length  = sample->length - sample->loopPtr;
             }
           }
 
-          if (--voice.tick == 0) {
+          if (--voice->tick == 0) {
             loop = 2;
 
             while (loop > 1) {
-              value = patterns.readByte();
+              value = patterns->readByte();
 
               if (value < 0) {
                 switch (value) {
                   case -125:
-                    voice.sample = sample = samples[patterns.readUnsignedByte()];
+                    voice->sample = sample = samples[patterns->readUnsignedByte()];
                     sampFlag = 1;
-                    voice.patternPos = patterns.position;
+                    voice->patternPos = patterns->position;
                     break;
                   case -126:
-                    speed = patterns.readUnsignedByte();
-                    voice.patternPos = patterns.position;
+                    speed = patterns->readUnsignedByte();
+                    voice->patternPos = patterns->position;
                     break;
                   case -127:
-                    value = (sample) ? sample.relative : 428;
-                    voice.portaSpeed = patterns.readUnsignedByte() * speed;
-                    voice.portaNote  = patterns.readUnsignedByte();
-                    voice.portaLimit = (PERIODS[voice.portaNote] * value) >> 10;
-                    voice.portamento = 0;
-                    voice.portaDelay = patterns.readUnsignedByte() * speed;
-                    voice.portaFlag  = 1;
-                    voice.patternPos = patterns.position;
+                    value = (sample) ? sample->relative : 428;
+                    voice->portaSpeed = patterns->readUnsignedByte() * speed;
+                    voice->portaNote  = patterns->readUnsignedByte();
+                    voice->portaLimit = (PERIODS[voice->portaNote] * value) >> 10;
+                    voice->portamento = 0;
+                    voice->portaDelay = patterns->readUnsignedByte() * speed;
+                    voice->portaFlag  = 1;
+                    voice->patternPos = patterns->position;
                     break;
                   case -124:
-                    chan.enabled = 0;
-                    voice.tick = speed;
-                    voice.busy = 1;
-                    voice.patternPos = patterns.position;
+                    chan->enabled = 0;
+                    voice->tick = speed;
+                    voice->busy = 1;
+                    voice->patternPos = patterns->position;
                     loop = 0;
                     break;
                   case -128:
-                    voice.trackPos++;
+                    voice->trackPos++;
 
                     while (1) {
-                      value = song.tracks[voice.index][voice.trackPos];
+                      value = song->tracks[voice->index][voice->trackPos];
 
                       if (value == 65535) {
-                        amiga.complete = 1;
+                        amiga->complete = 1;
                       } else if (value > 32767) {
-                        voice.trackPos = (value ^ 32768) >> 1;
+                        voice->trackPos = (value ^ 32768) >> 1;
 
                         if (!loopSong) {
-                          complete &= ~(voice.bitFlag);
-                          if (!complete) amiga.complete = 1;
+                          complete &= ~(voice->bitFlag);
+                          if (!complete) amiga->complete = 1;
                         }
                       } else {
-                        voice.patternPos = value;
-                        voice.tick = 1;
+                        voice->patternPos = value;
+                        voice->tick = 1;
                         loop = 1;
                         break;
                       }
                     }
                     break;
                   default:
-                    voice.tick = speed * -value;
-                    voice.patternPos = patterns.position;
+                    voice->tick = speed * -value;
+                    voice->patternPos = patterns->position;
                     loop = 0;
                     break;
                 }
               } else {
                 loop = 0;
-                voice.patternPos = patterns.position;
+                voice->patternPos = patterns->position;
 
-                voice.note = value;
-                voice.arpeggioPos =  0;
-                voice.vibratoFlag = -1;
-                voice.vibrato     =  0;
+                voice->note = value;
+                voice->arpeggioPos =  0;
+                voice->vibratoFlag = -1;
+                voice->vibrato     =  0;
 
-                voice.arpeggioSpeed = sample.arpeggioSpeed;
-                voice.vibratoDelay  = sample.vibratoDelay;
-                voice.vibratoSpeed  = sample.vibratoSpeed;
-                voice.vibratoDepth  = sample.vibratoDepth;
+                voice->arpeggioSpeed = sample->arpeggioSpeed;
+                voice->vibratoDelay  = sample->vibratoDelay;
+                voice->vibratoSpeed  = sample->vibratoSpeed;
+                voice->vibratoDepth  = sample->vibratoDepth;
 
-                if (sample.type == 1) {
-                  if (sampFlag || (sample.synchro & 2)) {
-                    voice.pulseCounter = sample.pulseCounter;
-                    voice.pulseDelay = sample.pulseDelay;
-                    voice.pulseDir = 0;
-                    voice.pulsePos = sample.pulsePosL;
-                    voice.pulseSpeed = sample.pulseSpeed;
+                if (sample->type == 1) {
+                  if (sampFlag || (sample->synchro & 2)) {
+                    voice->pulseCounter = sample->pulseCounter;
+                    voice->pulseDelay = sample->pulseDelay;
+                    voice->pulseDir = 0;
+                    voice->pulsePos = sample->pulsePosL;
+                    voice->pulseSpeed = sample->pulseSpeed;
 
-                    i = voice.synth;
-                    len = i + sample.pulsePosL;
-                    for (; i < len; ++i) amiga.memory[i] = sample.pulseRateNeg;
-                    len += (sample.length - sample.pulsePosL);
-                    for (; i < len; ++i) amiga.memory[i] = sample.pulseRatePos;
+                    i = voice->synth;
+                    len = i + sample->pulsePosL;
+                    for (; i < len; ++i) amiga->memory[i] = sample->pulseRateNeg;
+                    len += (sample->length - sample->pulsePosL);
+                    for (; i < len; ++i) amiga->memory[i] = sample->pulseRatePos;
                   }
 
-                  chan.pointer = voice.synth;
-                } else if (sample.type == 2) {
-                  voice.blendCounter = sample.blendCounter;
-                  voice.blendDelay = sample.blendDelay;
-                  voice.blendDir = 0;
-                  voice.blendPos = 1;
+                  chan->pointer = voice->synth;
+                } else if (sample->type == 2) {
+                  voice->blendCounter = sample->blendCounter;
+                  voice->blendDelay = sample->blendDelay;
+                  voice->blendDir = 0;
+                  voice->blendPos = 1;
 
-                  i = sample.pointer;
-                  j = voice.synth;
+                  i = sample->pointer;
+                  j = voice->synth;
                   len = i + 31;
-                  for (; i < len; ++i) amiga.memory[j++] = amiga.memory[i];
+                  for (; i < len; ++i) amiga->memory[j++] = amiga->memory[i];
 
-                  chan.pointer = voice.synth;
+                  chan->pointer = voice->synth;
                 } else {
-                  chan.pointer = sample.pointer;
+                  chan->pointer = sample->pointer;
                 }
 
-                voice.tick = speed;
-                voice.busy = 0;
-                voice.period = (PERIODS[voice.note] * sample.relative) >> 10;
+                voice->tick = speed;
+                voice->busy = 0;
+                voice->period = (PERIODS[voice->note] * sample->relative) >> 10;
 
-                voice.volume = 0;
-                voice.envelopePos = 0;
-                voice.sustainTime = sample.sustainTime;
+                voice->volume = 0;
+                voice->envelopePos = 0;
+                voice->sustainTime = sample->sustainTime;
 
-                chan.length  = sample.length;
-                chan.period  = voice.period;
-                chan.volume  = 0;
-                chan.enabled = 1;
+                chan->length  = sample->length;
+                chan->period  = voice->period;
+                chan->volume  = 0;
+                chan->enabled = 1;
 
-                if (voice.portaFlag) {
-                  if (!voice.portamento) {
-                    voice.portamento   = voice.period;
-                    voice.portaCounter = 1;
-                    voice.portaPeriod  = voice.portaLimit - voice.period;
+                if (voice->portaFlag) {
+                  if (!voice->portamento) {
+                    voice->portamento   = voice->period;
+                    voice->portaCounter = 1;
+                    voice->portaPeriod  = voice->portaLimit - voice->period;
                   }
                 }
               }
             }
-          } else if (voice.tick == 1) {
-            value = (patterns[voice.patternPos] - 160) & 255;
-            if (value > 127) chan.enabled = 0;
+          } else if (voice->tick == 1) {
+            value = (patterns[voice->patternPos] - 160) & 255;
+            if (value > 127) chan->enabled = 0;
           }
         } while (loop > 0);
 
-        if (!chan.enabled) {
-          voice = voice.next;
+        if (!chan->enabled) {
+          voice = voice->next;
           continue;
         }
 
-        value = voice.note + sample.arpeggio[voice.arpeggioPos];
+        value = voice->note + sample->arpeggio[voice->arpeggioPos];
 
-        if (--voice.arpeggioSpeed == 0) {
-          voice.arpeggioSpeed = sample.arpeggioSpeed;
+        if (--voice->arpeggioSpeed == 0) {
+          voice->arpeggioSpeed = sample->arpeggioSpeed;
 
-          if (++voice.arpeggioPos == sample.arpeggioLimit)
-            voice.arpeggioPos = 0;
+          if (++voice->arpeggioPos == sample->arpeggioLimit)
+            voice->arpeggioPos = 0;
         }
 
-        voice.period = (PERIODS[value] * sample.relative) >> 10;
+        voice->period = (PERIODS[value] * sample->relative) >> 10;
 
-        if (voice.portaFlag) {
-          if (voice.portaDelay) {
-            voice.portaDelay--;
+        if (voice->portaFlag) {
+          if (voice->portaDelay) {
+            voice->portaDelay--;
           } else {
-            voice.period += ((voice.portaCounter * voice.portaPeriod) / voice.portaSpeed);
+            voice->period += ((voice->portaCounter * voice->portaPeriod) / voice->portaSpeed);
 
-            if (++voice.portaCounter > voice.portaSpeed) {
-              voice.note = voice.portaNote;
-              voice.portaFlag = 0;
+            if (++voice->portaCounter > voice->portaSpeed) {
+              voice->note = voice->portaNote;
+              voice->portaFlag = 0;
             }
           }
         }
 
-        if (voice.vibratoDelay) {
-          voice.vibratoDelay--;
+        if (voice->vibratoDelay) {
+          voice->vibratoDelay--;
         } else {
-          if (voice.vibratoFlag) {
-            if (voice.vibratoFlag < 0) {
-              voice.vibrato += voice.vibratoSpeed;
+          if (voice->vibratoFlag) {
+            if (voice->vibratoFlag < 0) {
+              voice->vibrato += voice->vibratoSpeed;
 
-              if (voice.vibrato == voice.vibratoDepth)
-                voice.vibratoFlag ^= 0x80000000;
+              if (voice->vibrato == voice->vibratoDepth)
+                voice->vibratoFlag ^= 0x80000000;
             } else {
-              voice.vibrato -= voice.vibratoSpeed;
+              voice->vibrato -= voice->vibratoSpeed;
 
-              if (voice.vibrato == 0)
-                voice.vibratoFlag ^= 0x80000000;
+              if (voice->vibrato == 0)
+                voice->vibratoFlag ^= 0x80000000;
             }
 
-            if (voice.vibrato == 0) voice.vibratoFlag ^= 1;
+            if (voice->vibrato == 0) voice->vibratoFlag ^= 1;
 
-            if (voice.vibratoFlag & 1) {
-              voice.period += voice.vibrato;
+            if (voice->vibratoFlag & 1) {
+              voice->period += voice->vibrato;
             } else {
-              voice.period -= voice.vibrato;
+              voice->period -= voice->vibrato;
             }
           }
         }
 
-        chan.period = voice.period;
+        chan->period = voice->period;
 
-        switch (voice.envelopePos) {
+        switch (voice->envelopePos) {
           case 4: break;
           case 0:
-            voice.volume += sample.attackSpeed;
+            voice->volume += sample->attackSpeed;
 
-            if (voice.volume >= sample.attackVol) {
-              voice.volume = sample.attackVol;
-              voice.envelopePos = 1;
+            if (voice->volume >= sample->attackVol) {
+              voice->volume = sample->attackVol;
+              voice->envelopePos = 1;
             }
             break;
           case 1:
-            voice.volume -= sample.decaySpeed;
+            voice->volume -= sample->decaySpeed;
 
-            if (voice.volume <= sample.decayVol) {
-              voice.volume = sample.decayVol;
-              voice.envelopePos = 2;
+            if (voice->volume <= sample->decayVol) {
+              voice->volume = sample->decayVol;
+              voice->envelopePos = 2;
             }
             break;
           case 2:
-            if (voice.sustainTime) {
-              voice.sustainTime--;
+            if (voice->sustainTime) {
+              voice->sustainTime--;
             } else {
-              voice.envelopePos = 3;
+              voice->envelopePos = 3;
             }
             break;
           case 3:
-            voice.volume -= sample.releaseSpeed;
+            voice->volume -= sample->releaseSpeed;
 
-            if (voice.volume <= sample.releaseVol) {
-              voice.volume = sample.releaseVol;
-              voice.envelopePos = 4;
+            if (voice->volume <= sample->releaseVol) {
+              voice->volume = sample->releaseVol;
+              voice->envelopePos = 4;
             }
             break;
         }
 
-        value = sample.envelopeVol << 12;
+        value = sample->envelopeVol << 12;
         value >>= 8;
         value >>= 4;
-        value *= voice.volume;
+        value *= voice->volume;
         value >>= 8;
         value >>= 1;
-        chan.volume = value;
+        chan->volume = value;
 
-        if (sample.type == 1) {
-          if (voice.pulseDelay) {
-            voice.pulseDelay--;
+        if (sample->type == 1) {
+          if (voice->pulseDelay) {
+            voice->pulseDelay--;
           } else {
-            if (voice.pulseSpeed) {
-              voice.pulseSpeed--;
+            if (voice->pulseSpeed) {
+              voice->pulseSpeed--;
             } else {
-              if (voice.pulseCounter || !(sample.synchro & 1)) {
-                voice.pulseSpeed = sample.pulseSpeed;
+              if (voice->pulseCounter || !(sample->synchro & 1)) {
+                voice->pulseSpeed = sample->pulseSpeed;
 
-                if (voice.pulseDir & 4) {
+                if (voice->pulseDir & 4) {
                   while (1) {
-                    if (voice.pulsePos >= sample.pulsePosL) {
+                    if (voice->pulsePos >= sample->pulsePosL) {
                       loop = 1;
                       break;
                     }
 
-                    voice.pulseDir &= -5;
-                    voice.pulsePos++;
-                    voice.pulseCounter--;
+                    voice->pulseDir &= -5;
+                    voice->pulsePos++;
+                    voice->pulseCounter--;
 
-                    if (voice.pulsePos <= sample.pulsePosH) {
+                    if (voice->pulsePos <= sample->pulsePosH) {
                       loop = 2;
                       break;
                     }
 
-                    voice.pulseDir |= 4;
-                    voice.pulsePos--;
-                    voice.pulseCounter--;
+                    voice->pulseDir |= 4;
+                    voice->pulsePos--;
+                    voice->pulseCounter--;
                   }
                 } else {
                   while (1) {
-                    if (voice.pulsePos <= sample.pulsePosH) {
+                    if (voice->pulsePos <= sample->pulsePosH) {
                       loop = 2;
                       break;
                     }
 
-                    voice.pulseDir |= 4;
-                    voice.pulsePos--;
-                    voice.pulseCounter--;
+                    voice->pulseDir |= 4;
+                    voice->pulsePos--;
+                    voice->pulseCounter--;
 
-                    if (voice.pulsePos >= sample.pulsePosL) {
+                    if (voice->pulsePos >= sample->pulsePosL) {
                       loop = 1;
                       break;
                     }
 
-                    voice.pulseDir &= -5;
-                    voice.pulsePos++;
-                    voice.pulseCounter++;
+                    voice->pulseDir &= -5;
+                    voice->pulsePos++;
+                    voice->pulseCounter++;
                   }
                 }
 
-                pos = voice.synth + voice.pulsePos;
+                pos = voice->synth + voice->pulsePos;
 
                 if (loop == 1) {
-                  amiga.memory[pos] = sample.pulseRatePos;
-                  voice.pulsePos--;
+                  amiga->memory[pos] = sample->pulseRatePos;
+                  voice->pulsePos--;
                 } else {
-                  amiga.memory[pos] = sample.pulseRateNeg;
-                  voice.pulsePos++;
+                  amiga->memory[pos] = sample->pulseRateNeg;
+                  voice->pulsePos++;
                 }
               }
             }
           }
-        } else if (sample.type == 2) {
-          if (voice.blendDelay) {
-            voice.blendDelay--;
+        } else if (sample->type == 2) {
+          if (voice->blendDelay) {
+            voice->blendDelay--;
           } else {
-            if (voice.blendCounter || !(sample.synchro & 4)) {
-              if (voice.blendDir) {
-                if (voice.blendPos != 1) {
-                  voice.blendPos--;
+            if (voice->blendCounter || !(sample->synchro & 4)) {
+              if (voice->blendDir) {
+                if (voice->blendPos != 1) {
+                  voice->blendPos--;
                 } else {
-                  voice.blendDir ^= 1;
-                  voice.blendCounter--;
+                  voice->blendDir ^= 1;
+                  voice->blendCounter--;
                 }
               } else {
-                if (voice.blendPos != (sample.blendRate << 1)) {
-                  voice.blendPos++;
+                if (voice->blendPos != (sample->blendRate << 1)) {
+                  voice->blendPos++;
                 } else {
-                  voice.blendDir ^= 1;
-                  voice.blendCounter--;
+                  voice->blendDir ^= 1;
+                  voice->blendCounter--;
                 }
               }
 
-              i = sample.pointer;
-              j = voice.synth;
+              i = sample->pointer;
+              j = voice->synth;
               len = i + 31;
               pos = len + 1;
 
               for (; i < len; ++i) {
-                value = (voice.blendPos * amiga.memory[pos++]) >> sample.blendRate;
-                amiga.memory[pos++] = value + amiga.memory[i];
+                value = (voice->blendPos * amiga->memory[pos++]) >> sample->blendRate;
+                amiga->memory[pos++] = value + amiga->memory[i];
               }
             }
           }
         }
 
-        voice = voice.next;
+        voice = voice->next;
       }
     }
 
     override protected function initialize():void {
       var i:int, len:int, voice:FEVoice = voices[3];
-      super.initialize();
+      super->initialize();
 
       song  = songs[playSong];
-      speed = song.speed;
+      speed = song->speed;
 
       complete = 15;
 
       while (voice) {
-        voice.initialize();
-        voice.channel = amiga.channels[voice.index];
-        voice.patternPos = song.tracks[voice.index][0];
+        voice->initialize();
+        voice->channel = amiga->channels[voice->index];
+        voice->patternPos = song->tracks[voice->index][0];
 
-        i = voice.synth;
+        i = voice->synth;
         len = i + 64;
-        for (; i < len; ++i) amiga.memory[i] = 0;
+        for (; i < len; ++i) amiga->memory[i] = 0;
 
-        voice = voice.next;
+        voice = voice->next;
       }
     }
 
     override protected function loader(stream:ByteArray):void {
       var basePtr:int, dataPtr:int, i:int, j:int, len:int, pos:int, ptr:int, sample:FESample, size:int, song:FESong, tracksLen:int, value:int;
 
-      while (stream.position < 16) {
-        value = stream.readUnsignedShort();
-        stream.position += 2;
+      while (stream->position < 16) {
+        value = stream->readUnsignedShort();
+        stream->position += 2;
         if (value != 0x4efa) return;                                            //jmp
       }
 
-      while (stream.position < 1024) {
-        value = stream.readUnsignedShort();
+      while (stream->position < 1024) {
+        value = stream->readUnsignedShort();
 
-        if (value == 0x123a) {                                                  //move.b $x,d1
-          stream.position += 2;
-          value = stream.readUnsignedShort();
+        if (value == 0x123a) {                                                  //move->b $x,d1
+          stream->position += 2;
+          value = stream->readUnsignedShort();
 
-          if (value == 0xb001) {                                                //cmp.b d1,d0
-            stream.position -= 4;
-            dataPtr = (stream.position + stream.readUnsignedShort()) - 0x895;
+          if (value == 0xb001) {                                                //cmp->b d1,d0
+            stream->position -= 4;
+            dataPtr = (stream->position + stream->readUnsignedShort()) - 0x895;
           }
-        } else if (value == 0x214a) {                                           //move.l a2,(a0)
-          stream.position += 2;
-          value = stream.readUnsignedShort();
+        } else if (value == 0x214a) {                                           //move->l a2,(a0)
+          stream->position += 2;
+          value = stream->readUnsignedShort();
 
           if (value == 0x47fa) {                                                //lea $x,a3
-            basePtr = stream.position + stream.readShort();
+            basePtr = stream->position + stream->readShort();
             version = 1;
             break;
           }
@@ -458,18 +458,18 @@ package neoart.flod.fred {
 
       if (!version) return;
 
-      stream.position = dataPtr + 0x8a2;
-      pos = stream.readUnsignedInt();
-      stream.position = basePtr + pos;
+      stream->position = dataPtr + 0x8a2;
+      pos = stream->readUnsignedInt();
+      stream->position = basePtr + pos;
       samples = new Vector.<FESample>();
       pos = 0x7fffffff;
 
-      while (pos > stream.position) {
-        value = stream.readUnsignedInt();
+      while (pos > stream->position) {
+        value = stream->readUnsignedInt();
 
         if (value) {
-          if ((value < stream.position) || (value >= stream.length)) {
-            stream.position -= 4;
+          if ((value < stream->position) || (value >= stream->length)) {
+            stream->position -= 4;
             break;
           }
 
@@ -477,61 +477,61 @@ package neoart.flod.fred {
         }
 
         sample = new FESample();
-        sample.pointer  = value;
-        sample.loopPtr  = stream.readShort();
-        sample.length   = stream.readUnsignedShort() << 1;
-        sample.relative = stream.readUnsignedShort();
+        sample->pointer  = value;
+        sample->loopPtr  = stream->readShort();
+        sample->length   = stream->readUnsignedShort() << 1;
+        sample->relative = stream->readUnsignedShort();
 
-        sample.vibratoDelay = stream.readUnsignedByte();
-        stream.position++;
-        sample.vibratoSpeed = stream.readUnsignedByte();
-        sample.vibratoDepth = stream.readUnsignedByte();
-        sample.envelopeVol  = stream.readUnsignedByte();
-        sample.attackSpeed  = stream.readUnsignedByte();
-        sample.attackVol    = stream.readUnsignedByte();
-        sample.decaySpeed   = stream.readUnsignedByte();
-        sample.decayVol     = stream.readUnsignedByte();
-        sample.sustainTime  = stream.readUnsignedByte();
-        sample.releaseSpeed = stream.readUnsignedByte();
-        sample.releaseVol   = stream.readUnsignedByte();
+        sample->vibratoDelay = stream->readUnsignedByte();
+        stream->position++;
+        sample->vibratoSpeed = stream->readUnsignedByte();
+        sample->vibratoDepth = stream->readUnsignedByte();
+        sample->envelopeVol  = stream->readUnsignedByte();
+        sample->attackSpeed  = stream->readUnsignedByte();
+        sample->attackVol    = stream->readUnsignedByte();
+        sample->decaySpeed   = stream->readUnsignedByte();
+        sample->decayVol     = stream->readUnsignedByte();
+        sample->sustainTime  = stream->readUnsignedByte();
+        sample->releaseSpeed = stream->readUnsignedByte();
+        sample->releaseVol   = stream->readUnsignedByte();
 
-        for (i = 0; i < 16; ++i) sample.arpeggio[i] = stream.readByte();
+        for (i = 0; i < 16; ++i) sample->arpeggio[i] = stream->readByte();
 
-        sample.arpeggioSpeed = stream.readUnsignedByte();
-        sample.type          = stream.readByte();
-        sample.pulseRateNeg  = stream.readByte();
-        sample.pulseRatePos  = stream.readUnsignedByte();
-        sample.pulseSpeed    = stream.readUnsignedByte();
-        sample.pulsePosL     = stream.readUnsignedByte();
-        sample.pulsePosH     = stream.readUnsignedByte();
-        sample.pulseDelay    = stream.readUnsignedByte();
-        sample.synchro       = stream.readUnsignedByte();
-        sample.blendRate     = stream.readUnsignedByte();
-        sample.blendDelay    = stream.readUnsignedByte();
-        sample.pulseCounter  = stream.readUnsignedByte();
-        sample.blendCounter  = stream.readUnsignedByte();
-        sample.arpeggioLimit = stream.readUnsignedByte();
+        sample->arpeggioSpeed = stream->readUnsignedByte();
+        sample->type          = stream->readByte();
+        sample->pulseRateNeg  = stream->readByte();
+        sample->pulseRatePos  = stream->readUnsignedByte();
+        sample->pulseSpeed    = stream->readUnsignedByte();
+        sample->pulsePosL     = stream->readUnsignedByte();
+        sample->pulsePosH     = stream->readUnsignedByte();
+        sample->pulseDelay    = stream->readUnsignedByte();
+        sample->synchro       = stream->readUnsignedByte();
+        sample->blendRate     = stream->readUnsignedByte();
+        sample->blendDelay    = stream->readUnsignedByte();
+        sample->pulseCounter  = stream->readUnsignedByte();
+        sample->blendCounter  = stream->readUnsignedByte();
+        sample->arpeggioLimit = stream->readUnsignedByte();
 
-        stream.position += 12;
-        samples.push(sample);
-        if (!stream.bytesAvailable) break;
+        stream->position += 12;
+        samples->push(sample);
+        if (!stream->bytesAvailable) break;
       }
 
-      samples.fixed = true;
+      samples->fixed = true;
 
       if (pos != 0x7fffffff) {
-        amiga.store(stream, stream.length - pos);
-        len = samples.length;
+        amiga->store(stream, stream->length - pos);
+        len = samples->length;
 
         for (i = 0; i < len; ++i) {
           sample = samples[i];
-          if (sample.pointer) sample.pointer -= (basePtr + pos);
+          if (sample->pointer) sample->pointer -= (basePtr + pos);
         }
       }
 
-      pos = amiga.memory.length;
-      amiga.memory.length += 256;
-      amiga.loopLen = 100;
+      pos = amiga->memory->length;
+      amiga->memory->length += 256;
+      amiga->loopLen = 100;
 
       for (i = 0; i < 4; ++i) {
         voices[i].synth = pos;
@@ -539,15 +539,15 @@ package neoart.flod.fred {
       }
 
       patterns = new ByteArray();
-      stream.position = dataPtr + 0x8a2;
-      len = stream.readUnsignedInt();
-      pos = stream.readUnsignedInt();
-      stream.position = basePtr + pos;
-      stream.readBytes(patterns, 0, (len - pos));
+      stream->position = dataPtr + 0x8a2;
+      len = stream->readUnsignedInt();
+      pos = stream->readUnsignedInt();
+      stream->position = basePtr + pos;
+      stream->readBytes(patterns, 0, (len - pos));
       pos += basePtr;
 
-      stream.position = dataPtr + 0x895;
-      lastSong = len = stream.readUnsignedByte();
+      stream->position = dataPtr + 0x895;
+      lastSong = len = stream->readUnsignedByte();
 
       songs = new Vector.<FESong>(++len, true);
       basePtr = dataPtr + 0xb0e;
@@ -558,30 +558,30 @@ package neoart.flod.fred {
         song = new FESong();
 
         for (j = 0; j < 4; ++j) {
-          stream.position = basePtr + pos;
-          value = stream.readUnsignedShort();
+          stream->position = basePtr + pos;
+          value = stream->readUnsignedShort();
 
           if (j == 3 && (i == (len - 1))) size = tracksLen;
-            else size = stream.readUnsignedShort();
+            else size = stream->readUnsignedShort();
 
           size = (size - value) >> 1;
-          if (size > song.length) song.length = size;
+          if (size > song->length) song->length = size;
 
-          song.tracks[j] = new Vector.<int>(size, true);
-          stream.position = basePtr + value;
+          song->tracks[j] = new Vector.<int>(size, true);
+          stream->position = basePtr + value;
 
           for (ptr = 0; ptr < size; ++ptr)
-            song.tracks[j][ptr] = stream.readUnsignedShort();
+            song->tracks[j][ptr] = stream->readUnsignedShort();
 
           pos += 2;
         }
 
-        stream.position = dataPtr + 0x897 + i;
-        song.speed = stream.readUnsignedByte();
+        stream->position = dataPtr + 0x897 + i;
+        song->speed = stream->readUnsignedByte();
         songs[i] = song;
       }
 
-      stream.clear();
+      stream->clear();
       stream = null;
     }
 

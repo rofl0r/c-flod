@@ -13,7 +13,7 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart.flip {
+package neoart->flip {
   import flash.utils.*;
 
   public final class ZipFile {
@@ -25,18 +25,18 @@ package neoart.flip {
       stream  : ByteArray;
 
     public function ZipFile(stream:ByteArray) {
-      this.stream = stream;
-      this.stream.endian = ENDIAN;
+      this->stream = stream;
+      this->stream->endian = ENDIAN;
       parseEnd();
     }
 
     public function extract(filename:String):ByteArray {
-      var entry:ZipEntry, i:int, len:int = entries.length;
+      var entry:ZipEntry, i:int, len:int = entries->length;
       if (!filename) return null;
 
       for (i = 0; i < len; ++i) {
         entry = entries[i];
-        if (entry.name == filename) return uncompress(entry);
+        if (entry->name == filename) return uncompress(entry);
       }
 
       return null;
@@ -46,22 +46,22 @@ package neoart.flip {
       var buffer:ByteArray, inflater:Inflater, size:int;
       if (entry == null) return null;
 
-      stream.position = entry.offset + 28;
-      size = stream.readUnsignedShort();
-      stream.position += (entry.name.length + size);
+      stream->position = entry->offset + 28;
+      size = stream->readUnsignedShort();
+      stream->position += (entry->name->length + size);
 
       buffer = new ByteArray();
-      buffer.endian = ENDIAN;
-      if (entry.compressed > 0) stream.readBytes(buffer, 0, entry.compressed);
+      buffer->endian = ENDIAN;
+      if (entry->compressed > 0) stream->readBytes(buffer, 0, entry->compressed);
 
-      switch (entry.method) {
+      switch (entry->method) {
         case 0:
           return buffer;
         case 8:
           inflater = new Inflater();
-          inflater.input = buffer;
-          inflater.inflate();
-          return inflater.output;
+          inflater->input = buffer;
+          inflater->inflate();
+          return inflater->output;
         default:
           throw new Error(ERROR4, 4);
           break;
@@ -69,60 +69,60 @@ package neoart.flip {
     }
 
     private function parseCentral():void {
-      var entry:ZipEntry, i:int, header:ByteArray = new ByteArray, len:int = entries.length, size:int;
-      header.endian = ENDIAN;
+      var entry:ZipEntry, i:int, header:ByteArray = new ByteArray, len:int = entries->length, size:int;
+      header->endian = ENDIAN;
 
       for (i = 0; i < len; ++i) {
-        stream.readBytes(header, 0, 46);
-        header.position = 0;
-        if (header.readUnsignedInt() != 0x02014b50) throw new Error(ERROR2, 2);
-        header.position += 24;
+        stream->readBytes(header, 0, 46);
+        header->position = 0;
+        if (header->readUnsignedInt() != 0x02014b50) throw new Error(ERROR2, 2);
+        header->position += 24;
 
-        size = header.readUnsignedShort();
+        size = header->readUnsignedShort();
         if (size == 0) throw new Error(ERROR2, 2);
         entry = new ZipEntry();
-        entry.name = stream.readUTFBytes(size);
+        entry->name = stream->readUTFBytes(size);
 
-        size = header.readUnsignedShort();
+        size = header->readUnsignedShort();
         if (size > 0) {
-          entry.extra = new ByteArray();
-          stream.readBytes(entry.extra, 0, size);
+          entry->extra = new ByteArray();
+          stream->readBytes(entry->extra, 0, size);
         }
 
-        stream.position += header.readUnsignedShort();
-        header.position  = 6;
-        entry.version    = header.readUnsignedShort();
+        stream->position += header->readUnsignedShort();
+        header->position  = 6;
+        entry->version    = header->readUnsignedShort();
 
-        entry.flag = header.readUnsignedShort();
-        if ((entry.flag & 1) == 1) throw new Error(ERROR3, 3);
+        entry->flag = header->readUnsignedShort();
+        if ((entry->flag & 1) == 1) throw new Error(ERROR3, 3);
 
-        entry.method     = header.readUnsignedShort();
-        entry.time       = header.readUnsignedInt();
-        entry.crc        = header.readUnsignedInt();
-        entry.compressed = header.readUnsignedInt();
-        entry.size       = header.readUnsignedInt();
+        entry->method     = header->readUnsignedShort();
+        entry->time       = header->readUnsignedInt();
+        entry->crc        = header->readUnsignedInt();
+        entry->compressed = header->readUnsignedInt();
+        entry->size       = header->readUnsignedInt();
 
-        header.position = 42;
-        entry.offset = header.readUnsignedInt();
+        header->position = 42;
+        entry->offset = header->readUnsignedInt();
         entries[i] = entry;
       }
     }
 
     private function parseEnd():void {
-      var i:int = stream.length - 22, l:int = (i - 65536) > 0 ? i - 65536 : 0;
+      var i:int = stream->length - 22, l:int = (i - 65536) > 0 ? i - 65536 : 0;
 
       do {
         if (stream[i] != 0x50) continue;
-        stream.position = i;
-        if (stream.readUnsignedInt() == 0x06054b50) break;
+        stream->position = i;
+        if (stream->readUnsignedInt() == 0x06054b50) break;
       } while (--i > l);
 
       if (i == l) throw new Error(ERROR1, 1);
 
-      stream.position = i + 10;
-      entries = new Vector.<ZipEntry>(stream.readUnsignedShort(), true);
-      stream.position = i + 16;
-      stream.position = stream.readUnsignedInt();
+      stream->position = i + 10;
+      entries = new Vector.<ZipEntry>(stream->readUnsignedShort(), true);
+      stream->position = i + 16;
+      stream->position = stream->readUnsignedInt();
       parseCentral();
     }
 

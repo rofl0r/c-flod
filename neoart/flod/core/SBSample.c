@@ -15,7 +15,7 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart.flod.core {
+package neoart->flod->core {
   import flash.utils.*;
 
   public class SBSample {
@@ -32,7 +32,7 @@ package neoart.flod.core {
     public function store(stream:ByteArray):void {
       var delta:int, i:int, len:int = length, pos:int, sample:Number, total:int, value:int;
       if (!loopLen) loopMode = 0;
-      pos = stream.position;
+      pos = stream->position;
 
       if (loopMode) {
         len = loopStart + loopLen;
@@ -44,11 +44,11 @@ package neoart.flod.core {
       if (bits == 8) {
         total = pos + len;
 
-        if (total > stream.length)
-          len = stream.length - pos;
+        if (total > stream->length)
+          len = stream->length - pos;
 
         for (i = 0; i < len; ++i) {
-          value = stream.readByte() + delta;
+          value = stream->readByte() + delta;
 
           if (value < -128) value += 256;
             else if (value > 127) value -= 256;
@@ -59,11 +59,11 @@ package neoart.flod.core {
       } else {
         total = pos + (len << 1);
 
-        if (total > stream.length)
-          len = (stream.length - pos) >> 1;
+        if (total > stream->length)
+          len = (stream->length - pos) >> 1;
 
         for (i = 0; i < len; ++i) {
-          value = stream.readShort() + delta;
+          value = stream->readShort() + delta;
 
           if (value < -32768) value += 65536;
             else if (value > 32767) value -= 65536;
@@ -92,8 +92,8 @@ package neoart.flod.core {
         for (i = len; i < length; ++i) data[i] = sample;
       }
 
-      if (total < stream.length) stream.position = total;
-        else stream.position = stream.length - 1;
+      if (total < stream->length) stream->position = total;
+        else stream->position = stream->length - 1;
     }
   }
 }

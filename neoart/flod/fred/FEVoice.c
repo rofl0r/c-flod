@@ -15,7 +15,7 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart.flod.fred {
+package neoart->flod->fred {
   import neoart.flod.core.*;
 
   public final class FEVoice {
@@ -61,8 +61,8 @@ package neoart.flod.fred {
       blendPos      : int;
 
     public function FEVoice(index:int, bitFlag:int) {
-      this.index = index;
-      this.bitFlag = bitFlag;
+      this->index = index;
+      this->bitFlag = bitFlag;
     }
 
     internal function initialize():void {

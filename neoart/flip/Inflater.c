@@ -13,7 +13,7 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart.flip {
+package neoart->flip {
   import flash.utils.*;
 
   public final class Inflater {
@@ -37,8 +37,8 @@ package neoart.flip {
     public function set input(stream:ByteArray):void {
       inpbuf = stream;
       output = new ByteArray();
-      inpbuf.endian   = output.endian   = ZipFile.ENDIAN;
-      inpbuf.position = output.position = 0;
+      inpbuf->endian   = output->endian   = ZipFile->ENDIAN;
+      inpbuf->position = output->position = 0;
       inpcnt = outcnt = 0;
     }
 
@@ -59,7 +59,7 @@ package neoart.flip {
     }
 
     private function bits(need:int):int {
-      var buff:int = bitbuf, inplen:uint = inpbuf.length;
+      var buff:int = bitbuf, inplen:uint = inpbuf->length;
 
       while (bitcnt < need) {
         if (inpcnt == inplen) throw new Error(ERROR2, 2);
@@ -102,38 +102,38 @@ package neoart.flip {
     private function construct(huff:Huffman, length:Vector.<int>, n:int):int {
       var len:int, left:int = 1, offs:Vector.<int> = new Vector.<int>(16, true), sym:int;
 
-      for (len = 0; len < 16; ++len) huff.count[len] = 0;
-      for (sym = 0; sym <  n; ++sym) huff.count[length[sym]]++;
-      if (huff.count[0] == n) return 0;
+      for (len = 0; len < 16; ++len) huff->count[len] = 0;
+      for (sym = 0; sym <  n; ++sym) huff->count[length[sym]]++;
+      if (huff->count[0] == n) return 0;
 
       for (len = 1; len < 16; ++len) {
         left <<= 1;
-        left -= huff.count[len];
+        left -= huff->count[len];
         if (left < 0) return left;
       }
 
       for (len = 1; len < 15; ++len)
-        offs[int(len + 1)] = offs[len] + huff.count[len];
+        offs[int(len + 1)] = offs[len] + huff->count[len];
 
       for (sym = 0; sym <  n; ++sym)
-        if (length[sym] != 0) huff.symbol[int(offs[length[sym]]++)] = sym;
+        if (length[sym] != 0) huff->symbol[int(offs[length[sym]]++)] = sym;
 
       return left;
     }
 
     private function decode(huff:Huffman):int {
-      var buff:int = bitbuf, code:int, count:int, first:int, index:int, inplen:uint = inpbuf.length, left:int = bitcnt, len:int = 1;
+      var buff:int = bitbuf, code:int, count:int, first:int, index:int, inplen:uint = inpbuf->length, left:int = bitcnt, len:int = 1;
 
       while (1) {
         while (left--) {
           code |= buff & 1;
           buff >>= 1;
-          count = huff.count[len];
+          count = huff->count[len];
 
           if (code < int(first + count)) {
             bitbuf = buff;
             bitcnt = (bitcnt - len) & 7;
-            return huff.symbol[int(index + (code - first))];
+            return huff->symbol[int(index + (code - first))];
           }
 
           index += count;
@@ -154,7 +154,7 @@ package neoart.flip {
     }
 
     private function stored():int {
-      var inplen:uint = inpbuf.length, len:int;
+      var inplen:uint = inpbuf->length, len:int;
       bitbuf = bitcnt = 0;
 
       if ((inpcnt + 4) > inplen) throw new Error(ERROR2, 2);
@@ -222,10 +222,10 @@ package neoart.flip {
       }
 
       err = construct(dlencode, length, nlen);
-      if (err < 0 || (err > 0 && nlen - dlencode.count[0] != 1)) throw new Error(ERROR10, 10);
+      if (err < 0 || (err > 0 && nlen - dlencode->count[0] != 1)) throw new Error(ERROR10, 10);
 
-      err = construct(ddiscode, length.slice(nlen), ndis);
-      if (err < 0 || (err > 0 && ndis - ddiscode.count[0] != 1)) throw new Error(ERROR11, 11);
+      err = construct(ddiscode, length->slice(nlen), ndis);
+      if (err < 0 || (err > 0 && ndis - ddiscode->count[0] != 1)) throw new Error(ERROR11, 11);
 
       return codes(dlencode, ddiscode);
     }

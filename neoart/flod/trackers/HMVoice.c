@@ -15,7 +15,7 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart.flod.trackers {
+package neoart->flod->trackers {
   import neoart.flod.core.*;
 
   public final class HMVoice {
@@ -39,7 +39,7 @@ package neoart.flod.trackers {
       wavePos      : int;
 
     public function HMVoice(index:int) {
-      this.index = index;
+      this->index = index;
     }
 
     internal function initialize():void {

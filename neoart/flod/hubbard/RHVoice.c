@@ -15,7 +15,7 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart.flod.hubbard {
+package neoart->flod->hubbard {
   import neoart.flod.core.*;
 
   public final class RHVoice {
@@ -40,8 +40,8 @@ package neoart.flod.hubbard {
       synthPos   : int;
 
     public function RHVoice(index:int, bitFlag:int) {
-      this.index = index;
-      this.bitFlag = bitFlag;
+      this->index = index;
+      this->bitFlag = bitFlag;
     }
 
     internal function initialize():void {

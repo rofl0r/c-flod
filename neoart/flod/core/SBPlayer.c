@@ -15,7 +15,7 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart.flod.core {
+package neoart->flod->core {
 
   public class SBPlayer extends CorePlayer {
     public var
@@ -28,8 +28,8 @@ package neoart.flod.core {
       master  : int;
 
     public function SBPlayer(mixer:Soundblaster = null) {
-      this.mixer = mixer || new Soundblaster();
-      super(this.mixer);
+      this->mixer = mixer || new Soundblaster();
+      super(this->mixer);
 
       endian  = "littleEndian";
       quality = 1;
@@ -43,15 +43,15 @@ package neoart.flod.core {
     }
 
     override public function toggle(index:int):void {
-      mixer.channels[index].mute ^= 1;
+      mixer->channels[index].mute ^= 1;
     }
 
     override protected function setup():void {
-      mixer.setup(channels);
+      mixer->setup(channels);
     }
 
     override protected function initialize():void {
-      super.initialize();
+      super->initialize();
       timer  = speed;
       master = 64;
     }

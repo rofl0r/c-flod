@@ -28,7 +28,7 @@ package {
   import neoart.flod.core.*;
 
   public final class Demo3 extends Sprite {
-    [Embed(source="filename.mod", mimeType="application/octet-stream")]
+    [Embed(source="filename->mod", mimeType="application/octet-stream")]
 
     private var
       Song   : Class,
@@ -37,8 +37,8 @@ package {
 
     public function Demo3() {
       loader = new FileLoader();
-      player = loader.load(new Song() as ByteArray);
-      if (player && player.version) player.play();
+      player = loader->load(new Song() as ByteArray);
+      if (player && player->version) player->play();
     }
   }
 }

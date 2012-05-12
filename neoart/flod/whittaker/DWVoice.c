@@ -15,7 +15,7 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart.flod.whittaker {
+package neoart->flod->whittaker {
   import neoart.flod.core.*;
 
   public final class DWVoice {
@@ -51,8 +51,8 @@ package neoart.flod.whittaker {
       vibratoDepth  : int;
 
     public function DWVoice(index:int, bitFlag:int) {
-      this.index = index;
-      this.bitFlag = bitFlag;
+      this->index = index;
+      this->bitFlag = bitFlag;
     }
 
     internal function initialize():void {

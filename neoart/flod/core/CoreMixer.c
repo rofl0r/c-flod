@@ -15,7 +15,7 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart.flod.core {
+package neoart->flod->core {
   import flash.events.*;
   import flash.utils.*;
 
@@ -32,11 +32,11 @@ package neoart.flod.core {
 
     public function CoreMixer() {
       wave = new ByteArray();
-      wave.endian = "littleEndian";
+      wave->endian = "littleEndian";
       bufferSize = 8192;
     }
 
-    public function get bufferSize():int { return buffer.length; }
+    public function get bufferSize():int { return buffer->length; }
     public function set bufferSize(value:int):void {
       var i:int, len:int;
       if (value == len || value < 2048) return;
@@ -44,10 +44,10 @@ package neoart.flod.core {
       if (!buffer) {
         buffer = new Vector.<Sample>(value, true);
       } else {
-        len = buffer.length;
-        buffer.fixed = false;
-        buffer.length = value;
-        buffer.fixed = true;
+        len = buffer->length;
+        buffer->fixed = false;
+        buffer->length = value;
+        buffer->fixed = true;
       }
 
       if (value > len) {
@@ -60,7 +60,7 @@ package neoart.flod.core {
 
     public function get complete():int { return completed; }
     public function set complete(value:int):void {
-      completed = value ^ player.loopSong;
+      completed = value ^ player->loopSong;
     }
 
     //js function reset
@@ -72,8 +72,8 @@ package neoart.flod.core {
       completed   = 0;
 
       while (sample) {
-        sample.l = sample.r = 0.0;
-        sample = sample.next;
+        sample->l = sample->r = 0.0;
+        sample = sample->next;
       }
     }
 
@@ -86,23 +86,23 @@ package neoart.flod.core {
 
     internal function waveform():ByteArray {
       var file:ByteArray = new ByteArray();
-      file.endian = "littleEndian";
+      file->endian = "littleEndian";
 
-      file.writeUTFBytes("RIFF");
-      file.writeInt(wave.length + 44);
-      file.writeUTFBytes("WAVEfmt ");
-      file.writeInt(16);
-      file.writeShort(1);
-      file.writeShort(2);
-      file.writeInt(44100);
-      file.writeInt(44100 << 2);
-      file.writeShort(4);
-      file.writeShort(16);
-      file.writeUTFBytes("data");
-      file.writeInt(wave.length);
-      file.writeBytes(wave);
+      file->writeUTFBytes("RIFF");
+      file->writeInt(wave->length + 44);
+      file->writeUTFBytes("WAVEfmt ");
+      file->writeInt(16);
+      file->writeShort(1);
+      file->writeShort(2);
+      file->writeInt(44100);
+      file->writeInt(44100 << 2);
+      file->writeShort(4);
+      file->writeShort(16);
+      file->writeUTFBytes("data");
+      file->writeInt(wave->length);
+      file->writeBytes(wave);
 
-      file.position = 0;
+      file->position = 0;
       return file;
     }
   }

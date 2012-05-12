@@ -15,7 +15,7 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart.flod.core {
+package neoart->flod->core {
 
   public class AmigaPlayer extends CorePlayer {
     public var
@@ -24,8 +24,8 @@ package neoart.flod.core {
       standard : int;
 
     public function AmigaPlayer(amiga:Amiga) {
-      this.amiga = amiga || new Amiga();
-      super(this.amiga);
+      this->amiga = amiga || new Amiga();
+      super(this->amiga);
 
       channels = 4;
       endian   = "bigEndian";
@@ -38,23 +38,23 @@ package neoart.flod.core {
       standard = value;
 
       if (value) {
-        amiga.clock = 81.1688208;
-        amiga.samplesTick = 735;
+        amiga->clock = 81.1688208;
+        amiga->samplesTick = 735;
       } else {
-        amiga.clock = 80.4284580;
-        amiga.samplesTick = 882;
+        amiga->clock = 80.4284580;
+        amiga->samplesTick = 882;
       }
     }
 
     override public function set stereo(value:Number):void {
-      var chan:AmigaChannel = amiga.channels[0];
+      var chan:AmigaChannel = amiga->channels[0];
 
       if (value < 0.0) value = 0.0;
         else if (value > 1.0) value = 1.0;
 
       while (chan) {
-        chan.level = value * chan.panning;
-        chan = chan.next;
+        chan->level = value * chan->panning;
+        chan = chan->next;
       }
     }
 
@@ -62,11 +62,11 @@ package neoart.flod.core {
       if (value < 0.0) value = 0.0;
         else if (value > 1.0) value = 1.0;
 
-      amiga.master = value * 0.00390625;
+      amiga->master = value * 0.00390625;
     }
 
     override public function toggle(index:int):void {
-      amiga.channels[index].mute ^= 1;
+      amiga->channels[index].mute ^= 1;
     }
   }
 }

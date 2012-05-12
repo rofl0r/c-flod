@@ -15,7 +15,7 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart.flod.core {
+package neoart->flod->core {
   import flash.events.*;
   import flash.utils.*;
 
@@ -56,33 +56,33 @@ package neoart.flod.core {
     }
 
     public function store(stream:ByteArray, len:int, pointer:int = -1):int {
-      var add:int, i:int, pos:int = stream.position, start:int = memory.length, total:int;
+      var add:int, i:int, pos:int = stream->position, start:int = memory->length, total:int;
 
-      if (pointer > -1) stream.position = pointer;
-      total = stream.position + len;
+      if (pointer > -1) stream->position = pointer;
+      total = stream->position + len;
 
-      if (total >= stream.length) {
-        add = total - stream.length;
-        len = stream.length - stream.position;
+      if (total >= stream->length) {
+        add = total - stream->length;
+        len = stream->length - stream->position;
       }
 
       for (i = start, len += start; i < len; ++i)
-        memory[i] = stream.readByte();
+        memory[i] = stream->readByte();
 
-      memory.length += add;
-      if (pointer > -1) stream.position = pos;
+      memory->length += add;
+      if (pointer > -1) stream->position = pos;
       return start;
     }
 
     override internal function initialize():void {
-      super.initialize();
-      wave.clear();
-      filter.initialize();
+      super->initialize();
+      wave->clear();
+      filter->initialize();
 
-      if (!memory.fixed) {
-        loopPtr = memory.length;
-        memory.length += loopLen;
-        memory.fixed = true;
+      if (!memory->fixed) {
+        loopPtr = memory->length;
+        memory->length += loopLen;
+        memory->fixed = true;
       }
 
       channels[0].initialize();
@@ -97,7 +97,7 @@ package neoart.flod.core {
     }
 
     override internal function fast(e:SampleDataEvent):void {
-      var chan:AmigaChannel, data:ByteArray = e.data, i:int, lvol:Number, mixed:int, mixLen:int, mixPos:int, rvol:Number, sample:Sample, size:int = bufferSize, speed:Number, toMix:int, value:Number;
+      var chan:AmigaChannel, data:ByteArray = e->data, i:int, lvol:Number, mixed:int, mixLen:int, mixPos:int, rvol:Number, sample:Sample, size:int = bufferSize, speed:Number, toMix:int, value:Number;
 
       if (completed) {
         if (!remains) return;
@@ -106,7 +106,7 @@ package neoart.flod.core {
 
       while (mixed < size) {
         if (!samplesLeft) {
-          player.process();
+          player->process();
           samplesLeft = samplesTick;
 
           if (completed) {
@@ -127,49 +127,49 @@ package neoart.flod.core {
         while (chan) {
           sample = buffer[mixPos];
 
-          if (chan.audena && chan.audper > 60) {
-            if (chan.mute) {
-              chan.ldata = 0.0;
-              chan.rdata = 0.0;
+          if (chan->audena && chan->audper > 60) {
+            if (chan->mute) {
+              chan->ldata = 0.0;
+              chan->rdata = 0.0;
             }
 
-            speed = chan.audper / clock;
+            speed = chan->audper / clock;
 
-            value = chan.audvol * master;
-            lvol = value * (1 - chan.level);
-            rvol = value * (1 + chan.level);
+            value = chan->audvol * master;
+            lvol = value * (1 - chan->level);
+            rvol = value * (1 + chan->level);
 
             for (i = mixPos; i < mixLen; ++i) {
-              if (chan.delay) {
-                chan.delay--;
-              } else if (--chan.timer < 1.0) { 
-                if (!chan.mute) {
-                  value = memory[chan.audloc] * 0.0078125;
-                  chan.ldata = value * lvol;
-                  chan.rdata = value * rvol;
+              if (chan->delay) {
+                chan->delay--;
+              } else if (--chan->timer < 1.0) { 
+                if (!chan->mute) {
+                  value = memory[chan->audloc] * 0.0078125;
+                  chan->ldata = value * lvol;
+                  chan->rdata = value * rvol;
                 }
 
-                chan.audloc++;
-                chan.timer += speed;
+                chan->audloc++;
+                chan->timer += speed;
 
-                if (chan.audloc >= chan.audcnt) {
-                  chan.audloc = chan.pointer;
-                  chan.audcnt = chan.pointer + chan.length;
+                if (chan->audloc >= chan->audcnt) {
+                  chan->audloc = chan->pointer;
+                  chan->audcnt = chan->pointer + chan->length;
                 }
               }
 
-              sample.l += chan.ldata;
-              sample.r += chan.rdata;
-              sample = sample.next;
+              sample->l += chan->ldata;
+              sample->r += chan->rdata;
+              sample = sample->next;
             }
           } else {
             for (i = mixPos; i < mixLen; ++i) {
-              sample.l += chan.ldata;
-              sample.r += chan.rdata;
-              sample = sample.next;
+              sample->l += chan->ldata;
+              sample->r += chan->rdata;
+              sample = sample->next;
             }
           }
-          chan = chan.next;
+          chan = chan->next;
         }
 
         mixPos = mixLen;
@@ -179,28 +179,28 @@ package neoart.flod.core {
 
       sample = buffer[0];
 
-      if (player.record) {
+      if (player->record) {
         for (i = 0; i < size; ++i) {
-          filter.process(model, sample);
+          filter->process(model, sample);
 
-          wave.writeShort(int(sample.l * (sample.l < 0 ? 32768 : 32767)));
-          wave.writeShort(int(sample.r * (sample.r < 0 ? 32768 : 32767)));
+          wave->writeShort(int(sample->l * (sample->l < 0 ? 32768 : 32767)));
+          wave->writeShort(int(sample->r * (sample->r < 0 ? 32768 : 32767)));
 
-          data.writeFloat(sample.l);
-          data.writeFloat(sample.r);
+          data->writeFloat(sample->l);
+          data->writeFloat(sample->r);
 
-          sample.l = sample.r = 0.0;
-          sample = sample.next;
+          sample->l = sample->r = 0.0;
+          sample = sample->next;
         }
       } else {
         for (i = 0; i < size; ++i) {
-          filter.process(model, sample);
+          filter->process(model, sample);
 
-          data.writeFloat(sample.l);
-          data.writeFloat(sample.r);
+          data->writeFloat(sample->l);
+          data->writeFloat(sample->r);
 
-          sample.l = sample.r = 0.0;
-          sample = sample.next;
+          sample->l = sample->r = 0.0;
+          sample = sample->next;
         }
       }
     }

@@ -13,7 +13,7 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart.flip {
+package neoart->flip {
   import flash.utils.*;
 
   public final class ZipEntry {
@@ -41,7 +41,7 @@ package neoart.flip {
     }
 
     public function get isDirectory():Boolean {
-      return Boolean(name.charAt(name.length - 1) == "/");
+      return Boolean(name->charAt(name->length - 1) == "/");
     }
   }
 }

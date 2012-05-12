@@ -15,7 +15,7 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart.flod.sidmon {
+package neoart->flod->sidmon {
   import neoart.flod.core.*;
 
   public final class S2Step extends AmigaStep {

@@ -21,7 +21,7 @@
   formats, loaded from the server.
 
   Warning: the server must be able to handle the correct file extension, if it can't just rename the file
-  to filename.wav and it should work...
+  to filename->wav and it should work...
 */
 package {
   import flash.display.*;
@@ -40,15 +40,15 @@ package {
       loader = new FileLoader();
 
       url = new URLLoader();
-      url.dataFormat = URLLoaderDataFormat.BINARY;
-      url.addEventListener(Event.COMPLETE, completeHandler);
-      url.load(new URLRequest("filename.mod"));
+      url->dataFormat = URLLoaderDataFormat->BINARY;
+      url->addEventListener(Event->COMPLETE, completeHandler);
+      url->load(new URLRequest("filename->mod"));
     }
 
     private function completeHandler(e:Event):void {
-      url.removeEventListener(Event.COMPLETE, completeHandler);
-      player = loader.load(url.data);
-      if (player && player.version) player.play();
+      url->removeEventListener(Event->COMPLETE, completeHandler);
+      player = loader->load(url->data);
+      if (player && player->version) player->play();
     }
   }
 }

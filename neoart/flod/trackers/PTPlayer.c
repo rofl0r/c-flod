@@ -15,7 +15,7 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart.flod.trackers {
+package neoart->flod->trackers {
   import flash.utils.*;
   import neoart.flod.core.*;
 
@@ -36,9 +36,9 @@ package neoart.flod.trackers {
 
     public function PTPlayer(amiga:Amiga = null) {
       super(amiga);
-      PERIODS.fixed = true;
-      VIBRATO.fixed = true;
-      FUNKREP.fixed = true;
+      PERIODS->fixed = true;
+      VIBRATO->fixed = true;
+      FUNKREP->fixed = true;
 
       track   = new Vector.<int>(128, true);
       samples = new Vector.<PTSample>(32, true);
@@ -72,96 +72,96 @@ package neoart.flod.trackers {
           pattern = track[trackPos] + patternPos;
 
           while (voice) {
-            chan = voice.channel;
-            voice.enabled = 0;
+            chan = voice->channel;
+            voice->enabled = 0;
 
-            if (!voice.step) chan.period = voice.period;
+            if (!voice->step) chan->period = voice->period;
 
-            row = patterns[int(pattern + voice.index)];
-            voice.step   = row.step;
-            voice.effect = row.effect;
-            voice.param  = row.param;
+            row = patterns[int(pattern + voice->index)];
+            voice->step   = row->step;
+            voice->effect = row->effect;
+            voice->param  = row->param;
 
-            if (row.sample) {
-              sample = voice.sample = samples[row.sample];
+            if (row->sample) {
+              sample = voice->sample = samples[row->sample];
 
-              voice.pointer  = sample.pointer;
-              voice.length   = sample.length;
-              voice.loopPtr  = voice.funkWave = sample.loopPtr;
-              voice.repeat   = sample.repeat;
-              voice.finetune = sample.finetune;
+              voice->pointer  = sample->pointer;
+              voice->length   = sample->length;
+              voice->loopPtr  = voice->funkWave = sample->loopPtr;
+              voice->repeat   = sample->repeat;
+              voice->finetune = sample->finetune;
 
-              chan.volume = voice.volume = sample.volume;
+              chan->volume = voice->volume = sample->volume;
             } else {
-              sample = voice.sample;
+              sample = voice->sample;
             }
 
-            if (!row.note) {
+            if (!row->note) {
               moreEffects(voice);
-              voice = voice.next;
+              voice = voice->next;
               continue;
             } else {
-              if ((voice.step & 0x0ff0) == 0x0e50) {
-                voice.finetune = (voice.param & 0x0f) * 37;
-              } else if (voice.effect == 3 || voice.effect == 5) {
-                if (row.note == voice.period) {
-                  voice.portaPeriod = 0;
+              if ((voice->step & 0x0ff0) == 0x0e50) {
+                voice->finetune = (voice->param & 0x0f) * 37;
+              } else if (voice->effect == 3 || voice->effect == 5) {
+                if (row->note == voice->period) {
+                  voice->portaPeriod = 0;
                 } else {
-                  i = voice.finetune;
+                  i = voice->finetune;
                   value = i + 37;
 
                   for (i; i < value; ++i)
-                    if (row.note >= PERIODS[i]) break;
+                    if (row->note >= PERIODS[i]) break;
 
                   if (i == value) value--;
 
                   if (i > 0) {
-                    value = (voice.finetune / 37) & 8;
+                    value = (voice->finetune / 37) & 8;
                     if (value) i--;
                   }
 
-                  voice.portaPeriod = PERIODS[i];
-                  voice.portaDir = row.note > voice.portaPeriod ? 0 : 1;
+                  voice->portaPeriod = PERIODS[i];
+                  voice->portaDir = row->note > voice->portaPeriod ? 0 : 1;
                 }
-              } else if (voice.effect == 9) {
+              } else if (voice->effect == 9) {
                 moreEffects(voice);
               }
             }
 
             for (i = 0; i < 37; ++i)
-              if (row.note >= PERIODS[i]) break;
+              if (row->note >= PERIODS[i]) break;
 
-            voice.period = PERIODS[int(voice.finetune + i)];
+            voice->period = PERIODS[int(voice->finetune + i)];
 
-            if ((voice.step & 0x0ff0) == 0x0ed0) {
-              if (voice.funkSpeed) updateFunk(voice);
+            if ((voice->step & 0x0ff0) == 0x0ed0) {
+              if (voice->funkSpeed) updateFunk(voice);
               extended(voice);
-              voice = voice.next;
+              voice = voice->next;
               continue;
             }
 
-            if (voice.vibratoWave < 4) voice.vibratoPos = 0;
-            if (voice.tremoloWave < 4) voice.tremoloPos = 0;
+            if (voice->vibratoWave < 4) voice->vibratoPos = 0;
+            if (voice->tremoloWave < 4) voice->tremoloPos = 0;
 
-            chan.enabled = 0;
-            chan.pointer = voice.pointer;
-            chan.length  = voice.length;
-            chan.period  = voice.period;
+            chan->enabled = 0;
+            chan->pointer = voice->pointer;
+            chan->length  = voice->length;
+            chan->period  = voice->period;
 
-            voice.enabled = 1;
+            voice->enabled = 1;
             moreEffects(voice);
-            voice = voice.next;
+            voice = voice->next;
           }
           voice = voices[0];
 
           while (voice) {
-            chan = voice.channel;
-            if (voice.enabled) chan.enabled = 1;
+            chan = voice->channel;
+            if (voice->enabled) chan->enabled = 1;
 
-            chan.pointer = voice.loopPtr;
-            chan.length  = voice.repeat;
+            chan->pointer = voice->loopPtr;
+            chan->length  = voice->repeat;
 
-            voice = voice.next;
+            voice = voice->next;
           }
         }
       } else {
@@ -188,7 +188,7 @@ package neoart.flod.trackers {
 
           if (++trackPos == length) {
             trackPos = 0;
-            amiga.complete = 1;
+            amiga->complete = 1;
           }
         }
       }
@@ -206,112 +206,112 @@ package neoart.flod.trackers {
       breakPos     = 0;
       jumpFlag     = 0;
 
-      super.initialize();
+      super->initialize();
       force = version;
 
       while (voice) {
-        voice.initialize();
-        voice.channel = amiga.channels[voice.index];
-        voice.sample  = samples[0];
-        voice = voice.next;
+        voice->initialize();
+        voice->channel = amiga->channels[voice->index];
+        voice->sample  = samples[0];
+        voice = voice->next;
       }
     }
 
     override protected function loader(stream:ByteArray):void {
       var higher:int, i:int, id:String, j:int, row:PTRow, sample:PTSample, size:int, value:int;
-      if (stream.length < 2106) return;
+      if (stream->length < 2106) return;
 
-      stream.position = 1080;
-      id = stream.readMultiByte(4, ENCODING);
-      if (id != "M.K." && id != "M!K!") return;
+      stream->position = 1080;
+      id = stream->readMultiByte(4, ENCODING);
+      if (id != "M->K." && id != "M!K!") return;
 
-      stream.position = 0;
-      title = stream.readMultiByte(20, ENCODING);
+      stream->position = 0;
+      title = stream->readMultiByte(20, ENCODING);
       version = PROTRACKER_10;
-      stream.position += 22;
+      stream->position += 22;
 
       for (i = 1; i < 32; ++i) {
-        value = stream.readUnsignedShort();
+        value = stream->readUnsignedShort();
 
         if (!value) {
           samples[i] = null;
-          stream.position += 28;
+          stream->position += 28;
           continue;
         }
 
         sample = new PTSample();
-        stream.position -= 24;
+        stream->position -= 24;
 
-        sample.name = stream.readMultiByte(22, ENCODING);
-        sample.length = sample.realLen = value << 1;
-        stream.position += 2;
+        sample->name = stream->readMultiByte(22, ENCODING);
+        sample->length = sample->realLen = value << 1;
+        stream->position += 2;
 
-        sample.finetune = stream.readUnsignedByte() * 37;
-        sample.volume   = stream.readUnsignedByte();
-        sample.loop     = stream.readUnsignedShort() << 1;
-        sample.repeat   = stream.readUnsignedShort() << 1;
+        sample->finetune = stream->readUnsignedByte() * 37;
+        sample->volume   = stream->readUnsignedByte();
+        sample->loop     = stream->readUnsignedShort() << 1;
+        sample->repeat   = stream->readUnsignedShort() << 1;
 
-        stream.position += 22;
-        sample.pointer = size;
-        size += sample.length;
+        stream->position += 22;
+        sample->pointer = size;
+        size += sample->length;
         samples[i] = sample;
       }
 
-      stream.position = 950;
-      length = stream.readUnsignedByte();
-      stream.position++;
+      stream->position = 950;
+      length = stream->readUnsignedByte();
+      stream->position++;
 
       for (i = 0; i < 128; ++i) {
-        value = stream.readUnsignedByte() << 8;
+        value = stream->readUnsignedByte() << 8;
         track[i] = value;
         if (value > higher) higher = value;
       }
 
-      stream.position = 1084;
+      stream->position = 1084;
       higher += 256;
       patterns = new Vector.<PTRow>(higher, true);
 
       for (i = 0; i < higher; ++i) {
         row = new PTRow();
-        row.step = value = stream.readUnsignedInt();
+        row->step = value = stream->readUnsignedInt();
 
-        row.note   = (value >> 16) & 0x0fff;
-        row.effect = (value >>  8) & 0x0f;
-        row.sample = (value >> 24) & 0xf0 | (value >> 12) & 0x0f;
-        row.param  = value & 0xff;
+        row->note   = (value >> 16) & 0x0fff;
+        row->effect = (value >>  8) & 0x0f;
+        row->sample = (value >> 24) & 0xf0 | (value >> 12) & 0x0f;
+        row->param  = value & 0xff;
 
         patterns[i] = row;
 
-        if (row.sample > 31 || !samples[row.sample]) row.sample = 0;
+        if (row->sample > 31 || !samples[row->sample]) row->sample = 0;
 
-        if (row.effect == 15 && row.param > 31)
+        if (row->effect == 15 && row->param > 31)
           version = PROTRACKER_11;
 
-        if (row.effect == 8)
+        if (row->effect == 8)
           version = PROTRACKER_12;
       }
 
-      amiga.store(stream, size);
+      amiga->store(stream, size);
 
       for (i = 1; i < 32; ++i) {
         sample = samples[i];
         if (!sample) continue;
 
-        if (sample.loop || sample.repeat > 4) {
-          sample.loopPtr = sample.pointer + sample.loop;
-          sample.length  = sample.loop + sample.repeat;
+        if (sample->loop || sample->repeat > 4) {
+          sample->loopPtr = sample->pointer + sample->loop;
+          sample->length  = sample->loop + sample->repeat;
         } else {
-          sample.loopPtr = amiga.memory.length;
-          sample.repeat  = 2;
+          sample->loopPtr = amiga->memory->length;
+          sample->repeat  = 2;
         }
 
-        size = sample.pointer + 2;
-        for (j = sample.pointer; j < size; ++j) amiga.memory[j] = 0;
+        size = sample->pointer + 2;
+        for (j = sample->pointer; j < size; ++j) amiga->memory[j] = 0;
       }
 
       sample = new PTSample();
-      sample.pointer = sample.loopPtr = amiga.memory.length;
-      sample.length  = sample.repeat  = 2;
+      sample->pointer = sample->loopPtr = amiga->memory->length;
+      sample->length  = sample->repeat  = 2;
       samples[0] = sample;
     }
 
@@ -319,153 +319,153 @@ package neoart.flod.trackers {
       var chan:AmigaChannel, i:int, position:int, slide:int, value:int, voice:PTVoice = voices[0], wave:int;
 
       while (voice) {
-        chan = voice.channel;
-        if (voice.funkSpeed) updateFunk(voice);
+        chan = voice->channel;
+        if (voice->funkSpeed) updateFunk(voice);
 
-        if ((voice.step & 0x0fff) == 0) {
-          chan.period = voice.period;
-          voice = voice.next;
+        if ((voice->step & 0x0fff) == 0) {
+          chan->period = voice->period;
+          voice = voice->next;
           continue;
         }
 
-        switch (voice.effect) {
+        switch (voice->effect) {
           case 0:   //arpeggio
             value = tick % 3;
 
             if (!value) {
-              chan.period = voice.period;
-              voice = voice.next;
+              chan->period = voice->period;
+              voice = voice->next;
               continue;
             }
 
-            if (value == 1) value = voice.param >> 4;
-              else value = voice.param & 0x0f;
+            if (value == 1) value = voice->param >> 4;
+              else value = voice->param & 0x0f;
 
-            i = voice.finetune;
+            i = voice->finetune;
             position = i + 37;
 
             for (i; i < position; ++i)
-              if (voice.period >= PERIODS[i]) {
-                chan.period = PERIODS[int(i + value)];
+              if (voice->period >= PERIODS[i]) {
+                chan->period = PERIODS[int(i + value)];
                 break;
               }
             break;
           case 1:   //portamento up
-            voice.period -= voice.param;
-            if (voice.period < 113) voice.period = 113;
-            chan.period = voice.period;
+            voice->period -= voice->param;
+            if (voice->period < 113) voice->period = 113;
+            chan->period = voice->period;
             break;
           case 2:   //portamento down
-            voice.period += voice.param;
-            if (voice.period > 856) voice.period = 856;
-            chan.period = voice.period;
+            voice->period += voice->param;
+            if (voice->period > 856) voice->period = 856;
+            chan->period = voice->period;
             break;
           case 3:   //tone portamento
           case 5:   //tone portamento + volume slide
-            if (voice.effect == 5) {
+            if (voice->effect == 5) {
               slide = 1;
             } else {
-              voice.portaSpeed = voice.param;
-              voice.param = 0;
+              voice->portaSpeed = voice->param;
+              voice->param = 0;
             }
 
-            if (voice.portaPeriod) {
-              if (voice.portaDir) {
-                voice.period -= voice.portaSpeed;
+            if (voice->portaPeriod) {
+              if (voice->portaDir) {
+                voice->period -= voice->portaSpeed;
 
-                if (voice.period <= voice.portaPeriod) {
-                  voice.period = voice.portaPeriod;
-                  voice.portaPeriod = 0;
+                if (voice->period <= voice->portaPeriod) {
+                  voice->period = voice->portaPeriod;
+                  voice->portaPeriod = 0;
                 }
               } else {
-                voice.period += voice.portaSpeed;
+                voice->period += voice->portaSpeed;
 
-                if (voice.period >= voice.portaPeriod) {
-                  voice.period = voice.portaPeriod;
-                  voice.portaPeriod = 0;
+                if (voice->period >= voice->portaPeriod) {
+                  voice->period = voice->portaPeriod;
+                  voice->portaPeriod = 0;
                 }
               }
 
-              if (voice.glissando) {
-                i = voice.finetune;
+              if (voice->glissando) {
+                i = voice->finetune;
                 value = i + 37;
 
                 for (i; i < value; ++i)
-                  if (voice.period >= PERIODS[i]) break;
+                  if (voice->period >= PERIODS[i]) break;
 
                 if (i == value) i--;
-                chan.period = PERIODS[i];
+                chan->period = PERIODS[i];
               } else {
-                chan.period = voice.period;
+                chan->period = voice->period;
               }
             }
             break;
           case 4:   //vibrato
           case 6:   //vibrato + volume slide
-            if (voice.effect == 6) {
+            if (voice->effect == 6) {
               slide = 1;
-            } else if (voice.param) {
-              value = voice.param & 0x0f;
-              if (value) voice.vibratoParam = (voice.vibratoParam & 0xf0) | value;
-              value = voice.param & 0xf0;
-              if (value) voice.vibratoParam = (voice.vibratoParam & 0x0f) | value;
+            } else if (voice->param) {
+              value = voice->param & 0x0f;
+              if (value) voice->vibratoParam = (voice->vibratoParam & 0xf0) | value;
+              value = voice->param & 0xf0;
+              if (value) voice->vibratoParam = (voice->vibratoParam & 0x0f) | value;
             }
 
-            position = (voice.vibratoPos >> 2) & 31;
-            wave = voice.vibratoWave & 3;
+            position = (voice->vibratoPos >> 2) & 31;
+            wave = voice->vibratoWave & 3;
 
             if (wave) {
               value = 255;
               position <<= 3;
 
               if (wave == 1) {
-                if (voice.vibratoPos > 127) value -= position;
+                if (voice->vibratoPos > 127) value -= position;
                   else value = position;
               }
             } else {
               value = VIBRATO[position];
             }
 
-            value = ((voice.vibratoParam & 0x0f) * value) >> vibratoDepth;
+            value = ((voice->vibratoParam & 0x0f) * value) >> vibratoDepth;
 
-            if (voice.vibratoPos > 127) chan.period = voice.period - value;
-              else chan.period = voice.period + value;
+            if (voice->vibratoPos > 127) chan->period = voice->period - value;
+              else chan->period = voice->period + value;
 
-            value = (voice.vibratoParam >> 2) & 60;
-            voice.vibratoPos = (voice.vibratoPos + value) & 255;
+            value = (voice->vibratoParam >> 2) & 60;
+            voice->vibratoPos = (voice->vibratoPos + value) & 255;
             break;
           case 7:   //tremolo
-            chan.period = voice.period;
+            chan->period = voice->period;
 
-            if (voice.param) {
-              value = voice.param & 0x0f;
-              if (value) voice.tremoloParam = (voice.tremoloParam & 0xf0) | value;
-              value = voice.param & 0xf0;
-              if (value) voice.tremoloParam = (voice.tremoloParam & 0x0f) | value;
+            if (voice->param) {
+              value = voice->param & 0x0f;
+              if (value) voice->tremoloParam = (voice->tremoloParam & 0xf0) | value;
+              value = voice->param & 0xf0;
+              if (value) voice->tremoloParam = (voice->tremoloParam & 0x0f) | value;
             }
 
-            position = (voice.tremoloPos >> 2) & 31;
-            wave = voice.tremoloWave & 3;
+            position = (voice->tremoloPos >> 2) & 31;
+            wave = voice->tremoloWave & 3;
 
             if (wave) {
               value = 255;
               position <<= 3;
 
               if (wave == 1) {
-                if (voice.tremoloPos > 127) value -= position;
+                if (voice->tremoloPos > 127) value -= position;
                   else value = position;
               }
             } else {
               value = VIBRATO[position];
             }
 
-            value = ((voice.tremoloParam & 0x0f) * value) >> 6;
+            value = ((voice->tremoloParam & 0x0f) * value) >> 6;
 
-            if (voice.tremoloPos > 127) chan.volume = voice.volume - value;
-              else chan.volume = voice.volume + value;
+            if (voice->tremoloPos > 127) chan->volume = voice->volume - value;
+              else chan->volume = voice->volume + value;
 
-            value = (voice.tremoloParam >> 2) & 60;
-            voice.tremoloPos = (voice.tremoloPos + value) & 255;
+            value = (voice->tremoloParam >> 2) & 60;
+            voice->tremoloPos = (voice->tremoloPos + value) & 255;
             break;
           case 10:  //volume slide
             slide = 1;
@@ -477,48 +477,48 @@ package neoart.flod.trackers {
 
         if (slide) {
           slide = 0;
-          value = voice.param >> 4;
+          value = voice->param >> 4;
 
-          if (value) voice.volume += value;
-            else voice.volume -= voice.param & 0x0f;
+          if (value) voice->volume += value;
+            else voice->volume -= voice->param & 0x0f;
 
-          if (voice.volume < 0) voice.volume = 0;
-            else if (voice.volume > 64) voice.volume = 64;
+          if (voice->volume < 0) voice->volume = 0;
+            else if (voice->volume > 64) voice->volume = 64;
 
-          chan.volume = voice.volume;
+          chan->volume = voice->volume;
         }
-        voice = voice.next;
+        voice = voice->next;
       }
     }
 
     private function moreEffects(voice:PTVoice):void {
-      var chan:AmigaChannel = voice.channel, value:int;
-      if (voice.funkSpeed) updateFunk(voice);
+      var chan:AmigaChannel = voice->channel, value:int;
+      if (voice->funkSpeed) updateFunk(voice);
 
-      switch (voice.effect) {
+      switch (voice->effect) {
         case 9:   //sample offset
-          if (voice.param) voice.offset = voice.param;
-          value = voice.offset << 8;
+          if (voice->param) voice->offset = voice->param;
+          value = voice->offset << 8;
 
-          if (value >= voice.length) {
-            voice.length = 2;
+          if (value >= voice->length) {
+            voice->length = 2;
           } else {
-            voice.pointer += value;
-            voice.length  -= value;
+            voice->pointer += value;
+            voice->length  -= value;
           }
           break;
         case 11:  //position jump
-          trackPos = voice.param - 1;
+          trackPos = voice->param - 1;
           breakPos = 0;
           jumpFlag = 1;
           break;
         case 12:  //set volume
-          voice.volume = voice.param;
-          if (voice.volume > 64) voice.volume = 64;
-          chan.volume = voice.volume;
+          voice->volume = voice->param;
+          if (voice->volume > 64) voice->volume = 64;
+          chan->volume = voice->volume;
           break;
         case 13:  //pattern break
-          breakPos = ((voice.param >> 4) * 10) + (voice.param & 0x0f);
+          breakPos = ((voice->param >> 4) * 10) + (voice->param & 0x0f);
 
           if (breakPos > 63) breakPos = 0;
             else breakPos <<= 2;
@@ -529,10 +529,10 @@ package neoart.flod.trackers {
           extended(voice);
           break;
         case 15:  //set speed
-          if (!voice.param) return;
+          if (!voice->param) return;
 
-          if (voice.param < 32) speed = voice.param;
-            else amiga.samplesTick = 110250 / voice.param;
+          if (voice->param < 32) speed = voice->param;
+            else amiga->samplesTick = 110250 / voice->param;
 
           tick = 0;
           break;
@@ -540,101 +540,101 @@ package neoart.flod.trackers {
     }
 
     private function extended(voice:PTVoice):void {
-      var chan:AmigaChannel = voice.channel, effect:int = voice.param >> 4, i:int, len:int, memory:Vector.<int>, param:int = voice.param & 0x0f;
+      var chan:AmigaChannel = voice->channel, effect:int = voice->param >> 4, i:int, len:int, memory:Vector.<int>, param:int = voice->param & 0x0f;
 
       switch (effect) {
         case 0:   //set filter
-          amiga.filter.active = param;
+          amiga->filter->active = param;
           break;
         case 1:   //fine portamento up
           if (tick) return;
-          voice.period -= param;
-          if (voice.period < 113) voice.period = 113;
-          chan.period = voice.period;
+          voice->period -= param;
+          if (voice->period < 113) voice->period = 113;
+          chan->period = voice->period;
           break;
         case 2:   //fine portamento down
           if (tick) return;
-          voice.period += param;
-          if (voice.period > 856) voice.period = 856;
-          chan.period = voice.period;
+          voice->period += param;
+          if (voice->period > 856) voice->period = 856;
+          chan->period = voice->period;
           break;
         case 3:   //glissando control
-          voice.glissando = param;
+          voice->glissando = param;
           break;
         case 4:   //vibrato control
-          voice.vibratoWave = param;
+          voice->vibratoWave = param;
           break;
         case 5:   //set finetune
-          voice.finetune = param * 37;
+          voice->finetune = param * 37;
           break;
         case 6:   //pattern loop
           if (tick) return;
 
           if (param) {
-            if (voice.loopCtr) voice.loopCtr--;
-              else voice.loopCtr = param;
+            if (voice->loopCtr) voice->loopCtr--;
+              else voice->loopCtr = param;
 
-            if (voice.loopCtr) {
-              breakPos = voice.loopPos << 2;
+            if (voice->loopCtr) {
+              breakPos = voice->loopPos << 2;
               patternBreak = 1;
             }
           } else {
-            voice.loopPos = patternPos >> 2;
+            voice->loopPos = patternPos >> 2;
           }
           break;
         case 7:   //tremolo control
-          voice.tremoloWave = param;
+          voice->tremoloWave = param;
           break;
         case 8:   //karplus strong
-          len = voice.length - 2;
-          memory = amiga.memory;
+          len = voice->length - 2;
+          memory = amiga->memory;
 
-          for (i = voice.loopPtr; i < len;)
+          for (i = voice->loopPtr; i < len;)
             memory[i] = (memory[i] + memory[++i]) * 0.5;
 
           memory[++i] = (memory[i] + memory[0]) * 0.5;
           break;
         case 9:   //retrig note
-          if (tick || !param || !voice.period) return;
+          if (tick || !param || !voice->period) return;
           if (tick % param) return;
 
-          chan.enabled = 0;
-          chan.pointer = voice.pointer;
-          chan.length  = voice.length;
-          chan.delay   = 30;
+          chan->enabled = 0;
+          chan->pointer = voice->pointer;
+          chan->length  = voice->length;
+          chan->delay   = 30;
 
-          chan.enabled = 1;
-          chan.pointer = voice.loopPtr;
-          chan.length  = voice.repeat;
-          chan.period  = voice.period;
+          chan->enabled = 1;
+          chan->pointer = voice->loopPtr;
+          chan->length  = voice->repeat;
+          chan->period  = voice->period;
           break;
         case 10:  //fine volume up
           if (tick) return;
-          voice.volume += param;
-          if (voice.volume > 64) voice.volume = 64;
-          chan.volume = voice.volume;
+          voice->volume += param;
+          if (voice->volume > 64) voice->volume = 64;
+          chan->volume = voice->volume;
           break;
         case 11:  //fine volume down
           if (tick) return;
-          voice.volume -= param;
-          if (voice.volume < 0) voice.volume = 0;
-          chan.volume = voice.volume;
+          voice->volume -= param;
+          if (voice->volume < 0) voice->volume = 0;
+          chan->volume = voice->volume;
           break;
         case 12:  //note cut
-          if (tick == param) chan.volume = voice.volume = 0;
+          if (tick == param) chan->volume = voice->volume = 0;
           break;
         case 13:  //note delay
-          if (tick != param || !voice.period) return;
+          if (tick != param || !voice->period) return;
 
-          chan.enabled = 0;
-          chan.pointer = voice.pointer;
-          chan.length  = voice.length;
-          chan.delay   = 30;
+          chan->enabled = 0;
+          chan->pointer = voice->pointer;
+          chan->length  = voice->length;
+          chan->delay   = 30;
 
-          chan.enabled = 1;
-          chan.pointer = voice.loopPtr;
-          chan.length  = voice.repeat;
-          chan.period  = voice.period;
+          chan->enabled = 1;
+          chan->pointer = voice->loopPtr;
+          chan->length  = voice->repeat;
+          chan->period  = voice->period;
           break;
         case 14:  //pattern delay
           if (tick || patternDelay) return;
@@ -642,35 +642,35 @@ package neoart.flod.trackers {
           break;
         case 15:  //funk repeat or invert loop
           if (tick) return;
-          voice.funkSpeed = param;
+          voice->funkSpeed = param;
           if (param) updateFunk(voice);
           break;
       }
     }
 
     private function updateFunk(voice:PTVoice):void {
-      var chan:AmigaChannel = voice.channel, p1:int, p2:int, value:int = FUNKREP[voice.funkSpeed];
+      var chan:AmigaChannel = voice->channel, p1:int, p2:int, value:int = FUNKREP[voice->funkSpeed];
 
-      voice.funkPos += value;
-      if (voice.funkPos < 128) return;
-      voice.funkPos = 0;
+      voice->funkPos += value;
+      if (voice->funkPos < 128) return;
+      voice->funkPos = 0;
 
       if (version == PROTRACKER_10) {
-        p1 = voice.pointer + voice.sample.realLen - voice.repeat;
-        p2 = voice.funkWave + voice.repeat;
+        p1 = voice->pointer + voice->sample->realLen - voice->repeat;
+        p2 = voice->funkWave + voice->repeat;
 
         if (p2 > p1) {
-          p2 = voice.loopPtr;
-          chan.length = voice.repeat;
+          p2 = voice->loopPtr;
+          chan->length = voice->repeat;
         }
-        chan.pointer = voice.funkWave = p2;
+        chan->pointer = voice->funkWave = p2;
       } else {
-        p1 = voice.loopPtr + voice.repeat;
-        p2 = voice.funkWave + 1;
+        p1 = voice->loopPtr + voice->repeat;
+        p2 = voice->funkWave + 1;
 
-        if (p2 >= p1) p2 = voice.loopPtr;
+        if (p2 >= p1) p2 = voice->loopPtr;
 
-        amiga.memory[p2] = -amiga.memory[p2];
+        amiga->memory[p2] = -amiga->memory[p2];
       }
     }
 

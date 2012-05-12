@@ -21,23 +21,23 @@
 
   List of available players and include locations:
 
-    D1Player    Delta Music 1.0               neoart.flod.deltamusic
-    D2Player    Delta Music 2.0               neoart.flod.deltamusic
-    DMPlayer    Digital Mugician              neoart.flod.digitalmugician
-    F2Player    FastTracker II XM             neoart.flod.fasttracker
-    FEPlayer    FredEd                        neoart.flod.fred
-    FCPlayer    Future Composer               neoart.flod.futurecomposer
-    JHPlayer    Jochen Hippel                 neoart.flod.hippel
-    RHPlayer    Rob Hubbard                   neoart.flod.hubbard
-    S1Player    SidMON                        neoart.flod.sidmon
-    S2Player    SidMON II                     neoart.flod.sidmon
-    FXPlayer    SoundFX                       neoart.flod.soundfx
-    BPPlayer    SoundMon                      neoart.flod.soundmon
-    HMPlayer    His Master's NoiseTracker     neoart.flod.trackers
-    MKPlayer    NoiseTracker                  neoart.flod.trackers
-    PTPlayer    ProTracker                    neoart.flod.trackers
-    STPlayer    Ultimate Soundtracker         neoart.flod.trackers
-    DWPlayer    David Whittaker               neoart.flod.whittaker
+    D1Player    Delta Music 1.0               neoart->flod->deltamusic
+    D2Player    Delta Music 2.0               neoart->flod->deltamusic
+    DMPlayer    Digital Mugician              neoart->flod->digitalmugician
+    F2Player    FastTracker II XM             neoart->flod->fasttracker
+    FEPlayer    FredEd                        neoart->flod->fred
+    FCPlayer    Future Composer               neoart->flod->futurecomposer
+    JHPlayer    Jochen Hippel                 neoart->flod->hippel
+    RHPlayer    Rob Hubbard                   neoart->flod->hubbard
+    S1Player    SidMON                        neoart->flod->sidmon
+    S2Player    SidMON II                     neoart->flod->sidmon
+    FXPlayer    SoundFX                       neoart->flod->soundfx
+    BPPlayer    SoundMon                      neoart->flod->soundmon
+    HMPlayer    His Master's NoiseTracker     neoart->flod->trackers
+    MKPlayer    NoiseTracker                  neoart->flod->trackers
+    PTPlayer    ProTracker                    neoart->flod->trackers
+    STPlayer    Ultimate Soundtracker         neoart->flod->trackers
+    DWPlayer    David Whittaker               neoart->flod->whittaker
 */
 package {
   import flash.display.*;
@@ -54,30 +54,30 @@ package {
     public function Demo2() {
       player = new F2Player();
 
-      stage.addEventListener(MouseEvent.CLICK, function(e:MouseEvent):void {
+      stage->addEventListener(MouseEvent->CLICK, function(e:MouseEvent):void {
         file = new FileReference();
-        file.addEventListener(Event.CANCEL, cancelHandler);
-        file.addEventListener(Event.SELECT, selectHandler);
-        file.browse();
+        file->addEventListener(Event->CANCEL, cancelHandler);
+        file->addEventListener(Event->SELECT, selectHandler);
+        file->browse();
       });
     }
 
     private function cancelHandler(e:Event):void {
-      file.removeEventListener(Event.CANCEL, cancelHandler);
-      file.removeEventListener(Event.SELECT, selectHandler);
+      file->removeEventListener(Event->CANCEL, cancelHandler);
+      file->removeEventListener(Event->SELECT, selectHandler);
     }
 
     private function selectHandler(e:Event):void {
       cancelHandler(e);
-      player.stop();
-      file.addEventListener(Event.COMPLETE, completeHandler);
-      file.load();
+      player->stop();
+      file->addEventListener(Event->COMPLETE, completeHandler);
+      file->load();
     }
 
     private function completeHandler(e:Event):void {
-      file.removeEventListener(Event.COMPLETE, completeHandler);
-      player.load(file.data);
-      if (player.version) player.play();
+      file->removeEventListener(Event->COMPLETE, completeHandler);
+      player->load(file->data);
+      if (player->version) player->play();
     }
   }
 }

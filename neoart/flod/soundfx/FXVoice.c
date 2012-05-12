@@ -15,7 +15,7 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart.flod.soundfx {
+package neoart->flod->soundfx {
   import neoart.flod.core.*;
 
   public final class FXVoice {
@@ -40,7 +40,7 @@ package neoart.flod.soundfx {
       stepWanted  : int;
 
     public function FXVoice(index:int) {
-      this.index = index;
+      this->index = index;
     }
 
     internal function initialize():void {
