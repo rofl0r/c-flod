@@ -1113,7 +1113,7 @@ void envelope(voice:F2Voice, envelope:F2Envelope, data:F2Data) {
       envelope->frame++;
     }
 
-     void amiga( int note; int finetune):int {
+int amiga( int note; int finetune) {
       var delta:Number = 0.0, period:int = PERIODS[++note];
 
       if (finetune < 0) {

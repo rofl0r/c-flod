@@ -58,7 +58,7 @@ void set input(stream:ByteArray) {
       return 0;
     }
 
-     void bits( int need):int {
+int bits( int need) {
       var buff:int = bitbuf, inplen:uint = inpbuf->length;
 
       while (bitcnt < need) {
@@ -72,7 +72,7 @@ void set input(stream:ByteArray) {
       return buff & ((1 << need) - 1);
     }
 
-     void codes(lencode:Huffman, discode:Huffman):int {
+int codes(lencode:Huffman, discode:Huffman) {
       var int dis; int len; int pos; int sym;
 
       do {
@@ -99,7 +99,7 @@ void set input(stream:ByteArray) {
       return 0;
     }
 
-     void construct(huff:Huffman, length:Vector.<int>, int n):int {
+int construct(huff:Huffman, length:Vector.<int>, int n) {
       var int len; left:int = 1, offs:Vector.<int> = new Vector.<int>(16, true), int sym;
 
       for (len = 0; len < 16; ++len) huff->count[len] = 0;
@@ -121,7 +121,7 @@ void set input(stream:ByteArray) {
       return left;
     }
 
-     void decode(huff:Huffman):int {
+int decode(huff:Huffman) {
       var buff:int = bitbuf, int code; int count; int first; int index; inplen:uint = inpbuf->length, left:int = bitcnt, len:int = 1;
 
       while (1) {

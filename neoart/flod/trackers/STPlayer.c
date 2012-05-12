@@ -347,7 +347,7 @@ void arpeggio(voice:STVoice) {
       chan->period = PERIODS[int(i + param)];
     }
 
-     void isLegal(text:String):int {
+int isLegal(text:String) {
       var int ascii; i:int = 0, len:int = text->length;
       if (!len) return 0;
 
