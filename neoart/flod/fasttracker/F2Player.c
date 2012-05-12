@@ -39,7 +39,8 @@ package neoart->flod->fasttracker {
       super(mixer);
     }
 
-    override  void process():void {
+//override
+void process():void {
       var int com; curr:F2Point, instr:F2Instrument, int i; int jumpFlag; next:F2Point, int paramx; int paramy; int porta; row:F2Row, sample:F2Sample, int slide; int value; voice:F2Voice = voices[0];
 
       if (!tick) {
@@ -581,7 +582,8 @@ package neoart->flod->fasttracker {
       }
     }
 
-    override  void fast():void {
+//override
+void fast():void {
       var chan:SBChannel, int delta; int flags; instr:F2Instrument, int panning; voice:F2Voice = voices[0], Number volume;
 
       while (voice) {
@@ -682,7 +684,8 @@ package neoart->flod->fasttracker {
       }
     }
 
-    override  void accurate():void {
+//override
+void accurate():void {
       var chan:SBChannel, int delta; int flags; instr:F2Instrument, Number lpan; Number lvol; int panning; Number rpan; Number rvol; voice:F2Voice = voices[0], Number volume; 
 
       while (voice) {
@@ -832,7 +835,8 @@ package neoart->flod->fasttracker {
       }
     }
 
-    override  void initialize():void {
+//override
+void initialize():void {
       var i:int = 0, voice:F2Voice;
       super->initialize();
 
@@ -860,7 +864,8 @@ package neoart->flod->fasttracker {
       }
     }
 
-    override  void loader(stream:ByteArray):void {
+//override
+void loader(stream:ByteArray):void {
       var int header; int i; id:String, int iheader; instr:F2Instrument, int ipos; int j; int len; pattern:F2Pattern, int pos; reserved:int = 22, row:F2Row, int rows; sample:F2Sample, int value;
       if (stream->length < 360) return;
       stream->position = 17;

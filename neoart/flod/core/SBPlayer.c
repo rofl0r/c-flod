@@ -35,22 +35,26 @@ package neoart->flod->core {
       quality = 1;
   }
 
-    override  void set volume( Number value):void {
+//override
+void set volume( Number value):void {
       if (value < 0.0) value = 0.0;
         else if (value > 1.0) value = 1.0;
 
       master = value * 64;
     }
 
-    override  void toggle( int index):void {
+//override
+void toggle( int index):void {
       mixer->channels[index].mute ^= 1;
     }
 
-    override  void setup():void {
+//override
+void setup():void {
       mixer->setup(channels);
     }
 
-    override  void initialize():void {
+//override
+void initialize():void {
       super->initialize();
       timer  = speed;
       master = 64;

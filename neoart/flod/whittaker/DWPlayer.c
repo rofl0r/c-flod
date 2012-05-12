@@ -66,7 +66,8 @@ package neoart->flod->whittaker {
       voices[3] = new DWVoice(3,8);
     }
 
-    override  void process():void {
+//override
+void process():void {
       var chan:AmigaChannel, int loop; int pos; sample:DWSample, int value; voice:DWVoice = voices[active], int volume;
 
       if (slower) {
@@ -371,7 +372,8 @@ package neoart->flod->whittaker {
       }
     }
 
-    override  void initialize():void {
+//override
+void initialize():void {
       var int i; int len; voice:DWVoice = voices[active];
       super->initialize();
 
@@ -419,7 +421,8 @@ package neoart->flod->whittaker {
       }
     }
 
-    override  void loader(stream:ByteArray):void {
+//override
+void loader(stream:ByteArray):void {
       var int flag; int headers; int i; int index; int info; int lower; int pos; sample:DWSample, size:int = 10, song:DWSong, int total; int value;
 
       master  = 64;

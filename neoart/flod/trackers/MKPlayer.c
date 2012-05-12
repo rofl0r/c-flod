@@ -48,7 +48,8 @@ package neoart->flod->trackers {
       voices[2].next = voices[3] = new MKVoice(3);
     }
 
-    override  void set force( int value):void {
+//override
+void set force( int value):void {
       if (value < SOUNDTRACKER_23)
         value = SOUNDTRACKER_23;
       else if (value > NOISETRACKER_20)
@@ -68,7 +69,8 @@ package neoart->flod->trackers {
       }
     }
 
-    override  void process():void {
+//override
+void process():void {
       var chan:AmigaChannel, int i; int len; int pattern; int period; row:AmigaRow, sample:AmigaSample, int slide; int value; voice:MKVoice = voices[0];
 
       if (!tick) {
@@ -270,7 +272,8 @@ package neoart->flod->trackers {
       }
     }
 
-    override  void initialize():void {
+//override
+void initialize():void {
       var voice:MKVoice = voices[0];
       super->initialize();
       force = version;
@@ -288,7 +291,8 @@ package neoart->flod->trackers {
       }
     }
 
-    override  void loader(stream:ByteArray):void {
+//override
+void loader(stream:ByteArray):void {
       var int higher; int i; id:String, int j; row:AmigaRow, sample:AmigaSample, int size; int value;
       if (stream->length < 2106) return;
 

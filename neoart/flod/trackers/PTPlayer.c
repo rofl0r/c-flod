@@ -50,7 +50,8 @@ package neoart->flod->trackers {
       voices[2].next = voices[3] = new PTVoice(3);
     }
 
-    override  void set force( int value):void {
+//override
+void set force( int value):void {
       if (value < PROTRACKER_10)
         value = PROTRACKER_10;
       else if (value > PROTRACKER_12)
@@ -62,7 +63,8 @@ package neoart->flod->trackers {
         else vibratoDepth = 7;
     }
 
-    override  void process():void {
+//override
+void process():void {
       var chan:AmigaChannel, int i; int pattern; row:PTRow, sample:PTSample, int value; voice:PTVoice = voices[0];
 
       if (!tick) {
@@ -194,7 +196,8 @@ package neoart->flod->trackers {
       }
     }
 
-    override  void initialize():void {
+//override
+void initialize():void {
       var voice:PTVoice = voices[0];
 
       tempo        = 125;
@@ -217,7 +220,8 @@ package neoart->flod->trackers {
       }
     }
 
-    override  void loader(stream:ByteArray):void {
+//override
+void loader(stream:ByteArray):void {
       var int higher; int i; id:String, int j; row:PTRow, sample:PTSample, int size; int value;
       if (stream->length < 2106) return;
 

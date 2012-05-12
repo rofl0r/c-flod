@@ -50,7 +50,8 @@ package neoart->flod->soundmon {
       voices[2].next = voices[3] = new BPVoice(3);
     }
 
-    override  void process():void {
+//override
+void process():void {
       var chan:AmigaChannel, int data; int dst; int instr; int len; memory:Vector.<int> = amiga->memory, int note; int option; row:AmigaRow, sample:BPSample, int src; step:BPStep, voice:BPVoice = voices[0];
       arpeggioCtr = --arpeggioCtr & 3;
       vibratoPos  = ++vibratoPos  & 7;
@@ -435,7 +436,8 @@ package neoart->flod->soundmon {
       }
     }
 
-    override  void initialize():void {
+//override
+void initialize():void {
       var int i; voice:BPVoice = voices[0];
       super->initialize();
 
@@ -459,7 +461,8 @@ package neoart->flod->soundmon {
       }
     }
 
-    override  void reset():void {
+//override
+void reset():void {
       var int i; int len; int pos; voice:BPVoice = voices[0];
 
       while (voice) {
@@ -475,7 +478,8 @@ package neoart->flod->soundmon {
       }
     }
 
-    override  void loader(stream:ByteArray):void {
+//override
+void loader(stream:ByteArray):void {
       var int higher; i:int = 0, id:String, int len; row:AmigaRow, sample:BPSample, step:BPStep, int tables;
       title = stream->readMultiByte(26, ENCODING);
 

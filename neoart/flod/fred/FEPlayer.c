@@ -39,7 +39,8 @@ package neoart->flod->fred {
       voices[1].next = voices[0] = new FEVoice(0,1);
     }
 
-    override  void process():void {
+//override
+void process():void {
       var chan:AmigaChannel, int i; int j; int len; int loop; int pos; sample:FESample, int value; voice:FEVoice = voices[3];
 
       while (voice) {
@@ -402,7 +403,8 @@ package neoart->flod->fred {
       }
     }
 
-    override  void initialize():void {
+//override
+void initialize():void {
       var int i; int len; voice:FEVoice = voices[3];
       super->initialize();
 
@@ -424,7 +426,8 @@ package neoart->flod->fred {
       }
     }
 
-    override  void loader(stream:ByteArray):void {
+//override
+void loader(stream:ByteArray):void {
       var int basePtr; int dataPtr; int i; int j; int len; int pos; int ptr; sample:FESample, int size; song:FESong, int tracksLen; int value;
 
       while (stream->position < 16) {

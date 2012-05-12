@@ -50,7 +50,8 @@ package neoart->flod->sidmon {
       voices[2].next = voices[3] = new S2Voice(3);
     }
 
-    override  void process():void {
+//override
+void process():void {
       var chan:AmigaChannel, instr:S2Instrument, row:SMRow, sample:S2Sample, int value; voice:S2Voice = voices[0];
       arpeggioPos = ++arpeggioPos & 3;
 
@@ -337,7 +338,8 @@ package neoart->flod->sidmon {
       }
     }
 
-    override  void initialize():void {
+//override
+void initialize():void {
       var voice:S2Voice = voices[0];
       super->initialize();
 
@@ -357,7 +359,8 @@ package neoart->flod->sidmon {
       }
     }
 
-    override  void loader(stream:ByteArray):void {
+//override
+void loader(stream:ByteArray):void {
       var int higher; i:int = 0, id:String, instr:S2Instrument, int j; int len; pointers:Vector.<int>, int position; int pos; row:SMRow, step:S2Step, sample:S2Sample, int sampleData; int value;
       stream->position = 58;
       id = stream->readMultiByte(28, ENCODING);

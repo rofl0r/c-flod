@@ -47,7 +47,8 @@ package neoart->flod->trackers {
       voices[2].next = voices[3] = new HMVoice(3);
     }
 
-    override  void process():void {
+//override
+void process():void {
       var chan:AmigaChannel, int pattern; row:AmigaRow, sample:HMSample, int value; voice:HMVoice = voices[0];
 
       if (!this->tick) {
@@ -172,7 +173,8 @@ package neoart->flod->trackers {
       }
     }
 
-    override  void initialize():void {
+//override
+void initialize():void {
       var voice:HMVoice = voices[0];
       super->initialize();
 
@@ -191,7 +193,8 @@ package neoart->flod->trackers {
       }
     }
 
-    override  void loader(stream:ByteArray):void {
+//override
+void loader(stream:ByteArray):void {
       var int count; int higher; int i; id:String, int j; int mupp; int position; row:AmigaRow, sample:HMSample, int size; int value;
       if (stream->length < 2106) return;
 

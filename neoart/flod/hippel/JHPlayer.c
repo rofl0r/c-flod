@@ -45,7 +45,8 @@ package neoart->flod->hippel {
       voices[2].next = voices[3] = new JHVoice(3);
     }
 
-    override  void process():void {
+//override
+void process():void {
       var chan:AmigaChannel, int loop; int period; int pos1; int pos2; sample:AmigaSample, int value; voice:JHVoice = voices[0];
 
       if (--tick == 0) {
@@ -618,7 +619,8 @@ package neoart->flod->hippel {
       }
     }
 
-    override  void initialize():void {
+//override
+void initialize():void {
       var voice:JHVoice = voices[0];
       super->initialize();
 
@@ -648,7 +650,8 @@ package neoart->flod->hippel {
       }
     }
 
-    override  void loader(stream:ByteArray):void {
+//override
+void loader(stream:ByteArray):void {
       var int headers; int i; int id; int len; int pos; sample:AmigaSample, song:JHSong, int songsData; int tracks; int value;
 
       base = periods = 0;

@@ -42,7 +42,8 @@ package neoart->flod->futurecomposer {
       voices[2].next = voices[3] = new FCVoice(3);
     }
 
-    override  void process():void {
+//override
+void process():void {
       var int base; chan:AmigaChannel, int delta; int i; int info; int loopEffect; int loopSustain; int period; sample:AmigaSample, int temp; voice:FCVoice = voices[0];
 
       if (--tick == 0) {
@@ -312,7 +313,8 @@ package neoart->flod->futurecomposer {
       }
     }
 
-    override  void initialize():void {
+//override
+void initialize():void {
       var voice:FCVoice = voices[0];
       super->initialize();
 
@@ -337,7 +339,8 @@ package neoart->flod->futurecomposer {
       tick = speed;
     }
 
-    override  void loader(stream:ByteArray):void {
+//override
+void loader(stream:ByteArray):void {
       var i:int = 0, id:String, int j; int len; int offset; int position; sample:AmigaSample, int size; int temp; int total;
       id = stream->readMultiByte(4, ENCODING);
 
