@@ -479,7 +479,7 @@ void reset():void {
     }
 
 //override
-void loader(stream:ByteArray):void {
+void loader(stream:ByteArray) {
       var int higher; i:int = 0, id:String, int len; row:AmigaRow, sample:BPSample, step:BPStep, int tables;
       title = stream->readMultiByte(26, ENCODING);
 

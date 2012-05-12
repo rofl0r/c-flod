@@ -422,7 +422,7 @@ void initialize():void {
     }
 
 //override
-void loader(stream:ByteArray):void {
+void loader(stream:ByteArray) {
       var int flag; int headers; int i; int index; int info; int lower; int pos; sample:DWSample, size:int = 10, song:DWSong, int total; int value;
 
       master  = 64;

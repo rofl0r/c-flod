@@ -568,7 +568,7 @@ void initialize():void {
     }
 
 //override
-void loader(stream:ByteArray):void {
+void loader(stream:ByteArray) {
       var int data; int i; id:String, index:Vector.<int>, int instr; int j; int len; int position; row:AmigaRow, sample:DMSample, song:DMSong, step:AmigaStep;
       id = stream->readMultiByte(24, ENCODING);
 

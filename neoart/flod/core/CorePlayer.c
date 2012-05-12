@@ -43,7 +43,7 @@ CorePlayer_get_waveform(struct CorePlayer* self):ByteArray {
 return self->hardware->waveform();
 }
 
-    void CorePlayer_toggle(struct CorePlayer* self, int index):void { }
+void CorePlayer_toggle(struct CorePlayer* self, int index) {
 
     CorePlayer_load(struct CorePlayer* self, stream:ByteArray):int {
       struct ZipFile* zip;
@@ -95,44 +95,44 @@ package neoart->flod->core {
       return 1;
     }
 
-    void CorePlayer_pause(struct CorePlayer* self):void {
+void CorePlayer_pause(struct CorePlayer* self) {
       if (!version || !soundChan) return;
       soundPos = soundChan->position;
       removeEvents();
     }
 
-    void CorePlayer_stop(struct CorePlayer* self):void {
+void CorePlayer_stop(struct CorePlayer* self) {
       if (!version) return;
       if (soundChan) removeEvents();
       soundPos = 0.0;
       reset();
     }
 
-    void CorePlayer_process(struct CorePlayer* self):void { }
+void CorePlayer_process(struct CorePlayer* self) {
 
-    void CorePlayer_fast(struct CorePlayer* self):void { }
+void CorePlayer_fast(struct CorePlayer* self) {
 
-    void CorePlayer_accurate(struct CorePlayer* self):void { }
+void CorePlayer_accurate(struct CorePlayer* self) {
 
-    void CorePlayer_setup(struct CorePlayer* self):void { }
+void CorePlayer_setup(struct CorePlayer* self) {
 
     //js function reset
-    void CorePlayer_initialize(struct CorePlayer* self):void {
+void CorePlayer_initialize(struct CorePlayer* self) {
       tick = 0;
       hardware->initialize();
       hardware->samplesTick = 110250 / tempo;
     }
 
-    void CorePlayer_reset(struct CorePlayer* self):void { }
+void CorePlayer_reset(struct CorePlayer* self) {
 
-    void CorePlayer_loader(struct CorePlayer* self, stream:ByteArray):void { }
+void CorePlayer_loader(struct CorePlayer* self, stream:ByteArray) {
 
-    void CorePlayer_completeHandler(struct CorePlayer* self, e:Event):void {
+void CorePlayer_completeHandler(struct CorePlayer* self, e:Event) {
       stop();
       dispatchEvent(e);
     }
 
-    void CorePlayer_removeEvents(struct CorePlayer* self):void {
+void CorePlayer_removeEvents(struct CorePlayer* self) {
       soundChan->stop();
       soundChan->removeEventListener(Event->SOUND_COMPLETE, completeHandler);
       soundChan->dispatchEvent(new Event(Event->SOUND_COMPLETE));

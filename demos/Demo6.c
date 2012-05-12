@@ -60,7 +60,7 @@ package {
       url->load(new URLRequest("filename->mod"));
     }
 
-     void completeHandler(e:Event):void {
+void completeHandler(e:Event) {
       url->removeEventListener(Event->COMPLETE, completeHandler);
       player->load(url->data);
       if (player->version) player->play();

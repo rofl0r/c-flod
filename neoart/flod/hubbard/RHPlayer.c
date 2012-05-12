@@ -222,7 +222,7 @@ void initialize():void {
     }
 
 //override
-void loader(stream:ByteArray):void {
+void loader(stream:ByteArray) {
       var int i; int j; int len; int pos; sample:RHSample, int samplesData; int samplesHeaders; int samplesLen; song:RHSong, int songsHeaders; int wavesHeaders; int wavesPointers; int value;
       stream->position = 44;
 

@@ -51,7 +51,7 @@ package neoart->flod->trackers {
     }
 
 //override
-void set force( int value):void {
+void set force( int value) {
       if (value < PROTRACKER_10)
         value = PROTRACKER_10;
       else if (value > PROTRACKER_12)
@@ -221,7 +221,7 @@ void initialize():void {
     }
 
 //override
-void loader(stream:ByteArray):void {
+void loader(stream:ByteArray) {
       var int higher; int i; id:String, int j; row:PTRow, sample:PTSample, int size; int value;
       if (stream->length < 2106) return;
 
@@ -495,7 +495,7 @@ void loader(stream:ByteArray):void {
       }
     }
 
-     void moreEffects(voice:PTVoice):void {
+void moreEffects(voice:PTVoice) {
       var chan:AmigaChannel = voice->channel, int value;
       if (voice->funkSpeed) updateFunk(voice);
 
@@ -543,7 +543,7 @@ void loader(stream:ByteArray):void {
       }
     }
 
-     void extended(voice:PTVoice):void {
+void extended(voice:PTVoice) {
       var chan:AmigaChannel = voice->channel, effect:int = voice->param >> 4, int i; int len; memory:Vector.<int>, param:int = voice->param & 0x0f;
 
       switch (effect) {
@@ -652,7 +652,7 @@ void loader(stream:ByteArray):void {
       }
     }
 
-     void updateFunk(voice:PTVoice):void {
+void updateFunk(voice:PTVoice) {
       var chan:AmigaChannel = voice->channel, int p1; int p2; value:int = FUNKREP[voice->funkSpeed];
 
       voice->funkPos += value;

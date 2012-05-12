@@ -194,7 +194,7 @@ void initialize():void {
     }
 
 //override
-void loader(stream:ByteArray):void {
+void loader(stream:ByteArray) {
       var int count; int higher; int i; id:String, int j; int mupp; int position; row:AmigaRow, sample:HMSample, int size; int value;
       if (stream->length < 2106) return;
 
@@ -330,7 +330,7 @@ void loader(stream:ByteArray):void {
       samples[0] = sample;
     }
 
-     void effects(voice:HMVoice):void {
+void effects(voice:HMVoice) {
       var chan:AmigaChannel = voice->channel, int i; int len; period:int = voice->period & 0x0fff, int slide; int value;
 
       if (voice->effect || voice->param) {
@@ -427,7 +427,7 @@ void loader(stream:ByteArray):void {
       }
     }
 
-     void handler(voice:HMVoice):void {
+void handler(voice:HMVoice) {
       var sample:HMSample;
 
       if (voice->handler) {

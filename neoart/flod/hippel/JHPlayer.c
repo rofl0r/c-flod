@@ -651,7 +651,7 @@ void initialize():void {
     }
 
 //override
-void loader(stream:ByteArray):void {
+void loader(stream:ByteArray) {
       var int headers; int i; int id; int len; int pos; sample:AmigaSample, song:JHSong, int songsData; int tracks; int value;
 
       base = periods = 0;

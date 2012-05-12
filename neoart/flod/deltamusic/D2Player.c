@@ -272,7 +272,7 @@ void initialize():void {
     }
 
 //override
-void loader(stream:ByteArray):void {
+void loader(stream:ByteArray) {
       var int i; id:String, int j; int len; offsets:Vector.<int>, int position; row:AmigaRow, sample:D2Sample, step:AmigaStep, int value;
       stream->position = 3014;
       id = stream->readMultiByte(4, ENCODING);

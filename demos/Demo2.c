@@ -62,19 +62,19 @@ package {
       });
     }
 
-     void cancelHandler(e:Event):void {
+void cancelHandler(e:Event) {
       file->removeEventListener(Event->CANCEL, cancelHandler);
       file->removeEventListener(Event->SELECT, selectHandler);
     }
 
-     void selectHandler(e:Event):void {
+void selectHandler(e:Event) {
       cancelHandler(e);
       player->stop();
       file->addEventListener(Event->COMPLETE, completeHandler);
       file->load();
     }
 
-     void completeHandler(e:Event):void {
+void completeHandler(e:Event) {
       file->removeEventListener(Event->COMPLETE, completeHandler);
       player->load(file->data);
       if (player->version) player->play();

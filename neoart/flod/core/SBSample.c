@@ -29,7 +29,7 @@ package neoart->flod->core {
  int loopStart;
  int loopLen;
 
-     void store(stream:ByteArray):void {
+void store(stream:ByteArray) {
       var int delta; int i; len:int = length, int pos; Number sample; int total; int value;
       if (!loopLen) loopMode = 0;
       pos = stream->position;

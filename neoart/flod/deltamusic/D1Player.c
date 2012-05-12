@@ -345,7 +345,7 @@ void initialize():void {
     }
 
 //override
-void loader(stream:ByteArray):void {
+void loader(stream:ByteArray) {
       var data:Vector.<int>, int i; id:String, int index; int j; int len; int position; row:AmigaRow, sample:D1Sample, step:AmigaStep, int value;
       id = stream->readMultiByte(4, ENCODING);
       if (id != "ALL ") return;

@@ -427,7 +427,7 @@ void initialize():void {
     }
 
 //override
-void loader(stream:ByteArray):void {
+void loader(stream:ByteArray) {
       var int basePtr; int dataPtr; int i; int j; int len; int pos; int ptr; sample:FESample, int size; song:FESong, int tracksLen; int value;
 
       while (stream->position < 16) {

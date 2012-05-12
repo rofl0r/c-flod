@@ -45,7 +45,7 @@ package neoart->flod->trackers {
     }
 
 //override
-void set force( int value):void {
+void set force( int value) {
       if (value < ULTIMATE_SOUNDTRACKER)
         value = ULTIMATE_SOUNDTRACKER;
       else if (value > DOC_SOUNDTRACKER_20)
@@ -55,7 +55,7 @@ void set force( int value):void {
     }
 
 //override
-void set ntsc( int value):void {
+void set ntsc( int value) {
       super->ntsc = value;
 
       if (version < DOC_SOUNDTRACKER_9)
@@ -219,7 +219,7 @@ void initialize():void {
     }
 
 //override
-void loader(stream:ByteArray):void {
+void loader(stream:ByteArray) {
       var int higher; int i; int j; row:AmigaRow, sample:AmigaSample, int score; int size; int value;
       if (stream->length < 1626) return;
 
@@ -332,7 +332,7 @@ void loader(stream:ByteArray):void {
       if (score < 1) version = 0;
     }
 
-     void arpeggio(voice:STVoice):void {
+void arpeggio(voice:STVoice) {
       var chan:AmigaChannel = voice->channel, i:int = 0, param:int = tick % 3;
 
       if (!param) {

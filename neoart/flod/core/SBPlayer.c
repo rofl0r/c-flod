@@ -36,7 +36,7 @@ package neoart->flod->core {
   }
 
 //override
-void set volume( Number value):void {
+void set volume( Number value) {
       if (value < 0.0) value = 0.0;
         else if (value > 1.0) value = 1.0;
 
@@ -44,7 +44,7 @@ void set volume( Number value):void {
     }
 
 //override
-void toggle( int index):void {
+void toggle( int index) {
       mixer->channels[index].mute ^= 1;
     }
 

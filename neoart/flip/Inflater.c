@@ -34,7 +34,7 @@ package neoart->flip {
       initialize();
     }
 
-     void set input(stream:ByteArray):void {
+void set input(stream:ByteArray) {
       inpbuf = stream;
       output = new ByteArray();
       inpbuf->endian   = output->endian   = ZipFile->ENDIAN;

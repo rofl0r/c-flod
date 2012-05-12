@@ -49,7 +49,7 @@ package neoart->flod->trackers {
     }
 
 //override
-void set force( int value):void {
+void set force( int value) {
       if (value < SOUNDTRACKER_23)
         value = SOUNDTRACKER_23;
       else if (value > NOISETRACKER_20)
@@ -292,7 +292,7 @@ void initialize():void {
     }
 
 //override
-void loader(stream:ByteArray):void {
+void loader(stream:ByteArray) {
       var int higher; int i; id:String, int j; row:AmigaRow, sample:AmigaSample, int size; int value;
       if (stream->length < 2106) return;
 

@@ -369,7 +369,7 @@ void initialize():void {
     }
 
 //override
-void loader(stream:ByteArray):void {
+void loader(stream:ByteArray) {
       var int data; int i; id:String, int j; int headers; int len; int position; row:SMRow, sample:S1Sample, int start; step:AmigaStep, int totInstruments; int totPatterns; int totSamples; int totWaveforms; int ver;
 
       while (stream->bytesAvailable > 8) {

@@ -865,7 +865,7 @@ void initialize():void {
     }
 
 //override
-void loader(stream:ByteArray):void {
+void loader(stream:ByteArray) {
       var int header; int i; id:String, int iheader; instr:F2Instrument, int ipos; int j; int len; pattern:F2Pattern, int pos; reserved:int = 22, row:F2Row, int rows; sample:F2Sample, int value;
       if (stream->length < 360) return;
       stream->position = 17;
@@ -1079,7 +1079,7 @@ void loader(stream:ByteArray):void {
       instruments[0] = instr;
     }
 
-     void envelope(voice:F2Voice, envelope:F2Envelope, data:F2Data):void {
+void envelope(voice:F2Voice, envelope:F2Envelope, data:F2Data) {
       var pos:int = envelope->position, curr:F2Point = data->points[pos], next:F2Point;
 
       if (envelope->frame == curr->frame) {
@@ -1125,7 +1125,7 @@ void loader(stream:ByteArray):void {
       return int(period - (delta * finetune));
     }
     
-     void retrig(voice:F2Voice):void {
+void retrig(voice:F2Voice) {
       switch (voice->retrigx) {
         case 1:
           voice->volume--;

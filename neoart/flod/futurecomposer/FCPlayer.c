@@ -340,7 +340,7 @@ void initialize():void {
     }
 
 //override
-void loader(stream:ByteArray):void {
+void loader(stream:ByteArray) {
       var i:int = 0, id:String, int j; int len; int offset; int position; sample:AmigaSample, int size; int temp; int total;
       id = stream->readMultiByte(4, ENCODING);
 

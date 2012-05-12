@@ -360,7 +360,7 @@ void initialize():void {
     }
 
 //override
-void loader(stream:ByteArray):void {
+void loader(stream:ByteArray) {
       var int higher; i:int = 0, id:String, instr:S2Instrument, int j; int len; pointers:Vector.<int>, int position; int pos; row:SMRow, step:S2Step, sample:S2Sample, int sampleData; int value;
       stream->position = 58;
       id = stream->readMultiByte(28, ENCODING);

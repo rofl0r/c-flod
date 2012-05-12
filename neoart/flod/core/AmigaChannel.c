@@ -43,7 +43,7 @@ package neoart->flod->core {
 
      void get enabled():int { return audena; }
 
-     void set enabled( int value):void {
+void set enabled( int value) {
       if (value == audena) return;
 
       audena = value;
@@ -54,14 +54,14 @@ package neoart->flod->core {
       if (value) delay += 2;
     }
 
-     void set period( int value):void {
+void set period( int value) {
       if (value < 0) value = 0;
         else if(value > 65535) value = 65535;
 
       audper = value;
     }
 
-     void set volume( int value):void {
+void set volume( int value) {
       if (value < 0) value = 0;
         else if (value > 64) value = 64;
 
