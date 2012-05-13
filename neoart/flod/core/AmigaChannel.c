@@ -15,78 +15,72 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->core {
 
-  public final class AmigaChannel {
-    public var
-      next    : AmigaChannel,
- int mute;
-      panning : Number = 1.0,
- int delay;
- int pointer;
- int length;
-    internal var
- int audena;
- int audcnt;
- int audloc;
- int audper;
- int audvol;
- Number timer;
- Number level;
- Number ldata;
- Number rdata;
+#include "../flod_internal.h"
+#include "AmigaChannel.h"
 
-     void AmigaChannel( int index) {
-      if ((++index & 2) == 0) panning = -panning;
-      level = panning;
-    }
+void AmigaChannel_defaults(struct AmigaChannel* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+	self->panning  = 1.0;
+}
 
-int get enabled() {
+void AmigaChannel_ctor(struct AmigaChannel* self, int index) {
+	CLASS_CTOR_DEF(AmigaChannel);
+	// original constructor code goes here
+	if (((++index) & 2) == 0) self->panning = -(self->panning);
+	self->level = self->panning;	
+}
 
-void set enabled( int value) {
-      if (value == audena) return;
+struct AmigaChannel* AmigaChannel_new(void, int index) {
+	CLASS_NEW_BODY(AmigaChannel, index);
+}
 
-      audena = value;
-      audloc = pointer;
-      audcnt = pointer + length;
+int AmigaChannel_get_enabled(struct AmigaChannel* self) {}
 
-      timer = 1.0;
-      if (value) delay += 2;
-    }
 
-void set period( int value) {
-      if (value < 0) value = 0;
-        else if(value > 65535) value = 65535;
+void AmigaChannel_set_enabled(struct AmigaChannel* self, int value) {
+	if (value == self->audena) return;
 
-      audper = value;
-    }
+	self->audena = value;
+	self->audloc = self->pointer;
+	self->audcnt = self->pointer + self->length;
 
-void set volume( int value) {
-      if (value < 0) value = 0;
-        else if (value > 64) value = 64;
+	self->timer = 1.0;
+	if (value) self->delay += 2;
+}
 
-      audvol = value;
-    }
+void AmigaChannel_set_period(struct AmigaChannel* self, int value) {
+	if (value < 0) value = 0;
+		else if(value > 65535) value = 65535;
 
-void resetData() {
-      ldata = 0.0;
-      rdata = 0.0;
-    }
+	self->audper = value;
+}
 
-    internal function initialize():void {
-      audena = 0;
-      audcnt = 0;
-      audloc = 0;
-      audper = 50;
-      audvol = 0;
+void AmigaChannel_set_volume(struct AmigaChannel* self, int value) {
+	if (value < 0) value = 0;
+		else if (value > 64) value = 64;
 
-      timer = 0.0;
-      ldata = 0.0;
-      rdata = 0.0;
+	self->audvol = value;
+}
 
-      delay   = 0;
-      pointer = 0;
-      length  = 0;
-    }
-  }
+void AmigaChannel_resetData(struct AmigaChannel* self) {
+	self->ldata = 0.0;
+	self->rdata = 0.0;
+}
+
+void AmigaChannel_initialize(struct AmigaChannel* self) {
+	self->audena = 0;
+	self->audcnt = 0;
+	self->audloc = 0;
+	self->audper = 50;
+	self->audvol = 0;
+
+	self->timer = 0.0;
+	self->ldata = 0.0;
+	self->rdata = 0.0;
+
+	self->delay   = 0;
+	self->pointer = 0;
+	self->length  = 0;
 }

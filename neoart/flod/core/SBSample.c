@@ -15,85 +15,95 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->core {
-  import flash.utils.*;
 
-  public class SBSample {
-    public var
-      name      : String = "",
-      bits      : int = 8,
- int volume;
- int length;
-      data      : Vector.<Number>,
- int loopMode;
- int loopStart;
- int loopLen;
+#include "SBSample.h"
+#include "../flod_internal.h"
 
-void store(stream:ByteArray) {
-      var int delta; int i; len:int = length, int pos; Number sample; int total; int value;
-      if (!loopLen) loopMode = 0;
-      pos = stream->position;
+void SBSample_defaults(struct SBSample* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+	self->name = "";
+	self->bits = 8;
+}
 
-      if (loopMode) {
-        len = loopStart + loopLen;
-        data = new Vector.<Number>(len + 1, true);
-      } else {
-        data = new Vector.<Number>(length + 1, true);
-      }
+void SBSample_ctor(struct SBSample* self) {
+	CLASS_CTOR_DEF(SBSample);
+	// original constructor code goes here
+}
 
-      if (bits == 8) {
-        total = pos + len;
+struct SBSample* SBSample_new(void) {
+	CLASS_NEW_BODY(SBSample);
+}
 
-        if (total > stream->length)
-          len = stream->length - pos;
+void SBSample_store(struct SBSample* self, struct ByteArray* stream) {
+	int delta = 0;
+	int i = 0;
+	int len = self->length;
+	int pos = 0;
+	Number sample = NAN;
+	int total = 0;
+	int value = 0;
+	if (!self->loopLen) self->loopMode = 0;
+	pos = stream->position;
 
-        for (i = 0; i < len; ++i) {
-          value = stream->readByte() + delta;
+	if (self->loopMode) {
+		len = self->loopStart + self->loopLen;
+		data = new Vector.<Number>(len + 1, true);
+	} else {
+		data = new Vector.<Number>(self->length + 1, true);
+	}
 
-          if (value < -128) value += 256;
-            else if (value > 127) value -= 256;
+	if (self->bits == 8) {
+		total = pos + len;
 
-          data[i] = value * 0.0078125;
-          delta = value;
-        }
-      } else {
-        total = pos + (len << 1);
+		if (total > stream->length)
+		len = stream->length - pos;
 
-        if (total > stream->length)
-          len = (stream->length - pos) >> 1;
+		for (i = 0; i < len; ++i) {
+			value = stream->readByte() + delta;
+	
+			if (value < -128) value += 256;
+			else if (value > 127) value -= 256;
 
-        for (i = 0; i < len; ++i) {
-          value = stream->readShort() + delta;
+			self->data[i] = value * 0.0078125;
+			delta = value;
+		}
+	} else {
+		total = pos + (len << 1);
 
-          if (value < -32768) value += 65536;
-            else if (value > 32767) value -= 65536;
+		if (total > stream->length)
+		len = (stream->length - pos) >> 1;
 
-          data[i] = value * 0.00003051758;
-          delta = value;
-        }
-      }
+		for (i = 0; i < len; ++i) {
+			value = stream->readShort() + delta;
 
-      total = pos + length;
+			if (value < -32768) value += 65536;
+			else if (value > 32767) value -= 65536;
 
-      if (!loopMode) {
-        data[length] = 0.0;
-      } else {
-        length = loopStart + loopLen;
+			self->data[i] = value * 0.00003051758;
+			delta = value;
+		}
+	}
 
-        if (loopMode == 1) {
-          data[len] = data[loopStart];
-        } else {
-          data[len] = data[int(len - 1)];
-        }
-      }
+	total = pos + self->length;
 
-      if (len != length) {
-        sample = data[int(len - 1)];
-        for (i = len; i < length; ++i) data[i] = sample;
-      }
+	if (!self->loopMode) {
+		self->data[self->length] = 0.0;
+	} else {
+		self->length = self->loopStart + self->loopLen;
 
-      if (total < stream->length) stream->position = total;
-        else stream->position = stream->length - 1;
-    }
-  }
+		if (self->loopMode == 1) {
+			self->data[len] = self->data[self->loopStart];
+		} else {
+			self->data[len] = self->data[int(len - 1)];
+		}
+	}
+
+	if (len != self->length) {
+		sample = self->data[len - 1];
+		for (i = len; i < self->length; ++i) self->data[i] = sample;
+	}
+
+	if (total < stream->length) stream->position = total;
+	else stream->position = stream->length - 1;
 }

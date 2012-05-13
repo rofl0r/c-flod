@@ -15,12 +15,22 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->core {
 
-  public final class Sample {
-    public var
-      l    : Number = 0.0,
-      r    : Number = 0.0,
-      next : Sample;
-  }
+#include "Sample.h"
+#include "../flod_internal.h"
+
+void Sample_defaults(struct Sample* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+	self->l = self->r = 0.0;
 }
+
+void Sample_ctor(struct Sample* self) {
+	CLASS_CTOR_DEF(Sample);
+	// original constructor code goes here
+}
+
+struct Sample* Sample_new(void) {
+	CLASS_NEW_BODY(Sample);
+}
+

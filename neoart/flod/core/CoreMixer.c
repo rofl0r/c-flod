@@ -16,16 +16,24 @@
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
 #include "../flod.h"
+#include "../flod_internal.h"
 #include "CoreMixer.h"
 
+void CoreMixer_defaults(struct CoreMixer* self) {
+	CLASS_DEF_INIT();
+	/* static initializers go here */
+}
+
+void CoreMixer_ctor(struct CoreMixer* self) {
+	CLASS_CTOR_DEF(CoreMixer);
+	/* original constructor code goes here */
+	self->wave = ByteArray_new();
+	self->wave->endian = "littleEndian";
+	self->bufferSize = 8192;
+}
+
 struct CoreMixer* CoreMixer_new(void) {
-	struct CoreMixer* self = malloc(sizeof(*self));
-	if(self) {
-		self->wave = ByteArray_new();
-		self->wave->endian = "littleEndian";
-		self->bufferSize = 8192;
-	}
-	return self;
+	CLASS_NEW_BODY(CoreMixer);
 }
 
 //js function reset
@@ -53,11 +61,13 @@ void CoreMixer_reset(struct CoreMixer* self) {}
 void CoreMixer_fast(struct CoreMixer* self, struct SampleDataEvent *e) {}
 void CoreMixer_accurate(struct CoreMixer* self, struct SampleDataEvent *e) {}
 
-int CoreMixer_get_bufferSize(struct CoreMixer* self){ return self->buffer->length; }
+int CoreMixer_get_bufferSize(struct CoreMixer* self) {
+	return self->buffer->length; 
+}
 
 void CoreMixer_set_bufferSize(struct CoreMixer* self, int value) {
 	int i = 0; int len = 0;
-	if (value == len || value < 2048) return; // FIXME len == unitialized access ? struct member ? 0 ?
+	if (value == len || value < 2048) return;
 
 	if (!self->buffer) {
 		self->buffer = new Vector.<Sample>(value, true);
@@ -76,7 +86,7 @@ void CoreMixer_set_bufferSize(struct CoreMixer* self, int value) {
 	}
 }
 
-struct ByteArray CoreMixer_waveform(struct CoreMixer* self) {
+struct ByteArray* CoreMixer_waveform(struct CoreMixer* self) {
 	struct ByteArray file = ByteArray_new();
 	file->endian = "littleEndian";
 

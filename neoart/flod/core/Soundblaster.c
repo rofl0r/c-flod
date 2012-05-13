@@ -15,375 +15,410 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->core {
-  import flash.events.*;
-  import flash.utils.*;
 
-  public final class Soundblaster extends CoreMixer {
-    public var
-      channels : Vector.<SBChannel>;
+#include "Soundblaster.h"
+#include "../flod_internal.h"
 
-     void Soundblaster() {
-      super();
-    }
+void Soundblaster_defaults(struct Soundblaster* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
 
-    internal function setup( int len):void {
-      var i:int = 1;
-      channels = new Vector.<SBChannel>(len, true);
-      channels[0] = new SBChannel();
+void Soundblaster_ctor(struct Soundblaster* self) {
+	CLASS_CTOR_DEF(Soundblaster);
+	// original constructor code goes here
+	super();
+}
 
-      for (; i < len; ++i)
-        channels[i] = channels[int(i - 1)].next = new SBChannel();
-    }
+struct Soundblaster* Soundblaster_new(void) {
+	CLASS_NEW_BODY(Soundblaster);
+}
 
-//override
-internal function initialize():void {
-      var chan:SBChannel = channels[0];
-      super->initialize();
+void Soundblaster_setup(struct Soundblaster* self, int len) {
+	int i = 1;
+	channels = new Vector.<SBChannel>(len, true);
+	channels[0] = new SBChannel();
 
-      while (chan) {
-        chan->initialize();
-        chan = chan->next;
-      }
-    }
+	for (; i < len; ++i)
+		channels[i] = channels[int(i - 1)].next = new SBChannel();
+}
 
 //override
-internal function fast(e:SampleDataEvent):void {
-      var chan:SBChannel, d:Vector.<Number>, data:ByteArray = e->data, int i; int mixed; int mixLen; int mixPos; s:SBSample, sample:Sample, size:int = bufferSize, int toMix; Number value;
+void Soundblaster_initialize(struct Soundblaster* self) {
+	var chan:SBChannel = channels[0];
+	super->initialize();
 
-      if (completed) {
-        if (!remains) return;
-        size = remains;
-      }
-
-      while (mixed < size) {
-        if (!samplesLeft) {
-          player->process();
-          player->fast();
-          samplesLeft = samplesTick;
-
-          if (completed) {
-            size = mixed + samplesTick;
-
-            if (size > bufferSize) {
-              remains = size - bufferSize;
-              size = bufferSize;
-            }
-          }
-        }
-
-        toMix = samplesLeft;
-        if ((mixed + toMix) >= size) toMix = size - mixed;
-        mixLen = mixPos + toMix;
-        chan = channels[0];
-
-        while (chan) {
-          if (!chan->enabled) {
-            chan = chan->next;
-            continue;
-          }
-
-          s = chan->sample;
-          d = s->data;
-          sample  = buffer[mixPos];
-
-          for (i = mixPos; i < mixLen; ++i) {
-            if (chan->index != chan->pointer) {
-              if (chan->index >= chan->length) {
-                if (!s->loopMode) {
-                  chan->enabled = 0;
-                  break;
-                } else {
-                  chan->pointer = s->loopStart + (chan->index - chan->length);
-                  chan->length  = s->length;
-
-                  if (s->loopMode == 2) {
-                    if (!chan->dir) {
-                      chan->dir = s->length + s->loopStart - 1;
-                    } else {
-                      chan->dir = 0;
-                    }
-                  }
-                }
-              } else chan->pointer = chan->index;
-
-              if (!chan->mute) {
-                if (!chan->dir) value = d[chan->pointer];
-                  else value = d[int(chan->dir - chan->pointer)];
-
-                chan->ldata = value * chan->lvol;
-                chan->rdata = value * chan->rvol;
-              } else {
-                chan->ldata = 0.0;
-                chan->rdata = 0.0;
-              }
-            }
-
-            chan->index = chan->pointer + chan->delta;
-
-            if ((chan->fraction += chan->speed) >= 1.0) {
-              chan->index++;
-              chan->fraction--;
-            }
-
-            sample->l += chan->ldata;
-            sample->r += chan->rdata;
-            sample = sample->next;
-          }
-          chan = chan->next;
-        }
-
-        mixPos = mixLen;
-        mixed += toMix;
-        samplesLeft -= toMix;
-      }
-
-      sample = buffer[0];
-
-      if (player->record) {
-        for (i = 0; i < size; ++i) {
-          if (sample->l > 1.0) sample->l = 1.0;
-            else if (sample->l < -1.0) sample->l = -1.0;
-
-          if (sample->r > 1.0) sample->r = 1.0;
-            else if (sample->r < -1.0) sample->r = -1.0;
-
-          wave->writeShort(int(sample->l * (sample->l < 0 ? 32768 : 32767)));
-          wave->writeShort(int(sample->r * (sample->r < 0 ? 32768 : 32767)));
-
-          data->writeFloat(sample->l);
-          data->writeFloat(sample->r);
-
-          sample->l = sample->r = 0.0;
-          sample = sample->next;
-        }
-      } else {
-        for (i = 0; i < size; ++i) {
-          if (sample->l > 1.0) sample->l = 1.0;
-            else if (sample->l < -1.0) sample->l = -1.0;
-
-          if (sample->r > 1.0) sample->r = 1.0;
-            else if (sample->r < -1.0) sample->r = -1.0;
-
-          data->writeFloat(sample->l);
-          data->writeFloat(sample->r);
-
-          sample->l = sample->r = 0.0;
-          sample = sample->next;
-        }
-      }
-    }
+	while (chan) {
+		chan->initialize();
+		chan = chan->next;
+	}
+}
 
 //override
-internal function accurate(e:SampleDataEvent):void {
-      var chan:SBChannel, d1:Vector.<Number>, d2:Vector.<Number>, data:ByteArray = e->data, int delta; int i; int mixed; int mixLen; int mixPos; Number mixValue; s1:SBSample, s2:SBSample, sample:Sample, size:int = bufferSize, int toMix; Number value;
+void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
+	struct SBChannel *chan;
+	//d:Vector.<Number>,
+	Number* d;
+	struct ByteArray* data = e->data;
+	
+	int i = 0;
+	int mixed = 0;
+	int mixLen = 0;
+	int mixPos = 0;
+	struct SBSample *s = NULL;
+	struct Sample *sample = NULL;
+	int size = self->bufferSize;
+	int toMix = 0;
+	Number value = NAN;
 
-      if (completed) {
-        if (!remains) return;
-        size = remains;
-      }
+	if (self->super.completed) {
+		if (!self->super.remains) return;
+		size = self->super.remains;
+	}
 
-      while (mixed < size) {
-        if (!samplesLeft) {
-          player->process();
-          player->accurate();
-          samplesLeft = samplesTick;
+	while (mixed < size) {
+		if (!self->super.samplesLeft) {
+			self->super.player->process();
+			self->super.player->fast();
+			self->super.samplesLeft = self->super.samplesTick;
 
-          if (completed) {
-            size = mixed + samplesTick;
+			if (self->super.completed) {
+				size = mixed +self->super.samplesTick;
 
-            if (size > bufferSize) {
-              remains = size - bufferSize;
-              size = bufferSize;
-            }
-          }
-        }
+				if (size > self->super.bufferSize) {
+					self->super.remains = size - self->super.bufferSize;
+					size = self->super.bufferSize;
+				}
+			}
+		}
 
-        toMix = samplesLeft;
-        if ((mixed + toMix) >= size) toMix = size - mixed;
-        mixLen = mixPos + toMix;
-        chan = channels[0];
+		toMix = self->super.samplesLeft;
+		if ((mixed + toMix) >= size) toMix = size - mixed;
+		mixLen = mixPos + toMix;
+		chan = self->channels[0];
 
-        while (chan) {
-          if (!chan->enabled) {
-            chan = chan->next;
-            continue;
-          }
+		while (chan) {
+			if (!chan->enabled) {
+				chan = chan->next;
+				continue;
+			}
 
-          s1 = chan->sample;
-          d1 = s1.data;
-          s2 = chan->oldSample;
-          if (s2) d2 = s2.data;
+			s = chan->sample;
+			d = s->data;
+			sample  = self->super.buffer[mixPos];
 
-          sample = buffer[mixPos];
+			for (i = mixPos; i < mixLen; ++i) {
+				if (chan->index != chan->pointer) {
+					if (chan->index >= chan->length) {
+						if (!s->loopMode) {
+							chan->enabled = 0;
+							break;
+						} else {
+							chan->pointer = s->loopStart + (chan->index - chan->length);
+							chan->length  = s->length;
 
-          for (i = mixPos; i < mixLen; ++i) {
-            value = chan->mute ? 0.0 : d1[chan->pointer];
-            value += (d1[int(chan->pointer + chan->dir)] - value) * chan->fraction;
+							if (s->loopMode == 2) {
+								if (!chan->dir) {
+									chan->dir = s->length + s->loopStart - 1;
+								} else {
+									chan->dir = 0;
+								}
+							}
+						}
+					} else chan->pointer = chan->index;
 
-            if ((chan->fraction += chan->speed) >= 1.0) {
-              delta = int(chan->fraction);
-              chan->fraction -= delta;
+					if (!chan->mute) {
+						if (!chan->dir) value = d[chan->pointer];
+						else value = d[int(chan->dir - chan->pointer)];
 
-              if (chan->dir > 0) {
-                chan->pointer += delta;
+						chan->ldata = value * chan->lvol;
+						chan->rdata = value * chan->rvol;
+					} else {
+						chan->ldata = 0.0;
+						chan->rdata = 0.0;
+					}
+				}
 
-                if (chan->pointer > chan->length) {
-                  chan->fraction += chan->pointer - chan->length;
-                  chan->pointer = chan->length;
-                }
-              } else {
-                chan->pointer -= delta;
+				chan->index = chan->pointer + chan->delta;
 
-                if (chan->pointer < chan->length) {
-                  chan->fraction += chan->length - chan->pointer;
-                  chan->pointer = chan->length;
-                }
-              }
-            }
+				if ((chan->fraction += chan->speed) >= 1.0) {
+					chan->index++;
+					chan->fraction--;
+				}
 
-            if (!chan->mixCounter) {
-              sample->l += value * chan->lvol;
-              sample->r += value * chan->rvol;
+				sample->l += chan->ldata;
+				sample->r += chan->rdata;
+				sample = sample->next;
+			}
+			chan = chan->next;
+		}
 
-              if (chan->volCounter) {
-                chan->lvol += chan->lvolDelta;
-                chan->rvol += chan->rvolDelta;
-                chan->volCounter--;
-              } else if (chan->panCounter) {
-                chan->lpan += chan->lpanDelta;
-                chan->rpan += chan->rpanDelta;
-                chan->panCounter--;
+		mixPos = mixLen;
+		mixed += toMix;
+		self->super.samplesLeft -= toMix;
+	}
 
-                chan->lvol = chan->volume * chan->lpan;
-                chan->rvol = chan->volume * chan->rpan;
-              }
-            } else {
-              if (s2) {
-                mixValue = chan->mute ? 0.0 : d2[chan->oldPointer];
-                mixValue += (d2[int(chan->oldPointer + chan->oldDir)] - mixValue) * chan->oldFraction;
+	sample = self->super.buffer[0];
 
-                if ((chan->oldFraction += chan->oldSpeed) > 1) {
-                  delta = int(chan->oldFraction);
-                  chan->oldFraction -= delta;
+	if (self->super.player->record) {
+		for (i = 0; i < size; ++i) {
+			if (sample->l > 1.0) sample->l = 1.0;
+			else if (sample->l < -1.0) sample->l = -1.0;
 
-                  if (chan->oldDir > 0) {
-                    chan->oldPointer += delta;
+			if (sample->r > 1.0) sample->r = 1.0;
+			else if (sample->r < -1.0) sample->r = -1.0;
 
-                    if (chan->oldPointer > chan->oldLength) {
-                      chan->oldFraction += chan->oldPointer - chan->oldLength;
-                      chan->oldPointer = chan->oldLength;
-                    }
-                  } else {
-                    chan->oldPointer -= delta;
+			self->super.wave->writeShort(int(sample->l * (sample->l < 0 ? 32768 : 32767)));
+			self->super.wave->writeShort(int(sample->r * (sample->r < 0 ? 32768 : 32767)));
 
-                    if (chan->oldPointer < chan->oldLength) {
-                      chan->oldFraction += chan->oldLength - chan->oldPointer;
-                      chan->oldPointer = chan->oldLength;
-                    }
-                  }
-                }
+			data->writeFloat(sample->l);
+			data->writeFloat(sample->r);
 
-                sample->l += (value * chan->lmixRampU) + (mixValue * chan->lmixRampD);
-                sample->r += (value * chan->rmixRampU) + (mixValue * chan->rmixRampD);
+			sample->l = sample->r = 0.0;
+			sample = sample->next;
+		}
+	} else {
+		for (i = 0; i < size; ++i) {
+			if (sample->l > 1.0) sample->l = 1.0;
+			else if (sample->l < -1.0) sample->l = -1.0;
 
-                chan->lmixRampD -= chan->lmixDeltaD;
-                chan->rmixRampD -= chan->rmixDeltaD;
-              } else {
-                sample->l += (value * chan->lmixRampU);
-                sample->r += (value * chan->rmixRampU);
-              }
+			if (sample->r > 1.0) sample->r = 1.0;
+			else if (sample->r < -1.0) sample->r = -1.0;
 
-              chan->lmixRampU += chan->lmixDeltaU;
-              chan->rmixRampU += chan->rmixDeltaU;
-              chan->mixCounter--;
+			data->writeFloat(sample->l);
+			data->writeFloat(sample->r);
 
-              if (chan->oldPointer == chan->oldLength) {
-                if (!s2.loopMode) {
-                  s2 = null;
-                  chan->oldPointer = 0;
-                } else if (s2.loopMode == 1) {
-                  chan->oldPointer = s2.loopStart;
-                  chan->oldLength  = s2.length;
-                } else {
-                  if (chan->oldDir > 0) {
-                    chan->oldPointer = s2.length - 1;
-                    chan->oldLength  = s2.loopStart;
-                    chan->oldDir     = -1;
-                  } else {
-                    chan->oldFraction -= 1;
-                    chan->oldPointer   = s2.loopStart;
-                    chan->oldLength    = s2.length;
-                    chan->oldDir       = 1;
-                  }
-                }
-              }
-            }
+			sample->l = sample->r = 0.0;
+			sample = sample->next;
+		}
+	}
+}
 
-            if (chan->pointer == chan->length) {
-              if (!s1.loopMode) {
-                chan->enabled = 0;
-                break;
-              } else if (s1.loopMode == 1) {
-                chan->pointer = s1.loopStart;
-                chan->length  = s1.length;
-              } else {
-                if (chan->dir > 0) {
-                  chan->pointer = s1.length - 1;
-                  chan->length  = s1.loopStart;
-                  chan->dir     = -1;
-                } else {
-                  chan->fraction -= 1;
-                  chan->pointer   = s1.loopStart;
-                  chan->length    = s1.length;
-                  chan->dir       = 1;
-                }
-              }
-            }
-            sample = sample->next;
-          }
-          chan = chan->next;
-        }
+//override
+void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e) {
+	struct SBChannel *chan = NULL;
+	//d1:Vector.<Number>;
+	//d2:Vector.<Number>;
+	Number *d1 = NAN;
+	Number *d2 = NAN;
+	struct ByteArray* data = e->data;
+	int delta = 0;
+	int i = 0; 
+	int mixed = 0; 
+	int mixLen = 0; 
+	int mixPos = 0; 
+	Number mixValue = NAN;
+	struct SBSample *s1;
+	struct SBSample *s2;
+	struct Sample *sample;
+	int size = bufferSize;
+	int toMix = 0; 
+	Number value = NAN;
 
-        mixPos = mixLen;
-        mixed += toMix;
-        samplesLeft -= toMix;
-      }
+	if (self->super.completed) {
+		if (!self->super.remains) return;
+		size = self->super.remains;
+	}
 
-      sample = buffer[0];
+	while (mixed < size) {
+		if (!self->super.samplesLeft) {
+			self->super.player->process();
+			self->super.player->accurate();
+			self->super.samplesLeft = self->super.samplesTick;
 
-      if (player->record) {
-        for (i = 0; i < size; ++i) {
-          if (sample->l > 1.0) sample->l = 1.0;
-            else if (sample->l < -1.0) sample->l = -1.0;
+			if (self->super.completed) {
+				size = mixed + self->super.samplesTick;
 
-          if (sample->r > 1.0) sample->r = 1.0;
-            else if (sample->r < -1.0) sample->r = -1.0;
+				if (size > self->super.bufferSize) {
+					self->super.remains = size - self->super.bufferSize;
+					size = self->super.bufferSize;
+				}
+			}
+		}
 
-          wave->writeShort(int(sample->l * (sample->l < 0 ? 32768 : 32767)));
-          wave->writeShort(int(sample->r * (sample->r < 0 ? 32768 : 32767)));
+		toMix = self->super.samplesLeft;
+		if ((mixed + toMix) >= size) toMix = size - mixed;
+		mixLen = mixPos + toMix;
+		chan = self->channels[0];
 
-          data->writeFloat(sample->l);
-          data->writeFloat(sample->r);
+		while (chan) {
+			if (!chan->enabled) {
+				chan = chan->next;
+				continue;
+			}
 
-          sample->l = sample->r = 0.0;
-          sample = sample->next;
-        }
-      } else {
-        for (i = 0; i < size; ++i) {
-          if (sample->l > 1.0) sample->l = 1.0;
-            else if (sample->l < -1.0) sample->l = -1.0;
+			s1 = chan->sample;
+			d1 = s1.data;
+			s2 = chan->oldSample;
+			if (s2) d2 = s2.data;
 
-          if (sample->r > 1.0) sample->r = 1.0;
-            else if (sample->r < -1.0) sample->r = -1.0;
+			sample = self->super.buffer[mixPos];
 
-          data->writeFloat(sample->l);
-          data->writeFloat(sample->r);
+			for (i = mixPos; i < mixLen; ++i) {
+				value = chan->mute ? 0.0 : d1[chan->pointer];
+				value += (d1[int(chan->pointer + chan->dir)] - value) * chan->fraction;
 
-          sample->l = sample->r = 0.0;
-          sample = sample->next;
-        }
-      }
-    }
-  }
+				if ((chan->fraction += chan->speed) >= 1.0) {
+					delta = int(chan->fraction);
+					chan->fraction -= delta;
+
+					if (chan->dir > 0) {
+						chan->pointer += delta;
+
+						if (chan->pointer > chan->length) {
+						chan->fraction += chan->pointer - chan->length;
+						chan->pointer = chan->length;
+						}
+					} else {
+						chan->pointer -= delta;
+
+						if (chan->pointer < chan->length) {
+						chan->fraction += chan->length - chan->pointer;
+						chan->pointer = chan->length;
+						}
+					}
+				}
+
+				if (!chan->mixCounter) {
+					sample->l += value * chan->lvol;
+					sample->r += value * chan->rvol;
+
+					if (chan->volCounter) {
+						chan->lvol += chan->lvolDelta;
+						chan->rvol += chan->rvolDelta;
+						chan->volCounter--;
+					} else if (chan->panCounter) {
+						chan->lpan += chan->lpanDelta;
+						chan->rpan += chan->rpanDelta;
+						chan->panCounter--;
+
+						chan->lvol = chan->volume * chan->lpan;
+						chan->rvol = chan->volume * chan->rpan;
+					}
+				} else {
+					if (s2) {
+						mixValue = chan->mute ? 0.0 : d2[chan->oldPointer];
+						mixValue += (d2[int(chan->oldPointer + chan->oldDir)] - mixValue) * chan->oldFraction;
+
+						if ((chan->oldFraction += chan->oldSpeed) > 1) {
+							delta = int(chan->oldFraction);
+							chan->oldFraction -= delta;
+
+							if (chan->oldDir > 0) {
+								chan->oldPointer += delta;
+
+								if (chan->oldPointer > chan->oldLength) {
+									chan->oldFraction += chan->oldPointer - chan->oldLength;
+									chan->oldPointer = chan->oldLength;
+								}
+							} else {
+								chan->oldPointer -= delta;
+
+								if (chan->oldPointer < chan->oldLength) {
+									chan->oldFraction += chan->oldLength - chan->oldPointer;
+									chan->oldPointer = chan->oldLength;
+								}
+							}
+						}
+
+						sample->l += (value * chan->lmixRampU) + (mixValue * chan->lmixRampD);
+						sample->r += (value * chan->rmixRampU) + (mixValue * chan->rmixRampD);
+
+						chan->lmixRampD -= chan->lmixDeltaD;
+						chan->rmixRampD -= chan->rmixDeltaD;
+					} else {
+						sample->l += (value * chan->lmixRampU);
+						sample->r += (value * chan->rmixRampU);
+					}
+
+					chan->lmixRampU += chan->lmixDeltaU;
+					chan->rmixRampU += chan->rmixDeltaU;
+					chan->mixCounter--;
+
+					if (chan->oldPointer == chan->oldLength) {
+						if (!s2.loopMode) {
+							s2 = null;
+							chan->oldPointer = 0;
+						} else if (s2.loopMode == 1) {
+							chan->oldPointer = s2.loopStart;
+							chan->oldLength  = s2.length;
+						} else {
+							if (chan->oldDir > 0) {
+								chan->oldPointer = s2.length - 1;
+								chan->oldLength  = s2.loopStart;
+								chan->oldDir     = -1;
+							} else {
+								chan->oldFraction -= 1;
+								chan->oldPointer   = s2.loopStart;
+								chan->oldLength    = s2.length;
+								chan->oldDir       = 1;
+							}
+						}
+					}
+				}
+
+				if (chan->pointer == chan->length) {
+					if (!s1.loopMode) {
+						chan->enabled = 0;
+						break;
+					} else if (s1.loopMode == 1) {
+						chan->pointer = s1.loopStart;
+						chan->length  = s1.length;
+					} else {
+						if (chan->dir > 0) {
+						chan->pointer = s1.length - 1;
+						chan->length  = s1.loopStart;
+						chan->dir     = -1;
+						} else {
+						chan->fraction -= 1;
+						chan->pointer   = s1.loopStart;
+						chan->length    = s1.length;
+						chan->dir       = 1;
+						}
+					}
+				}
+				sample = sample->next;
+			}
+			chan = chan->next;
+		}
+
+		mixPos = mixLen;
+		mixed += toMix;
+		self->super.samplesLeft -= toMix;
+	}
+
+	sample = self->super.buffer[0];
+
+	if (self->super.player->record) {
+		for (i = 0; i < size; ++i) {
+			if (sample->l > 1.0) sample->l = 1.0;
+			else if (sample->l < -1.0) sample->l = -1.0;
+
+			if (sample->r > 1.0) sample->r = 1.0;
+			else if (sample->r < -1.0) sample->r = -1.0;
+
+			self->super.wave->writeShort(int(sample->l * (sample->l < 0 ? 32768 : 32767)));
+			self->super.wave->writeShort(int(sample->r * (sample->r < 0 ? 32768 : 32767)));
+
+			data->writeFloat(sample->l);
+			data->writeFloat(sample->r);
+
+			sample->l = sample->r = 0.0;
+			sample = sample->next;
+		}
+	} else {
+		for (i = 0; i < size; ++i) {
+			if (sample->l > 1.0) sample->l = 1.0;
+			else if (sample->l < -1.0) sample->l = -1.0;
+
+			if (sample->r > 1.0) sample->r = 1.0;
+			else if (sample->r < -1.0) sample->r = -1.0;
+
+			data->writeFloat(sample->l);
+			data->writeFloat(sample->r);
+
+			sample->l = sample->r = 0.0;
+			sample = sample->next;
+		}
+	}
 }

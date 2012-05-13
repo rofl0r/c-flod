@@ -15,62 +15,69 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->core {
 
-  public class AmigaPlayer extends CorePlayer {
-    public var
-      amiga    : Amiga;
-    protected var
- int standard;
+#include "AmigaPlayer.h"
+#include "../flod_internal.h"
 
-     void AmigaPlayer(amiga:Amiga) {
-      self->amiga = amiga || new Amiga();
-      super(self->amiga);
-
-      channels = 4;
-      endian   = "bigEndian";
-      ntsc     = 0;
-      speed    = 6;
-      tempo    = 125;
-    }
-
-//override
-void set ntsc( int value) {
-      standard = value;
-
-      if (value) {
-        amiga->clock = 81.1688208;
-        amiga->samplesTick = 735;
-      } else {
-        amiga->clock = 80.4284580;
-        amiga->samplesTick = 882;
-      }
-    }
-
-//override
-void set stereo( Number value) {
-      var chan:AmigaChannel = amiga->channels[0];
-
-      if (value < 0.0) value = 0.0;
-        else if (value > 1.0) value = 1.0;
-
-      while (chan) {
-        chan->level = value * chan->panning;
-        chan = chan->next;
-      }
-    }
-
-//override
-void set volume( Number value) {
-      if (value < 0.0) value = 0.0;
-        else if (value > 1.0) value = 1.0;
-
-      amiga->master = value * 0.00390625;
-    }
-
-//override
-void toggle( int index) {
-      amiga->channels[index].mute ^= 1;
-    }
-  }
+void AmigaPlayer_defaults(struct AmigaPlayer* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
 }
+
+void AmigaPlayer_ctor(struct AmigaPlayer* self, struct Amiga* amiga) {
+	CLASS_CTOR_DEF(AmigaPlayer);
+	// original constructor code goes here
+	self->amiga = amiga ? amiga : Amiga_new();
+	super(self->amiga);
+
+	self->super.channels = 4;
+	self->super.endian   = "bigEndian";
+	self->super.ntsc     = 0;
+	self->super.speed    = 6;
+	self->super.tempo    = 125;
+}
+
+struct AmigaPlayer* AmigaPlayer_new(struct Amiga* amiga) {
+	CLASS_NEW_BODY(AmigaPlayer, amiga);
+}
+
+//override
+void AmigaPlayer_set_ntsc(struct AmigaPlayer* self, int value) {
+	self->standard = value;
+
+	if (value) {
+		self->amiga->clock = 81.1688208;
+		self->amiga->super.samplesTick = 735;
+	} else {
+		self->amiga->clock = 80.4284580;
+		self->amiga->super.samplesTick = 882;
+	}
+}
+
+//override
+void AmigaPlayer_set_stereo(struct AmigaPlayer* self, Number value) {
+	struct AmigaChannel *chan = self->amiga->channels[0];
+
+	if (value < 0.0) value = 0.0;
+	else if (value > 1.0) value = 1.0;
+
+	while (chan) {
+		chan->level = value * chan->panning;
+		chan = chan->next;
+	}
+}
+
+//override
+void AmigaPlayer_set_volume(struct AmigaPlayer* self, Number value) {
+	if (value < 0.0) value = 0.0;
+	else if (value > 1.0) value = 1.0;
+
+	self->amiga->master = value * 0.00390625;
+}
+
+//override
+void AmigaPlayer_toggle(struct AmigaPlayer* self, int index) {
+	self->amiga->channels[index].mute ^= 1;
+}
+
+  

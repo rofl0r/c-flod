@@ -15,12 +15,20 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->whittaker {
 
-  public final class DWSong {
-    internal var
- int speed;
- int delay;
-      tracks : Vector.<int>;
-  }
+#include "DWSong.h"
+#include "../flod_internal.h"
+
+void DWSong_defaults(struct DWSong* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+void DWSong_ctor(struct DWSong* self) {
+	CLASS_CTOR_DEF(DWSong);
+	// original constructor code goes here
+}
+
+struct DWSong* DWSong_new(void) {
+	CLASS_NEW_BODY(DWSong);
 }

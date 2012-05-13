@@ -11,5 +11,7 @@
 #include "../../flashlib/Common.h"
 #include "../../flashlib/ByteArray.h"
 #include "../../flashlib/Encoding.h"
+#include "../../flashlib/EventDispatcher.h"
+#include "../../flashlib/SampleDataEvent.h"
 
 #endif

@@ -17,34 +17,35 @@
 */
 
 #include "Amiga.h"
+#include "../flod_internal.h"
 
 void Amiga_defaults(struct Amiga* self) {
+	CLASS_DEF_INIT();
+	/* static initializers go here */	
 	self->model = MODEL_A1200;
 	self->loopLen = 4;
 	self->clock = 0.0;
 	self->master = 0.00390625;
 }
 
-struct Amiga* Amiga_new(void) {
-	struct Amiga *self = malloc(sizeof(Amiga));
-	if(self) {
-		Amiga_defaults(self);
-		Amiga_ctor(self);
-	}
-	return self;
-}
-
 void Amiga_ctor(struct Amiga* self) {
-      super();
-      self->bufferSize = 8192;
-      self->filter = AmigaFilter_new();
-      self->channels = new Vector.<AmigaChannel>(4, true);
+	CLASS_CTOR_DEF(Amiga);
+	/* original constructor code goes here */	
+	super();
+	self->bufferSize = 8192;
+	self->filter = AmigaFilter_new();
+	self->channels = new Vector.<AmigaChannel>(4, true);
 
-      self->channels[0] = AmigaChannel_new(0);
-      self->channels[0].next = self->channels[1] = AmigaChannel_new(1);
-      self->channels[1].next = self->channels[2] = AmigaChannel_new(2);
-      self->channels[2].next = self->channels[3] = AmigaChannel_new(3);
+	self->channels[0] = AmigaChannel_new(0);
+	self->channels[0].next = self->channels[1] = AmigaChannel_new(1);
+	self->channels[1].next = self->channels[2] = AmigaChannel_new(2);
+	self->channels[2].next = self->channels[3] = AmigaChannel_new(3);
 }
+
+struct Amiga* Amiga_new(void) {
+	CLASS_NEW_BODY(Amiga);
+}
+
 
 void Amiga_set_volume(struct Amiga* self, int value) {
 	if (value > 0) {
@@ -103,7 +104,7 @@ void Amiga_reset(struct Amiga* self) {
 }
 
     //override
-void Amiga_fast(struct Amiga* self, e:SampleDataEvent) {
+void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 	struct AmigaChannel *chan = NULL;
 	struct ByteArray *data = e->data;
 	int i = 0;
@@ -124,27 +125,27 @@ void Amiga_fast(struct Amiga* self, e:SampleDataEvent) {
 	}
 
 	while (mixed < size) {
-		if (!self->samplesLeft) {
-			self->player->process();
-			self->samplesLeft = self->samplesTick;
+		if (!self->super.samplesLeft) {
+			self->super.player->process();
+			self->super.samplesLeft = self->super.samplesTick;
 
 			if (self->completed) {
-				size = mixed + self->samplesTick;
+				size = mixed + self->super.samplesTick;
 
 				if (size > self->bufferSize) {
-					self->remains = size - self->bufferSize;
+					self->super.remains = size - self->bufferSize;
 					size = self->bufferSize;
 				}
 			}
 		}
 
-		toMix = self->samplesLeft;
+		toMix = self->super.samplesLeft;
 		if ((mixed + toMix) >= size) toMix = size - mixed;
 		mixLen = mixPos + toMix;
 		chan = self->channels[0];
 
 		while (chan) {
-			sample = self->buffer[mixPos];
+			sample = self->super.buffer[mixPos];
 
 			if (chan->audena && chan->audper > 60) {
 				if (chan->mute) {
@@ -193,17 +194,17 @@ void Amiga_fast(struct Amiga* self, e:SampleDataEvent) {
 
 		mixPos = mixLen;
 		mixed += toMix;
-		self->samplesLeft -= toMix;
+		self->super.samplesLeft -= toMix;
 	}
 
-	sample = self->buffer[0];
+	sample = self->super.buffer[0];
 
-	if (self->player->record) {
+	if (self->super.player->record) {
 		for (i = 0; i < size; ++i) {
 			self->filter->process(model, sample);
 
-			self->wave->writeShort(int(sample->l * (sample->l < 0 ? 32768 : 32767)));
-			self->wave->writeShort(int(sample->r * (sample->r < 0 ? 32768 : 32767)));
+			self->super.wave->writeShort(int(sample->l * (sample->l < 0 ? 32768 : 32767)));
+			self->super.wave->writeShort(int(sample->r * (sample->r < 0 ? 32768 : 32767)));
 
 			data->writeFloat(sample->l);
 			data->writeFloat(sample->r);

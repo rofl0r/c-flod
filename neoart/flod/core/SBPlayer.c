@@ -15,49 +15,52 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->core {
 
-  public class SBPlayer extends CorePlayer {
-    public var
-      mixer   : Soundblaster,
- int length;
- int restart;
-      track   : Vector.<int>;
-    protected var
- int timer;
- int master;
+#include "SBPlayer.h"
+#include "../flod_internal.h"
 
-     void SBPlayer(mixer:Soundblaster = null) {
-      self->mixer = mixer || new Soundblaster();
-      super(self->mixer);
+void SBPlayer_defaults(struct SBPlayer* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
 
-      endian  = "littleEndian";
-      quality = 1;
-  }
+//mixer default value: NULL
+void SBPlayer_ctor(struct SBPlayer* self, struct Soundblaster* mixer) {
+	CLASS_CTOR_DEF(SBPlayer);
+	// original constructor code goes here
+	self->mixer = mixer ? mixer : Soundblaster_new();
+	super(self->mixer);
 
-//override
-void set volume( Number value) {
-      if (value < 0.0) value = 0.0;
-        else if (value > 1.0) value = 1.0;
+	self->super.endian  = "littleEndian";
+	self->super.quality = 1;
+}
 
-      master = value * 64;
-    }
+struct SBPlayer* SBPlayer_new(struct Soundblaster* mixer) {
+	CLASS_NEW_BODY(SBPlayer, mixer);
+}
+
 
 //override
-void toggle( int index) {
-      mixer->channels[index].mute ^= 1;
-    }
+void SBPlayer_set_volume(struct SBPlayer* self, Number value) {
+	if (value < 0.0) value = 0.0;
+		else if (value > 1.0) value = 1.0;
+
+	self->master = value * 64;
+}
 
 //override
-void setup() {
-      mixer->setup(channels);
-    }
+void SBPlayer_toggle(struct SBPlayer* self, int index) {
+	self->mixer->channels[index].mute ^= 1;
+}
 
 //override
-void initialize() {
-      super->initialize();
-      timer  = speed;
-      master = 64;
-    }
-  }
+void SBPlayer_setup(struct SBPlayer* self) {
+	self->mixer->setup(self->super.channels);
+}
+
+//override
+void SBPlayer_initialize(struct SBPlayer* self) {
+	super->initialize();
+	self->timer  = self->super.speed;
+	self->master = 64;
 }

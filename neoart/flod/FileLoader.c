@@ -15,7 +15,10 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod {
+
+#include "FileLoader.h"
+#include "flod_internal.h"
+/*
   import flash.utils.*;
   import neoart.flip.*;
   import neoart.flod.core.*;
@@ -31,310 +34,302 @@ package neoart->flod {
   import neoart.flod.trackers.*;
   import neoart.flod.fasttracker.*;
   import neoart.flod.whittaker.*;
+*/
 
-  public final class FileLoader {
-    private var
-      player : CorePlayer,
- int index;
-      amiga  : Amiga,
-      mixer  : Soundblaster;
 
-     void FileLoader() {
-      amiga = new Amiga();
-      mixer = new Soundblaster();
+void FileLoader_defaults(struct FileLoader* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+void FileLoader_ctor(struct FileLoader* self) {
+	CLASS_CTOR_DEF(FileLoader);
+	// original constructor code goes here
+	self->amiga = Amiga_new();
+	self->mixer = Soundblaster_new();
+}
+
+struct FileLoader* FileLoader_new(void) {
+	CLASS_NEW_BODY(FileLoader);
+}
+
+
+const char* FileLoader_get_tracker(struct FileLoader* self) {
+	return (self->player) ? TRACKERS[self->index + self->player->version] : TRACKERS[0];
+}
+
+struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *stream) {
+	struct ZipFile archive = NULL;
+	char *id = "";
+	int value = 0;
+
+	stream->endian = "littleEndian";
+	stream->position = 0;
+
+	if (stream->readUnsignedInt() == 67324752) {
+		archive = new ZipFile(stream);
+		stream = archive->uncompress(archive->entries[0]);
+	}
+
+	if (!stream) return null;
+
+	if (self->player && !(self->player is STPlayer)) {
+		self->player->load(stream);
+		if (self->player->version) return self->player;
+	}
+
+	if (stream->length > 336) {
+		stream->position = 38;
+		id = stream->readMultiByte(20, CorePlayer->ENCODING);
+
+		if (id == "FastTracker v2.00   " ||
+		id == "FastTracker v 2.00  " ||
+		id == "Sk@le Tracker"        ||
+		id == "MadTracker 2.0"       ||
+		id == "MilkyTracker        " ||
+		id == "DigiBooster Pro 2.18" ||
+		id->indexOf("OpenMPT") != -1) {
+
+			self->player = new F2Player(mixer);
+			self->player->load(stream);
+
+			if (self->player->version) {
+				index = FASTTRACKER;
+				return self->player;
+			}
+		}
+	}
+
+	stream->endian = "bigEndian";
+
+	if (stream->length > 2105) {
+		stream->position = 1080;
+		id = stream->readMultiByte(4, CorePlayer->ENCODING);
+
+		if (id == "M->K." || id == "FLT4") {
+			self->player = new MKPlayer(self->amiga);
+			self->player->load(stream);
+
+			if (self->player->version) {
+				index = NOISETRACKER;
+				return self->player;
+			}
+		} else if (id == "FEST") {
+			self->player = new HMPlayer(self->amiga);
+			self->player->load(stream);
+
+			if (self->player->version) {
+				index = HISMASTER;
+				return self->player;
+			}
+		}
+	}
+
+	if (stream->length > 2105) {
+		stream->position = 1080;
+		id = stream->readMultiByte(4, CorePlayer->ENCODING);
+
+		if (id == "M->K." || id == "M!K!") {
+			self->player = new PTPlayer(self->amiga);
+			self->player->load(stream);
+
+			if (self->player->version) {
+				index = PROTRACKER;
+				return self->player;
+			}
+		}
+	}
+
+	if (stream->length > 1685) {
+		stream->position = 60;
+		id = stream->readMultiByte(4, CorePlayer->ENCODING);
+
+		if (id != "SONG") {
+			stream->position = 124;
+			id = stream->readMultiByte(4, CorePlayer->ENCODING);
+		}
+
+		if (id == "SONG" || id == "SO31") {
+			self->player = new FXPlayer(self->amiga);
+			self->player->load(stream);
+
+			if (self->player->version) {
+				index = SOUNDFX;
+				return self->player;
+			}
+		}
+	}
+
+	if (stream->length > 4) {
+		stream->position = 0;
+		id = stream->readMultiByte(4, CorePlayer->ENCODING);
+
+		if (id == "ALL ") {
+			self->player = new D1Player(self->amiga);
+			self->player->load(stream);
+
+			if (self->player->version) {
+				index = DELTAMUSIC;
+				return self->player;
+			}
+		}
+	}
+
+	if (stream->length > 3018) {
+		stream->position = 3014;
+		id = stream->readMultiByte(4, CorePlayer->ENCODING);
+
+		if (id == ".FNL") {
+			self->player = new D2Player(self->amiga);
+			self->player->load(stream);
+
+			if (self->player->version) {
+				index = DELTAMUSIC;
+				return self->player;
+			}
+		}
+	}
+
+	if (stream->length > 30) {
+		stream->position = 26;
+		id = stream->readMultiByte(3, CorePlayer->ENCODING);
+
+		if (id == "BPS" || id == "V.2" || id == "V.3") {
+			self->player = new BPPlayer(self->amiga);
+			self->player->load(stream);
+
+			if (self->player->version) {
+				index = BPSOUNDMON;
+				return self->player;
+			}
+		}
+	}
+
+	if (stream->length > 4) {
+		stream->position = 0;
+		id = stream->readMultiByte(4, CorePlayer->ENCODING);
+
+		if (id == "SMOD" || id == "FC14") {
+			self->player = new FCPlayer(self->amiga);
+			self->player->load(stream);
+
+			if (self->player->version) {
+				index = FUTURECOMP;
+				return self->player;
+			}
+		}
+	}
+
+	if (stream->length > 10) {
+		stream->position = 0;
+		id = stream->readMultiByte(9, CorePlayer->ENCODING);
+
+		if (id == " MUGICIAN") {
+			self->player = new DMPlayer(self->amiga);
+			self->player->load(stream);
+
+			if (self->player->version) {
+				index = DIGITALMUG;
+				return self->player;
+			}
+		}
+	}
+
+	if (stream->length > 86) {
+		stream->position = 58;
+		id = stream->readMultiByte(28, CorePlayer->ENCODING);
+
+		if (id == "SIDMON II - THE MIDI VERSION") {
+			self->player = new S2Player(self->amiga);
+			self->player->load(stream);
+
+			if (self->player->version) {
+				index = SIDMON;
+				return self->player;
+			}
+		}
+	}
+
+	if (stream->length > 2830) {
+		stream->position = 0;
+		value = stream->readUnsignedShort();
+
+		if (value == 0x4efa) {
+			self->player = new FEPlayer(self->amiga);
+			self->player->load(stream);
+
+			if (self->player->version) {
+				index = FREDED;
+				return self->player;
+			}
+		}
+	}
+
+	if (stream->length > 5220) {
+		self->player = new S1Player(self->amiga);
+		self->player->load(stream);
+
+		if (self->player->version) {
+			index = SIDMON;
+			return self->player;
+		}
+	}
+
+	stream->position = 0;
+	value = stream->readUnsignedShort();
+	stream->position = 0;
+	id = stream->readMultiByte(4, CorePlayer->ENCODING);
+
+	if (id == "COSO" || value == 0x6000 || value == 0x6002 || value == 0x600e || value == 0x6016) {
+		self->player = new JHPlayer(self->amiga);
+		self->player->load(stream);
+
+		if (self->player->version) {
+			index = HIPPEL;
+			return self->player;
+		}
+	}
+
+	stream->position = 0;
+	value = stream->readUnsignedShort();
+
+	self->player = new DWPlayer(self->amiga);
+	self->player->load(stream);
+
+	if (self->player->version) {
+		index = WHITTAKER;
+		return self->player;
+	}
+
+	stream->position = 0;
+	value = stream->readUnsignedShort();
+
+	if (value == 0x6000) {
+		self->player = new RHPlayer(self->amiga);
+		self->player->load(stream);
+
+		if (self->player->version) {
+			index = HUBBARD;
+			return self->player;
+		}
+	}
+
+	if (stream->length > 1625) {
+		self->player = new STPlayer(self->amiga);
+		self->player->load(stream);
+
+		if (self->player->version) {
+			index = SOUNDTRACKER;
+			return self->player;
+		}
+	}
+
+	stream->clear();
+	index = 0;
+	return self->player = null;
     }
 
-     void get tracker():String {
-      return (player) ? TRACKERS[index + player->version] : TRACKERS[0];
-    }
-
-     void load(stream:ByteArray):CorePlayer {
-      var archive:ZipFile, id:String, int value;
-
-      stream->endian = "littleEndian";
-      stream->position = 0;
-
-      if (stream->readUnsignedInt() == 67324752) {
-        archive = new ZipFile(stream);
-        stream = archive->uncompress(archive->entries[0]);
-      }
-
-      if (!stream) return null;
-
-      if (player && !(player is STPlayer)) {
-        player->load(stream);
-        if (player->version) return player;
-      }
-
-      if (stream->length > 336) {
-        stream->position = 38;
-        id = stream->readMultiByte(20, CorePlayer->ENCODING);
-
-        if (id == "FastTracker v2.00   " ||
-            id == "FastTracker v 2.00  " ||
-            id == "Sk@le Tracker"        ||
-            id == "MadTracker 2.0"       ||
-            id == "MilkyTracker        " ||
-            id == "DigiBooster Pro 2.18" ||
-            id->indexOf("OpenMPT") != -1) {
-
-          player = new F2Player(mixer);
-          player->load(stream);
-
-          if (player->version) {
-            index = FASTTRACKER;
-            return player;
-          }
-        }
-      }
-
-      stream->endian = "bigEndian";
-
-      if (stream->length > 2105) {
-        stream->position = 1080;
-        id = stream->readMultiByte(4, CorePlayer->ENCODING);
-
-        if (id == "M->K." || id == "FLT4") {
-          player = new MKPlayer(amiga);
-          player->load(stream);
-
-          if (player->version) {
-            index = NOISETRACKER;
-            return player;
-          }
-        } else if (id == "FEST") {
-          player = new HMPlayer(amiga);
-          player->load(stream);
-
-          if (player->version) {
-            index = HISMASTER;
-            return player;
-          }
-        }
-      }
-
-      if (stream->length > 2105) {
-        stream->position = 1080;
-        id = stream->readMultiByte(4, CorePlayer->ENCODING);
-
-        if (id == "M->K." || id == "M!K!") {
-          player = new PTPlayer(amiga);
-          player->load(stream);
-
-          if (player->version) {
-            index = PROTRACKER;
-            return player;
-          }
-        }
-      }
-
-      if (stream->length > 1685) {
-        stream->position = 60;
-        id = stream->readMultiByte(4, CorePlayer->ENCODING);
-
-        if (id != "SONG") {
-          stream->position = 124;
-          id = stream->readMultiByte(4, CorePlayer->ENCODING);
-        }
-
-        if (id == "SONG" || id == "SO31") {
-          player = new FXPlayer(amiga);
-          player->load(stream);
-
-          if (player->version) {
-            index = SOUNDFX;
-            return player;
-          }
-        }
-      }
-
-      if (stream->length > 4) {
-        stream->position = 0;
-        id = stream->readMultiByte(4, CorePlayer->ENCODING);
-
-        if (id == "ALL ") {
-          player = new D1Player(amiga);
-          player->load(stream);
-
-          if (player->version) {
-            index = DELTAMUSIC;
-            return player;
-          }
-        }
-      }
-
-      if (stream->length > 3018) {
-        stream->position = 3014;
-        id = stream->readMultiByte(4, CorePlayer->ENCODING);
-
-        if (id == ".FNL") {
-          player = new D2Player(amiga);
-          player->load(stream);
-
-          if (player->version) {
-            index = DELTAMUSIC;
-            return player;
-          }
-        }
-      }
-
-      if (stream->length > 30) {
-        stream->position = 26;
-        id = stream->readMultiByte(3, CorePlayer->ENCODING);
-
-        if (id == "BPS" || id == "V.2" || id == "V.3") {
-          player = new BPPlayer(amiga);
-          player->load(stream);
-
-          if (player->version) {
-            index = BPSOUNDMON;
-            return player;
-          }
-        }
-      }
-
-      if (stream->length > 4) {
-        stream->position = 0;
-        id = stream->readMultiByte(4, CorePlayer->ENCODING);
-
-        if (id == "SMOD" || id == "FC14") {
-          player = new FCPlayer(amiga);
-          player->load(stream);
-
-          if (player->version) {
-            index = FUTURECOMP;
-            return player;
-          }
-        }
-      }
-
-      if (stream->length > 10) {
-        stream->position = 0;
-        id = stream->readMultiByte(9, CorePlayer->ENCODING);
-
-        if (id == " MUGICIAN") {
-          player = new DMPlayer(amiga);
-          player->load(stream);
-
-          if (player->version) {
-            index = DIGITALMUG;
-            return player;
-          }
-        }
-      }
-
-      if (stream->length > 86) {
-        stream->position = 58;
-        id = stream->readMultiByte(28, CorePlayer->ENCODING);
-
-        if (id == "SIDMON II - THE MIDI VERSION") {
-          player = new S2Player(amiga);
-          player->load(stream);
-
-          if (player->version) {
-            index = SIDMON;
-            return player;
-          }
-        }
-      }
-
-      if (stream->length > 2830) {
-        stream->position = 0;
-        value = stream->readUnsignedShort();
-
-        if (value == 0x4efa) {
-          player = new FEPlayer(amiga);
-          player->load(stream);
-
-          if (player->version) {
-            index = FREDED;
-            return player;
-          }
-        }
-      }
-
-      if (stream->length > 5220) {
-        player = new S1Player(amiga);
-        player->load(stream);
-
-        if (player->version) {
-          index = SIDMON;
-          return player;
-        }
-      }
-
-      stream->position = 0;
-      value = stream->readUnsignedShort();
-      stream->position = 0;
-      id = stream->readMultiByte(4, CorePlayer->ENCODING);
-
-      if (id == "COSO" || value == 0x6000 || value == 0x6002 || value == 0x600e || value == 0x6016) {
-        player = new JHPlayer(amiga);
-        player->load(stream);
-
-        if (player->version) {
-          index = HIPPEL;
-          return player;
-        }
-      }
-
-      stream->position = 0;
-      value = stream->readUnsignedShort();
-
-      player = new DWPlayer(amiga);
-      player->load(stream);
-
-      if (player->version) {
-        index = WHITTAKER;
-        return player;
-      }
-
-      stream->position = 0;
-      value = stream->readUnsignedShort();
-
-      if (value == 0x6000) {
-        player = new RHPlayer(amiga);
-        player->load(stream);
-
-        if (player->version) {
-          index = HUBBARD;
-          return player;
-        }
-      }
-
-      if (stream->length > 1625) {
-        player = new STPlayer(amiga);
-        player->load(stream);
-
-        if (player->version) {
-          index = SOUNDTRACKER;
-          return player;
-        }
-      }
-
-      stream->clear();
-      index = 0;
-      return player = null;
-    }
-
-    private static const
-      SOUNDTRACKER = 0,
-      NOISETRACKER = 4,
-      PROTRACKER   = 9,
-      HISMASTER    = 12,
-      SOUNDFX      = 13,
-      BPSOUNDMON   = 17,
-      DELTAMUSIC   = 20,
-      DIGITALMUG   = 22,
-      FUTURECOMP   = 24,
-      SIDMON       = 26,
-      WHITTAKER    = 28,
-      FREDED       = 29,
-      HIPPEL       = 30,
-      HUBBARD      = 32,
-      FASTTRACKER  = 33,
-
-      TRACKERS = [
+const char* TRACKERS[] = {
         "Unknown Format",
         "Ultimate SoundTracker",
         "D->O.C. SoundTracker 9",
@@ -374,6 +369,5 @@ package neoart->flod {
         "MadTracker 2.0",
         "MilkyTracker",
         "DigiBooster Pro 2.18",
-        "OpenMPT"];
-  }
-}
+        "OpenMPT"
+};

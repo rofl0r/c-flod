@@ -17,16 +17,25 @@
 */
 
 #include "CorePlayer.h"
+#include "../flod_internal.h"
 
-CorePlayer_defaults(struct CorePlayer* self) {
+void CorePlayer_defaults(struct CorePlayer* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
 	self->encoding = ENCODING_US_ASCII;
 	self->title = "";
 	self->soundPos = 0.0;
 }
 
 void CorePlayer_dtor(struct CorePlayer* self, struct CoreMixer *hardware) {
+	CLASS_CTOR_DEF(CorePlayer);
+	// original constructor code goes here
 	hardware->player = this;
 	self->hardware = hardware;
+}
+
+struct CorePlayer* CorePlayer_new(struct CoreMixer *hardware) {
+	CLASS_NEW_BODY(CorePlayer, hardware);
 }
 
 void CorePlayer_set_force(struct CorePlayer* self, int value) {
@@ -37,111 +46,101 @@ void CorePlayer_set_ntsc(struct CorePlayer* self, int value) { }
 
 void CorePlayer_set_stereo(struct CorePlayer* self, Number value) { }
 
-CorePlayer_set_volume(struct CorePlayer* self, Number value) { }
+void CorePlayer_set_volume(struct CorePlayer* self, Number value) { }
 
-CorePlayer_get_waveform(struct CorePlayer* self):ByteArray {
-return self->hardware->waveform();
+struct ByteArray *CorePlayer_get_waveform(struct CorePlayer* self) {
+	return self->hardware->waveform();
 }
 
-void CorePlayer_toggle(struct CorePlayer* self, int index) {
+void CorePlayer_toggle(struct CorePlayer* self, int index) {}
 
-    CorePlayer_load(struct CorePlayer* self, stream:ByteArray):int {
-      struct ZipFile* zip;
-      self->hardware->reset();
-      stream->position = 0;
+int CorePlayer_load(struct CorePlayer* self, struct ByteArray *stream) {
+	struct ZipFile* zip;
+	self->hardware->reset();
+	self->stream->position = 0;
 
-      version  = 0;
-      playSong = 0;
-      lastSong = 0;
+	self->version  = 0;
+	self->playSong = 0;
+	self->lastSong = 0;
 
-      if (stream->readUnsignedInt() == 67324752) {
-        zip = new ZipFile(stream);
-        stream = zip->uncompress(zip->entries[0]);
-      }
+	if (self->stream->readUnsignedInt() == 67324752) {
+		zip = ZipFile_new(stream);
+		self->stream = zip->uncompress(zip->entries[0]);
+	}
 
-      if (stream) {
-        stream->endian = endian;
-        stream->position = 0;
-        loader(stream);
-        if (version) setup();
-      }
-      return version;
-    }
+	if (self->stream) {
+		self->stream->endian = endian;
+		self->stream->position = 0;
+		self->loader(stream);
+		if (self->version) self->setup();
+	}
+	return self->version;
+}
 
+/* processor default : NULL */
+int CorePlayer_play(struct CorePlayer* self, struct Sound *processor) {
+	if (!self->version) return 0;
+	if (self->soundPos == 0.0) self->initialize();
+	self->sound = processor || Sound_new();
 
-package neoart->flod->core {
-  import flash.events.*;
-  import flash.media.*;
-  import flash.utils.*;
-  import neoart.flip.*;
+	if (self->quality && (hardware is Soundblaster)) {
+		self->sound->addEventListener(SampleDataEvent->SAMPLE_DATA, hardware->accurate);
+	} else {
+		self->sound->addEventListener(SampleDataEvent->SAMPLE_DATA, hardware->fast);
+	}
 
-  public class CorePlayer extends EventDispatcher {
-
-
-    CorePlayer_play(struct CorePlayer* self, processor:Sound = null):int {
-      if (!version) return 0;
-      if (soundPos == 0.0) initialize();
-      sound = processor || new Sound();
-
-      if (quality && (hardware is Soundblaster)) {
-        sound->addEventListener(SampleDataEvent->SAMPLE_DATA, hardware->accurate);
-      } else {
-        sound->addEventListener(SampleDataEvent->SAMPLE_DATA, hardware->fast);
-      }
-
-      soundChan = sound->play(soundPos);
-      soundChan->addEventListener(Event->SOUND_COMPLETE, completeHandler);
-      soundPos = 0.0;
-      return 1;
-    }
+	self->soundChan = self->sound->play(soundPos);
+	self->soundChan->addEventListener(Event->SOUND_COMPLETE, completeHandler);
+	self->soundPos = 0.0;
+	return 1;
+}
 
 void CorePlayer_pause(struct CorePlayer* self) {
-      if (!version || !soundChan) return;
-      soundPos = soundChan->position;
-      removeEvents();
-    }
+	if (!self->version || !self->soundChan) return;
+	self->soundPos = self->soundChan->position;
+	self->removeEvents();
+}
 
 void CorePlayer_stop(struct CorePlayer* self) {
-      if (!version) return;
-      if (soundChan) removeEvents();
-      soundPos = 0.0;
-      reset();
-    }
+	if (!self->version) return;
+	if (self->soundChan) self->removeEvents();
+	self->soundPos = 0.0;
+	self->reset();
+}
 
-void CorePlayer_process(struct CorePlayer* self) {
+void CorePlayer_process(struct CorePlayer* self) {}
 
-void CorePlayer_fast(struct CorePlayer* self) {
+void CorePlayer_fast(struct CorePlayer* self) {}
 
-void CorePlayer_accurate(struct CorePlayer* self) {
+void CorePlayer_accurate(struct CorePlayer* self) {}
 
-void CorePlayer_setup(struct CorePlayer* self) {
+void CorePlayer_setup(struct CorePlayer* self) {}
 
     //js function reset
 void CorePlayer_initialize(struct CorePlayer* self) {
-      tick = 0;
-      hardware->initialize();
-      hardware->samplesTick = 110250 / tempo;
-    }
+	self->tick = 0;
+	self->hardware->initialize();
+	self->hardware->samplesTick = 110250 / tempo;
+}
 
-void CorePlayer_reset(struct CorePlayer* self) {
+void CorePlayer_reset(struct CorePlayer* self) { }
 
-void CorePlayer_loader(struct CorePlayer* self, stream:ByteArray) {
+void CorePlayer_loader(struct CorePlayer* self, struct ByteArray *stream) { }
 
-void CorePlayer_completeHandler(struct CorePlayer* self, e:Event) {
-      stop();
-      dispatchEvent(e);
-    }
+void CorePlayer_completeHandler(struct CorePlayer* self, struct Event *e) {
+	self->stop();
+	self->dispatchEvent(e);
+}
 
 void CorePlayer_removeEvents(struct CorePlayer* self) {
-      soundChan->stop();
-      soundChan->removeEventListener(Event->SOUND_COMPLETE, completeHandler);
-      soundChan->dispatchEvent(new Event(Event->SOUND_COMPLETE));
+	self->soundChan->stop();
+	self->soundChan->removeEventListener(Event->SOUND_COMPLETE, completeHandler);
+	self->soundChan->dispatchEvent(new Event(Event->SOUND_COMPLETE));
 
-      if (quality) {
-        sound->removeEventListener(SampleDataEvent->SAMPLE_DATA, hardware->accurate);
-      } else {
-        sound->removeEventListener(SampleDataEvent->SAMPLE_DATA, hardware->fast);
-      }
-    }
-  }
+	if (self->quality) {
+		self->sound->removeEventListener(self->SampleDataEvent->SAMPLE_DATA, self->hardware->accurate);
+	} else {
+		self->sound->removeEventListener(self->SampleDataEvent->SAMPLE_DATA, self->hardware->fast);
+	}
 }
+

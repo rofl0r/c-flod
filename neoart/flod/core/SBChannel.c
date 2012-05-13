@@ -15,90 +15,61 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->core {
 
-  public final class SBChannel {
-    public var
-      next        : SBChannel,
- int mute;
- int enabled;
-      sample      : SBSample,
- int length;
- int index;
- int pointer;
- int delta;
- Number fraction;
- Number speed;
- int dir;
-      oldSample   : SBSample,
- int oldLength;
- int oldPointer;
- Number oldFraction;
- Number oldSpeed;
- int oldDir;
- Number volume;
- Number lvol;
- Number rvol;
- int panning;
- Number lpan;
- Number rpan;
- Number ldata;
- Number rdata;
- int mixCounter;
- Number lmixRampU;
- Number lmixDeltaU;
- Number rmixRampU;
- Number rmixDeltaU;
- Number lmixRampD;
- Number lmixDeltaD;
- Number rmixRampD;
- Number rmixDeltaD;
- int volCounter;
- Number lvolDelta;
- Number rvolDelta;
- int panCounter;
- Number lpanDelta;
- Number rpanDelta;
+#include "SBChannel.h"
+#include "../flod_internal.h"
 
-    internal function initialize():void {
-      enabled     = 0;
-      sample      = null;
-      length      = 0;
-      index       = 0;
-      pointer     = 0;
-      delta       = 0;
-      fraction    = 0.0;
-      speed       = 0.0;
-      dir         = 0;
-      oldSample   = null;
-      oldLength   = 0;
-      oldPointer  = 0;
-      oldFraction = 0.0;
-      oldSpeed    = 0.0;
-      oldDir      = 0;
-      volume      = 0.0;
-      lvol        = 0.0;
-      rvol        = 0.0;
-      panning     = 128
-      lpan        = 0.5;
-      rpan        = 0.5;
-      ldata       = 0.0;
-      rdata       = 0.0;
-      mixCounter  = 0;
-      lmixRampU   = 0.0;
-      lmixDeltaU  = 0.0;
-      rmixRampU   = 0.0;
-      rmixDeltaU  = 0.0;
-      lmixRampD   = 0.0;
-      lmixDeltaD  = 0.0;
-      rmixRampD   = 0.0;
-      rmixDeltaD  = 0.0;
-      volCounter  = 0;
-      lvolDelta   = 0.0;
-      rvolDelta   = 0.0;
-      panCounter  = 0;
-      lpanDelta   = 0.0;
-      rpanDelta   = 0.0;
-    }
-  }
+void SBChannel_defaults(struct SBChannel* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+void SBChannel_ctor(struct SBChannel* self) {
+	CLASS_CTOR_DEF(SBChannel);
+	// original constructor code goes here
+}
+
+struct SBChannel* SBChannel_new(void) {
+	CLASS_NEW_BODY(SBChannel);
+}
+
+void SBChannel_initialize(struct SBChannel* self) {
+	self->enabled     = 0;
+	self->sample      = null;
+	self->length      = 0;
+	self->index       = 0;
+	self->pointer     = 0;
+	self->delta       = 0;
+	self->fraction    = 0.0;
+	self->speed       = 0.0;
+	self->dir         = 0;
+	self->oldSample   = null;
+	self->oldLength   = 0;
+	self->oldPointer  = 0;
+	self->oldFraction = 0.0;
+	self->oldSpeed    = 0.0;
+	self->oldDir      = 0;
+	self->volume      = 0.0;
+	self->lvol        = 0.0;
+	self->rvol        = 0.0;
+	self->panning     = 128;
+	self->lpan        = 0.5;
+	self->rpan        = 0.5;
+	self->ldata       = 0.0;
+	self->rdata       = 0.0;
+	self->mixCounter  = 0;
+	self->lmixRampU   = 0.0;
+	self->lmixDeltaU  = 0.0;
+	self->rmixRampU   = 0.0;
+	self->rmixDeltaU  = 0.0;
+	self->lmixRampD   = 0.0;
+	self->lmixDeltaD  = 0.0;
+	self->rmixRampD   = 0.0;
+	self->rmixDeltaD  = 0.0;
+	self->volCounter  = 0;
+	self->lvolDelta   = 0.0;
+	self->rvolDelta   = 0.0;
+	self->panCounter  = 0;
+	self->lpanDelta   = 0.0;
+	self->rpanDelta   = 0.0;
 }

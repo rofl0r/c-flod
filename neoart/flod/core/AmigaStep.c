@@ -15,11 +15,20 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->core {
 
-  public class AmigaStep {
-    public var
- int pattern;
- int transpose;
-  }
+#include "AmigaStep.h"
+#include "../flod_internal.h"
+
+void AmigaStep_defaults(struct AmigaStep* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+void AmigaStep_ctor(struct AmigaStep* self) {
+	CLASS_CTOR_DEF(AmigaStep);
+	// original constructor code goes here
+}
+
+struct AmigaStep* AmigaStep_new(void) {
+	CLASS_NEW_BODY(AmigaStep);
 }
