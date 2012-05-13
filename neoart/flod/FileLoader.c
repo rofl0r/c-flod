@@ -75,6 +75,7 @@ struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *st
 
 	if (!stream) return null;
 
+/*
 	if (self->player && !(self->player is STPlayer)) {
 		self->player->load(stream);
 		if (self->player->version) return self->player;
@@ -101,8 +102,11 @@ struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *st
 			}
 		}
 	}
+	*/
 
 	stream->endian = "bigEndian";
+	
+	/*
 
 	if (stream->length > 2105) {
 		stream->position = 1080;
@@ -291,7 +295,7 @@ struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *st
 			return self->player;
 		}
 	}
-
+	*/
 	stream->position = 0;
 	value = stream->readUnsignedShort();
 
@@ -302,7 +306,7 @@ struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *st
 		index = WHITTAKER;
 		return self->player;
 	}
-
+/*
 	stream->position = 0;
 	value = stream->readUnsignedShort();
 
@@ -325,7 +329,7 @@ struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *st
 			return self->player;
 		}
 	}
-
+*/
 	stream->clear();
 	index = 0;
 	return self->player = null;
