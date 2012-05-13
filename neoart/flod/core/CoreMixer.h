@@ -5,6 +5,11 @@
 #include "Sample.h"
 #include "../flod.h"
 
+enum CoreMixer_type {
+	CM_AMIGA,
+	CM_SOUNDBLASTER,
+};
+
 struct CoreMixer {
 	struct CorePlayer* player;
 	int samplesTick;
@@ -14,6 +19,7 @@ struct CoreMixer {
 	int remains;
 	int completed;
 	struct ByteArray* wave;
+	CoreMixer_type type;
 };
 
 void CoreMixer_defaults(struct CoreMixer* self);

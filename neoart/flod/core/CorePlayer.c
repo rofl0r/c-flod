@@ -56,22 +56,22 @@ void CorePlayer_toggle(struct CorePlayer* self, int index) {}
 
 int CorePlayer_load(struct CorePlayer* self, struct ByteArray *stream) {
 	self->hardware->reset();
-	self->stream->position = 0;
+	stream->position = 0;
 
 	self->version  = 0;
 	self->playSong = 0;
 	self->lastSong = 0;
 #ifdef SUPPORT_COMPRESSION
 	struct ZipFile* zip;	
-	if (self->stream->readUnsignedInt() == 67324752) {
+	if (stream->readUnsignedInt() == 67324752) {
 		zip = ZipFile_new(stream);
-		self->stream = zip->uncompress(zip->entries[0]);
+		stream = zip->uncompress(zip->entries[0]);
 	}
 #endif
 
-	if (self->stream) {
-		self->stream->endian = endian;
-		self->stream->position = 0;
+	if (stream) {
+		stream->endian = endian;
+		stream->position = 0;
 		self->loader(stream);
 		if (self->version) self->setup();
 	}
@@ -82,9 +82,9 @@ int CorePlayer_load(struct CorePlayer* self, struct ByteArray *stream) {
 int CorePlayer_play(struct CorePlayer* self, struct Sound *processor) {
 	if (!self->version) return 0;
 	if (self->soundPos == 0.0) self->initialize();
-	self->sound = processor || Sound_new();
+	self->sound = processor ? processor : Sound_new();
 
-	if (self->quality && (hardware is Soundblaster)) {
+	if (self->quality && (self->hardware->type == CM_SOUNDBLASTER)) {
 		self->sound->addEventListener(SampleDataEvent->SAMPLE_DATA, hardware->accurate);
 	} else {
 		self->sound->addEventListener(SampleDataEvent->SAMPLE_DATA, hardware->fast);

@@ -28,6 +28,7 @@ void Soundblaster_ctor(struct Soundblaster* self) {
 	CLASS_CTOR_DEF(Soundblaster);
 	// original constructor code goes here
 	super();
+	self->super.type = CM_SOUNDBLASTER;
 }
 
 struct Soundblaster* Soundblaster_new(void) {
