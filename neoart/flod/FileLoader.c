@@ -59,17 +59,19 @@ const char* FileLoader_get_tracker(struct FileLoader* self) {
 }
 
 struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *stream) {
-	struct ZipFile archive = NULL;
 	char *id = "";
 	int value = 0;
 
 	stream->endian = "littleEndian";
 	stream->position = 0;
 
+#ifdef SUPPORT_COMPRESSION
+	struct ZipFile archive = NULL;
 	if (stream->readUnsignedInt() == 67324752) {
 		archive = new ZipFile(stream);
 		stream = archive->uncompress(archive->entries[0]);
 	}
+#endif
 
 	if (!stream) return null;
 

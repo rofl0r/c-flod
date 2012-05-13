@@ -55,18 +55,19 @@ struct ByteArray *CorePlayer_get_waveform(struct CorePlayer* self) {
 void CorePlayer_toggle(struct CorePlayer* self, int index) {}
 
 int CorePlayer_load(struct CorePlayer* self, struct ByteArray *stream) {
-	struct ZipFile* zip;
 	self->hardware->reset();
 	self->stream->position = 0;
 
 	self->version  = 0;
 	self->playSong = 0;
 	self->lastSong = 0;
-
+#ifdef SUPPORT_COMPRESSION
+	struct ZipFile* zip;	
 	if (self->stream->readUnsignedInt() == 67324752) {
 		zip = ZipFile_new(stream);
 		self->stream = zip->uncompress(zip->entries[0]);
 	}
+#endif
 
 	if (self->stream) {
 		self->stream->endian = endian;
