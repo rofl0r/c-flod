@@ -87,22 +87,22 @@ void CoreMixer_set_bufferSize(struct CoreMixer* self, int value) {
 }
 
 struct ByteArray* CoreMixer_waveform(struct CoreMixer* self) {
-	struct ByteArray file = ByteArray_new();
+	struct ByteArray *file = ByteArray_new();
 	file->endian = BAE_LITTLE;
 
-	file->writeUTFBytes("RIFF");
-	file->writeInt(wave->length + 44);
-	file->writeUTFBytes("WAVEfmt ");
-	file->writeInt(16);
-	file->writeShort(1);
-	file->writeShort(2);
-	file->writeInt(44100);
-	file->writeInt(44100 << 2);
-	file->writeShort(4);
-	file->writeShort(16);
-	file->writeUTFBytes("data");
-	file->writeInt(wave->length);
-	file->writeBytes(wave);
+	file->writeUTFBytes(file, "RIFF");
+	file->writeInt(file, ByteArray_get_length(self->wave) + 44);
+	file->writeUTFBytes(file, "WAVEfmt ");
+	file->writeInt(file, 16);
+	file->writeShort(file, 1);
+	file->writeShort(file, 2);
+	file->writeInt(file, 44100);
+	file->writeInt(file, 44100 << 2);
+	file->writeShort(file, 4);
+	file->writeShort(file, 16);
+	file->writeUTFBytes(file, "data");
+	file->writeInt(file, ByteArray_get_length(self->wave));
+	file->writeBytes(file, self->wave);
 
 	ByteArray_set_position(file, 0);
 	return file;
