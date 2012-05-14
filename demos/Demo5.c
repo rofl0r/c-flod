@@ -23,32 +23,28 @@
   Warning: the server must be able to handle the correct file extension, if it can't just rename the file
   to filename->wav and it should work...
 */
-package {
-  import flash.display.*;
-  import flash.events.*;
-  import flash.net.*;
-  import neoart.flod.*;
-  import neoart.flod.core.*;
 
-  public final class Demo5 extends Sprite {
-    private var
-      url    : URLLoader,
-      loader : FileLoader,
-      player : CorePlayer;
+#include "../neoart/flod/FileLoader.h"
+#include "../neoart/flod/flod.h"
 
-     void Demo5() {
-      loader = new FileLoader();
 
-      url = new URLLoader();
-      url->dataFormat = URLLoaderDataFormat->BINARY;
-      url->addEventListener(Event->COMPLETE, completeHandler);
-      url->load(new URLRequest("filename->mod"));
-    }
-
-void completeHandler(e:Event) {
-      url->removeEventListener(Event->COMPLETE, completeHandler);
-      player = loader->load(url->data);
-      if (player && player->version) player->play();
-    }
-  }
+int main(int argc, char** argv) {
+	struct FileLoader *loader;
+	struct CorePlayer *player;
+	struct ByteArray *data;
+	
+	loader = FileLoader_new();
+	data = ByteArray_new();
+	if(argc < 2) {
+		puts("expect filename as arg!");
+		return 1;
+	}
+	if(!ByteArray_open_file(data, argv[1])) {
+		perror("failed to open file");
+		return 1;
+	}
+	player = loader->load(data);
+	if (player && player->version) player->play();
+	
+	return 0;
 }
