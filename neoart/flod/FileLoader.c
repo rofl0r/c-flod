@@ -68,7 +68,7 @@ struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *st
 
 #ifdef SUPPORT_COMPRESSION
 	struct ZipFile archive = NULL;
-	if (stream->readUnsignedInt() == 67324752) {
+	if (stream->readUnsignedInt(stream) == 67324752) {
 		archive = new ZipFile(stream);
 		stream = archive->uncompress(archive->entries[0]);
 	}
@@ -298,10 +298,11 @@ struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *st
 	}
 	*/
 	ByteArray_set_position(stream, 0);
-	value = stream->readUnsignedShort();
+	value = stream->readUnsignedShort(stream);
 
-	self->player = DWPlayer_new(self->amiga);
-	self->player->load(stream);
+	self->player = (struct CorePlayer*) DWPlayer_new(self->amiga);
+	CorePlayer_load(self->player, stream);
+	//self->player->load(stream);
 
 	if (self->player->version) {
 		index = WHITTAKER;
@@ -331,10 +332,10 @@ struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *st
 		}
 	}
 */
-	stream->clear();
+	ByteArray_clear(stream);
 	index = 0;
 	return self->player = null;
-    }
+}
 
 const char* TRACKERS[] = {
         "Unknown Format",

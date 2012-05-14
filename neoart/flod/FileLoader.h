@@ -33,9 +33,10 @@ struct FileLoader {
 extern const char* TRACKERS[];
 
 void FileLoader_defaults(struct FileLoader* self);
-
 void FileLoader_ctor(struct FileLoader* self);
-
 struct FileLoader* FileLoader_new(void);
+
+const char* FileLoader_get_tracker(struct FileLoader* self);
+struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *stream);
 
 #endif
