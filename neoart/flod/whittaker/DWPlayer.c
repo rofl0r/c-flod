@@ -384,7 +384,8 @@ void DWPlayer_initialize(struct DWPlayer* self) {
 	int i = 0;
 	int len = 0;
 	struct DWVoice *voice = self->voices[self->active];
-	self->super->initialize();
+	CorePlayer_initialize(&self->super.super);
+	//self->super->initialize();
 
 	self->song    = self->songs[self->super.super.playSong];
 	self->songvol = self->master;

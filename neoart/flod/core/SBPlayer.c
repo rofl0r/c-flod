@@ -57,12 +57,14 @@ void SBPlayer_toggle(struct SBPlayer* self, int index) {
 
 //override
 void SBPlayer_setup(struct SBPlayer* self) {
-	self->mixer->setup(self->super.channels);
+	Soundblaster_setup(self->mixer, self->super.channels);
+	//self->mixer->setup(self->super.channels);
 }
 
 //override
 void SBPlayer_initialize(struct SBPlayer* self) {
-	super->initialize();
+	//super->initialize();
+	CorePlayer_initialize(&self->super);
 	self->timer  = self->super.speed;
 	self->master = 64;
 }

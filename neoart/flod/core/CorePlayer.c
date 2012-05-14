@@ -86,7 +86,10 @@ int CorePlayer_load(struct CorePlayer* self, struct ByteArray *stream) {
 /* processor default : NULL */
 int CorePlayer_play(struct CorePlayer* self, struct Sound *processor) {
 	if (!self->version) return 0;
-	if (self->soundPos == 0.0) self->initialize();
+	if (self->soundPos == 0.0) {
+		//self->initialize();
+		CorePlayer_initialize(self);
+	}
 	self->sound = processor ? processor : Sound_new();
 
 	if (self->quality && (self->hardware->type == CM_SOUNDBLASTER)) {
