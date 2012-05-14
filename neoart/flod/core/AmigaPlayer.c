@@ -32,7 +32,7 @@ void AmigaPlayer_ctor(struct AmigaPlayer* self, struct Amiga* amiga) {
 
 	self->super.channels = 4;
 	self->super.endian   = BAE_BIG;
-	self->super.ntsc     = 0;
+	AmigaPlayer_set_ntsc(&self->super, 0/;
 	self->super.speed    = 6;
 	self->super.tempo    = 125;
 }
