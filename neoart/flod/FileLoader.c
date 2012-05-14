@@ -18,6 +18,7 @@
 
 #include "FileLoader.h"
 #include "flod_internal.h"
+#include "whittaker/DWPlayer.h"
 /*
   import flash.utils.*;
   import neoart.flip.*;
@@ -62,8 +63,8 @@ struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *st
 	char *id = "";
 	int value = 0;
 
-	stream->endian = "littleEndian";
-	stream->position = 0;
+	stream->endian = BAE_LITTLE;
+	ByteArray_set_position(stream, 0);
 
 #ifdef SUPPORT_COMPRESSION
 	struct ZipFile archive = NULL;
@@ -104,7 +105,7 @@ struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *st
 	}
 	*/
 
-	stream->endian = "bigEndian";
+	stream->endian = BAE_BIG;
 	
 	/*
 
@@ -296,10 +297,10 @@ struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *st
 		}
 	}
 	*/
-	stream->position = 0;
+	ByteArray_set_position(stream, 0);
 	value = stream->readUnsignedShort();
 
-	self->player = new DWPlayer(self->amiga);
+	self->player = DWPlayer_new(self->amiga);
 	self->player->load(stream);
 
 	if (self->player->version) {

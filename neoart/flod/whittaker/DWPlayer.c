@@ -341,7 +341,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 					ByteArray_set_position(self->stream, voice->volseqPos);
 					volume = self->stream->readByte();
 
-					if (volume >= 0) voice->volseqPos = self->stream->position;
+					if (volume >= 0) voice->volseqPos = ByteArray_get_position(self->stream);
 					voice->volseqCounter = voice->volseqSpeed;
 					volume &= 0x7f;
 

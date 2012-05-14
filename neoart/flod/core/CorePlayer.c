@@ -56,7 +56,7 @@ void CorePlayer_toggle(struct CorePlayer* self, int index) {}
 
 int CorePlayer_load(struct CorePlayer* self, struct ByteArray *stream) {
 	self->hardware->reset();
-	stream->position = 0;
+	ByteArray_set_position(stream, 0);
 
 	self->version  = 0;
 	self->playSong = 0;
@@ -71,7 +71,7 @@ int CorePlayer_load(struct CorePlayer* self, struct ByteArray *stream) {
 
 	if (stream) {
 		stream->endian = endian;
-		stream->position = 0;
+		ByteArray_set_position(stream, 0);
 		self->loader(stream);
 		if (self->version) self->setup();
 	}

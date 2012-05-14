@@ -61,16 +61,16 @@ void Amiga_set_volume(struct Amiga* self, int value) {
 int Amiga_store(struct Amiga* self, struct ByteArray *stream, int len, int pointer) {
 	int add = 0; 
 	int i = 0;
-	int pos = stream->position;
+	int pos = ByteArray_get_position(stream);
 	int start = self->memory->length;
 	int total = 0;
 
 	if (pointer > -1) ByteArray_set_position(stream, pointer);
-	total = stream->position + len;
+	total = ByteArray_get_position(stream) + len;
 
 	if (total >= stream->length) {
 		add = total - stream->length;
-		len = stream->length - stream->position;
+		len = stream->length - ByteArray_get_position(stream);
 	}
 
 	for (i = start, len += start; i < len; ++i)
@@ -84,7 +84,7 @@ int Amiga_store(struct Amiga* self, struct ByteArray *stream, int len, int point
 //override
 void Amiga_initialize(struct Amiga* self) {
 	self->super->initialize();
-	self->wave->clear();
+	self->super.wave->clear();
 	self->filter->initialize();
 
 	if (!self->memory->fixed) {
@@ -120,9 +120,9 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 	int toMix = 0;
 	number value = NAN;
 
-	if (self->completed) {
-		if (!self->remains) return;
-		size = self->remains;
+	if (self->super.completed) {
+		if (!self->super.remains) return;
+		size = self->super.remains;
 	}
 
 	while (mixed < size) {
@@ -215,13 +215,13 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 		}
 	} else {
 		for (i = 0; i < size; ++i) {
-		self->filter->process(model, sample);
+			self->filter->process(model, sample);
 
-		data->writeFloat(sample->l);
-		data->writeFloat(sample->r);
+			data->writeFloat(sample->l);
+			data->writeFloat(sample->r);
 
-		sample->l = sample->r = 0.0;
-		sample = sample->next;
+			sample->l = sample->r = 0.0;
+			sample = sample->next;
 		}
 	}
 }

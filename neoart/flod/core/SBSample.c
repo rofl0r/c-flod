@@ -18,6 +18,7 @@
 
 #include "SBSample.h"
 #include "../flod_internal.h"
+#include "../../../flashlib/ByteArray.h"
 
 void SBSample_defaults(struct SBSample* self) {
 	CLASS_DEF_INIT();
@@ -44,7 +45,7 @@ void SBSample_store(struct SBSample* self, struct ByteArray* stream) {
 	int total = 0;
 	int value = 0;
 	if (!self->loopLen) self->loopMode = 0;
-	pos = stream->position;
+	pos = ByteArray_get_position(stream);
 
 	if (self->loopMode) {
 		len = self->loopStart + self->loopLen;
@@ -104,6 +105,6 @@ void SBSample_store(struct SBSample* self, struct ByteArray* stream) {
 		for (i = len; i < self->length; ++i) self->data[i] = sample;
 	}
 
-	if (total < stream->length) stream->position = total;
-	else stream->position = stream->length - 1;
+	if (total < stream->length) ByteArray_set_position(stream, total);
+	else ByteArray_set_position(stream, stream->length - 1);
 }

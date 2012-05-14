@@ -104,7 +104,7 @@ struct ByteArray* CoreMixer_waveform(struct CoreMixer* self) {
 	file->writeInt(wave->length);
 	file->writeBytes(wave);
 
-	file->position = 0;
+	ByteArray_set_position(file, 0);
 	return file;
 }
 
