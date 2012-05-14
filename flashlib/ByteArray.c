@@ -17,6 +17,17 @@ void ByteArray_ctor(struct ByteArray* self) {
 	self->readUnsignedShort = ByteArray_readUnsignedShort;
 	self->readInt = ByteArray_readInt;
 	self->readUnsignedInt = ByteArray_readUnsignedInt;
+	
+	self->writeInt = ByteArray_writeInt;
+	self->writeUnsignedInt = ByteArray_writeUnsignedInt;
+	self->writeShort = ByteArray_writeShort;
+	self->writeUnsignedShort = ByteArray_writeUnsignedShort;
+	self->writeByte = ByteArray_writeByte;
+	self->writeUnsignedByte = ByteArray_writeUnsignedByte;;
+	self->writeMem = ByteArray_writeMem;
+	self->writeUTFBytes = ByteArray_writeUTFBytes;
+	self->writeBytes = ByteArray_writeBytes;
+	
 #ifdef IS_LITTLE_ENDIAN
 	self->sys_endian = BAE_LITTLE;
 #else
@@ -26,6 +37,10 @@ void ByteArray_ctor(struct ByteArray* self) {
 
 struct ByteArray* ByteArray_new(void) {
 	CLASS_NEW_BODY(ByteArray);
+}
+
+void ByteArray_clear(struct ByteArray* self) {
+	fprintf(stderr, "clear called");
 }
 
 off_t ByteArray_get_position(struct ByteArray* self) {
@@ -189,3 +204,86 @@ signed char ByteArray_readByte(struct ByteArray* self) {
 	ByteArray_readMultiByte(self, &buf.intval, 1);
 	return buf.intval;
 }
+
+void ByteArray_writeByte(struct ByteArray* self, signed char what) {
+	ByteArray_writeMem(self, (unsigned char*) &what, 1);
+}
+
+void ByteArray_writeUnsignedByte(struct ByteArray* self, unsigned char what) {
+	ByteArray_writeMem(self, (unsigned char*) &what, 1);
+}
+
+void ByteArray_writeShort(struct ByteArray* self, signed short what) {
+	union {
+		short intval;
+		unsigned char charval[sizeof(what)];
+	} u;
+	u.intval = what;
+	if(self->sys_endian != self->endian) {
+		u.intval = byteswap16(u.intval);
+	}
+	ByteArray_writeMem(self, u.charval, sizeof(what));
+}
+
+void ByteArray_writeUnsignedShort(struct ByteArray* self, unsigned short what) {
+	union {
+		unsigned short intval;
+		unsigned char charval[sizeof(what)];
+	} u;
+	u.intval = what;
+	if(self->sys_endian != self->endian) {
+		u.intval = byteswap16(u.intval);
+	}
+	ByteArray_writeMem(self, u.charval, sizeof(what));
+}
+
+void ByteArray_writeInt(struct ByteArray* self, signed int what) {
+	union {
+		int intval;
+		unsigned char charval[sizeof(what)];
+	} u;
+	u.intval = what;
+	if(self->sys_endian != self->endian) {
+		u.intval = byteswap32(u.intval);
+	}
+	ByteArray_writeMem(self, u.charval, sizeof(what));
+}
+
+void ByteArray_writeUnsignedInt(struct ByteArray* self, unsigned int what) {
+	union {
+		unsigned int intval;
+		unsigned char charval[sizeof(what)];
+	} u;
+	u.intval = what;
+	if(self->sys_endian != self->endian) {
+		u.intval = byteswap32(u.intval);
+	}
+	ByteArray_writeMem(self, u.charval, sizeof(what));
+}
+
+void ByteArray_writeMem(struct ByteArray* self, unsigned char* what, size_t len) {
+	if(self->type == BAT_FILESTREAM) {
+		fprintf(stderr, "tried to write to file!\n");
+		return;
+	}
+	if(self->pos + len > self->size) {
+		fprintf(stderr, "oob write attempted");
+		return;
+	}
+	memcpy(&self->start_addr[self->pos], what, len);
+	self->pos += len;
+}
+
+void ByteArray_writeUTFBytes(struct ByteArray* self, char* what) {
+	ByteArray_writeMem(self, (unsigned char*) what, strlen(what));
+}
+
+void ByteArray_writeBytes(struct ByteArray* self, struct ByteArray* what) {
+	if(what->type == BAT_FILESTREAM) {
+		fprintf(stderr, "tried to write from non-memory stream\n");
+		abort();
+	} else {
+		ByteArray_writeMem(self, what->start_addr[what->pos], what->size - what->pos);
+	}
+}
+
