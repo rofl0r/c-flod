@@ -62,7 +62,7 @@ void Soundblaster_setup(struct Soundblaster* self, unsigned int len) {
 void Soundblaster_initialize(struct Soundblaster* self) {
 	struct SBChannel *chan = &self->channels[0];
 	//super->initialize();
-	CoreMixer_initialize(&self->super);
+	//CoreMixer_initialize(&self->super);
 
 	while (chan) {
 		//chan->initialize();

@@ -18,6 +18,8 @@
 
 #include "CorePlayer.h"
 #include "../flod_internal.h"
+#include "Amiga.h"
+#include "Soundblaster.h"
 
 void CorePlayer_defaults(struct CorePlayer* self) {
 	CLASS_DEF_INIT();
@@ -123,7 +125,14 @@ void CorePlayer_setup(struct CorePlayer* self) {}
     //js function reset
 void CorePlayer_initialize(struct CorePlayer* self) {
 	self->tick = 0;
-	self->hardware->initialize();
+	CoreMixer_initialize(self->hardware);
+	if(self->hardware->type == CM_AMIGA)
+		Amiga_initialize((struct Amiga*) self->hardware);
+	else if(self->hardware->type == CM_SOUNDBLASTER)
+		Soundblaster_initialize((struct Soundblaster*) self->hardware);
+	else
+		abort();
+	//self->hardware->initialize();
 	self->hardware->samplesTick = 110250 / tempo;
 }
 

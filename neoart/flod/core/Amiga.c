@@ -84,9 +84,9 @@ int Amiga_store(struct Amiga* self, struct ByteArray *stream, int len, int point
 
 //override
 void Amiga_initialize(struct Amiga* self) {
-	self->super->initialize();
+	//self->super->initialize();
 	self->super.wave->clear();
-	self->filter->initialize();
+	AmigaFilter_initialize(self->filter);
 
 	if (!self->memory->fixed) {
 		self->loopPtr = self->memory->length;
@@ -94,10 +94,10 @@ void Amiga_initialize(struct Amiga* self) {
 		self->memory->fixed = true;
 	}
 
-	self->channels[0]->initialize();
-	self->channels[1]->initialize();
-	self->channels[2]->initialize();
-	self->channels[3]->initialize();
+	AmigaChannel_initialize(&self->channels[0]);
+	AmigaChannel_initialize(&self->channels[1]);
+	AmigaChannel_initialize(&self->channels[2]);
+	AmigaChannel_initialize(&self->channels[3]);
 }
 
 //override
