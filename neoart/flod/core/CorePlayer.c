@@ -32,6 +32,9 @@ void CorePlayer_ctor(struct CorePlayer* self, struct CoreMixer *hardware) {
 	// original constructor code goes here
 	hardware->player = this;
 	self->hardware = hardware;
+	
+	//add vtable
+	
 }
 
 struct CorePlayer* CorePlayer_new(struct CoreMixer *hardware) {
@@ -129,7 +132,7 @@ void CorePlayer_reset(struct CorePlayer* self) { }
 void CorePlayer_loader(struct CorePlayer* self, struct ByteArray *stream) { }
 
 void CorePlayer_completeHandler(struct CorePlayer* self, struct Event *e) {
-	self->stop();
+	CorePlayer_stop(self);
 	self->dispatchEvent(e);
 }
 
