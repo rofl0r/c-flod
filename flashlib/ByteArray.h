@@ -42,6 +42,7 @@ void ByteArray_ctor(struct ByteArray* self);
 struct ByteArray* ByteArray_new(void);
 off_t ByteArray_get_position(struct ByteArray* self);
 int ByteArray_set_position(struct ByteArray* self, off_t pos);
+int ByteArray_set_position_rel(struct ByteArray* self, int rel);
 int ByteArray_open_file(struct ByteArray* self, char* filename);
 int ByteArray_open_mem(struct ByteArray* self, char* data, size_t size);
 void ByteArray_readMultiByte(struct ByteArray* self, char* buffer, size_t len);

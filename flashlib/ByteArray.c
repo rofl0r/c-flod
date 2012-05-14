@@ -36,6 +36,18 @@ static int seek_error() {
 	perror("seek error!\n");
 }
 
+static int neg_off() {
+	fprintf(stderr, "negative seek attempted");
+}
+
+int ByteArray_set_position_rel(struct ByteArray* self, int rel) {
+	if((int) self->pos - rel < 0) {
+		neg_off();
+		rel = 0;
+	}
+	return ByteArray_set_position(self, self->pos - rel);
+}
+
 int ByteArray_set_position(struct ByteArray* self, off_t pos) {
 	if(pos == self->pos) return 1;
 	if(pos > self->size) return 0;
