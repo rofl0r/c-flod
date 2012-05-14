@@ -157,14 +157,26 @@ void DWPlayer_process(struct DWPlayer* self) {
 						switch (value) {
 							case -128:
 								ByteArray_set_position(self->stream, voice->trackPtr + voice->trackPos);
-								value = self->stream[self->readMix]();
+								if(self->readLen == 2) {
+									value = ByteArray_readUnsignedShort(self->stream);
+								} else if (self->readLen == 4) {
+									value = ByteArray_readUnsignedInt(self->stream);
+								}
+								//value = self->stream[self->readMix]();
 
 								if (value) {
 									ByteArray_set_position(self->stream, self->base + value);
 									voice->trackPos += self->readLen;
 								} else {
 									ByteArray_set_position(self->stream, voice->trackPtr);
-									ByteArray_set_position(self->stream, self->base + self->stream[readMix]());
+									unsigned int temp;
+									if(self->readLen == 2) {
+										temp = ByteArray_readUnsignedShort(self->stream);
+									} else if (self->readLen == 4) {
+										temp = ByteArray_readUnsignedInt(self->stream);
+									}
+									ByteArray_set_position(self->stream, self->base + temp);
+									//ByteArray_set_position(self->stream, self->base + self->stream[readMix]());
 									voice->trackPos = self->readLen;
 
 									if (!self->super.super.loopSong) {
@@ -423,7 +435,14 @@ void DWPlayer_initialize(struct DWPlayer* self) {
 		voice->trackPtr   = self->song->tracks[voice->index];
 		voice->trackPos   = self->readLen;
 		ByteArray_set_position(self->stream, voice->trackPtr);
-		voice->patternPos = self->base + self->stream[readMix]();
+		unsigned int temp;
+		if(self->readLen == 2) {
+			temp = ByteArray_readUnsignedShort(self->stream);
+		} else if (self->readLen == 4) {
+			temp = ByteArray_readUnsignedInt(self->stream);
+		}
+		//voice->patternPos = self->base + self->stream[readMix]();
+		voice->patternPos = self->base + temp;
 
 		if (self->frqseqs) {
 			ByteArray_set_position(self->stream, self->frqseqs);
@@ -451,7 +470,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 	int value;
 
 	self->master  = 64;
-	self->readMix = "readUnsignedShort";
+	//self->readMix = "readUnsignedShort";
 	self->readLen = 2;
 	self->super.super.variant = 0;
 
@@ -483,7 +502,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 				size = stream->readUnsignedShort(stream);
 
 				if (size == 18) {
-					self->readMix = "readUnsignedInt";
+					//self->readMix = "readUnsignedInt";
 					self->readLen = 4;
 				} else {
 					self->super.super.variant = 10;
@@ -538,7 +557,14 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 		if (song->speed > 255) break;
 
 		for (i = 0; i < self->super.super.channels; ++i) {
-			value = self->base + stream[readMix]();
+			unsigned int temp;
+			if(self->readLen == 2) {
+				temp = ByteArray_readUnsignedShort(stream);
+			} else if (self->readLen == 4) {
+				temp = ByteArray_readUnsignedInt(stream);
+			}
+			//value = self->base + stream[readMix]();
+			value = self->base + temp;
 			if (value < lower) lower = value;
 			song->tracks[i] = value;
 		}

@@ -56,7 +56,6 @@ struct DWPlayer {
 	int com2;
 	int com3;
 	int com4;
-	char *readMix;
 	int readLen;
 };
 
