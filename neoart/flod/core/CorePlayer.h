@@ -32,7 +32,7 @@ struct CorePlayer {
 };
 
 void CorePlayer_defaults(struct CorePlayer* self);
-void CorePlayer_dtor(struct CorePlayer* self, struct CoreMixer *hardware);
+void CorePlayer_ctor(struct CorePlayer* self, struct CoreMixer *hardware);
 struct CorePlayer* CorePlayer_new(struct CoreMixer *hardware);
 void CorePlayer_set_force(struct CorePlayer* self, int value);
 void CorePlayer_set_ntsc(struct CorePlayer* self, int value);

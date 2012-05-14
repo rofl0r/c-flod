@@ -27,7 +27,7 @@ void CorePlayer_defaults(struct CorePlayer* self) {
 	self->soundPos = 0.0;
 }
 
-void CorePlayer_dtor(struct CorePlayer* self, struct CoreMixer *hardware) {
+void CorePlayer_ctor(struct CorePlayer* self, struct CoreMixer *hardware) {
 	CLASS_CTOR_DEF(CorePlayer);
 	// original constructor code goes here
 	hardware->player = this;

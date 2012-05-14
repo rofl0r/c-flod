@@ -18,6 +18,7 @@
 
 #include "SBPlayer.h"
 #include "../flod_internal.h"
+//extends CorePlayer
 
 void SBPlayer_defaults(struct SBPlayer* self) {
 	CLASS_DEF_INIT();
@@ -29,7 +30,8 @@ void SBPlayer_ctor(struct SBPlayer* self, struct Soundblaster* mixer) {
 	CLASS_CTOR_DEF(SBPlayer);
 	// original constructor code goes here
 	self->mixer = mixer ? mixer : Soundblaster_new();
-	super(self->mixer);
+	//super(self->mixer);
+	CorePlayer_ctor(&self->super, (struct CoreMixer*) self->mixer);
 
 	self->super.endian  = BAE_LITTLE;
 	self->super.quality = 1;

@@ -28,13 +28,15 @@ void DWPlayer_defaults(struct DWPlayer* self) {
 void DWPlayer_ctor(struct DWPlayer* self, struct Amiga* amiga) {
 	CLASS_CTOR_DEF(DWPlayer);
 	// original constructor code goes here
-	super(amiga);
-	voices = new Vector.<DWVoice>(4, true);
+	//super(amiga);
+	AmigaPlayer_ctor(&self->super, amiga);
+	
+	self->voices = new Vector.<DWVoice>(4, true);
 
-	voices[0] = new DWVoice(0,1);
-	voices[1] = new DWVoice(1,2);
-	voices[2] = new DWVoice(2,4);
-	voices[3] = new DWVoice(3,8);	
+	self->voices[0] = DWVoice_new(0,1);
+	self->voices[1] = DWVoice_new(1,2);
+	self->voices[2] = DWVoice_new(2,4);
+	self->voices[3] = DWVoice_new(3,8);	
 }
 
 struct DWPlayer* DWPlayer_new(struct Amiga* amiga) {

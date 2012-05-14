@@ -31,7 +31,8 @@ void Amiga_defaults(struct Amiga* self) {
 void Amiga_ctor(struct Amiga* self) {
 	CLASS_CTOR_DEF(Amiga);
 	/* original constructor code goes here */	
-	super();
+	//super();
+	CoreMixer_ctor(&self->super);
 	self->super.type = CM_AMIGA;
 	self->bufferSize = 8192;
 	self->filter = AmigaFilter_new();

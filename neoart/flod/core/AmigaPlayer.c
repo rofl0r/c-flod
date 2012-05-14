@@ -28,11 +28,12 @@ void AmigaPlayer_ctor(struct AmigaPlayer* self, struct Amiga* amiga) {
 	CLASS_CTOR_DEF(AmigaPlayer);
 	// original constructor code goes here
 	self->amiga = amiga ? amiga : Amiga_new();
-	super(self->amiga);
+	//super(self->amiga);
+	CorePlayer_ctor(&self->super, (struct CoreMixer*) self->amiga);
 
 	self->super.channels = 4;
 	self->super.endian   = BAE_BIG;
-	AmigaPlayer_set_ntsc(&self->super, 0/;
+	AmigaPlayer_set_ntsc(self, 0);
 	self->super.speed    = 6;
 	self->super.tempo    = 125;
 }
