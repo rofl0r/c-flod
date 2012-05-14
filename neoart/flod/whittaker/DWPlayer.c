@@ -122,7 +122,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 			loop = 1;
 
 			while (loop > 0) {
-				value = self->stream->readByte();
+				value = self->stream->readByte(self->stream);
 
 				if (value < 0) {
 					if (value >= -32) {
@@ -134,18 +134,18 @@ void DWPlayer_process(struct DWPlayer* self) {
 						pos = ByteArray_get_position(self->stream);
 
 						ByteArray_set_position(self->stream, self->volseqs + ((value - self->com3) << 1));
-						ByteArray_set_position(self->stream, self->base + self->stream->readUnsignedShort());
+						ByteArray_set_position(self->stream, self->base + self->stream->readUnsignedShort(self->stream));
 						voice->volseqPtr = ByteArray_get_position(self->stream);
 
 						ByteArray_set_position_rel(self->stream, -1);
-						voice->volseqSpeed = self->stream->readUnsignedByte();
+						voice->volseqSpeed = self->stream->readUnsignedByte(self->stream);
 
 						ByteArray_set_position(self->stream, pos);
 					} else if (value >= self->com4) {
 						pos = ByteArray_get_position(self->stream);
 
 						ByteArray_set_position(self->stream, self->frqseqs + ((value - self->com4) << 1));
-						voice->frqseqPtr = self->base + self->stream->readUnsignedShort();
+						voice->frqseqPtr = self->base + self->stream->readUnsignedShort(self->stream);
 						voice->frqseqPos = voice->frqseqPtr;
 
 						ByteArray_set_position(self->stream, pos);
@@ -171,8 +171,8 @@ void DWPlayer_process(struct DWPlayer* self) {
 								break;
 							case -127:
 								if (self->super.super.variant > 0) voice->portaDelta = 0;
-								voice->portaSpeed = self->stream->readByte();
-								voice->portaDelay = self->stream->readUnsignedByte();
+								voice->portaSpeed = self->stream->readByte(self->stream);
+								voice->portaDelay = self->stream->readUnsignedByte(self->stream);
 								voice->flags |= 2;
 								break;
 								case -126:
@@ -204,12 +204,12 @@ void DWPlayer_process(struct DWPlayer* self) {
 								//self->super.amiga->complete = 1;
 								break;
 							case -123:
-								if (self->super.super.variant > 0) self->transpose = self->stream->readByte();
+								if (self->super.super.variant > 0) self->transpose = self->stream->readByte(self->stream);
 								break;
 							case -122:
 								voice->vibrato = -1;
-								voice->vibratoSpeed = self->stream->readUnsignedByte();
-								voice->vibratoDepth = self->stream->readUnsignedByte();
+								voice->vibratoSpeed = self->stream->readUnsignedByte(self->stream);
+								voice->vibratoDepth = self->stream->readUnsignedByte(self->stream);
 								voice->vibratoDelta = 0;
 								break;
 							case -121:
@@ -219,32 +219,32 @@ void DWPlayer_process(struct DWPlayer* self) {
 								if (self->super.super.variant == 21) {
 									voice->halve = 1;
 								} else if (self->super.super.variant == 11) {
-									self->fadeSpeed = self->stream->readUnsignedByte();
+									self->fadeSpeed = self->stream->readUnsignedByte(self->stream);
 								} else {
-									voice->transpose = self->stream->readByte();
+									voice->transpose = self->stream->readByte(self->stream);
 								}
 							break;
 							case -119:
 								if (self->super.super.variant == 21) {
 									voice->halve = 0;
 								} else {
-									voice->trackPtr = self->base + self->stream->readUnsignedShort();
+									voice->trackPtr = self->base + self->stream->readUnsignedShort(self->stream);
 									voice->trackPos = 0;
 								}
 								break;
 							case -118:
 								if (self->super.super.variant == 31) {
-									self->delaySpeed = self->stream->readUnsignedByte();
+									self->delaySpeed = self->stream->readUnsignedByte(self->stream);
 								} else {
-									self->super.super.speed = self->stream->readUnsignedByte();
+									self->super.super.speed = self->stream->readUnsignedByte(self->stream);
 								}
 								break;
 							case -117:
-								self->fadeSpeed = self->stream->readUnsignedByte();
+								self->fadeSpeed = self->stream->readUnsignedByte(self->stream);
 								self->fadeCounter = self->fadeSpeed;
 								break;
 							case -116:
-								value = self->stream->readUnsignedByte();
+								value = self->stream->readUnsignedByte(self->stream);
 								if (self->super.super.variant != 32) self->songvol = value;
 								break;
 							default:
@@ -260,7 +260,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 					if (self->super.super.variant >= 20) {
 						value = (value + self->transpose + voice->transpose) & 0xff;
 						ByteArray_set_position(self->stream, voice->volseqPtr);
-						volume = self->stream->readUnsignedByte();
+						volume = self->stream->readUnsignedByte(self->stream);
 
 						voice->volseqPos = ByteArray_get_position(self->stream);
 						voice->volseqCounter = voice->volseqSpeed;
@@ -277,7 +277,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 					//chan->volume  = volume;
 
 					ByteArray_set_position(self->stream, self->periods + (value << 1));
-					value = (self->stream->readUnsignedShort() * sample->relative) >> 10;
+					value = (self->stream->readUnsignedShort(self->stream) * sample->relative) >> 10;
 					if (self->super.super.variant < 10) voice->portaDelta = value;
 
 					AmigaChannel_set_period(chan, value);
@@ -292,10 +292,10 @@ void DWPlayer_process(struct DWPlayer* self) {
 				//chan->enabled = 0;
 				AmigaChannel_set_enabled(chan, 0);
 			} else {
-				value = self->stream->readUnsignedByte();
+				value = self->stream->readUnsignedByte(self->stream);
 
 				if (value != 131) {
-				if (self->super.super.variant < 40 || value < 224 || (self->stream->readUnsignedByte() != 131))
+				if (self->super.super.variant < 40 || value < 224 || (self->stream->readUnsignedByte(self->stream) != 131))
 					AmigaChannel_set_enabled(chan, 0);
 					//chan->enabled = 0;
 				}
@@ -312,7 +312,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 			}
 		} else {
 			ByteArray_set_position(self->stream, voice->frqseqPos);
-			value = self->stream->readByte();
+			value = self->stream->readByte(self->stream);
 
 			if (value < 0) {
 				value &= 0x7f;
@@ -323,7 +323,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 
 			value = (value + voice->note + self->transpose + voice->transpose) & 0xff;
 			ByteArray_set_position(self->stream, self->periods + (value << 1));
-			value = (self->stream->readUnsignedShort() * sample->relative) >> 10;
+			value = (self->stream->readUnsignedShort(self->stream) * sample->relative) >> 10;
 
 			if (voice->flags & 2) {
 				if (voice->portaDelay) {
@@ -357,7 +357,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 			if (self->super.super.variant >= 20) {
 				if (--(voice->volseqCounter) < 0) {
 					ByteArray_set_position(self->stream, voice->volseqPos);
-					volume = self->stream->readByte();
+					volume = self->stream->readByte(self->stream);
 
 					if (volume >= 0) voice->volseqPos = ByteArray_get_position(self->stream);
 					voice->volseqCounter = voice->volseqSpeed;
@@ -417,7 +417,7 @@ void DWPlayer_initialize(struct DWPlayer* self) {
 
 		if (self->frqseqs) {
 			ByteArray_set_position(self->stream, self->frqseqs);
-			voice->frqseqPtr = self->base + self->stream->readUnsignedShort();
+			voice->frqseqPtr = self->base + self->stream->readUnsignedShort(self->stream);
 			voice->frqseqPos = voice->frqseqPtr;
 		}
 
@@ -445,32 +445,32 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 	self->readLen = 2;
 	self->super.super.variant = 0;
 
-	if (stream->readUnsignedShort() == 0x48e7) {                               //movem->l
+	if (stream->readUnsignedShort(stream) == 0x48e7) {                               //movem->l
 		ByteArray_set_position(stream, 4);
-		if (stream->readUnsignedShort() != 0x6100) return;                       //bsr->w
+		if (stream->readUnsignedShort(stream) != 0x6100) return;                       //bsr->w
 
-		ByteArray_set_position_rel(stream->readUnsignedShort());
+		ByteArray_set_position_rel(stream->readUnsignedShort(stream));
 		self->super.super.variant = 30;
 	} else {
 		ByteArray_set_position(stream, 0);
 	}
 
 	while (value != 0x4e75) {                                                 //rts
-		value = stream->readUnsignedShort();
+		value = stream->readUnsignedShort(stream);
 
 		switch (value) {
 			case 0x47fa:                                                          //lea x,a3
-				self->base = ByteArray_get_position(stream) + stream->readShort();
+				self->base = ByteArray_get_position(stream) + stream->readShort(stream);
 				break;
 			case 0x6100:                                                          //bsr->w
 				ByteArray_set_position_rel(stream, 2);
 				info = ByteArray_get_position(stream);
 
-				if (stream->readUnsignedShort() == 0x6100)                           //bsr->w
-				info = ByteArray_get_position(stream) + stream->readUnsignedShort();
+				if (stream->readUnsignedShort(stream) == 0x6100)                           //bsr->w
+				info = ByteArray_get_position(stream) + stream->readUnsignedShort(stream);
 				break;
 			case 0xc0fc:                                                          //mulu->w #x,d0
-				size = stream->readUnsignedShort();
+				size = stream->readUnsignedShort(stream);
 
 				if (size == 18) {
 					self->readMix = "readUnsignedInt";
@@ -479,27 +479,27 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 					self->super.super.variant = 10;
 				}
 
-				if (stream->readUnsignedShort() == 0x41fa)
-					headers = ByteArray_get_position(stream) + stream->readUnsignedShort();
+				if (stream->readUnsignedShort(stream) == 0x41fa)
+					headers = ByteArray_get_position(stream) + stream->readUnsignedShort(stream);
 
-				if (stream->readUnsignedShort() == 0x1230) flag = 1;
+				if (stream->readUnsignedShort(stream) == 0x1230) flag = 1;
 				break;
 			case 0x1230:                                                          //move->b (a0,d0.w),d1
 				ByteArray_set_position(stream, -6);
 
-				if (stream->readUnsignedShort() == 0x41fa) {
-					headers = ByteArray_get_position(stream) + stream->readUnsignedShort();
+				if (stream->readUnsignedShort(stream) == 0x41fa) {
+					headers = ByteArray_get_position(stream) + stream->readUnsignedShort(stream);
 					flag = 1;
 				}
 
 				ByteArray_set_position(stream, 4);
 				break;
 			case 0xbe7c:                                                          //cmp->w #x,d7
-				self->super.super.channels = stream->readUnsignedShort();
+				self->super.super.channels = stream->readUnsignedShort(stream);
 				ByteArray_set_position(stream, 2);
 
-				if (stream->readUnsignedShort() == 0x377c)
-					self->master = stream->readUnsignedShort();
+				if (stream->readUnsignedShort(stream) == 0x377c)
+					self->master = stream->readUnsignedShort(stream);
 				break;
 			default:
 				break;
@@ -519,10 +519,10 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 		song->tracks = new Vector.<int>(channels, true);
 
 		if (flag) {
-			song->speed = stream->readUnsignedByte();
-			song->delay = stream->readUnsignedByte();
+			song->speed = stream->readUnsignedByte(stream);
+			song->delay = stream->readUnsignedByte(stream);
 		} else {
-			song->speed = stream->readUnsignedShort();
+			song->speed = stream->readUnsignedShort(stream);
 		}
 
 		if (song->speed > 255) break;
@@ -543,30 +543,30 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 	self->super.super.lastSong = self->songs->length - 1;
 
 	ByteArray_set_position(stream, info);
-	if (stream->readUnsignedShort() != 0x4a2b) return;                         //tst->b x(a3)
+	if (stream->readUnsignedShort(stream) != 0x4a2b) return;                         //tst->b x(a3)
 	headers = size = 0;
 	self->wave = null;
 
 	while (value != 0x4e75) {                                                 //rts
-		value = stream->readUnsignedShort();
+		value = stream->readUnsignedShort(stream);
 
 		switch (value) {
 			case 0x4bfa:
 				if (headers) break;
-				info = ByteArray_get_position(stream) + stream->readShort();
+				info = ByteArray_get_position(stream) + stream->readShort(stream);
 				ByteArray_set_position_rel(stream, 1);
-				total = stream->readUnsignedByte();
+				total = stream->readUnsignedByte(stream);
 
 				ByteArray_set_position(stream, -10);
-				value = stream->readUnsignedShort();
+				value = stream->readUnsignedShort(stream);
 				pos = ByteArray_get_position(stream);
 
 				if (value == 0x41fa || value == 0x207a) {                           //lea x,a0 | movea->l x,a0
-					headers = ByteArray_get_position(stream) + stream->readUnsignedShort();
+					headers = ByteArray_get_position(stream) + stream->readUnsignedShort(stream);
 				} else if (value == 0xd0fc) {                                       //adda->w #x,a0
-					headers = (64 + stream->readUnsignedShort());
+					headers = (64 + stream->readUnsignedShort(stream));
 					ByteArray_set_position_rel(stream, -18);
-					headers += (ByteArray_get_position(stream) + stream->readUnsignedShort());
+					headers += (ByteArray_get_position(stream) + stream->readUnsignedShort(stream));
 				}
 
 				ByteArray_set_position(stream, pos);
@@ -574,12 +574,12 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 			case 0x84c3:                                                          //divu->w d3,d2
 				if (size) break;
 				ByteArray_set_position_rel(stream, 4);
-				value = stream->readUnsignedShort();
+				value = stream->readUnsignedShort(stream);
 
 				if (value == 0xdafc) {                                              //adda->w #x,a5
-					size = stream->readUnsignedShort();
+					size = stream->readUnsignedShort(stream);
 				} else if (value == 0xdbfc) {                                       //adda->l #x,a5
-					size = stream->readUnsignedInt();
+					size = stream->readUnsignedInt(stream);
 				}
 
 				if (size == 12 && self->super.super.variant < 30) self->super.super.variant = 20;
@@ -590,23 +590,23 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 
 				for (i = 0; i < total; ++i) {
 					sample = DWSample_new();
-					sample->super.length   = stream->readUnsignedInt();
-					sample->relative = 3579545 / stream->readUnsignedShort();
+					sample->super.length   = stream->readUnsignedInt(stream);
+					sample->relative = 3579545 / stream->readUnsignedShort(stream);
 					sample->super.pointer  = self->super.amiga->store(stream, sample->length);
 
 					value = ByteArray_get_position(stream);
 					ByteArray_set_position(stream, info + (i * size) + 4);
-					sample->super.loopPtr = stream->readInt();
+					sample->super.loopPtr = stream->readInt(stream);
 
 					if (self->super.super.variant == 0) {
 						ByteArray_set_position_rel(stream, 6);
 						
 						sample->super;
-						sample->volume = stream->readUnsignedShort();
+						sample->volume = stream->readUnsignedShort(stream);
 					} else if (self->super.super.variant == 10) {
 						ByteArray_set_position_rel(ByteArray_get_position(stream), 4);
-						sample->volume = stream->readUnsignedShort();
-						sample->finetune = stream->readByte();
+						sample->volume = stream->readUnsignedShort(stream);
+						sample->finetune = stream->readByte(stream);
 					}
 
 					ByteArray_set_position(stream, value);
@@ -619,25 +619,25 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 				ByteArray_set_position(stream, pos);
 				break;
 			case 0x207a:                                                          //movea->l x,a0
-				value = ByteArray_get_position(stream) + stream->readShort();
+				value = ByteArray_get_position(stream) + stream->readShort(stream);
 
-				if (stream->readUnsignedShort() != 0x323c) {                         //move->w #x,d1
+				if (stream->readUnsignedShort(stream) != 0x323c) {                         //move->w #x,d1
 					ByteArray_set_position_rel(stream, -2);
 					break;
 				}
 
 				self->wave = self->samples[((value - info) / size)];
-				self->waveCenter = (stream->readUnsignedShort() + 1) << 1;
+				self->waveCenter = (stream->readUnsignedShort(stream) + 1) << 1;
 
 				ByteArray_set_position_rel(stream, 2);
-				self->waveRateNeg = stream->readByte();
+				self->waveRateNeg = stream->readByte(stream);
 				ByteArray_set_position(stream, 12);
-				self->waveRatePos = stream->readByte();
+				self->waveRatePos = stream->readByte(stream);
 				break;
 			case 0x046b:                                                          //subi->w #x,x(a3)
 			case 0x066b:                                                          //addi->w #x,x(a3)
-				total = stream->readUnsignedShort();
-				sample = self->samples[((stream->readUnsignedShort() - info) / size)];
+				total = stream->readUnsignedShort(stream);
+				sample = self->samples[((stream->readUnsignedShort(stream) - info) / size)];
 
 				if (value == 0x066b) {
 					sample->relative += total;
@@ -664,22 +664,22 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 	self->com4 = 0x90;
 
 	while (stream->bytesAvailable > 16) {
-		value = stream->readUnsignedShort();
+		value = stream->readUnsignedShort(stream);
 
 		switch (value) {
 			case 0x47fa:                                                          //lea x,a3
 				ByteArray_set_position_rel(stream, 2);
-				if (stream->readUnsignedShort() != 0x4a2b) break;                    //tst->b x(a3)
+				if (stream->readUnsignedShort(stream) != 0x4a2b) break;                    //tst->b x(a3)
 
 				pos = ByteArray_get_position(stream);
 				ByteArray_set_position_rel(stream, 4);
-				value = stream->readUnsignedShort();
+				value = stream->readUnsignedShort(stream);
 
 				if (value == 0x103a) {                                              //move->b x,d0
 					ByteArray_set_position_rel(stream, 4);
 
-					if (stream->readUnsignedShort() == 0xc0fc) {                       //mulu->w #x,d0
-						value = stream->readUnsignedShort();
+					if (stream->readUnsignedShort(stream) == 0xc0fc) {                       //mulu->w #x,d0
+						value = stream->readUnsignedShort(stream);
 						total = self->songs->length;
 						for (i = 0; i < total; ++i) self->songs[i].delay *= value;
 						ByteArray_set_position_rel(stream, 6);
@@ -688,25 +688,25 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 					ByteArray_set_position_rel(stream, -8);
 				}
 
-				value = stream->readUnsignedShort();
+				value = stream->readUnsignedShort(stream);
 
 				if (value == 0x4a2b) {                                              //tst->b x(a3)
-					ByteArray_set_position(stream, self->base + stream->readUnsignedShort());
-					self->slower = stream->readByte();
+					ByteArray_set_position(stream, self->base + stream->readUnsignedShort(stream));
+					self->slower = stream->readByte(stream);
 				}
 
 				ByteArray_set_position(stream, pos);
 				break;
 			case 0x0c6b:                                                          //cmpi->w #x,x(a3)
 				ByteArray_set_position_rel(stream, -6);
-				value = stream->readUnsignedShort();
+				value = stream->readUnsignedShort(stream);
 
 				if (value == 0x546b || value == 0x526b) {                           //addq->w #2,x(a3) | addq->w #1,x(a3)
 					ByteArray_set_position_rel(stream, 4);
-					self->waveHi = self->wave->super.pointer + stream->readUnsignedShort();
+					self->waveHi = self->wave->super.pointer + stream->readUnsignedShort(stream);
 				} else if (value == 0x556b || value == 0x536b) {                    //subq->w #2,x(a3) | subq->w #1,x(a3)
 					ByteArray_set_position_rel(stream, 4);
-					self->waveLo = self->wave->super.pointer + stream->readUnsignedShort();
+					self->waveLo = self->wave->super.pointer + stream->readUnsignedShort(stream);
 				}
 
 				self->waveLen = (value < 0x546b) ? 1 : 2;
@@ -728,17 +728,17 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 				break;
 			case 0x0c68:                                                          //cmpi->w #x,x(a0)
 				ByteArray_set_position_rel(stream, 22);
-				if (stream->readUnsignedShort() == 0x0c11) self->super.super.variant = 40;
+				if (stream->readUnsignedShort(stream) == 0x0c11) self->super.super.variant = 40;
 				break;
 			case 0x322d:                                                          //move->w x(a5),d1
 				pos = ByteArray_get_position(stream);
-				value = stream->readUnsignedShort();
+				value = stream->readUnsignedShort(stream);
 
 				if (value == 0x000a || value == 0x000c) {                           //10 | 12
 				ByteArray_set_position_rel(stream, -8);
 
-				if (stream->readUnsignedShort() == 0x45fa)                         //lea x,a2
-					periods = ByteArray_get_position(stream) + stream->readUnsignedShort();
+				if (stream->readUnsignedShort(stream) == 0x45fa)                         //lea x,a2
+					periods = ByteArray_get_position(stream) + stream->readUnsignedShort(stream);
 				}
 
 				ByteArray_set_position(stream, pos + 2);
@@ -746,7 +746,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 			case 0x0400:                                                          //subi->b #x,d0
 			case 0x0440:                                                          //subi->w #x,d0
 			case 0x0600:                                                          //addi->b #x,d0
-				value = stream->readUnsignedShort();
+				value = stream->readUnsignedShort(stream);
 
 				if (value == 0x00c0 || value == 0x0040) {                           //192 | 64
 					self->com2 = 0xc0;
@@ -755,15 +755,15 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 				} else if (value == self->com3) {
 					ByteArray_set_position_rel(stream, 2);
 
-					if (stream->readUnsignedShort() == 0x45fa) {                       //lea x,a2
-						self->volseqs = ByteArray_get_position(stream) + stream->readUnsignedShort();
+					if (stream->readUnsignedShort(stream) == 0x45fa) {                       //lea x,a2
+						self->volseqs = ByteArray_get_position(stream) + stream->readUnsignedShort(stream);
 						if (self->super.super.variant < 40) self->super.super.variant = 30;
 					}
 				} else if (value == self->com4) {
 					ByteArray_set_position_rel(stream, 2);
 
-					if (stream->readUnsignedShort() == 0x45fa)                         //lea x,a2
-						self->frqseqs = ByteArray_get_position(stream) + stream->readUnsignedShort();
+					if (stream->readUnsignedShort(stream) == 0x45fa)                         //lea x,a2
+						self->frqseqs = ByteArray_get_position(stream) + stream->readUnsignedShort(stream);
 				}
 				break;
 			case 0x4ef3:                                                          //jmp (a3,a2.w)
@@ -772,19 +772,19 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 			case 0x4ed2:                                                          //jmp a2
 				lower = ByteArray_get_position(stream);
 				ByteArray_set_position_rel(stream, -10);
-				ByteArray_set_position_rel(stream, stream->readUnsignedShort());
+				ByteArray_set_position_rel(stream, stream->readUnsignedShort(stream));
 				pos = ByteArray_get_position(stream);                                //jump table address
 
 				ByteArray_set_position_rel(stream, 2);                               //effect -126
-				ByteArray_set_position(stream, self->base + stream->readUnsignedShort() + 10);
-				if (stream->readUnsignedShort() == 0x4a14) self->super.super.variant = 41;             //tst->b (a4)
+				ByteArray_set_position(stream, self->base + stream->readUnsignedShort(stream) + 10);
+				if (stream->readUnsignedShort(stream) == 0x4a14) self->super.super.variant = 41;             //tst->b (a4)
 
 				ByteArray_set_position(stream, pos + 16);                                         //effect -120
-				value = self->base + stream->readUnsignedShort();
+				value = self->base + stream->readUnsignedShort(stream);
 
 				if (value > lower && value < pos) {
 					ByteArray_set_position(stream, value);
-					value = stream->readUnsignedShort();
+					value = stream->readUnsignedShort(stream);
 
 					if (value == 0x50e8) {                                            //st x(a0)
 						self->super.super.variant = 21;
@@ -794,15 +794,15 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 				}
 
 				ByteArray_set_position(stream, pos + 20);                                         //effect -118
-				value = self->base + stream->readUnsignedShort();
+				value = self->base + stream->readUnsignedShort(stream);
 
 				if (value > lower && value < pos) {
 					ByteArray_set_position(stream, value + 2);
-					if (stream->readUnsignedShort() != 0x4880) self->super.super.variant = 31;           //ext->w d0
+					if (stream->readUnsignedShort(stream) != 0x4880) self->super.super.variant = 31;           //ext->w d0
 				}
 
 				ByteArray_set_position(stream, pos + 26);                                         //effect -115
-				value = stream->readUnsignedShort();
+				value = stream->readUnsignedShort(stream);
 				if (value > lower && value < pos) self->super.super.variant = 32;
 
 				if (self->frqseqs) ByteArray_set_position(stream, stream->length);
