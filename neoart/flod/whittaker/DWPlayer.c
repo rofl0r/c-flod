@@ -30,13 +30,17 @@ void DWPlayer_ctor(struct DWPlayer* self, struct Amiga* amiga) {
 	// original constructor code goes here
 	//super(amiga);
 	AmigaPlayer_ctor(&self->super, amiga);
+	unsigned i;
 	
-	self->voices = new Vector.<DWVoice>(4, true);
-
+	//self->voices = new Vector.<DWVoice>(4, true);
+/*	
 	self->voices[0] = DWVoice_new(0,1);
 	self->voices[1] = DWVoice_new(1,2);
 	self->voices[2] = DWVoice_new(2,4);
-	self->voices[3] = DWVoice_new(3,8);	
+	self->voices[3] = DWVoice_new(3,8);	*/
+	for(i = 0; i < DWPLAYER_MAX_VOICES; i++) {
+		DWVoice_ctor(&self->voices[i], i, 1 << i);
+	}
 }
 
 struct DWPlayer* DWPlayer_new(struct Amiga* amiga) {
@@ -73,7 +77,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 
 		if (!self->songvol) {
 			if (!self->super.super.loopSong) {
-				self->amiga->complete = 1;
+				self->super.amiga->complete = 1;
 				return;
 			} else {
 				self->initialize();
@@ -336,7 +340,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 				}
 			}
 
-			chan->period = value;
+			AmigaChannel_set_period(chan, value);
 
 			if (self->super.super.variant >= 20) {
 				if (--(voice->volseqCounter) < 0) {
@@ -364,7 +368,7 @@ void DWPlayer_initialize(struct DWPlayer* self) {
 	struct DWVoice *voice = self->voices[self->active];
 	self->super->initialize();
 
-	self->song    = self->songs[playSong];
+	self->song    = self->songs[self->super.super.playSong];
 	self->songvol = self->master;
 	self->super.super.speed   = self->song->speed;
 
@@ -388,7 +392,7 @@ void DWPlayer_initialize(struct DWPlayer* self) {
 	}
 
 	while (voice) {
-		voice->initialize();
+		DWVoice_initialize(voice);
 		voice->channel = self->super.amiga->channels[voice->index];
 		voice->sample  = self->samples[0];
 		self->complete += voice->bitFlag;
@@ -488,7 +492,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 				break;
 		}
 
-		if (stream->bytesAvailable < 20) return;
+		if (ByteArray_bytesAvailable(stream) < 20) return;
 	}
 
 	index = ByteArray_get_position(stream);

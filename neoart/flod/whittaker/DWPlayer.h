@@ -7,6 +7,8 @@
 #include "DWSample.h"
 #include "DWVoice.h"
 
+#define DWPLAYER_MAX_VOICES 4
+
 //extends AmigaPlayer
 struct DWPlayer {
 	struct AmigaPlayer super;
@@ -38,7 +40,8 @@ struct DWPlayer {
 	int wavePos;
 	int waveRateNeg;
 	int waveRatePos;
-	struct DWVoice *voices;
+	struct DWVoice voices[DWPLAYER_MAX_VOICES];
+	//struct DWVoice *voices;
 	//voices        : Vector.<DWVoice>,
 	int active;
 	int complete;
