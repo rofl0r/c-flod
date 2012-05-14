@@ -10,4 +10,7 @@
 
 typedef float Number;
 
+#include <stdio.h>
+#define DEBUGP(format, ...) fprintf(stderr, format, __VA_ARGS__)
+
 #endif
