@@ -53,7 +53,8 @@ unsigned short ByteArray_readUnsignedShort(struct ByteArray* self);
 short ByteArray_readShort(struct ByteArray* self);
 unsigned char ByteArray_readUnsignedByte(struct ByteArray* self);
 signed char ByteArray_readByte(struct ByteArray* self);
-
+void ByteArray_set_length(struct ByteArray* self, off_t len);
+off_t ByteArray_get_length(struct ByteArray* self);
 
 
 #endif

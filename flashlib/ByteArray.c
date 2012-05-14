@@ -40,6 +40,22 @@ static int neg_off() {
 	fprintf(stderr, "negative seek attempted");
 }
 
+static int oob() {
+	fprintf(stderr, "oob access attempted");
+}
+
+void ByteArray_set_length(struct ByteArray* self, off_t len) {
+	if(len > self->size) {
+		oob();
+		return;
+	}
+	self->size = len;
+}
+
+off_t ByteArray_get_length(struct ByteArray* self) {
+	return self->size;
+}
+
 int ByteArray_set_position_rel(struct ByteArray* self, int rel) {
 	if((int) self->pos - rel < 0) {
 		neg_off();
