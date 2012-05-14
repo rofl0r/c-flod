@@ -18,6 +18,7 @@
 
 #include "DWPlayer.h"
 #include "../flod_internal.h"
+//extends AmigaPlayer
 
 void DWPlayer_defaults(struct DWPlayer* self) {
 	CLASS_DEF_INIT();
@@ -77,10 +78,12 @@ void DWPlayer_process(struct DWPlayer* self) {
 
 		if (!self->songvol) {
 			if (!self->super.super.loopSong) {
-				self->super.amiga->complete = 1;
+				CoreMixer_set_complete(&self->super.amiga->super, 1);
+				//self->super.amiga->complete = 1;
 				return;
 			} else {
-				self->initialize();
+				CorePlayer_initialize(&self->super.super);
+				//self->initialize();
 			}
 		}
 	}
@@ -178,7 +181,8 @@ void DWPlayer_process(struct DWPlayer* self) {
 
 								if (self->super.super.variant == 41) {
 									voice->busy = 1;
-									chan->enabled = 0;
+									AmigaChannel_set_enabled(chan, 0);
+									//chan->enabled = 0;
 								} else {
 									chan->pointer = self->super.amiga->loopPtr;
 									chan->length  = self->super.amiga->loopLen;
@@ -190,12 +194,14 @@ void DWPlayer_process(struct DWPlayer* self) {
 								if (self->super.super.variant > 0) {
 									voice->tick = voice->speed;
 									voice->patternPos = ByteArray_get_position(self->stream);
-									chan->enabled = 1;
+									AmigaChannel_set_enabled(chan, 1);
+									//chan->enabled = 1;
 									loop = 0;
 								}
 								break;
 							case -124:
-								self->super.amiga->complete = 1;
+								CoreMixer_set_complete(&self->super.amiga->super, 1);
+								//self->super.amiga->complete = 1;
 								break;
 							case -123:
 								if (self->super.super.variant > 0) self->transpose = self->stream->readByte();
@@ -267,26 +273,31 @@ void DWPlayer_process(struct DWPlayer* self) {
 
 					chan->pointer = sample->super.pointer;
 					chan->length  = sample->super.length;
-					chan->volume  = volume;
+					AmigaChannel_set_volume(chan, volume);
+					//chan->volume  = volume;
 
 					ByteArray_set_position(self->stream, self->periods + (value << 1));
 					value = (self->stream->readUnsignedShort() * sample->relative) >> 10;
 					if (self->super.super.variant < 10) voice->portaDelta = value;
 
-					chan->period  = value;
-					chan->enabled = 1;
+					AmigaChannel_set_period(chan, value);
+					//chan->period  = value;
+					AmigaChannel_set_enabled(chan, 1);
+					//chan->enabled = 1;
 					loop = 0;
 				}
 			}
 		} else if (voice->tick == 1) {
 			if (self->super.super.variant < 30) {
-				chan->enabled = 0;
+				//chan->enabled = 0;
+				AmigaChannel_set_enabled(chan, 0);
 			} else {
 				value = self->stream->readUnsignedByte();
 
 				if (value != 131) {
 				if (self->super.super.variant < 40 || value < 224 || (self->stream->readUnsignedByte() != 131))
-					chan->enabled = 0;
+					AmigaChannel_set_enabled(chan, 0);
+					//chan->enabled = 0;
 				}
 			}
 		} else if (self->super.super.variant == 0) {
@@ -295,7 +306,8 @@ void DWPlayer_process(struct DWPlayer* self) {
 					voice->portaDelay--;
 				} else {
 					voice->portaDelta -= voice->portaSpeed;
-					chan->period = voice->portaDelta;
+					AmigaChannel_set_period(chan, voice->portaDelta);
+					//chan->period = voice->portaDelta;
 				}
 			}
 		} else {
@@ -352,7 +364,8 @@ void DWPlayer_process(struct DWPlayer* self) {
 					volume &= 0x7f;
 
 					if (voice->halve) volume >>= 1;
-					chan->volume = (volume * self->songvol) >> 6;
+					AmigaChannel_set_volume(chan, (volume * self->songvol) >> 6);
+					//chan->volume = (volume * self->songvol) >> 6;
 				}
 			}
 		}
@@ -525,6 +538,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 	}
 
 	if (!total) return;
+
 	self->songs->fixed = true;
 	self->super.super.lastSong = self->songs->length - 1;
 
@@ -586,6 +600,8 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 
 					if (self->super.super.variant == 0) {
 						ByteArray_set_position_rel(stream, 6);
+						
+						sample->super;
 						sample->volume = stream->readUnsignedShort();
 					} else if (self->super.super.variant == 10) {
 						ByteArray_set_position_rel(ByteArray_get_position(stream), 4);
@@ -598,7 +614,8 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 				}
 
 				self->super.amiga->loopLen = 64;
-				stream->length = headers;
+				ByteArray_set_length(stream, headers);
+				//stream->length = headers;
 				ByteArray_set_position(stream, pos);
 				break;
 			case 0x207a:                                                          //movea->l x,a0
