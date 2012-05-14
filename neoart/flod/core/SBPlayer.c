@@ -35,6 +35,11 @@ void SBPlayer_ctor(struct SBPlayer* self, struct Soundblaster* mixer) {
 
 	self->super.endian  = BAE_LITTLE;
 	self->super.quality = 1;
+
+	//add vtable
+	self->super.setup = SBPlayer_setup;
+	self->super.set_volume = SBPlayer_set_volume;
+	self->super.toggle = SBPlayer_toggle;
 }
 
 struct SBPlayer* SBPlayer_new(struct Soundblaster* mixer) {

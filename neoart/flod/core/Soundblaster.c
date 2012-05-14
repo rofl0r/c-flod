@@ -96,8 +96,8 @@ void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
 
 	while (mixed < size) {
 		if (!self->super.samplesLeft) {
-			self->super.player->process();
-			self->super.player->fast();
+			self->super.player->process(&self->super.player);
+			self->super.player->fast(&self->super.player);
 			self->super.samplesLeft = self->super.samplesTick;
 
 			if (self->super.completed) {
@@ -241,8 +241,8 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 
 	while (mixed < size) {
 		if (!self->super.samplesLeft) {
-			self->super.player->process();
-			self->super.player->accurate();
+			self->super.player->process(&self->super.player);
+			self->super.player->accurate(&self->super.player);
 			self->super.samplesLeft = self->super.samplesTick;
 
 			if (self->super.completed) {

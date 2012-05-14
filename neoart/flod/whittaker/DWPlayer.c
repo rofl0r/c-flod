@@ -42,6 +42,10 @@ void DWPlayer_ctor(struct DWPlayer* self, struct Amiga* amiga) {
 	for(i = 0; i < DWPLAYER_MAX_VOICES; i++) {
 		DWVoice_ctor(&self->voices[i], i, 1 << i);
 	}
+
+	//add vtable
+	self->super.super.process = DWPlayer_process;
+	self->super.super.loader = DWPlayer_loader;
 }
 
 struct DWPlayer* DWPlayer_new(struct Amiga* amiga) {
@@ -383,7 +387,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 void DWPlayer_initialize(struct DWPlayer* self) {
 	int i = 0;
 	int len = 0;
-	struct DWVoice *voice = self->voices[self->active];
+	struct DWVoice *voice = &self->voices[self->active];
 	CorePlayer_initialize(&self->super.super);
 	//self->super->initialize();
 

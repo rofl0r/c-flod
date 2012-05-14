@@ -36,7 +36,16 @@ void CorePlayer_ctor(struct CorePlayer* self, struct CoreMixer *hardware) {
 	self->hardware = hardware;
 	
 	//add vtable
-	
+	self->process = CorePlayer_process;
+	self->fast = CorePlayer_fast;
+	self->accurate = CorePlayer_accurate;
+	self->setup = CorePlayer_setup;
+	self->set_ntsc = CorePlayer_set_ntsc;
+	self->set_stereo = CorePlayer_set_stereo;
+	self->set_volume = CorePlayer_set_volume;
+	self->toggle = CorePlayer_toggle;
+	self->reset = CorePlayer_reset;
+	self->loader = CorePlayer_loader;
 }
 
 struct CorePlayer* CorePlayer_new(struct CoreMixer *hardware) {
@@ -47,17 +56,31 @@ void CorePlayer_set_force(struct CorePlayer* self, int value) {
 	self->version = 0;
 }
 
+/* stubs */
+void CorePlayer_process(struct CorePlayer* self) {}
+
+void CorePlayer_fast(struct CorePlayer* self) {}
+
+void CorePlayer_accurate(struct CorePlayer* self) {}
+
+void CorePlayer_setup(struct CorePlayer* self) {}
+
 void CorePlayer_set_ntsc(struct CorePlayer* self, int value) { }
 
 void CorePlayer_set_stereo(struct CorePlayer* self, Number value) { }
 
 void CorePlayer_set_volume(struct CorePlayer* self, Number value) { }
 
+void CorePlayer_toggle(struct CorePlayer* self, int index) {}
+
+void CorePlayer_reset(struct CorePlayer* self) { }
+
+void CorePlayer_loader(struct CorePlayer* self, struct ByteArray *stream) { }
+
+
 struct ByteArray *CorePlayer_get_waveform(struct CorePlayer* self) {
 	return self->hardware->waveform();
 }
-
-void CorePlayer_toggle(struct CorePlayer* self, int index) {}
 
 int CorePlayer_load(struct CorePlayer* self, struct ByteArray *stream) {
 	self->hardware->reset();
@@ -77,7 +100,7 @@ int CorePlayer_load(struct CorePlayer* self, struct ByteArray *stream) {
 	if (stream) {
 		stream->endian = endian;
 		ByteArray_set_position(stream, 0);
-		self->loader(stream);
+		self->loader(self, stream);
 		if (self->version) self->setup();
 	}
 	return self->version;
@@ -114,16 +137,8 @@ void CorePlayer_stop(struct CorePlayer* self) {
 	if (!self->version) return;
 	if (self->soundChan) self->removeEvents();
 	self->soundPos = 0.0;
-	self->reset();
+	self->reset(self);
 }
-
-void CorePlayer_process(struct CorePlayer* self) {}
-
-void CorePlayer_fast(struct CorePlayer* self) {}
-
-void CorePlayer_accurate(struct CorePlayer* self) {}
-
-void CorePlayer_setup(struct CorePlayer* self) {}
 
     //js function reset
 void CorePlayer_initialize(struct CorePlayer* self) {
@@ -138,10 +153,6 @@ void CorePlayer_initialize(struct CorePlayer* self) {
 	//self->hardware->initialize();
 	self->hardware->samplesTick = 110250 / tempo;
 }
-
-void CorePlayer_reset(struct CorePlayer* self) { }
-
-void CorePlayer_loader(struct CorePlayer* self, struct ByteArray *stream) { }
 
 void CorePlayer_completeHandler(struct CorePlayer* self, struct Event *e) {
 	CorePlayer_stop(self);

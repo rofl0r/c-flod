@@ -36,6 +36,12 @@ void AmigaPlayer_ctor(struct AmigaPlayer* self, struct Amiga* amiga) {
 	AmigaPlayer_set_ntsc(self, 0);
 	self->super.speed    = 6;
 	self->super.tempo    = 125;
+
+	//add vtable
+	self->super.set_ntsc = AmigaPlayer_set_ntsc;
+	self->super.set_stereo = AmigaPlayer_set_stereo;
+	self->super.set_volume = AmigaPlayer_set_volume;
+	self->super.toggle = AmigaPlayer_toggle;
 }
 
 struct AmigaPlayer* AmigaPlayer_new(struct Amiga* amiga) {
