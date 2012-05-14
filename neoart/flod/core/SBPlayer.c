@@ -31,7 +31,7 @@ void SBPlayer_ctor(struct SBPlayer* self, struct Soundblaster* mixer) {
 	self->mixer = mixer ? mixer : Soundblaster_new();
 	super(self->mixer);
 
-	self->super.endian  = "littleEndian";
+	self->super.endian  = BAE_LITTLE;
 	self->super.quality = 1;
 }
 

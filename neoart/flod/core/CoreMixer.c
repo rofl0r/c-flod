@@ -28,7 +28,7 @@ void CoreMixer_ctor(struct CoreMixer* self) {
 	CLASS_CTOR_DEF(CoreMixer);
 	/* original constructor code goes here */
 	self->wave = ByteArray_new();
-	self->wave->endian = "littleEndian";
+	self->wave->endian = BAE_LITTLE;
 	self->bufferSize = 8192;
 }
 
@@ -88,7 +88,7 @@ void CoreMixer_set_bufferSize(struct CoreMixer* self, int value) {
 
 struct ByteArray* CoreMixer_waveform(struct CoreMixer* self) {
 	struct ByteArray file = ByteArray_new();
-	file->endian = "littleEndian";
+	file->endian = BAE_LITTLE;
 
 	file->writeUTFBytes("RIFF");
 	file->writeInt(wave->length + 44);
