@@ -18,7 +18,9 @@
 
 #include "Soundblaster.h"
 #include "../flod_internal.h"
+#include "../../../flashlib/Common.h"
 
+//extends CoreMixer
 void Soundblaster_defaults(struct Soundblaster* self) {
 	CLASS_DEF_INIT();
 	// static initializers go here
@@ -36,22 +38,35 @@ struct Soundblaster* Soundblaster_new(void) {
 	CLASS_NEW_BODY(Soundblaster);
 }
 
-void Soundblaster_setup(struct Soundblaster* self, int len) {
-	int i = 1;
-	channels = new Vector.<SBChannel>(len, true);
-	channels[0] = new SBChannel();
+void Soundblaster_setup(struct Soundblaster* self, unsigned int len) {
+	DEBUGP("calling %s with %d channels\n", __FUNCTION__, len);
+	if(len > SOUNDBLASTER_MAX_CHANNELS) {
+		abort();
+	}
+/*	int i = 1;
+	self->channels = new Vector.<SBChannel>(len, true);
+	self->channels[0] = new SBChannel();
 
 	for (; i < len; ++i)
-		channels[i] = channels[int(i - 1)].next = new SBChannel();
+		channels[i] = channels[int(i - 1)].next = new SBChannel(); */
+	unsigned i;
+	for(i = 0; i < len; i++){
+		SBChannel_ctor(&self->channels[i]);
+		if(i) {
+			self->channels[i - 1].next = &self->channels[i];
+		}
+	}
 }
 
 //override
 void Soundblaster_initialize(struct Soundblaster* self) {
-	var chan:SBChannel = channels[0];
-	super->initialize();
+	struct SBChannel *chan = &self->channels[0];
+	//super->initialize();
+	CoreMixer_initialize(&self->super);
 
 	while (chan) {
-		chan->initialize();
+		//chan->initialize();
+		SBChannel_initialize(chan);
 		chan = chan->next;
 	}
 }
@@ -69,7 +84,8 @@ void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
 	int mixPos = 0;
 	struct SBSample *s = NULL;
 	struct Sample *sample = NULL;
-	int size = self->bufferSize;
+	//int size = self->bufferSize;
+	int size = CoreMixer_get_bufferSize(&self->super);
 	int toMix = 0;
 	Number value = NAN;
 
@@ -131,7 +147,7 @@ void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
 
 					if (!chan->mute) {
 						if (!chan->dir) value = d[chan->pointer];
-						else value = d[int(chan->dir - chan->pointer)];
+						else value = d[(chan->dir - chan->pointer)];
 
 						chan->ldata = value * chan->lvol;
 						chan->rdata = value * chan->rvol;
@@ -201,8 +217,8 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 	struct SBChannel *chan = NULL;
 	//d1:Vector.<Number>;
 	//d2:Vector.<Number>;
-	Number *d1 = NAN;
-	Number *d2 = NAN;
+	Number *d1 = null;
+	Number *d2 = null;
 	struct ByteArray* data = e->data;
 	int delta = 0;
 	int i = 0; 
@@ -213,7 +229,8 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 	struct SBSample *s1;
 	struct SBSample *s2;
 	struct Sample *sample;
-	int size = bufferSize;
+	//int size = bufferSize;
+	int size = CoreMixer_get_bufferSize(&self->super);
 	int toMix = 0; 
 	Number value = NAN;
 
@@ -231,9 +248,9 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 			if (self->super.completed) {
 				size = mixed + self->super.samplesTick;
 
-				if (size > self->super.bufferSize) {
-					self->super.remains = size - self->super.bufferSize;
-					size = self->super.bufferSize;
+				if (size > CoreMixer_get_bufferSize(&self->super)) {
+					self->super.remains = size - CoreMixer_get_bufferSize(&self->super);
+					size = CoreMixer_get_bufferSize(&self->super);
 				}
 			}
 		}
@@ -399,8 +416,8 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 			if (sample->r > 1.0) sample->r = 1.0;
 			else if (sample->r < -1.0) sample->r = -1.0;
 
-			self->super.wave->writeShort(int(sample->l * (sample->l < 0 ? 32768 : 32767)));
-			self->super.wave->writeShort(int(sample->r * (sample->r < 0 ? 32768 : 32767)));
+			self->super.wave->writeShort((int)(sample->l * (sample->l < 0 ? 32768 : 32767)));
+			self->super.wave->writeShort((int)(sample->r * (sample->r < 0 ? 32768 : 32767)));
 
 			data->writeFloat(sample->l);
 			data->writeFloat(sample->r);
