@@ -2,7 +2,12 @@
 #define AMIGACHANNEL_H
 
 #include "../flod.h"
-  
+
+/*
+inheritance
+object
+	-> AmigaChannel
+*/
 struct AmigaChannel {
 	struct AmigaChannel *next;
 	int mute;
@@ -25,6 +30,7 @@ struct AmigaChannel {
 void AmigaChannel_defaults(struct AmigaChannel* self);
 void AmigaChannel_ctor(struct AmigaChannel* self, int index);
 struct AmigaChannel* AmigaChannel_new(void, int index);
+
 int AmigaChannel_get_enabled(struct AmigaChannel* self);
 void AmigaChannel_set_enabled(struct AmigaChannel* self, int value);
 void AmigaChannel_set_period(struct AmigaChannel* self, int value);

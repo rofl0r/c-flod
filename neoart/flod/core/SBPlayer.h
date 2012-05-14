@@ -4,7 +4,13 @@
 #include "CorePlayer.h"
 #include "Soundblaster.h"
 
-// extends CorePlayer
+/*
+inheritance
+??
+   -> EventDispatcher
+                     ->CorePlayer
+                                 ->SBPlayer
+*/
 struct SBPlayer {
 	struct CorePlayer super;
 	struct Soundblaster *mixer;

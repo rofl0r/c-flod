@@ -3,6 +3,11 @@
 
 #include "../../../flashlib/Common.h"
 
+/*
+inheritance:
+object
+      -> Sample
+*/
 struct Sample {
       Number l;
       Number r;

@@ -7,6 +7,12 @@
 #include "../../../flashlib/SoundChannel.h"
 #include "../../../flashlib/EventDispatcher.h"
 
+/*
+inheritance
+??
+   -> EventDispatcher
+                     ->CorePlayer
+*/
 struct CorePlayer {
 	//extends EventDispatcher
 	struct EventDispatcher super;

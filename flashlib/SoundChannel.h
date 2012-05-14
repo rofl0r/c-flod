@@ -1,7 +1,12 @@
 #ifndef SOUNDCHANNEL_H
 #define SOUNDCHANNEL_H
-
-typedef struct {
+/*
+flash type
+inheritance
+???
+   -> SoundChannel
+*/
+struct {
 	
 } SoundChannel;
 

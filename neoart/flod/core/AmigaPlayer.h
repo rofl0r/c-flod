@@ -4,7 +4,13 @@
 #include "CorePlayer.h"
 #include "Amiga.h"
 
-// extends CorePlayer
+/*
+inheritance
+??
+   -> EventDispatcher
+                     ->CorePlayer
+                                 ->AmigaPlayer
+*/
 struct AmigaPlayer {
 	struct CorePlayer super;
 	struct Amiga *amiga;

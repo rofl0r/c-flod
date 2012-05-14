@@ -9,7 +9,11 @@ enum AmigaFilterForce {
 	FORCE_ON  =  1,
 	FORCE_OFF = -1,
 };
-
+/*
+inheritance
+object
+	-> AmigaFilter
+*/
 struct AmigaFilter {
 	int active;
 	enum AmigaFilterForce forced;

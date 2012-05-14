@@ -2,7 +2,11 @@
 #define AMIGASAMPLE_H
 
 #include "../flod.h"
-
+/*
+inheritance
+object
+      -> AmigaSample
+*/
 struct AmigaSample {
 	char* name;
 	int length;

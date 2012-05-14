@@ -9,7 +9,14 @@
 
 #define DWPLAYER_MAX_VOICES 4
 
-//extends AmigaPlayer
+/*
+inheritance
+??
+   -> EventDispatcher
+                     ->CorePlayer
+                                 ->AmigaPlayer
+                                              ->DWPlayer
+*/
 struct DWPlayer {
 	struct AmigaPlayer super;
 	//songs         : Vector.<DWSong>,
