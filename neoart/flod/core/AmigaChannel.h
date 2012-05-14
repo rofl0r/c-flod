@@ -1,5 +1,7 @@
 #ifndef AMIGACHANNEL_H
 #define AMIGACHANNEL_H
+
+#include "../flod.h"
   
 struct AmigaChannel {
 	struct AmigaChannel *next;
