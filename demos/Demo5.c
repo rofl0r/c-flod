@@ -43,8 +43,8 @@ int main(int argc, char** argv) {
 		perror("failed to open file");
 		return 1;
 	}
-	player = loader->load(data);
-	if (player && player->version) player->play();
+	player = FileLoader_load(loader, data);
+	if (player && player->version) CorePlayer_play(player, NULL);
 	
 	return 0;
 }
