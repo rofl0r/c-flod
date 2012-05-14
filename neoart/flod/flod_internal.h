@@ -1,6 +1,9 @@
 #ifndef FLOD_INTERNAL_H
 #define FLOD_INTERNAL_H
 
+#include <string.h>
+#include <stdlib.h>
+
 /* convention
  * 
  * as3 static initializers   -> classname_defaults(self)
