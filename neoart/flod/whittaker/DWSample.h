@@ -3,7 +3,14 @@
 
 #include "../core/AmigaSample.h"
 
-// extends AmigaSample
+/* 
+
+inheritance:
+
+object
+      -> AmigaSample
+                     -> DWSample
+*/
 struct DWSample {
 	struct AmigaSample super;
 	int relative;
