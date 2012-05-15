@@ -49,19 +49,23 @@ void SBSample_store(struct SBSample* self, struct ByteArray* stream) {
 
 	if (self->loopMode) {
 		len = self->loopStart + self->loopLen;
-		data = new Vector.<Number>(len + 1, true);
+		assert(len + 1 < SBSAMPLE_MAX_DATA);
+		//data = new Vector.<Number>(len + 1, true);
 	} else {
-		data = new Vector.<Number>(self->length + 1, true);
+		assert(self->length + 1 < SBSAMPLE_MAX_DATA);
+		//data = new Vector.<Number>(self->length + 1, true);
 	}
 
 	if (self->bits == 8) {
 		total = pos + len;
 
-		if (total > stream->length)
-		len = stream->length - pos;
+		if (total > ByteArray_get_position(stream))
+			len = ByteArray_get_length(stream) - pos;
+		
+		assert(len < SBSAMPLE_MAX_DATA);
 
 		for (i = 0; i < len; ++i) {
-			value = stream->readByte() + delta;
+			value = stream->readByte(stream) + delta;
 	
 			if (value < -128) value += 256;
 			else if (value > 127) value -= 256;
@@ -72,11 +76,13 @@ void SBSample_store(struct SBSample* self, struct ByteArray* stream) {
 	} else {
 		total = pos + (len << 1);
 
-		if (total > stream->length)
-		len = (stream->length - pos) >> 1;
+		if (total > ByteArray_get_length(stream))
+			len = (ByteArray_get_length(stream) - pos) >> 1;
+		
+		assert(len < SBSAMPLE_MAX_DATA);
 
 		for (i = 0; i < len; ++i) {
-			value = stream->readShort() + delta;
+			value = stream->readShort(stream) + delta;
 
 			if (value < -32768) value += 65536;
 			else if (value > 32767) value -= 65536;
@@ -89,22 +95,27 @@ void SBSample_store(struct SBSample* self, struct ByteArray* stream) {
 	total = pos + self->length;
 
 	if (!self->loopMode) {
+		assert(self->length < SBSAMPLE_MAX_DATA);
 		self->data[self->length] = 0.0;
 	} else {
 		self->length = self->loopStart + self->loopLen;
+		
+		assert(len < SBSAMPLE_MAX_DATA);
 
 		if (self->loopMode == 1) {
+			assert(self->loopStart < SBSAMPLE_MAX_DATA);
 			self->data[len] = self->data[self->loopStart];
 		} else {
-			self->data[len] = self->data[int(len - 1)];
+			self->data[len] = self->data[len - 1];
 		}
 	}
 
 	if (len != self->length) {
+		assert(len < SBSAMPLE_MAX_DATA);
 		sample = self->data[len - 1];
 		for (i = len; i < self->length; ++i) self->data[i] = sample;
 	}
 
-	if (total < stream->length) ByteArray_set_position(stream, total);
-	else ByteArray_set_position(stream, stream->length - 1);
+	if (total < ByteArray_get_length(stream)) ByteArray_set_position(stream, total);
+	else ByteArray_set_position(stream, ByteArray_get_length(stream) - 1);
 }

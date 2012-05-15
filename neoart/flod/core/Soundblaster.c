@@ -146,8 +146,10 @@ void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
 					} else chan->pointer = chan->index;
 
 					if (!chan->mute) {
-						if (!chan->dir) value = d[chan->pointer];
-						else value = d[(chan->dir - chan->pointer)];
+						unsigned int temp;
+						temp = chan->dir ? chan->dir - chan->pointer : chan->pointer;
+						assert(temp < SBSAMPLE_MAX_DATA);
+						value = d[temp];
 
 						chan->ldata = value * chan->lvol;
 						chan->rdata = value * chan->rvol;
@@ -189,8 +191,8 @@ void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
 			self->super.wave->writeShort(int(sample->l * (sample->l < 0 ? 32768 : 32767)));
 			self->super.wave->writeShort(int(sample->r * (sample->r < 0 ? 32768 : 32767)));
 
-			data->writeFloat(sample->l);
-			data->writeFloat(sample->r);
+			data->writeFloat(data, sample->l);
+			data->writeFloat(data, sample->r);
 
 			sample->l = sample->r = 0.0;
 			sample = sample->next;
@@ -203,8 +205,8 @@ void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
 			if (sample->r > 1.0) sample->r = 1.0;
 			else if (sample->r < -1.0) sample->r = -1.0;
 
-			data->writeFloat(sample->l);
-			data->writeFloat(sample->r);
+			data->writeFloat(data, sample->l);
+			data->writeFloat(data, sample->r);
 
 			sample->l = sample->r = 0.0;
 			sample = sample->next;
@@ -267,15 +269,22 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 			}
 
 			s1 = chan->sample;
-			d1 = s1.data;
+			d1 = s1->data;
 			s2 = chan->oldSample;
-			if (s2) d2 = s2.data;
+			if (s2) d2 = s2->data;
 
 			sample = self->super.buffer[mixPos];
 
 			for (i = mixPos; i < mixLen; ++i) {
-				value = chan->mute ? 0.0 : d1[chan->pointer];
-				value += (d1[int(chan->pointer + chan->dir)] - value) * chan->fraction;
+				if(chan->mute)
+					value = 0.0;
+				else {
+					assert(chan->pointer < SBSAMPLE_MAX_DATA);
+					value = d1[chan->pointer];
+				}
+				//value = chan->mute ? 0.0 : d1[chan->pointer];
+				assert(chan->pointer + chan->dir < SBSAMPLE_MAX_DATA);
+				value += (d1[chan->pointer + chan->dir] - value) * chan->fraction;
 
 				if ((chan->fraction += chan->speed) >= 1.0) {
 					delta = int(chan->fraction);
@@ -316,8 +325,15 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 					}
 				} else {
 					if (s2) {
-						mixValue = chan->mute ? 0.0 : d2[chan->oldPointer];
-						mixValue += (d2[int(chan->oldPointer + chan->oldDir)] - mixValue) * chan->oldFraction;
+						if(chan->mute) {
+							mixValue = 0.0;
+						} else {
+							assert(chan->oldPointer < SBSAMPLE_MAX_DATA);
+							mixValue = d2[chan->oldPointer];
+						}
+						//mixValue = chan->mute ? 0.0 : d2[chan->oldPointer];
+						assert(chan->oldPointer + chan->oldDir < SBSAMPLE_MAX_DATA);
+						mixValue += (d2[chan->oldPointer + chan->oldDir] - mixValue) * chan->oldFraction;
 
 						if ((chan->oldFraction += chan->oldSpeed) > 1) {
 							delta = int(chan->oldFraction);
@@ -419,8 +435,8 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 			self->super.wave->writeShort((int)(sample->l * (sample->l < 0 ? 32768 : 32767)));
 			self->super.wave->writeShort((int)(sample->r * (sample->r < 0 ? 32768 : 32767)));
 
-			data->writeFloat(sample->l);
-			data->writeFloat(sample->r);
+			data->writeFloat(data, sample->l);
+			data->writeFloat(data, sample->r);
 
 			sample->l = sample->r = 0.0;
 			sample = sample->next;
@@ -433,8 +449,8 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 			if (sample->r > 1.0) sample->r = 1.0;
 			else if (sample->r < -1.0) sample->r = -1.0;
 
-			data->writeFloat(sample->l);
-			data->writeFloat(sample->r);
+			data->writeFloat(data, sample->l);
+			data->writeFloat(data, sample->r);
 
 			sample->l = sample->r = 0.0;
 			sample = sample->next;
