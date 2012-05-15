@@ -403,7 +403,7 @@ void DWPlayer_initialize(struct DWPlayer* self) {
 	CorePlayer_initialize(&self->super.super);
 	//self->super->initialize();
 
-	self->song    = self->songs[self->super.super.playSong];
+	self->song    = &self->songs[self->super.super.playSong];
 	self->songvol = self->master;
 	self->super.super.speed   = self->song->speed;
 
@@ -544,8 +544,10 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 	ByteArray_set_position(stream, headers);
 
 	while (1) {
-		song = new DWSong();
-		song->tracks = new Vector.<int>(channels, true);
+		song = DWSong_new();
+		//song = &self->songs[self-
+		//song->tracks = new Vector.<int>(channels, true);
+		//song->tracks = new Vector.<int>(channels, true);
 
 		if (flag) {
 			song->speed = stream->readUnsignedByte(stream);
@@ -566,7 +568,9 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 			//value = self->base + stream[readMix]();
 			value = self->base + temp;
 			if (value < lower) lower = value;
+			if(i >= DWSONG_MAXTRACKS) abort();
 			song->tracks[i] = value;
+			song->vector_count_tracks++;
 		}
 
 		self->songs[total++] = song;
