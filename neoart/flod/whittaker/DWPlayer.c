@@ -549,6 +549,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 		//song = DWSong_new();
 		if(self->vector_count_songs >= DWPLAYER_MAX_SONGS) abort();
 		song = &self->songs[self->vector_count_songs];
+		DWSong_ctor(song);
 		//song->tracks = new Vector.<int>(channels, true);
 		//song->tracks = new Vector.<int>(channels, true);
 
