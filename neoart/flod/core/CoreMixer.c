@@ -29,16 +29,22 @@ void CoreMixer_ctor(struct CoreMixer* self) {
 	/* original constructor code goes here */
 	self->wave = ByteArray_new();
 	self->wave->endian = BAE_LITTLE;
-	self->bufferSize = 8192;
+	CoreMixer_set_bufferSize(self, 8192);
+	//self->bufferSize = 8192;
 }
 
 struct CoreMixer* CoreMixer_new(void) {
 	CLASS_NEW_BODY(CoreMixer);
 }
 
+/* stubs */
+void CoreMixer_reset(struct CoreMixer* self) {}
+void CoreMixer_fast(struct CoreMixer* self, struct SampleDataEvent *e) {}
+void CoreMixer_accurate(struct CoreMixer* self, struct SampleDataEvent *e) {}
+
 //js function reset
 void CoreMixer_initialize(struct CoreMixer* self) {
-	Sample* sample = self->buffer[0];
+	struct Sample* sample = &self->buffer[0];
 
 	self->samplesLeft = 0;
 	self->remains     = 0;
@@ -57,32 +63,40 @@ int CoreMixer_get_complete(struct CoreMixer* self) {
 void CoreMixer_set_complete(struct CoreMixer* self, int value) {
 	self->completed = value ^ self->player->loopSong;
 }
-void CoreMixer_reset(struct CoreMixer* self) {}
-void CoreMixer_fast(struct CoreMixer* self, struct SampleDataEvent *e) {}
-void CoreMixer_accurate(struct CoreMixer* self, struct SampleDataEvent *e) {}
 
 int CoreMixer_get_bufferSize(struct CoreMixer* self) {
-	return self->buffer->length; 
+	return self->vector_count_buffer;
+	//return self->buffer->length; 
 }
 
 void CoreMixer_set_bufferSize(struct CoreMixer* self, int value) {
 	int i = 0; int len = 0;
 	if (value == len || value < 2048) return;
+	assert(value <= COREMIXER_MAX_BUFFER);
 
-	if (!self->buffer) {
+/*	if (!self->buffer) {
 		self->buffer = new Vector.<Sample>(value, true);
 	} else {
 		len = self->buffer->length;
 		self->buffer->fixed = false;
 		self->buffer->length = value;
 		self->buffer->fixed = true;
-	}
+	} */
+	len = self->vector_count_buffer;
+	self->vector_count_buffer = value;
 
 	if (value > len) {
+		Sample_ctor(&self->buffer[len]);
+		for(i = ++len; i < value; i++) {
+			Sample_ctor(&self->buffer[i]);
+			self->buffer[i - 1].next = &self->buffer[i];
+		}
+		/*
 		self->buffer[len] = Sample_new();
 
 		for (i = ++len; i < value; ++i)
 		self->buffer[i] = self->buffer[i - 1].next = Sample_new();
+		*/
 	}
 }
 

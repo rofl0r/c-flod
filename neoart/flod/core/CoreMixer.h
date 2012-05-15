@@ -10,6 +10,8 @@ enum CoreMixer_type {
 	CM_SOUNDBLASTER,
 };
 
+#define COREMIXER_MAX_BUFFER 8192
+
 /*
 inheritance
 object
@@ -19,7 +21,9 @@ struct CoreMixer {
 	struct CorePlayer* player;
 	int samplesTick;
 	// buffer      : Vector.<Sample>,
-	struct Sample* buffer; //Vector
+	//struct Sample* buffer; //Vector
+	struct Sample buffer[COREMIXER_MAX_BUFFER];
+	unsigned vector_count_buffer;
 	int samplesLeft;
 	int remains;
 	int completed;
