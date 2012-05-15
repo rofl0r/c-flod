@@ -52,14 +52,14 @@ void AmigaChannel_set_enabled(struct AmigaChannel* self, int value) {
 
 void AmigaChannel_set_period(struct AmigaChannel* self, int value) {
 	if (value < 0) value = 0;
-		else if(value > 65535) value = 65535;
+	else if(value > 65535) value = 65535;
 
 	self->audper = value;
 }
 
 void AmigaChannel_set_volume(struct AmigaChannel* self, int value) {
 	if (value < 0) value = 0;
-		else if (value > 64) value = 64;
+	else if (value > 64) value = 64;
 
 	self->audvol = value;
 }

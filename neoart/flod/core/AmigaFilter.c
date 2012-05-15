@@ -18,6 +18,7 @@
 #include "../flod_internal.h"
 #include "../flod.h"
 #include "AmigaFilter.h"
+#include "Amiga.h"
 
 void AmigaFilter_defaults(struct AmigaFilter* self) {
 	CLASS_DEF_INIT();
@@ -42,7 +43,7 @@ void AmigaFilter_initialize(struct AmigaFilter* self) {
 void AmigaFilter_process(struct AmigaFilter* self, int model, struct Sample* sample) {
 	Number FL = 0.5213345843532200, P0 = 0.4860348337215757, P1 = 0.9314955486749749, d = 1.0 - P0;
 
-	if (model == 0) {
+	if (model == MODEL_A500) {
 		self->l0 = P0 * sample->l + d * self->l0 + 1.e-18 - 1.e-18;
 		self->r0 = P0 * sample->r + d * self->r0 + 1.e-18 - 1.e-18;
 		d = 1 - P1;
