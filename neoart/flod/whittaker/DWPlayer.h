@@ -8,6 +8,7 @@
 #include "DWVoice.h"
 
 #define DWPLAYER_MAX_VOICES 4
+#define DWPLAYER_MAX_SONGS 16
 
 /*
 inheritance
@@ -21,8 +22,11 @@ struct DWPlayer {
 	struct AmigaPlayer super;
 	//songs         : Vector.<DWSong>,
 	//samples       : Vector.<DWSample>,
-	struct DWSong* songs;
+	//struct DWSong* songs;
+	struct DWSong songs[DWPLAYER_MAX_SONGS];
 	struct DWSample* samples;
+	
+	unsigned int vector_count_songs;
 	
 	struct ByteArray *stream;
 	struct DWSong *song;

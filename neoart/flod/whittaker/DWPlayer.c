@@ -403,6 +403,7 @@ void DWPlayer_initialize(struct DWPlayer* self) {
 	CorePlayer_initialize(&self->super.super);
 	//self->super->initialize();
 
+	if (self->super.super.playSong >= DWPLAYER_MAX_SONGS) abort();
 	self->song    = &self->songs[self->super.super.playSong];
 	self->songvol = self->master;
 	self->super.super.speed   = self->song->speed;
@@ -538,14 +539,15 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 	}
 
 	index = ByteArray_get_position(stream);
-	songs = new Vector.<DWSong>();
+	//songs = new Vector.<DWSong>();
 	lower = 0x7fffffff;
 	total = 0;
 	ByteArray_set_position(stream, headers);
 
 	while (1) {
-		song = DWSong_new();
-		//song = &self->songs[self-
+		//song = DWSong_new();
+		if(self->vector_count_songs >= DWPLAYER_MAX_SONGS) abort();
+		song = &self->songs[self->vector_count_songs];
 		//song->tracks = new Vector.<int>(channels, true);
 		//song->tracks = new Vector.<int>(channels, true);
 
@@ -573,14 +575,18 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 			song->vector_count_tracks++;
 		}
 
-		self->songs[total++] = song;
+		//self->songs[total++] = song;
+		total++;
+		self->vector_count_songs++;
 		if ((lower - ByteArray_get_position(stream)) < size) break;
 	}
 
 	if (!total) return;
 
-	self->songs->fixed = true;
-	self->super.super.lastSong = self->songs->length - 1;
+	//self->songs->fixed = true;
+	//self->super.super.lastSong = self->songs->length - 1;
+	if(self->vector_count_songs == 0) abort();
+	self->super.super.lastSong = self->vector_count_songs - 1;
 
 	ByteArray_set_position(stream, info);
 	if (stream->readUnsignedShort(stream) != 0x4a2b) return;                         //tst->b x(a3)
@@ -719,7 +725,8 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 
 					if (stream->readUnsignedShort(stream) == 0xc0fc) {                       //mulu->w #x,d0
 						value = stream->readUnsignedShort(stream);
-						total = self->songs->length;
+						//total = self->songs->length;
+						total = self->vector_count_songs;
 						for (i = 0; i < total; ++i) self->songs[i].delay *= value;
 						ByteArray_set_position_rel(stream, 6);
 					}
