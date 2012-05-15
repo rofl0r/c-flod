@@ -59,8 +59,11 @@ void DWPlayer_process(struct DWPlayer* self) {
 	int pos;
 	struct DWSample *sample;
 	int value; 
-	struct DWVoice *voice = self->voices[self->active];
+	struct DWVoice *voice;
 	int volume;
+	
+	assert(self->active < DWPLAYER_MAX_VOICES);
+	voice = self->voices[self->active];
 
 	if (self->slower) {
 		if (--(self->slowerCounter) == 0) {
@@ -197,7 +200,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 								voice->portaDelay = self->stream->readUnsignedByte(self->stream);
 								voice->flags |= 2;
 								break;
-								case -126:
+							case -126:
 								voice->tick = voice->speed;
 								voice->patternPos = ByteArray_get_position(self->stream);
 
@@ -400,7 +403,9 @@ void DWPlayer_process(struct DWPlayer* self) {
 void DWPlayer_initialize(struct DWPlayer* self) {
 	int i = 0;
 	int len = 0;
-	struct DWVoice *voice = &self->voices[self->active];
+	struct DWVoice *voice;
+	assert(self->active < DWPLAYER_MAX_VOICES);
+	voice = &self->voices[self->active];
 	CorePlayer_initialize(&self->super.super);
 	//self->super->initialize();
 
@@ -774,6 +779,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 			case 0x7e03:                                                          //moveq #3,d7
 				self->active = value & 0xf;
 				total = self->super.super.channels - 1;
+				assert(total < DWPLAYER_MAX_VOICES);
 
 				if (self->active) {
 					self->voices[0].next = null;
