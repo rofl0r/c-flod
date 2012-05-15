@@ -32,7 +32,7 @@ void CorePlayer_defaults(struct CorePlayer* self) {
 void CorePlayer_ctor(struct CorePlayer* self, struct CoreMixer *hardware) {
 	CLASS_CTOR_DEF(CorePlayer);
 	// original constructor code goes here
-	hardware->player = this;
+	hardware->player = self;
 	self->hardware = hardware;
 	
 	//add vtable
@@ -59,10 +59,6 @@ void CorePlayer_set_force(struct CorePlayer* self, int value) {
 /* stubs */
 void CorePlayer_process(struct CorePlayer* self) {}
 
-void CorePlayer_fast(struct CorePlayer* self) {}
-
-void CorePlayer_accurate(struct CorePlayer* self) {}
-
 void CorePlayer_setup(struct CorePlayer* self) {}
 
 void CorePlayer_set_ntsc(struct CorePlayer* self, int value) { }
@@ -77,13 +73,17 @@ void CorePlayer_reset(struct CorePlayer* self) { }
 
 void CorePlayer_loader(struct CorePlayer* self, struct ByteArray *stream) { }
 
+/* callback function for EVENT_SAMPLE_DATA */
+void CorePlayer_fast(struct CorePlayer* self) {}
+void CorePlayer_accurate(struct CorePlayer* self) {}
+
 
 struct ByteArray *CorePlayer_get_waveform(struct CorePlayer* self) {
-	return self->hardware->waveform();
+	return CoreMixer_waveform(self->hardware);
 }
 
 int CorePlayer_load(struct CorePlayer* self, struct ByteArray *stream) {
-	self->hardware->reset();
+	CoreMixer_reset(self->hardware);
 	ByteArray_set_position(stream, 0);
 
 	self->version  = 0;
@@ -91,17 +91,17 @@ int CorePlayer_load(struct CorePlayer* self, struct ByteArray *stream) {
 	self->lastSong = 0;
 #ifdef SUPPORT_COMPRESSION
 	struct ZipFile* zip;	
-	if (stream->readUnsignedInt() == 67324752) {
+	if (stream->readUnsignedInt(stream) == 67324752) {
 		zip = ZipFile_new(stream);
 		stream = zip->uncompress(zip->entries[0]);
 	}
 #endif
 
 	if (stream) {
-		stream->endian = endian;
+		stream->endian = self->endian;
 		ByteArray_set_position(stream, 0);
 		self->loader(self, stream);
-		if (self->version) self->setup();
+		if (self->version) self->setup(self);
 	}
 	return self->version;
 }
@@ -115,27 +115,28 @@ int CorePlayer_play(struct CorePlayer* self, struct Sound *processor) {
 	}
 	self->sound = processor ? processor : Sound_new();
 
-	if (self->quality && (self->hardware->type == CM_SOUNDBLASTER)) {
-		self->sound->addEventListener(SampleDataEvent->SAMPLE_DATA, hardware->accurate);
+	//if (self->quality && (self->hardware->type == CM_SOUNDBLASTER)) {
+	if (self->quality) {
+		EventDispatcher_addEventListener((struct EventDispatcher*) self->sound, EVENT_SAMPLE_DATA, (EventHandlerFunc) self->hardware->accurate);
 	} else {
-		self->sound->addEventListener(SampleDataEvent->SAMPLE_DATA, hardware->fast);
+		EventDispatcher_addEventListener((struct EventDispatcher*) self->sound, EVENT_SAMPLE_DATA, (EventHandlerFunc) self->hardware->fast);
 	}
 
-	self->soundChan = self->sound->play(soundPos);
-	self->soundChan->addEventListener(Event->SOUND_COMPLETE, completeHandler);
+	self->soundChan = Sound_play(self->sound, self->soundPos);
+	EventDispatcher_addEventListener((struct EventDispatcher*) self->soundChan, EVENT_SOUND_COMPLETE, (EventHandlerFunc) CorePlayer_completeHandler);
 	self->soundPos = 0.0;
 	return 1;
 }
 
 void CorePlayer_pause(struct CorePlayer* self) {
 	if (!self->version || !self->soundChan) return;
-	self->soundPos = self->soundChan->position;
-	self->removeEvents();
+	self->soundPos = SoundChannel_get_position(self->soundChan);
+	EventDispatcher_removeEvents((struct EventDispatcher*) self);
 }
 
 void CorePlayer_stop(struct CorePlayer* self) {
 	if (!self->version) return;
-	if (self->soundChan) self->removeEvents();
+	if (self->soundChan) EventDispatcher_removeEvents((struct EventDispatcher*) self);
 	self->soundPos = 0.0;
 	self->reset(self);
 }
@@ -151,23 +152,25 @@ void CorePlayer_initialize(struct CorePlayer* self) {
 	else
 		abort();
 	//self->hardware->initialize();
-	self->hardware->samplesTick = 110250 / tempo;
+	self->hardware->samplesTick = 110250 / self->tempo;
 }
 
+/* callback function for EVENT_SOUND_COMPLETE */
 void CorePlayer_completeHandler(struct CorePlayer* self, struct Event *e) {
 	CorePlayer_stop(self);
-	self->dispatchEvent(e);
+	EventDispatcher_dispatchEvent((struct EventDispatcher*) self, e);
 }
 
 void CorePlayer_removeEvents(struct CorePlayer* self) {
-	self->soundChan->stop();
-	self->soundChan->removeEventListener(Event->SOUND_COMPLETE, completeHandler);
-	self->soundChan->dispatchEvent(new Event(Event->SOUND_COMPLETE));
+	SoundChannel_stop(self->soundChan);
+	EventDispatcher_removeEventListener((struct EventDispatcher*) self->soundChan, EVENT_SOUND_COMPLETE, (EventHandlerFunc) CorePlayer_completeHandler);
+	EventDispatcher_dispatchEvent((struct EventDispatcher*) self->soundChan, Event_new(EVENT_SOUND_COMPLETE));
+	//self->soundChan->dispatchEvent(new Event(Event->SOUND_COMPLETE));
 
 	if (self->quality) {
-		self->sound->removeEventListener(self->SampleDataEvent->SAMPLE_DATA, self->hardware->accurate);
+		EventDispatcher_removeEventListener((struct EventDispatcher*) self->sound, EVENT_SAMPLE_DATA, (EventHandlerFunc) self->hardware->accurate);
 	} else {
-		self->sound->removeEventListener(self->SampleDataEvent->SAMPLE_DATA, self->hardware->fast);
+		EventDispatcher_removeEventListener((struct EventDispatcher*) self->sound, EVENT_SAMPLE_DATA, (EventHandlerFunc) self->hardware->fast);
 	}
 }
 

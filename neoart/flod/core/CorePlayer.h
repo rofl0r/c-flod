@@ -3,6 +3,7 @@
 
 #include "../flod.h"
 #include "CoreMixer.h"
+#include "../../../flashlib/ByteArray.h"
 #include "../../../flashlib/Sound.h"
 #include "../../../flashlib/SoundChannel.h"
 #include "../../../flashlib/EventDispatcher.h"
@@ -33,7 +34,7 @@ struct CorePlayer {
 	struct Sound* sound;
 	struct SoundChannel* soundChan;
 	Number soundPos;
-	char* endian;
+	enum ByteArray_Endianess endian;
 	int tick;
 	void (*process) (struct CorePlayer* self);
 	void (*fast) (struct CorePlayer* self);
