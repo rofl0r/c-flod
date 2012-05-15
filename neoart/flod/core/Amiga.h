@@ -6,6 +6,9 @@
 #include "AmigaFilter.h"
 #include "AmigaChannel.h"
 
+#define AMIGA_MAX_MEMORY_KB 32
+#define AMIGA_MAX_MEMORY ((AMIGA_MAX_MEMORY_KB * 1024) / sizeof(int))
+
 enum AmigaModel {
       MODEL_A500 = 0,
       MODEL_A1200 = 1,
@@ -16,12 +19,15 @@ struct Amiga {
 	struct CoreMixer super;
 	struct AmigaFilter* filter;
 	enum AmigaModel model;
-	int *memory; // Vector
+	//int *memory; // Vector
+	int memory[AMIGA_MAX_MEMORY];
+	unsigned vector_count_memory;
 	struct AmigaChannel *channels; //Vector
 	int loopPtr;
 	int loopLen;
 	Number clock;
 	Number master;
+	int memory_fixed; //FIXME temporary hack
 };
 
 void Amiga_defaults(struct Amiga* self);

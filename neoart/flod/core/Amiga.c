@@ -58,12 +58,18 @@ void Amiga_set_volume(struct Amiga* self, int value) {
 	}
 }
 
+static void Amiga_memory_set_length(struct Amiga *self, unsigned len) {
+	assert(len <= AMIGA_MAX_MEMORY);
+	self->vector_count_memory = len;
+}
+
 // pointer default value: -1
 int Amiga_store(struct Amiga* self, struct ByteArray *stream, int len, int pointer) {
 	int add = 0; 
 	int i = 0;
 	int pos = ByteArray_get_position(stream);
-	int start = self->memory->length;
+	//int start = self->memory->length;
+	int start = self->vector_count_memory;
 	int total = 0;
 
 	if (pointer > -1) ByteArray_set_position(stream, pointer);
@@ -73,11 +79,17 @@ int Amiga_store(struct Amiga* self, struct ByteArray *stream, int len, int point
 		add = total - ByteArray_get_length(stream);
 		len = ByteArray_get_length(stream) - ByteArray_get_position(stream);
 	}
-
-	for (i = start, len += start; i < len; ++i)
+	
+	len += start;
+	assert(len < AMIGA_MAX_MEMORY);
+	//FIXME: imo we should set vector_count_memory to len here
+	//FIXME: it looks as if amiga.memory can be char instead of byte
+	for (i = start; i < len; ++i)
 		self->memory[i] = stream->readByte();
 
-	self->memory->length += add;
+	//self->memory->length += add;
+	Amiga_memory_set_length(self, self->vector_count_memory + add); // FIXME dubious, why add and not len ?
+	assert(self->vector_count_memory <= AMIGA_MAX_MEMORY);
 	if (pointer > -1) ByteArray_set_position(stream, pos);
 	return start;
 }
@@ -88,10 +100,13 @@ void Amiga_initialize(struct Amiga* self) {
 	ByteArray_clear(self->super.wave);
 	AmigaFilter_initialize(self->filter);
 
-	if (!self->memory->fixed) {
-		self->loopPtr = self->memory->length;
-		self->memory->length += self->loopLen;
-		self->memory->fixed = true;
+	if (!self->memory_fixed) { 
+		// ^ FIXME need to evaluate if this was set automatically by Vector (memory.fixed)
+		// probably it was always initialised to false, so this was called only once.
+		// therefore we mimic the boolean behaviour using that variable
+		self->loopPtr = self->vector_count_memory;
+		Amiga_memory_set_length(self, self->vector_count_memory + self->loopLen);
+		self->memory_fixed = true;
 	}
 
 	AmigaChannel_initialize(&self->channels[0]);
@@ -102,7 +117,9 @@ void Amiga_initialize(struct Amiga* self) {
 
 //override
 void Amiga_reset(struct Amiga* self) {
-      self->memory = new Vector.<int>();
+      //self->memory = new Vector.<int>();
+      //memset(self->memory, 0, sizeof(self->memory));
+      self->vector_count_memory = 0;
 }
 
     //override
@@ -110,16 +127,16 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 	struct AmigaChannel *chan = NULL;
 	struct ByteArray *data = e->data;
 	int i = 0;
-	number lvol = NAN;
+	Number lvol = NAN;
 	int mixed = 0;
 	int mixLen = 0;
 	int mixPos = 0;
-	number rvol = NAN;
+	Number rvol = NAN;
 	struct Sample *sample = NULL;
 	int size = CoreMixer_get_bufferSize(&self->super);
-	number speed = NAN;
+	Number speed = NAN;
 	int toMix = 0;
-	number value = NAN;
+	Number value = NAN;
 
 	if (self->super.completed) {
 		if (!self->super.remains) return;
@@ -166,6 +183,7 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 						chan->delay--;
 					} else if (--chan->timer < 1.0) { 
 						if (!chan->mute) {
+							assert(chan->audloc < self->vector_count_memory);
 							value = self->memory[chan->audloc] * 0.0078125;
 							chan->ldata = value * lvol;
 							chan->rdata = value * rvol;
