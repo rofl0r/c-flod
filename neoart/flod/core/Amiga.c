@@ -36,12 +36,19 @@ void Amiga_ctor(struct Amiga* self) {
 	self->super.type = CM_AMIGA;
 	CoreMixer_set_bufferSize(self, 8192);
 	self->filter = AmigaFilter_new();
+	
+	unsigned int i;
+	for(i = 0; i < AMIGA_MAX_CHANNELS; i++) {
+		AmigaChannel_ctor(&self->channels[i], i);
+		if(i) self->channels[i -1].next = &self->channels[i];
+	}
+	/*
 	self->channels = new Vector.<AmigaChannel>(4, true);
 
 	self->channels[0] = AmigaChannel_new(0);
 	self->channels[0].next = self->channels[1] = AmigaChannel_new(1);
 	self->channels[1].next = self->channels[2] = AmigaChannel_new(2);
-	self->channels[2].next = self->channels[3] = AmigaChannel_new(3);
+	self->channels[2].next = self->channels[3] = AmigaChannel_new(3); */
 }
 
 struct Amiga* Amiga_new(void) {
@@ -85,7 +92,7 @@ int Amiga_store(struct Amiga* self, struct ByteArray *stream, int len, int point
 	//FIXME: imo we should set vector_count_memory to len here
 	//FIXME: it looks as if amiga.memory can be char instead of byte
 	for (i = start; i < len; ++i)
-		self->memory[i] = stream->readByte();
+		self->memory[i] = stream->readByte(stream);
 
 	//self->memory->length += add;
 	Amiga_memory_set_length(self, self->vector_count_memory + add); // FIXME dubious, why add and not len ?
@@ -108,11 +115,9 @@ void Amiga_initialize(struct Amiga* self) {
 		Amiga_memory_set_length(self, self->vector_count_memory + self->loopLen);
 		self->memory_fixed = true;
 	}
-
-	AmigaChannel_initialize(&self->channels[0]);
-	AmigaChannel_initialize(&self->channels[1]);
-	AmigaChannel_initialize(&self->channels[2]);
-	AmigaChannel_initialize(&self->channels[3]);
+	
+	unsigned i;
+	for(i = 0; i < AMIGA_MAX_CHANNELS; i++) AmigaChannel_initialize(&self->channels[i]);
 }
 
 //override
@@ -145,7 +150,7 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 
 	while (mixed < size) {
 		if (!self->super.samplesLeft) {
-			self->super.player->process();
+			self->super.player->process(self->super.player);
 			self->super.samplesLeft = self->super.samplesTick;
 
 			if (self->super.completed) {
@@ -161,10 +166,11 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 		toMix = self->super.samplesLeft;
 		if ((mixed + toMix) >= size) toMix = size - mixed;
 		mixLen = mixPos + toMix;
-		chan = self->channels[0];
+		chan = &self->channels[0];
 
 		while (chan) {
-			sample = self->super.buffer[mixPos];
+			assert(mixPos < COREMIXER_MAX_BUFFER);
+			sample = &self->super.buffer[mixPos];
 
 			if (chan->audena && chan->audper > 60) {
 				if (chan->mute) {
@@ -223,8 +229,8 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 		for (i = 0; i < size; ++i) {
 			AmigaFilter_process(self->filter, self->model, sample);
 
-			self->super.wave->writeShort(int(sample->l * (sample->l < 0 ? 32768 : 32767)));
-			self->super.wave->writeShort(int(sample->r * (sample->r < 0 ? 32768 : 32767)));
+			self->super.wave->writeShort(self->super.wave, (sample->l * (sample->l < 0 ? 32768 : 32767)));
+			self->super.wave->writeShort(self->super.wave, (sample->r * (sample->r < 0 ? 32768 : 32767)));
 
 			data->writeFloat(data, sample->l);
 			data->writeFloat(data, sample->r);

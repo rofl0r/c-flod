@@ -9,6 +9,8 @@
 #define AMIGA_MAX_MEMORY_KB 32
 #define AMIGA_MAX_MEMORY ((AMIGA_MAX_MEMORY_KB * 1024) / sizeof(int))
 
+#define AMIGA_MAX_CHANNELS 4
+
 enum AmigaModel {
       MODEL_A500 = 0,
       MODEL_A1200 = 1,
@@ -22,7 +24,8 @@ struct Amiga {
 	//int *memory; // Vector
 	int memory[AMIGA_MAX_MEMORY];
 	unsigned vector_count_memory;
-	struct AmigaChannel *channels; //Vector
+	//struct AmigaChannel *channels; //Vector
+	struct AmigaChannel channels[AMIGA_MAX_CHANNELS];
 	int loopPtr;
 	int loopLen;
 	Number clock;
