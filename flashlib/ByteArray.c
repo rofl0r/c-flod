@@ -27,6 +27,7 @@ void ByteArray_ctor(struct ByteArray* self) {
 	self->writeMem = ByteArray_writeMem;
 	self->writeUTFBytes = ByteArray_writeUTFBytes;
 	self->writeBytes = ByteArray_writeBytes;
+	self->writeFloat = ByteArray_writeFloat;
 	
 #ifdef IS_LITTLE_ENDIAN
 	self->sys_endian = BAE_LITTLE;
@@ -47,15 +48,15 @@ off_t ByteArray_get_position(struct ByteArray* self) {
 	return self->pos;
 }
 
-static int seek_error() {
+static void seek_error() {
 	perror("seek error!\n");
 }
 
-static int neg_off() {
+static void neg_off() {
 	fprintf(stderr, "negative seek attempted");
 }
 
-static int oob() {
+static void oob() {
 	fprintf(stderr, "oob access attempted");
 }
 
@@ -93,11 +94,11 @@ int ByteArray_set_position(struct ByteArray* self, off_t pos) {
 	return 1;
 }
 
-static int read_error() {
+static void read_error() {
 	perror("read error!\n");
 }
 
-static int read_error_short() {
+static void read_error_short() {
 	perror("read error (short)!\n");
 }
 
@@ -146,7 +147,7 @@ unsigned int ByteArray_readUnsignedInt(struct ByteArray* self) {
 		unsigned int intval;
 		unsigned char charval[sizeof(unsigned int)];
 	} buf;
-	ByteArray_readMultiByte(self, buf.charval, 4);
+	ByteArray_readMultiByte(self, (char*) buf.charval, 4);
 	if(self->endian != self->sys_endian) {
 		buf.intval = byteswap32(buf.intval);
 	}
@@ -158,7 +159,7 @@ int ByteArray_readInt(struct ByteArray* self) {
 		unsigned int intval;
 		unsigned char charval[sizeof(unsigned int)];
 	} buf;
-	ByteArray_readMultiByte(self, buf.charval, 4);
+	ByteArray_readMultiByte(self, (char*) buf.charval, 4);
 	if(self->endian != self->sys_endian) {
 		buf.intval = byteswap32(buf.intval);
 	}
@@ -170,7 +171,7 @@ unsigned short ByteArray_readUnsignedShort(struct ByteArray* self) {
 		unsigned short intval;
 		unsigned char charval[sizeof(unsigned short)];
 	} buf;
-	ByteArray_readMultiByte(self, buf.charval, 2);
+	ByteArray_readMultiByte(self, (char*) buf.charval, 2);
 	if(self->endian != self->sys_endian) {
 		buf.intval = byteswap16(buf.intval);
 	}
@@ -182,7 +183,7 @@ short ByteArray_readShort(struct ByteArray* self) {
 		unsigned short intval;
 		unsigned char charval[sizeof(unsigned short)];
 	} buf;
-	ByteArray_readMultiByte(self, buf.charval, 2);
+	ByteArray_readMultiByte(self, (char*) buf.charval, 2);
 	if(self->endian != self->sys_endian) {
 		buf.intval = byteswap16(buf.intval);
 	}
@@ -193,7 +194,7 @@ unsigned char ByteArray_readUnsignedByte(struct ByteArray* self) {
 	union {
 		unsigned char intval;
 	} buf;
-	ByteArray_readMultiByte(self, &buf.intval, 1);
+	ByteArray_readMultiByte(self, (char*) &buf.intval, 1);
 	return buf.intval;
 }
 
@@ -201,7 +202,7 @@ signed char ByteArray_readByte(struct ByteArray* self) {
 	union {
 		signed char intval;
 	} buf;
-	ByteArray_readMultiByte(self, &buf.intval, 1);
+	ByteArray_readMultiByte(self, (char*) &buf.intval, 1);
 	return buf.intval;
 }
 
@@ -283,7 +284,20 @@ void ByteArray_writeBytes(struct ByteArray* self, struct ByteArray* what) {
 		fprintf(stderr, "tried to write from non-memory stream\n");
 		abort();
 	} else {
-		ByteArray_writeMem(self, what->start_addr[what->pos], what->size - what->pos);
+		ByteArray_writeMem(self, (unsigned char*) &what->start_addr[what->pos], what->size - what->pos);
 	}
+}
+
+void ByteArray_writeFloat(struct ByteArray* self, float what) {
+	union {
+		float floatval;
+		unsigned int intval;
+		unsigned char charval[sizeof(what)];
+	} u;
+	u.floatval = what;
+	if(self->sys_endian != self->endian) {
+		u.intval = byteswap32(u.intval);
+	}
+	ByteArray_writeMem(self, u.charval, sizeof(what));
 }
 

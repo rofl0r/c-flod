@@ -44,6 +44,7 @@ struct ByteArray {
 	void (*writeMem) (struct ByteArray* self, unsigned char* what, size_t len);
 	void (*writeUTFBytes) (struct ByteArray* self, char* what);
 	void (*writeBytes) (struct ByteArray* self, struct ByteArray* what);
+	void (*writeFloat) (struct ByteArray* self, float what);
 };
 
 void ByteArray_defaults(struct ByteArray* self);
@@ -76,6 +77,7 @@ void ByteArray_writeShort(struct ByteArray* self, signed short what);
 void ByteArray_writeUnsignedShort(struct ByteArray* self, unsigned short what);
 void ByteArray_writeInt(struct ByteArray* self, signed int what);
 void ByteArray_writeUnsignedInt(struct ByteArray* self, unsigned int what);
+void ByteArray_writeFloat(struct ByteArray* self, float what);
 void ByteArray_writeMem(struct ByteArray* self, unsigned char* what, size_t len);
 void ByteArray_writeUTFBytes(struct ByteArray* self, char* what);
 void ByteArray_writeBytes(struct ByteArray* self, struct ByteArray* what);
