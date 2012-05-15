@@ -24,7 +24,7 @@ struct CoreMixer {
 	int remains;
 	int completed;
 	struct ByteArray* wave;
-	CoreMixer_type type;
+	enum CoreMixer_type type;
 };
 
 void CoreMixer_defaults(struct CoreMixer* self);

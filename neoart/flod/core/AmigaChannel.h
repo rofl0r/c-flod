@@ -29,7 +29,7 @@ struct AmigaChannel {
 
 void AmigaChannel_defaults(struct AmigaChannel* self);
 void AmigaChannel_ctor(struct AmigaChannel* self, int index);
-struct AmigaChannel* AmigaChannel_new(void, int index);
+struct AmigaChannel* AmigaChannel_new(int index);
 
 int AmigaChannel_get_enabled(struct AmigaChannel* self);
 void AmigaChannel_set_enabled(struct AmigaChannel* self, int value);

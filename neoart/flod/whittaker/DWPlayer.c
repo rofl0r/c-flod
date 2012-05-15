@@ -63,7 +63,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 	int volume;
 	
 	assert(self->active < DWPLAYER_MAX_VOICES);
-	voice = self->voices[self->active];
+	voice = &self->voices[self->active];
 
 	if (self->slower) {
 		if (--(self->slowerCounter) == 0) {
@@ -137,7 +137,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 					} else if (value >= self->com2) {
 						value -= self->com2;
 						assert(value < self->vector_count_samples);
-						voice->sample = sample = self->samples[value];
+						voice->sample = sample = &self->samples[value];
 					} else if (value >= self->com3) {
 						pos = ByteArray_get_position(self->stream);
 
@@ -435,7 +435,7 @@ void DWPlayer_initialize(struct DWPlayer* self) {
 
 	while (voice) {
 		DWVoice_initialize(voice);
-		voice->channel = self->super.amiga->channels[voice->index];
+		voice->channel = &self->super.amiga->channels[voice->index];
 		voice->sample  = &self->samples[0];
 		self->complete += voice->bitFlag;
 
@@ -485,7 +485,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 		ByteArray_set_position(stream, 4);
 		if (stream->readUnsignedShort(stream) != 0x6100) return;                       //bsr->w
 
-		ByteArray_set_position_rel(stream->readUnsignedShort(stream));
+		ByteArray_set_position_rel(stream, stream->readUnsignedShort(stream));
 		self->super.super.variant = 30;
 	} else {
 		ByteArray_set_position(stream, 0);
@@ -653,7 +653,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 					sample->super.length   = stream->readUnsignedInt(stream);
 					sample->relative = 3579545 / stream->readUnsignedShort(stream);
 					//sample->super.pointer  = self->super.amiga->store(stream, sample->length);
-					sample->super.pointer  = Amiga_store(&self->super.amiga, stream, sample->super.length);
+					sample->super.pointer  = Amiga_store(self->super.amiga, stream, sample->super.length, -1);
 
 					value = ByteArray_get_position(stream);
 					ByteArray_set_position(stream, info + (i * size) + 4);
@@ -663,7 +663,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 						ByteArray_set_position_rel(stream, 6);
 						sample->super.volume = stream->readUnsignedShort(stream);
 					} else if (self->super.super.variant == 10) {
-						ByteArray_set_position_rel(ByteArray_get_position(stream), 4);
+						ByteArray_set_position_rel(stream, 4);
 						sample->super.volume = stream->readUnsignedShort(stream);
 						sample->finetune = stream->readByte(stream);
 					}
@@ -686,7 +686,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 				}
 				unsigned int temp = (value - info) / size;
 				assert(temp < self->vector_count_samples);
-				self->wave = self->samples[temp];
+				self->wave = &self->samples[temp];
 				self->waveCenter = (stream->readUnsignedShort(stream) + 1) << 1;
 
 				ByteArray_set_position_rel(stream, 2);
@@ -697,9 +697,10 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 			case 0x046b:                                                          //subi->w #x,x(a3)
 			case 0x066b:                                                          //addi->w #x,x(a3)
 				total = stream->readUnsignedShort(stream);
-				unsigned int temp = (stream->readUnsignedShort(stream) - info) / size;
-				assert(temp < self->vector_count_samples);
-				sample = self->samples[temp];
+				unsigned int temp2;
+				temp2 = (stream->readUnsignedShort(stream) - info) / size;
+				assert(temp2 < self->vector_count_samples);
+				sample = &self->samples[temp2];
 
 				if (value == 0x066b) {
 					sample->relative += total;
@@ -783,10 +784,10 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 
 				if (self->active) {
 					self->voices[0].next = null;
-					for (i = total; i > 0;) self->voices[i].next = self->voices[--i];
+					for (i = total; i > 0;) self->voices[i].next = &self->voices[--i];
 				} else {
 					self->voices[total].next = null;
-					for (i = 0; i < total;) self->voices[i].next = self->voices[++i];
+					for (i = 0; i < total;) self->voices[i].next = &self->voices[++i];
 				}
 				break;
 			case 0x0c68:                                                          //cmpi->w #x,x(a0)

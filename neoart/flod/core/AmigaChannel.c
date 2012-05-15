@@ -32,7 +32,7 @@ void AmigaChannel_ctor(struct AmigaChannel* self, int index) {
 	self->level = self->panning;	
 }
 
-struct AmigaChannel* AmigaChannel_new(void, int index) {
+struct AmigaChannel* AmigaChannel_new(int index) {
 	CLASS_NEW_BODY(AmigaChannel, index);
 }
 

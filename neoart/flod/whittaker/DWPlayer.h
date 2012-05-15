@@ -67,9 +67,11 @@ struct DWPlayer {
 };
 
 void DWPlayer_defaults(struct DWPlayer* self);
-
 void DWPlayer_ctor(struct DWPlayer* self, struct Amiga* amiga);
-
 struct DWPlayer* DWPlayer_new(struct Amiga* amiga);
+
+void DWPlayer_process(struct DWPlayer* self);
+void DWPlayer_initialize(struct DWPlayer* self);
+void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream);
 
 #endif
