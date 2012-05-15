@@ -133,6 +133,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 						voice->speed = self->super.super.speed * (value + 33);
 					} else if (value >= self->com2) {
 						value -= self->com2;
+						assert(value < self->vector_count_samples);
 						voice->sample = sample = self->samples[value];
 					} else if (value >= self->com3) {
 						pos = ByteArray_get_position(self->stream);
@@ -430,7 +431,7 @@ void DWPlayer_initialize(struct DWPlayer* self) {
 	while (voice) {
 		DWVoice_initialize(voice);
 		voice->channel = self->super.amiga->channels[voice->index];
-		voice->sample  = self->samples[0];
+		voice->sample  = &self->samples[0];
 		self->complete += voice->bitFlag;
 
 		voice->trackPtr   = self->song->tracks[voice->index];
@@ -631,11 +632,18 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 				if (size == 12 && self->super.super.variant < 30) self->super.super.variant = 20;
 
 				pos = ByteArray_get_position(stream);
-				samples = new Vector.<DWSample>(++total, true);
+				
+				++total;
+				assert(total < DWPLAYER_MAX_SAMPLES);
+				self->vector_count_samples = total;
+				//samples = new Vector.<DWSample>(++total, true);
 				ByteArray_set_position(stream, headers);
 
 				for (i = 0; i < total; ++i) {
-					sample = DWSample_new();
+					//sample = DWSample_new();
+					sample = &self->samples[i];
+					DWSample_ctor(sample);
+					
 					sample->super.length   = stream->readUnsignedInt(stream);
 					sample->relative = 3579545 / stream->readUnsignedShort(stream);
 					//sample->super.pointer  = self->super.amiga->store(stream, sample->length);
@@ -655,7 +663,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 					}
 
 					ByteArray_set_position(stream, value);
-					self->samples[i] = sample;
+					//self->samples[i] = sample;
 				}
 
 				self->super.amiga->loopLen = 64;
@@ -670,8 +678,9 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 					ByteArray_set_position_rel(stream, -2);
 					break;
 				}
-
-				self->wave = self->samples[((value - info) / size)];
+				unsigned int temp = (value - info) / size;
+				assert(temp < self->vector_count_samples);
+				self->wave = self->samples[temp];
 				self->waveCenter = (stream->readUnsignedShort(stream) + 1) << 1;
 
 				ByteArray_set_position_rel(stream, 2);
@@ -682,7 +691,9 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 			case 0x046b:                                                          //subi->w #x,x(a3)
 			case 0x066b:                                                          //addi->w #x,x(a3)
 				total = stream->readUnsignedShort(stream);
-				sample = self->samples[((stream->readUnsignedShort(stream) - info) / size)];
+				unsigned int temp = (stream->readUnsignedShort(stream) - info) / size;
+				assert(temp < self->vector_count_samples);
+				sample = self->samples[temp];
 
 				if (value == 0x066b) {
 					sample->relative += total;
@@ -695,8 +706,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 		}
 	}
 
-	// FIXME was samples.length (maybe length of Vector ?)
-	if (!self->samples->super.length) return;
+	if (!self->vector_count_samples) return;
 	ByteArray_set_position(stream, index);
 
 	self->periods = 0;

@@ -9,6 +9,7 @@
 
 #define DWPLAYER_MAX_VOICES 4
 #define DWPLAYER_MAX_SONGS 16
+#define DWPLAYER_MAX_SAMPLES 16
 
 /*
 inheritance
@@ -23,10 +24,12 @@ struct DWPlayer {
 	//songs         : Vector.<DWSong>,
 	//samples       : Vector.<DWSample>,
 	//struct DWSong* songs;
+	//struct DWSample* samples;
 	struct DWSong songs[DWPLAYER_MAX_SONGS];
-	struct DWSample* samples;
+	struct DWSample samples[DWPLAYER_MAX_SAMPLES];
 	
 	unsigned int vector_count_songs;
+	unsigned int vector_count_samples;
 	
 	struct ByteArray *stream;
 	struct DWSong *song;
