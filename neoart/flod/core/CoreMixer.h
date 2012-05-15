@@ -29,6 +29,8 @@ struct CoreMixer {
 	int completed;
 	struct ByteArray* wave;
 	enum CoreMixer_type type;
+	void (*fast) (struct CoreMixer* self, struct SampleDataEvent *e);
+	void (*accurate) (struct CoreMixer* self, struct SampleDataEvent *e);	
 };
 
 void CoreMixer_defaults(struct CoreMixer* self);

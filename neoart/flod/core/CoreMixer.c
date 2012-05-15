@@ -18,6 +18,7 @@
 #include "../flod.h"
 #include "../flod_internal.h"
 #include "CoreMixer.h"
+#include "Amiga.h"
 
 void CoreMixer_defaults(struct CoreMixer* self) {
 	CLASS_DEF_INIT();
@@ -31,6 +32,10 @@ void CoreMixer_ctor(struct CoreMixer* self) {
 	self->wave->endian = BAE_LITTLE;
 	CoreMixer_set_bufferSize(self, 8192);
 	//self->bufferSize = 8192;
+	
+	//vtable
+	self->fast = CoreMixer_fast;
+	self->accurate = CoreMixer_accurate;
 }
 
 struct CoreMixer* CoreMixer_new(void) {
@@ -38,7 +43,11 @@ struct CoreMixer* CoreMixer_new(void) {
 }
 
 /* stubs */
-void CoreMixer_reset(struct CoreMixer* self) {}
+void CoreMixer_reset(struct CoreMixer* self) {
+	if(self->type == CM_AMIGA)
+		Amiga_reset((struct Amiga*)self);
+}
+
 void CoreMixer_fast(struct CoreMixer* self, struct SampleDataEvent *e) {}
 void CoreMixer_accurate(struct CoreMixer* self, struct SampleDataEvent *e) {}
 

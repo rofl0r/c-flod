@@ -32,6 +32,10 @@ void Soundblaster_ctor(struct Soundblaster* self) {
 	//super();
 	CoreMixer_ctor(&self->super);
 	self->super.type = CM_SOUNDBLASTER;
+	
+	//vtable
+	self->super.fast = (EventHandlerFunc) Soundblaster_fast;
+	self->super.accurate = (EventHandlerFunc) Soundblaster_accurate;
 }
 
 struct Soundblaster* Soundblaster_new(void) {
@@ -96,16 +100,16 @@ void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
 
 	while (mixed < size) {
 		if (!self->super.samplesLeft) {
-			self->super.player->process(&self->super.player);
-			self->super.player->fast(&self->super.player);
+			self->super.player->process(self->super.player);
+			self->super.player->fast(self->super.player);
 			self->super.samplesLeft = self->super.samplesTick;
 
 			if (self->super.completed) {
 				size = mixed +self->super.samplesTick;
 
-				if (size > self->super.bufferSize) {
-					self->super.remains = size - self->super.bufferSize;
-					size = self->super.bufferSize;
+				if (size > CoreMixer_get_bufferSize(&self->super)) {
+					self->super.remains = size - CoreMixer_get_bufferSize(&self->super);
+					size = CoreMixer_get_bufferSize(&self->super);
 				}
 			}
 		}
@@ -113,7 +117,7 @@ void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
 		toMix = self->super.samplesLeft;
 		if ((mixed + toMix) >= size) toMix = size - mixed;
 		mixLen = mixPos + toMix;
-		chan = self->channels[0];
+		chan = &self->channels[0];
 
 		while (chan) {
 			if (!chan->enabled) {
@@ -123,7 +127,8 @@ void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
 
 			s = chan->sample;
 			d = s->data;
-			sample  = self->super.buffer[mixPos];
+			assert(mixPos < COREMIXER_MAX_BUFFER);
+			sample  = &self->super.buffer[mixPos];
 
 			for (i = mixPos; i < mixLen; ++i) {
 				if (chan->index != chan->pointer) {
@@ -178,7 +183,7 @@ void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
 		self->super.samplesLeft -= toMix;
 	}
 
-	sample = self->super.buffer[0];
+	sample = &self->super.buffer[0];
 
 	if (self->super.player->record) {
 		for (i = 0; i < size; ++i) {
@@ -188,8 +193,8 @@ void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
 			if (sample->r > 1.0) sample->r = 1.0;
 			else if (sample->r < -1.0) sample->r = -1.0;
 
-			self->super.wave->writeShort(int(sample->l * (sample->l < 0 ? 32768 : 32767)));
-			self->super.wave->writeShort(int(sample->r * (sample->r < 0 ? 32768 : 32767)));
+			self->super.wave->writeShort(self->super.wave, (sample->l * (sample->l < 0 ? 32768 : 32767)));
+			self->super.wave->writeShort(self->super.wave, (sample->r * (sample->r < 0 ? 32768 : 32767)));
 
 			data->writeFloat(data, sample->l);
 			data->writeFloat(data, sample->r);
@@ -243,8 +248,8 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 
 	while (mixed < size) {
 		if (!self->super.samplesLeft) {
-			self->super.player->process(&self->super.player);
-			self->super.player->accurate(&self->super.player);
+			self->super.player->process(self->super.player);
+			self->super.player->accurate(self->super.player);
 			self->super.samplesLeft = self->super.samplesTick;
 
 			if (self->super.completed) {
@@ -260,7 +265,7 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 		toMix = self->super.samplesLeft;
 		if ((mixed + toMix) >= size) toMix = size - mixed;
 		mixLen = mixPos + toMix;
-		chan = self->channels[0];
+		chan = &self->channels[0];
 
 		while (chan) {
 			if (!chan->enabled) {
@@ -272,8 +277,10 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 			d1 = s1->data;
 			s2 = chan->oldSample;
 			if (s2) d2 = s2->data;
+			
+			assert(mixPos < COREMIXER_MAX_BUFFER);
 
-			sample = self->super.buffer[mixPos];
+			sample = &self->super.buffer[mixPos];
 
 			for (i = mixPos; i < mixLen; ++i) {
 				if(chan->mute)
@@ -287,7 +294,7 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 				value += (d1[chan->pointer + chan->dir] - value) * chan->fraction;
 
 				if ((chan->fraction += chan->speed) >= 1.0) {
-					delta = int(chan->fraction);
+					delta = (int) chan->fraction;
 					chan->fraction -= delta;
 
 					if (chan->dir > 0) {
@@ -336,7 +343,7 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 						mixValue += (d2[chan->oldPointer + chan->oldDir] - mixValue) * chan->oldFraction;
 
 						if ((chan->oldFraction += chan->oldSpeed) > 1) {
-							delta = int(chan->oldFraction);
+							delta = (int) chan->oldFraction;
 							chan->oldFraction -= delta;
 
 							if (chan->oldDir > 0) {
@@ -371,21 +378,21 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 					chan->mixCounter--;
 
 					if (chan->oldPointer == chan->oldLength) {
-						if (!s2.loopMode) {
+						if (!s2->loopMode) {
 							s2 = null;
 							chan->oldPointer = 0;
-						} else if (s2.loopMode == 1) {
-							chan->oldPointer = s2.loopStart;
-							chan->oldLength  = s2.length;
+						} else if (s2->loopMode == 1) {
+							chan->oldPointer = s2->loopStart;
+							chan->oldLength  = s2->length;
 						} else {
 							if (chan->oldDir > 0) {
-								chan->oldPointer = s2.length - 1;
-								chan->oldLength  = s2.loopStart;
+								chan->oldPointer = s2->length - 1;
+								chan->oldLength  = s2->loopStart;
 								chan->oldDir     = -1;
 							} else {
 								chan->oldFraction -= 1;
-								chan->oldPointer   = s2.loopStart;
-								chan->oldLength    = s2.length;
+								chan->oldPointer   = s2->loopStart;
+								chan->oldLength    = s2->length;
 								chan->oldDir       = 1;
 							}
 						}
@@ -393,22 +400,22 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 				}
 
 				if (chan->pointer == chan->length) {
-					if (!s1.loopMode) {
+					if (!s1->loopMode) {
 						chan->enabled = 0;
 						break;
-					} else if (s1.loopMode == 1) {
-						chan->pointer = s1.loopStart;
-						chan->length  = s1.length;
+					} else if (s1->loopMode == 1) {
+						chan->pointer = s1->loopStart;
+						chan->length  = s1->length;
 					} else {
 						if (chan->dir > 0) {
-						chan->pointer = s1.length - 1;
-						chan->length  = s1.loopStart;
-						chan->dir     = -1;
+							chan->pointer = s1->length - 1;
+							chan->length  = s1->loopStart;
+							chan->dir     = -1;
 						} else {
-						chan->fraction -= 1;
-						chan->pointer   = s1.loopStart;
-						chan->length    = s1.length;
-						chan->dir       = 1;
+							chan->fraction -= 1;
+							chan->pointer   = s1->loopStart;
+							chan->length    = s1->length;
+							chan->dir       = 1;
 						}
 					}
 				}
@@ -422,7 +429,7 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 		self->super.samplesLeft -= toMix;
 	}
 
-	sample = self->super.buffer[0];
+	sample = &self->super.buffer[0];
 
 	if (self->super.player->record) {
 		for (i = 0; i < size; ++i) {
@@ -432,8 +439,8 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 			if (sample->r > 1.0) sample->r = 1.0;
 			else if (sample->r < -1.0) sample->r = -1.0;
 
-			self->super.wave->writeShort((int)(sample->l * (sample->l < 0 ? 32768 : 32767)));
-			self->super.wave->writeShort((int)(sample->r * (sample->r < 0 ? 32768 : 32767)));
+			self->super.wave->writeShort(self->super.wave, (int)(sample->l * (sample->l < 0 ? 32768 : 32767)));
+			self->super.wave->writeShort(self->super.wave, (int)(sample->r * (sample->r < 0 ? 32768 : 32767)));
 
 			data->writeFloat(data, sample->l);
 			data->writeFloat(data, sample->r);

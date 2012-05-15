@@ -34,7 +34,7 @@ void Amiga_ctor(struct Amiga* self) {
 	//super();
 	CoreMixer_ctor(&self->super);
 	self->super.type = CM_AMIGA;
-	CoreMixer_set_bufferSize(self, 8192);
+	CoreMixer_set_bufferSize((struct CoreMixer*) self, 8192);
 	self->filter = AmigaFilter_new();
 	
 	unsigned int i;
@@ -49,6 +49,10 @@ void Amiga_ctor(struct Amiga* self) {
 	self->channels[0].next = self->channels[1] = AmigaChannel_new(1);
 	self->channels[1].next = self->channels[2] = AmigaChannel_new(2);
 	self->channels[2].next = self->channels[3] = AmigaChannel_new(3); */
+	
+	// vtable
+	self->super.fast = Amiga_fast;
+	self->super.accurate = Amiga_fast; // simply use the fast one
 }
 
 struct Amiga* Amiga_new(void) {
@@ -156,9 +160,9 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 			if (self->super.completed) {
 				size = mixed + self->super.samplesTick;
 
-				if (size > CoreMixer_get_bufferSize(self)) {
-					self->super.remains = size - CoreMixer_get_bufferSize(self);
-					size = CoreMixer_get_bufferSize(self);
+				if (size > CoreMixer_get_bufferSize((struct CoreMixer*) self)) {
+					self->super.remains = size - CoreMixer_get_bufferSize((struct CoreMixer*) self);
+					size = CoreMixer_get_bufferSize((struct CoreMixer*) self);
 				}
 			}
 		}
