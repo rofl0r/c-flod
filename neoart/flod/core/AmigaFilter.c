@@ -24,10 +24,13 @@ void AmigaFilter_defaults(struct AmigaFilter* self) {
 	CLASS_DEF_INIT();
 	// static initializers go here
 	self->forced = FORCE_OFF;
+	self->l0 = self->l1 = self->l2 = self->l3 = self->l4 = NAN;
+	self->r0 = self->r1 = self->r2 = self->l3 = self->r4 = NAN;
 }
 
 void AmigaFilter_ctor(struct AmigaFilter* self) {
 	CLASS_CTOR_DEF(AmigaFilter);
+	PFUNC();
 	// original constructor code goes here
 }
 
@@ -36,35 +39,39 @@ struct AmigaFilter* AmigaFilter_new(void) {
 }
 
 void AmigaFilter_initialize(struct AmigaFilter* self) {
-	self->l0 = self->l1 = self->l2 = self->l3 = self->l4 = 0.0;
-	self->r0 = self->r1 = self->r2 = self->r3 = self->r4 = 0.0;
+	PFUNC();
+	self->l0 = self->l1 = self->l2 = self->l3 = self->l4 = 0.0f;
+	self->r0 = self->r1 = self->r2 = self->r3 = self->r4 = 0.0f;
 }
 
 void AmigaFilter_process(struct AmigaFilter* self, int model, struct Sample* sample) {
-	Number FL = 0.5213345843532200, P0 = 0.4860348337215757, P1 = 0.9314955486749749, d = 1.0 - P0;
-
+	//PFUNC();
+	const Number FL = 0.5213345843532200f, P0 = 0.4860348337215757f, P1 = 0.9314955486749749f;
+	Number d = 1.0f - P0;
+	#define e18 (1.e-18f)
+	
 	if (model == MODEL_A500) {
-		self->l0 = P0 * sample->l + d * self->l0 + 1.e-18 - 1.e-18;
-		self->r0 = P0 * sample->r + d * self->r0 + 1.e-18 - 1.e-18;
-		d = 1 - P1;
+		self->l0 = P0 * sample->l + d * self->l0 + e18 - e18;
+		self->r0 = P0 * sample->r + d * self->r0 + e18 - e18;
+		d = 1.0f - P1;
 		sample->l = self->l1 = P1 * self->l0 + d * self->l1;
 		sample->r = self->r1 = P1 * self->r0 + d * self->r1;
 	}
 
 	if ((self->active | self->forced) > 0) {
-		d = 1 - FL;
-		self->l2 = FL * sample->l + d * self->l2 + 1.e-18 - 1.e-18;
-		self->r2 = FL * sample->r + d * self->r2 + 1.e-18 - 1.e-18;
+		d = 1.0f - FL;
+		self->l2 = FL * sample->l + d * self->l2 + e18 - e18;
+		self->r2 = FL * sample->r + d * self->r2 + e18 - e18;
 		self->l3 = FL * self->l2 + d * self->l3;
 		self->r3 = FL * self->r2 + d * self->r3;
 		sample->l = self->l4 = FL * self->l3 + d * self->l4;
 		sample->r = self->r4 = FL * self->r3 + d * self->r4;
 	}
 
-	if (sample->l > 1.0) sample->l = 1.0;
-	else if (sample->l < -1.0) sample->l = -1.0;
+	if (sample->l > 1.0f) sample->l = 1.0f;
+	else if (sample->l < -1.0f) sample->l = -1.0f;
 
-	if (sample->r > 1.0) sample->r = 1.0;
-	else if (sample->r < -1.0) sample->r = -1.0;
+	if (sample->r > 1.0f) sample->r = 1.0f;
+	else if (sample->r < -1.0f) sample->r = -1.0f;
 }
 
