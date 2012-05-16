@@ -65,7 +65,7 @@ void FCPlayer_process(struct FCPlayer* self) {
 		while (voice) {
 			chan = voice->channel;
 
-			self->pats->position = voice->pattern + voice->patStep;
+			ByteArray_set_position(self->pats, voice->pattern + voice->patStep);
 			temp = self->pats->readUnsignedByte();
 
 			if (voice->patStep >= 64 || temp == 0x49) {
