@@ -317,7 +317,7 @@ void ByteArray_writeFloat(struct ByteArray* self, float what) {
 
 void ByteArray_dump_to_file(struct ByteArray* self, char* filename) {
 	assert(self->type == BAT_MEMSTREAM);
-	int fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY, 666);
+	int fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY, 0666);
 	write(fd, self->start_addr, self->size);
 	close(fd);
 }
