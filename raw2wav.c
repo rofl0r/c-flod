@@ -112,7 +112,7 @@ int raw2wav(char *rawname, char* wavname, int channels, int hz, int bitrate) {
 	
 	assert(channels == 1 || channels == 2);
 	assert(hz == 48000 || hz == 44100 || hz == 22050 || hz == 11025);
-	assert(bitrate == 24 || bitrate == 16 || bitrate == 8);
+	assert(bitrate == 32 || bitrate == 24 || bitrate == 16 || bitrate == 8);
 	wave_hdr.wave_hdr.channels = channels;
 	wave_hdr.wave_hdr.samplerate = hz;
 	wave_hdr.wave_hdr.bitwidth = bitrate;
