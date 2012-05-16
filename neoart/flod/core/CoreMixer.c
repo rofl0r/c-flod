@@ -74,7 +74,8 @@ void CoreMixer_set_complete(struct CoreMixer* self, int value) {
 }
 
 int CoreMixer_get_bufferSize(struct CoreMixer* self) {
-	return self->vector_count_buffer;
+	return COREMIXER_MAX_BUFFER;
+	//return self->vector_count_buffer;
 	//return self->buffer->length; 
 }
 

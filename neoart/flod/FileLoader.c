@@ -305,7 +305,7 @@ struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *st
 	//self->player->load(stream);
 
 	if (self->player->version) {
-		index = WHITTAKER;
+		self->index = WHITTAKER;
 		return self->player;
 	}
 /*
@@ -333,7 +333,7 @@ struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *st
 	}
 */
 	ByteArray_clear(stream);
-	index = 0;
+	self->index = 0;
 	return self->player = null;
 }
 

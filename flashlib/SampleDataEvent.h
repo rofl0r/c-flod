@@ -5,6 +5,7 @@
 #include "Event.h"
 
 struct SampleDataEvent {
+	struct Event super;
 	struct ByteArray* data;
 };
 

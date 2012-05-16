@@ -12,5 +12,6 @@ typedef float Number;
 
 #include <stdio.h>
 #define DEBUGP(format, ...) fprintf(stderr, format, __VA_ARGS__)
+#define INT3 __asm__("int3")
 
 #endif

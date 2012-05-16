@@ -11,4 +11,6 @@
 #include "../../flashlib/EventDispatcher.h"
 #include "../../flashlib/SampleDataEvent.h"
 
+#define PFUNC() fprintf(stderr, "%s\n", __FUNCTION__)
+
 #endif

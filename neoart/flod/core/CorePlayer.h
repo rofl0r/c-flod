@@ -46,6 +46,7 @@ struct CorePlayer {
 	void (*toggle) (struct CorePlayer* self, int index);
 	void (*reset) (struct CorePlayer* self);
 	void (*loader) (struct CorePlayer* self, struct ByteArray *stream);
+	void (*initialize) (struct CorePlayer* self);
 	
 };
 
@@ -83,6 +84,8 @@ void CorePlayer_reset(struct CorePlayer* self);
 /* stub */
 void CorePlayer_loader(struct CorePlayer* self, struct ByteArray *stream);
 
+void CorePlayer_record(struct CorePlayer* self);
+void CorePlayer_save_record(struct CorePlayer* self, char* filename);
 
 
 #endif

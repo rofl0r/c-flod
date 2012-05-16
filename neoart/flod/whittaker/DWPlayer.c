@@ -46,6 +46,8 @@ void DWPlayer_ctor(struct DWPlayer* self, struct Amiga* amiga) {
 	//add vtable
 	self->super.super.process = DWPlayer_process;
 	self->super.super.loader = DWPlayer_loader;
+	
+	self->super.super.initialize = DWPlayer_initialize;
 }
 
 struct DWPlayer* DWPlayer_new(struct Amiga* amiga) {
@@ -54,13 +56,13 @@ struct DWPlayer* DWPlayer_new(struct Amiga* amiga) {
 
 //override
 void DWPlayer_process(struct DWPlayer* self) {
-	struct AmigaChannel *chan;
-	int loop;
-	int pos;
-	struct DWSample *sample;
-	int value; 
-	struct DWVoice *voice;
-	int volume;
+	struct AmigaChannel *chan = NULL;
+	int loop = 0;
+	int pos = 0;
+	struct DWSample *sample = NULL;
+	int value = 0; 
+	struct DWVoice *voice = NULL;
+	int volume = 0;
 	
 	assert(self->active < DWPLAYER_MAX_VOICES);
 	voice = &self->voices[self->active];
@@ -403,7 +405,10 @@ void DWPlayer_process(struct DWPlayer* self) {
 void DWPlayer_initialize(struct DWPlayer* self) {
 	int i = 0;
 	int len = 0;
-	struct DWVoice *voice;
+	struct DWVoice *voice = NULL;
+	
+	PFUNC();
+	
 	assert(self->active < DWPLAYER_MAX_VOICES);
 	voice = &self->voices[self->active];
 	CorePlayer_initialize(&self->super.super);
@@ -456,25 +461,30 @@ void DWPlayer_initialize(struct DWPlayer* self) {
 			voice->frqseqPtr = self->base + self->stream->readUnsignedShort(self->stream);
 			voice->frqseqPos = voice->frqseqPtr;
 		}
-
+		assert(voice != voice->next);
 		voice = voice->next;
 	}
 }
 
+#define return \
+	return printf("returning from %s @ line %d\n", __func__, __LINE__)
+
+
 //override
 void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
-	int flag;
-	int headers;
-	int i;
-	int index;
-	int info;
-	int lower;
-	int pos; 
-	struct DWSample *sample;
+	int flag = 0;
+	int headers = 0;
+	int i = 0;
+	int index= 0;
+	int info = 0;
+	int lower = 0;
+	int pos = 0; 
+	struct DWSample *sample = NULL;
 	int size = 10;
-	struct DWSong *song; 
-	int total;
-	int value;
+	struct DWSong *song = NULL;
+	int total = 0;
+	int value = 0;
+	off_t savepos;
 
 	self->master  = 64;
 	//self->readMix = "readUnsignedShort";
@@ -484,8 +494,8 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 	if (stream->readUnsignedShort(stream) == 0x48e7) {                               //movem->l
 		ByteArray_set_position(stream, 4);
 		if (stream->readUnsignedShort(stream) != 0x6100) return;                       //bsr->w
-
-		ByteArray_set_position_rel(stream, stream->readUnsignedShort(stream));
+		savepos = ByteArray_get_position(stream);
+		ByteArray_set_position(stream, savepos + stream->readUnsignedShort(stream));
 		self->super.super.variant = 30;
 	} else {
 		ByteArray_set_position(stream, 0);
@@ -521,18 +531,18 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 				if (stream->readUnsignedShort(stream) == 0x1230) flag = 1;
 				break;
 			case 0x1230:                                                          //move->b (a0,d0.w),d1
-				ByteArray_set_position(stream, -6);
+				ByteArray_set_position_rel(stream, -6);
 
 				if (stream->readUnsignedShort(stream) == 0x41fa) {
 					headers = ByteArray_get_position(stream) + stream->readUnsignedShort(stream);
 					flag = 1;
 				}
 
-				ByteArray_set_position(stream, 4);
+				ByteArray_set_position_rel(stream, 4);
 				break;
 			case 0xbe7c:                                                          //cmp->w #x,d7
 				self->super.super.channels = stream->readUnsignedShort(stream);
-				ByteArray_set_position(stream, 2);
+				ByteArray_set_position_rel(stream, 2);
 
 				if (stream->readUnsignedShort(stream) == 0x377c)
 					self->master = stream->readUnsignedShort(stream);
@@ -610,7 +620,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 				ByteArray_set_position_rel(stream, 1);
 				total = stream->readUnsignedByte(stream);
 
-				ByteArray_set_position(stream, -10);
+				ByteArray_set_position_rel(stream, -10);
 				value = stream->readUnsignedShort(stream);
 				pos = ByteArray_get_position(stream);
 
@@ -691,7 +701,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 
 				ByteArray_set_position_rel(stream, 2);
 				self->waveRateNeg = stream->readByte(stream);
-				ByteArray_set_position(stream, 12);
+				ByteArray_set_position_rel(stream, 12);
 				self->waveRatePos = stream->readByte(stream);
 				break;
 			case 0x046b:                                                          //subi->w #x,x(a3)
@@ -784,10 +794,14 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 
 				if (self->active) {
 					self->voices[0].next = null;
-					for (i = total; i > 0;) self->voices[i].next = &self->voices[--i];
+					printf("%d total 1\n", total);
+					__asm__("int3");
+					for (i = total; i > 0; i--) self->voices[i].next = &self->voices[i - 1];
 				} else {
+					printf("%d total 2\n", total);
+					__asm__("int3");
 					self->voices[total].next = null;
-					for (i = 0; i < total;) self->voices[i].next = &self->voices[++i];
+					for (i = 0; i < total;i++) self->voices[i].next = &self->voices[i + 1];
 				}
 				break;
 			case 0x0c68:                                                          //cmpi->w #x,x(a0)
@@ -837,10 +851,11 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 			case 0x4ed2:                                                          //jmp a2
 				lower = ByteArray_get_position(stream);
 				ByteArray_set_position_rel(stream, -10);
-				ByteArray_set_position_rel(stream, stream->readUnsignedShort(stream));
+				savepos = ByteArray_get_position(stream);
+				ByteArray_set_position(stream, savepos + stream->readUnsignedShort(stream));
 				pos = ByteArray_get_position(stream);                                //jump table address
 
-				ByteArray_set_position_rel(stream, 2);                               //effect -126
+				ByteArray_set_position(stream, pos + 2);                               //effect -126
 				ByteArray_set_position(stream, self->base + stream->readUnsignedShort(stream) + 10);
 				if (stream->readUnsignedShort(stream) == 0x4a14) self->super.super.variant = 41;             //tst->b (a4)
 

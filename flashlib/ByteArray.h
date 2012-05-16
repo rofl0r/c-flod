@@ -82,5 +82,6 @@ void ByteArray_writeMem(struct ByteArray* self, unsigned char* what, size_t len)
 void ByteArray_writeUTFBytes(struct ByteArray* self, char* what);
 void ByteArray_writeBytes(struct ByteArray* self, struct ByteArray* what);
 
+void ByteArray_dump_to_file(struct ByteArray* self, char* filename);
 
 #endif

@@ -6,7 +6,7 @@
 #include "AmigaFilter.h"
 #include "AmigaChannel.h"
 
-#define AMIGA_MAX_MEMORY_KB 32
+#define AMIGA_MAX_MEMORY_KB 128
 #define AMIGA_MAX_MEMORY ((AMIGA_MAX_MEMORY_KB * 1024) / sizeof(int))
 
 #define AMIGA_MAX_CHANNELS 4

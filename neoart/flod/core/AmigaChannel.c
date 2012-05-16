@@ -36,8 +36,9 @@ struct AmigaChannel* AmigaChannel_new(int index) {
 	CLASS_NEW_BODY(AmigaChannel, index);
 }
 
-int AmigaChannel_get_enabled(struct AmigaChannel* self) {}
-
+int AmigaChannel_get_enabled(struct AmigaChannel* self) {
+	return 0;
+}
 
 void AmigaChannel_set_enabled(struct AmigaChannel* self, int value) {
 	if (value == self->audena) return;

@@ -63,7 +63,7 @@ void AmigaPlayer_set_ntsc(struct AmigaPlayer* self, int value) {
 
 //override
 void AmigaPlayer_set_stereo(struct AmigaPlayer* self, Number value) {
-	struct AmigaChannel *chan = self->amiga->channels[0];
+	struct AmigaChannel *chan = &self->amiga->channels[0];
 
 	if (value < 0.0) value = 0.0;
 	else if (value > 1.0) value = 1.0;

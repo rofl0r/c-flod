@@ -32,7 +32,7 @@ void DWVoice_ctor(struct DWVoice* self, int index, int bitFlag) {
 }
 
 struct DWVoice* DWVoice_new(int index, int bitFlag) {
-	CLASS_NEW_BODY(DWVoice);
+	CLASS_NEW_BODY(DWVoice, index, bitFlag);
 }
 
 void DWVoice_initialize(struct DWVoice* self) {

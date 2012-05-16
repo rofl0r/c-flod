@@ -1,6 +1,7 @@
 #include "ByteArray.h"
 #include "../neoart/flod/flod_internal.h"
 #include "endianness.h"
+#include <assert.h>
 
 void ByteArray_defaults(struct ByteArray* self) {
 	CLASS_DEF_INIT();
@@ -50,14 +51,17 @@ off_t ByteArray_get_position(struct ByteArray* self) {
 
 static void seek_error() {
 	perror("seek error!\n");
+	__asm__("int3");
 }
 
 static void neg_off() {
-	fprintf(stderr, "negative seek attempted");
+	fprintf(stderr, "negative seek attempted\n");
+	__asm__("int3");
 }
 
 static void oob() {
-	fprintf(stderr, "oob access attempted");
+	fprintf(stderr, "oob access attempted\n");
+	__asm__("int3");
 }
 
 void ByteArray_set_length(struct ByteArray* self, off_t len) {
@@ -73,11 +77,11 @@ off_t ByteArray_get_length(struct ByteArray* self) {
 }
 
 int ByteArray_set_position_rel(struct ByteArray* self, int rel) {
-	if((int) self->pos - rel < 0) {
+	if((int) self->pos + rel < 0) {
 		neg_off();
-		rel = 0;
+		rel = -self->pos;
 	}
-	return ByteArray_set_position(self, self->pos - rel);
+	return ByteArray_set_position(self, self->pos + rel);
 }
 
 int ByteArray_set_position(struct ByteArray* self, off_t pos) {
@@ -96,10 +100,12 @@ int ByteArray_set_position(struct ByteArray* self, off_t pos) {
 
 static void read_error() {
 	perror("read error!\n");
+	__asm__("int3");
 }
 
 static void read_error_short() {
 	perror("read error (short)!\n");
+	__asm__("int3");
 }
 
 int ByteArray_open_file(struct ByteArray* self, char* filename) {
@@ -117,11 +123,14 @@ int ByteArray_open_mem(struct ByteArray* self, char* data, size_t size) {
 	self->pos = 0;
 	self->size = size;
 	self->type = BAT_MEMSTREAM;
+	self->start_addr = data;
 	return 1;
 }
 
 void ByteArray_readMultiByte(struct ByteArray* self, char* buffer, size_t len) {
-	if(self->type == BAT_FILESTREAM) {
+	if(self->type == BAT_MEMSTREAM) {
+		assert(self->start_addr);
+		assert(self->pos + len < self->size);
 		memcpy(buffer, &self->start_addr[self->pos], len);
 	} else {
 		ssize_t ret = read(self->fd, buffer, len);
@@ -265,12 +274,16 @@ void ByteArray_writeUnsignedInt(struct ByteArray* self, unsigned int what) {
 void ByteArray_writeMem(struct ByteArray* self, unsigned char* what, size_t len) {
 	if(self->type == BAT_FILESTREAM) {
 		fprintf(stderr, "tried to write to file!\n");
+		__asm__("int3");
 		return;
 	}
 	if(self->pos + len > self->size) {
 		fprintf(stderr, "oob write attempted");
+		__asm__("int3");
 		return;
 	}
+	assert(self->start_addr);
+
 	memcpy(&self->start_addr[self->pos], what, len);
 	self->pos += len;
 }
@@ -282,6 +295,7 @@ void ByteArray_writeUTFBytes(struct ByteArray* self, char* what) {
 void ByteArray_writeBytes(struct ByteArray* self, struct ByteArray* what) {
 	if(what->type == BAT_FILESTREAM) {
 		fprintf(stderr, "tried to write from non-memory stream\n");
+		__asm__("int3");
 		abort();
 	} else {
 		ByteArray_writeMem(self, (unsigned char*) &what->start_addr[what->pos], what->size - what->pos);
@@ -300,4 +314,12 @@ void ByteArray_writeFloat(struct ByteArray* self, float what) {
 	}
 	ByteArray_writeMem(self, u.charval, sizeof(what));
 }
+
+void ByteArray_dump_to_file(struct ByteArray* self, char* filename) {
+	assert(self->type == BAT_MEMSTREAM);
+	int fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY, 666);
+	write(fd, self->start_addr, self->size);
+	close(fd);
+}
+
 

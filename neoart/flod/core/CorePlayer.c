@@ -46,6 +46,7 @@ void CorePlayer_ctor(struct CorePlayer* self, struct CoreMixer *hardware) {
 	self->toggle = CorePlayer_toggle;
 	self->reset = CorePlayer_reset;
 	self->loader = CorePlayer_loader;
+	self->initialize = CorePlayer_initialize;
 }
 
 struct CorePlayer* CorePlayer_new(struct CoreMixer *hardware) {
@@ -77,6 +78,36 @@ void CorePlayer_loader(struct CorePlayer* self, struct ByteArray *stream) { }
 void CorePlayer_fast(struct CorePlayer* self) {}
 void CorePlayer_accurate(struct CorePlayer* self) {}
 
+void CorePlayer_record(struct CorePlayer* self) {
+	self->record = 1;
+	self->hardware->wave = ByteArray_new();
+	void *ptr = malloc(128 * 1024 * 1024 + (44));
+	ByteArray_open_mem(self->hardware->wave, ptr, 128 * 1024 * 1024 + (44));
+	
+	struct ByteArray *file = self->hardware->wave;
+	file->endian = BAE_LITTLE;
+
+	file->writeUTFBytes(file, "RIFF");
+	//file->writeInt(file, ByteArray_get_length(self->wave) + 44);
+	file->writeInt(file, file->size);
+	file->writeUTFBytes(file, "WAVEfmt ");
+	file->writeInt(file, 16);
+	file->writeShort(file, 1);
+	file->writeShort(file, 2);
+	file->writeInt(file, 44100);
+	file->writeInt(file, 44100 << 2);
+	file->writeShort(file, 4);
+	file->writeShort(file, 16);
+	file->writeUTFBytes(file, "data");
+	//file->writeInt(file, ByteArray_get_length(self->wave));
+	file->writeInt(file, file->size - 44);
+	
+	//CoreMixer_waveform(self->hardware);
+}
+
+void CorePlayer_save_record(struct CorePlayer* self, char* filename) {
+	ByteArray_dump_to_file(self->hardware->wave, filename);
+}
 
 struct ByteArray *CorePlayer_get_waveform(struct CorePlayer* self) {
 	return CoreMixer_waveform(self->hardware);
@@ -111,7 +142,7 @@ int CorePlayer_play(struct CorePlayer* self, struct Sound *processor) {
 	if (!self->version) return 0;
 	if (self->soundPos == 0.0) {
 		//self->initialize();
-		CorePlayer_initialize(self);
+		self->initialize(self);
 	}
 	self->sound = processor ? processor : Sound_new();
 
@@ -122,7 +153,7 @@ int CorePlayer_play(struct CorePlayer* self, struct Sound *processor) {
 		EventDispatcher_addEventListener((struct EventDispatcher*) self->sound, EVENT_SAMPLE_DATA, (EventHandlerFunc) self->hardware->fast);
 	}
 
-	self->soundChan = Sound_play(self->sound, self->soundPos);
+	self->soundChan = Sound_play(self->sound, self->soundPos, self->hardware);
 	EventDispatcher_addEventListener((struct EventDispatcher*) self->soundChan, EVENT_SOUND_COMPLETE, (EventHandlerFunc) CorePlayer_completeHandler);
 	self->soundPos = 0.0;
 	return 1;
@@ -131,12 +162,14 @@ int CorePlayer_play(struct CorePlayer* self, struct Sound *processor) {
 void CorePlayer_pause(struct CorePlayer* self) {
 	if (!self->version || !self->soundChan) return;
 	self->soundPos = SoundChannel_get_position(self->soundChan);
-	EventDispatcher_removeEvents((struct EventDispatcher*) self);
+	//EventDispatcher_removeEvents((struct EventDispatcher*) self);
+	CorePlayer_removeEvents(self);
 }
 
 void CorePlayer_stop(struct CorePlayer* self) {
 	if (!self->version) return;
-	if (self->soundChan) EventDispatcher_removeEvents((struct EventDispatcher*) self);
+	//if (self->soundChan) EventDispatcher_removeEvents((struct EventDispatcher*) self);
+	if (self->soundChan) CorePlayer_removeEvents(self);
 	self->soundPos = 0.0;
 	self->reset(self);
 }
@@ -158,13 +191,17 @@ void CorePlayer_initialize(struct CorePlayer* self) {
 /* callback function for EVENT_SOUND_COMPLETE */
 void CorePlayer_completeHandler(struct CorePlayer* self, struct Event *e) {
 	CorePlayer_stop(self);
-	EventDispatcher_dispatchEvent((struct EventDispatcher*) self, e);
+	// FIXME : disable dispatchEvent, as it'll trigger another event to be sent.
+	// we do not need to pass the event on.
+	//EventDispatcher_dispatchEvent((struct EventDispatcher*) self, e);
 }
 
 void CorePlayer_removeEvents(struct CorePlayer* self) {
 	SoundChannel_stop(self->soundChan);
 	EventDispatcher_removeEventListener((struct EventDispatcher*) self->soundChan, EVENT_SOUND_COMPLETE, (EventHandlerFunc) CorePlayer_completeHandler);
-	EventDispatcher_dispatchEvent((struct EventDispatcher*) self->soundChan, Event_new(EVENT_SOUND_COMPLETE));
+	//EventDispatcher_dispatchEvent((struct EventDispatcher*) self->soundChan, Event_new(EVENT_SOUND_COMPLETE));
+	// FIXME: temporarily set to self instead self->soundchan
+	EventDispatcher_dispatchEvent((struct EventDispatcher*) self, Event_new(EVENT_SOUND_COMPLETE));
 	//self->soundChan->dispatchEvent(new Event(Event->SOUND_COMPLETE));
 
 	if (self->quality) {

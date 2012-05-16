@@ -18,6 +18,7 @@
 
 #include "Amiga.h"
 #include "../flod_internal.h"
+#include "../whittaker/DWPlayer.h"
 
 void Amiga_defaults(struct Amiga* self) {
 	CLASS_DEF_INIT();
@@ -146,6 +147,8 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 	Number speed = NAN;
 	int toMix = 0;
 	Number value = NAN;
+	
+	PFUNC();
 
 	if (self->super.completed) {
 		if (!self->super.remains) return;
@@ -154,6 +157,8 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 
 	while (mixed < size) {
 		if (!self->super.samplesLeft) {
+			if(self->super.player->process != DWPlayer_process) __asm__("int3");
+			//assert(self->super.player->process == DWPlayer_process);
 			self->super.player->process(self->super.player);
 			self->super.samplesLeft = self->super.samplesTick;
 
@@ -193,7 +198,9 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 						chan->delay--;
 					} else if (--chan->timer < 1.0) { 
 						if (!chan->mute) {
-							assert(chan->audloc < self->vector_count_memory);
+							//__asm__("int3");
+							//assert(chan->audloc < self->vector_count_memory);
+							assert(chan->audloc < AMIGA_MAX_MEMORY);
 							value = self->memory[chan->audloc] * 0.0078125;
 							chan->ldata = value * lvol;
 							chan->rdata = value * rvol;
@@ -229,29 +236,20 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 
 	sample = &self->super.buffer[0];
 
-	if (self->super.player->record) {
-		for (i = 0; i < size; ++i) {
-			AmigaFilter_process(self->filter, self->model, sample);
-
+	for (i = 0; i < size; ++i) {
+		AmigaFilter_process(self->filter, self->model, sample);
+		
+		if (self->super.player->record) {
 			self->super.wave->writeShort(self->super.wave, (sample->l * (sample->l < 0 ? 32768 : 32767)));
 			self->super.wave->writeShort(self->super.wave, (sample->r * (sample->r < 0 ? 32768 : 32767)));
-
-			data->writeFloat(data, sample->l);
-			data->writeFloat(data, sample->r);
-
-			sample->l = sample->r = 0.0;
-			sample = sample->next;
 		}
-	} else {
-		for (i = 0; i < size; ++i) {
-			AmigaFilter_process(self->filter, self->model, sample);
 
-			data->writeFloat(data, sample->l);
-			data->writeFloat(data, sample->r);
+		data->writeFloat(data, sample->l);
+		data->writeFloat(data, sample->r);
 
-			sample->l = sample->r = 0.0;
-			sample = sample->next;
-		}
+		sample->l = sample->r = 0.0;
+		sample = sample->next;
 	}
+
 }
 

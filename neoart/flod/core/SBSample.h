@@ -3,6 +3,7 @@
 
 #define SBSAMPLE_MAX_DATA 128
 
+#include "../flod.h"
 #include "../../../flashlib/ByteArray.h"
 
 /*

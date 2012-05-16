@@ -5,12 +5,12 @@
 #include "Sample.h"
 #include "../flod.h"
 
+#include "CoreMixerMaxBuffer.h"
+
 enum CoreMixer_type {
 	CM_AMIGA,
 	CM_SOUNDBLASTER,
 };
-
-#define COREMIXER_MAX_BUFFER 8192
 
 /*
 inheritance

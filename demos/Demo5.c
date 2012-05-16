@@ -44,7 +44,11 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	player = FileLoader_load(loader, data);
-	if (player && player->version) CorePlayer_play(player, NULL);
+	if (player && player->version) {
+		CorePlayer_record(player);
+		CorePlayer_play(player, NULL);
+	}
+	EventDispatcher_event_loop();
 	
 	return 0;
 }
