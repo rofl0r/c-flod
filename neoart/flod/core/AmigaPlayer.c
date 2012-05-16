@@ -26,6 +26,7 @@ void AmigaPlayer_defaults(struct AmigaPlayer* self) {
 
 void AmigaPlayer_ctor(struct AmigaPlayer* self, struct Amiga* amiga) {
 	CLASS_CTOR_DEF(AmigaPlayer);
+	PFUNC();
 	// original constructor code goes here
 	self->amiga = amiga ? amiga : Amiga_new();
 	//super(self->amiga);
@@ -50,6 +51,7 @@ struct AmigaPlayer* AmigaPlayer_new(struct Amiga* amiga) {
 
 //override
 void AmigaPlayer_set_ntsc(struct AmigaPlayer* self, int value) {
+	PFUNC();
 	self->standard = value;
 
 	if (value) {
@@ -63,6 +65,7 @@ void AmigaPlayer_set_ntsc(struct AmigaPlayer* self, int value) {
 
 //override
 void AmigaPlayer_set_stereo(struct AmigaPlayer* self, Number value) {
+	PFUNC();
 	struct AmigaChannel *chan = &self->amiga->channels[0];
 
 	if (value < 0.0) value = 0.0;
@@ -76,6 +79,7 @@ void AmigaPlayer_set_stereo(struct AmigaPlayer* self, Number value) {
 
 //override
 void AmigaPlayer_set_volume(struct AmigaPlayer* self, Number value) {
+	PFUNC();
 	if (value < 0.0) value = 0.0;
 	else if (value > 1.0) value = 1.0;
 
@@ -84,6 +88,7 @@ void AmigaPlayer_set_volume(struct AmigaPlayer* self, Number value) {
 
 //override
 void AmigaPlayer_toggle(struct AmigaPlayer* self, int index) {
+	PFUNC();
 	self->amiga->channels[index].mute ^= 1;
 }
 

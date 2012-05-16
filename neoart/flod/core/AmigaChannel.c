@@ -23,11 +23,14 @@ void AmigaChannel_defaults(struct AmigaChannel* self) {
 	CLASS_DEF_INIT();
 	// static initializers go here
 	self->panning  = 1.0;
+	
+	self->timer = self->level = self->ldata = self->rdata = NAN;
 }
 
 void AmigaChannel_ctor(struct AmigaChannel* self, int index) {
 	CLASS_CTOR_DEF(AmigaChannel);
 	// original constructor code goes here
+	PFUNC();
 	if (((++index) & 2) == 0) self->panning = -(self->panning);
 	self->level = self->panning;	
 }
@@ -41,6 +44,7 @@ int AmigaChannel_get_enabled(struct AmigaChannel* self) {
 }
 
 void AmigaChannel_set_enabled(struct AmigaChannel* self, int value) {
+	PFUNC();
 	if (value == self->audena) return;
 
 	self->audena = value;
@@ -52,6 +56,7 @@ void AmigaChannel_set_enabled(struct AmigaChannel* self, int value) {
 }
 
 void AmigaChannel_set_period(struct AmigaChannel* self, int value) {
+	PFUNC();
 	if (value < 0) value = 0;
 	else if(value > 65535) value = 65535;
 
@@ -59,6 +64,7 @@ void AmigaChannel_set_period(struct AmigaChannel* self, int value) {
 }
 
 void AmigaChannel_set_volume(struct AmigaChannel* self, int value) {
+	PFUNC();
 	if (value < 0) value = 0;
 	else if (value > 64) value = 64;
 
@@ -66,11 +72,13 @@ void AmigaChannel_set_volume(struct AmigaChannel* self, int value) {
 }
 
 void AmigaChannel_resetData(struct AmigaChannel* self) {
+	PFUNC();
 	self->ldata = 0.0;
 	self->rdata = 0.0;
 }
 
 void AmigaChannel_initialize(struct AmigaChannel* self) {
+	PFUNC();
 	self->audena = 0;
 	self->audcnt = 0;
 	self->audloc = 0;

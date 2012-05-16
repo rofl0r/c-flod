@@ -29,6 +29,7 @@ void SBPlayer_defaults(struct SBPlayer* self) {
 void SBPlayer_ctor(struct SBPlayer* self, struct Soundblaster* mixer) {
 	CLASS_CTOR_DEF(SBPlayer);
 	// original constructor code goes here
+	PFUNC();
 	self->mixer = mixer ? mixer : Soundblaster_new();
 	//super(self->mixer);
 	CorePlayer_ctor(&self->super, (struct CoreMixer*) self->mixer);
@@ -50,6 +51,7 @@ struct SBPlayer* SBPlayer_new(struct Soundblaster* mixer) {
 
 //override
 void SBPlayer_set_volume(struct SBPlayer* self, Number value) {
+	PFUNC();
 	if (value < 0.0) value = 0.0;
 		else if (value > 1.0) value = 1.0;
 
@@ -58,17 +60,20 @@ void SBPlayer_set_volume(struct SBPlayer* self, Number value) {
 
 //override
 void SBPlayer_toggle(struct SBPlayer* self, int index) {
+	PFUNC();
 	self->mixer->channels[index].mute ^= 1;
 }
 
 //override
 void SBPlayer_setup(struct SBPlayer* self) {
+	PFUNC();
 	Soundblaster_setup(self->mixer, self->super.channels);
 	//self->mixer->setup(self->super.channels);
 }
 
 //override
 void SBPlayer_initialize(struct SBPlayer* self) {
+	PFUNC();
 	//super->initialize();
 	CorePlayer_initialize(&self->super);
 	self->timer  = self->super.speed;

@@ -28,6 +28,7 @@ void CoreMixer_defaults(struct CoreMixer* self) {
 void CoreMixer_ctor(struct CoreMixer* self) {
 	CLASS_CTOR_DEF(CoreMixer);
 	/* original constructor code goes here */
+	PFUNC();
 	self->wave = ByteArray_new();
 	self->wave->endian = BAE_LITTLE;
 	CoreMixer_set_bufferSize(self, 8192);
@@ -44,6 +45,7 @@ struct CoreMixer* CoreMixer_new(void) {
 
 /* stubs */
 void CoreMixer_reset(struct CoreMixer* self) {
+	PFUNC();
 	if(self->type == CM_AMIGA)
 		Amiga_reset((struct Amiga*)self);
 }
@@ -53,6 +55,7 @@ void CoreMixer_accurate(struct CoreMixer* self, struct SampleDataEvent *e) {}
 
 //js function reset
 void CoreMixer_initialize(struct CoreMixer* self) {
+	PFUNC();
 	struct Sample* sample = &self->buffer[0];
 
 	self->samplesLeft = 0;
@@ -80,6 +83,7 @@ int CoreMixer_get_bufferSize(struct CoreMixer* self) {
 }
 
 void CoreMixer_set_bufferSize(struct CoreMixer* self, int value) {
+	PFUNC();
 	int i = 0; int len = 0;
 	if (value == len || value < 2048) return;
 	assert(value <= COREMIXER_MAX_BUFFER);

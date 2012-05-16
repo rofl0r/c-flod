@@ -30,6 +30,7 @@ void DWPlayer_ctor(struct DWPlayer* self, struct Amiga* amiga) {
 	CLASS_CTOR_DEF(DWPlayer);
 	// original constructor code goes here
 	//super(amiga);
+	PFUNC();
 	AmigaPlayer_ctor(&self->super, amiga);
 	unsigned i;
 	
@@ -56,6 +57,7 @@ struct DWPlayer* DWPlayer_new(struct Amiga* amiga) {
 
 //override
 void DWPlayer_process(struct DWPlayer* self) {
+	PFUNC();
 	struct AmigaChannel *chan = NULL;
 	int loop = 0;
 	int pos = 0;
@@ -468,6 +470,7 @@ void DWPlayer_initialize(struct DWPlayer* self) {
 
 //override
 void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
+	PFUNC();
 	int flag = 0;
 	int headers = 0;
 	int i = 0;

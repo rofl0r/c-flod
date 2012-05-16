@@ -27,6 +27,7 @@ void DWVoice_defaults(struct DWVoice* self) {
 void DWVoice_ctor(struct DWVoice* self, int index, int bitFlag) {
 	CLASS_CTOR_DEF(DWVoice);
 	// original constructor code goes here
+	PFUNC();
 	self->index = index;
 	self->bitFlag = bitFlag;	
 }
@@ -36,6 +37,7 @@ struct DWVoice* DWVoice_new(int index, int bitFlag) {
 }
 
 void DWVoice_initialize(struct DWVoice* self) {
+	PFUNC();
 	self->channel       = null;
 	self->sample        = null;
 	self->trackPtr      = 0;

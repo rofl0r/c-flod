@@ -29,6 +29,7 @@ void Soundblaster_defaults(struct Soundblaster* self) {
 void Soundblaster_ctor(struct Soundblaster* self) {
 	CLASS_CTOR_DEF(Soundblaster);
 	// original constructor code goes here
+	PFUNC();
 	//super();
 	CoreMixer_ctor(&self->super);
 	self->super.type = CM_SOUNDBLASTER;
@@ -64,6 +65,7 @@ void Soundblaster_setup(struct Soundblaster* self, unsigned int len) {
 
 //override
 void Soundblaster_initialize(struct Soundblaster* self) {
+	PFUNC();
 	struct SBChannel *chan = &self->channels[0];
 	//super->initialize();
 	//CoreMixer_initialize(&self->super);
@@ -77,6 +79,7 @@ void Soundblaster_initialize(struct Soundblaster* self) {
 
 //override
 void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
+	PFUNC();
 	struct SBChannel *chan;
 	//d:Vector.<Number>,
 	Number* d;
@@ -221,6 +224,7 @@ void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
 
 //override
 void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e) {
+	PFUNC();
 	struct SBChannel *chan = NULL;
 	//d1:Vector.<Number>;
 	//d2:Vector.<Number>;
