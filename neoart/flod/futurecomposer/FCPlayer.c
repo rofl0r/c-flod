@@ -524,8 +524,8 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 			sample->loop   = 0;
 			sample->repeat = sample->length;
 
-			if ((size + sample->length) > stream->length)
-				sample->length = stream->length - size;
+			if ((size + sample->length) > ByteArray_get_length(stream))
+				sample->length = ByteArray_get_length(stream) - size;
 
 			sample->pointer = self->super.amiga->store(stream, sample->length, size);
 			sample->loopPtr = sample->pointer;
