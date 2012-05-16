@@ -453,7 +453,7 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 						if ((size + sample->length) > ByteArray_get_length(stream))
 						sample->length = ByteArray_get_length(stream) - size;
 
-						sample->pointer = self->super.amiga->store(stream, sample->length, size + total);
+						sample->pointer = Amiga_store(self->super.amiga, stream, sample->length, size + total);
 						sample->loopPtr = sample->pointer + sample->loop;
 						self->samples[(100 + (i * 10) + j)] = sample;
 						total += sample->length;
@@ -479,7 +479,7 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 				if ((size + sample->length) > ByteArray_get_length(stream))
 					sample->length = ByteArray_get_length(stream) - size;
 
-				sample->pointer = self->super.amiga->store(stream, sample->length, size);
+				sample->pointer = Amiga_store(self->super.amiga, stream, sample->length, size);
 				sample->loopPtr = sample->pointer + sample->loop;
 				self->samples[i] = sample;
 				size += sample->length;
@@ -527,7 +527,7 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 			if ((size + sample->length) > ByteArray_get_length(stream))
 				sample->length = ByteArray_get_length(stream) - size;
 
-			sample->pointer = self->super.amiga->store(stream, sample->length, size);
+			sample->pointer = Amiga_store(self->super.amiga, stream, sample->length, size);
 			sample->loopPtr = sample->pointer;
 			self->samples[i] = sample;
 			size += sample->length;
