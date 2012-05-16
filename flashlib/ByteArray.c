@@ -42,7 +42,10 @@ struct ByteArray* ByteArray_new(void) {
 }
 
 void ByteArray_clear(struct ByteArray* self) {
-	fprintf(stderr, "clear called");
+	fprintf(stderr, "clear called\n");
+	assert(self->type == BAT_MEMSTREAM);
+	assert(self->start_addr);
+	memset(self->start_addr, 0, self->size);
 }
 
 off_t ByteArray_get_position(struct ByteArray* self) {
