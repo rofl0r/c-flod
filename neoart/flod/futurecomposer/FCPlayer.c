@@ -15,36 +15,49 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->futurecomposer {
-  import flash.utils.*;
-  import neoart.flod.core.*;
 
-  public final class FCPlayer extends AmigaPlayer {
-    private var
-      seqs    : ByteArray,
-      pats    : ByteArray,
-      vols    : ByteArray,
-      frqs    : ByteArray,
- int length;
-      samples : Vector.<AmigaSample>,
-      voices  : Vector.<FCVoice>;
 
-     void FCPlayer(amiga:Amiga = null) {
-      super(amiga);
-      PERIODS->fixed = true;
-      WAVES->fixed   = true;
+#include "FCPlayer.h"
+#include "../flod_internal.h"
 
-      voices = new Vector.<FCVoice>(4, true);
+void FCPlayer_defaults(struct FCPlayer* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
 
-      voices[0] = new FCVoice(0);
-      voices[0].next = voices[1] = new FCVoice(1);
-      voices[1].next = voices[2] = new FCVoice(2);
-      voices[2].next = voices[3] = new FCVoice(3);
-    }
+// amiga default value NULL
+void FCPlayer_ctor(struct FCPlayer* self, struct Amiga *amiga) {
+	CLASS_CTOR_DEF(FCPlayer);
+	// original constructor code goes here
+	super(amiga);
+	PERIODS->fixed = true;
+	WAVES->fixed   = true;
+
+	voices = new Vector.<FCVoice>(4, true);
+
+	voices[0] = new FCVoice(0);
+	voices[0].next = voices[1] = new FCVoice(1);
+	voices[1].next = voices[2] = new FCVoice(2);
+	voices[2].next = voices[3] = new FCVoice(3);	
+}
+
+struct FCPlayer* FCPlayer_new(struct Amiga *amiga) {
+	CLASS_NEW_BODY(FCPlayer, amiga);
+}
 
 //override
-void process() {
-      var int base; chan:AmigaChannel, int delta; int i; int info; int loopEffect; int loopSustain; int period; sample:AmigaSample, int temp; voice:FCVoice = voices[0];
+void process(struct FCPlayer* self) {
+      int base; 
+      struct AmigaChannel *chan;
+      int delta;
+      int i;
+      int info;
+      int loopEffect;
+      int loopSustain;
+      int period;
+      struct AmigaSample *sample;
+      int temp;
+      struct FCVoice *voice = &self->voices[0];
 
       if (--tick == 0) {
         base = seqs->position;
@@ -314,7 +327,7 @@ void process() {
     }
 
 //override
-void initialize() {
+void initialize(struct FCPlayer *self) {
       var voice:FCVoice = voices[0];
       super->initialize();
 
@@ -340,7 +353,7 @@ void initialize() {
     }
 
 //override
-void loader(stream:ByteArray) {
+void loader(struct FCPlayer *self, stream:ByteArray) {
       var i:int = 0, id:String, int j; int len; int offset; int position; sample:AmigaSample, int size; int temp; int total;
       id = stream->readMultiByte(4, ENCODING);
 
@@ -508,12 +521,8 @@ void loader(stream:ByteArray) {
       length *= 13;
     }
 
-    public static const
-      FUTURECOMP_10 = 1,
-      FUTURECOMP_14 = 2;
 
-    private const
-      PERIODS: Vector.<int> = Vector.<int>([
+const unsigned short PERIODS[] = {
         1712,1616,1524,1440,1356,1280,1208,1140,1076,1016, 960, 906,
          856, 808, 762, 720, 678, 640, 604, 570, 538, 508, 480, 453,
          428, 404, 381, 360, 339, 320, 302, 285, 269, 254, 240, 226,
@@ -524,9 +533,10 @@ void loader(stream:ByteArray) {
          856, 808, 762, 720, 678, 640, 604, 570, 538, 508, 480, 453,
          428, 404, 381, 360, 339, 320, 302, 285, 269, 254, 240, 226,
          214, 202, 190, 180, 170, 160, 151, 143, 135, 127, 120, 113,
-         113, 113, 113, 113, 113, 113, 113, 113, 113, 113, 113, 113]),
+         113, 113, 113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+};
 
-      WAVES: Vector.<int> = Vector.<int>([
+const signed char WAVES[] = {
           16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,
           16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,  16,
            8,   8,   8,   8,   8,   8,   8,   8,  16,   8,  16,  16,   8,   8,  24, -64,
@@ -613,6 +623,7 @@ void loader(stream:ByteArray) {
            0,  64,  96, 127,  96,  64,  32,   0, -32, -64, -96,-128, -96, -64, -32,-128,
         -128,-112,-104, -96, -88, -80, -72, -64, -56, -48, -40, -32, -24, -16,  -8,   0,
            8,  16,  24,  32,  40,  48,  56,  64,  72,  80,  88,  96, 104, 112, 127,-128,
-        -128, -96, -80, -64, -48, -32, -16,   0,  16,  32,  48,  64,  80,  96, 112]);
-  }
-}
+        -128, -96, -80, -64, -48, -32, -16,   0,  16,  32,  48,  64,  80,  96, 112,
+};
+
+// FIXME figure out why the last row has only 15 entries
