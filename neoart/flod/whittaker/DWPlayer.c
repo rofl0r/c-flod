@@ -466,10 +466,6 @@ void DWPlayer_initialize(struct DWPlayer* self) {
 	}
 }
 
-#define return \
-	return printf("returning from %s @ line %d\n", __func__, __LINE__)
-
-
 //override
 void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 	int flag = 0;
@@ -794,12 +790,8 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 
 				if (self->active) {
 					self->voices[0].next = null;
-					printf("%d total 1\n", total);
-					__asm__("int3");
 					for (i = total; i > 0; i--) self->voices[i].next = &self->voices[i - 1];
 				} else {
-					printf("%d total 2\n", total);
-					__asm__("int3");
 					self->voices[total].next = null;
 					for (i = 0; i < total;i++) self->voices[i].next = &self->voices[i + 1];
 				}

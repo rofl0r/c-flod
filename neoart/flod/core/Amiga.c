@@ -157,8 +157,7 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 
 	while (mixed < size) {
 		if (!self->super.samplesLeft) {
-			if(self->super.player->process != DWPlayer_process) __asm__("int3");
-			//assert(self->super.player->process == DWPlayer_process);
+
 			self->super.player->process(self->super.player);
 			self->super.samplesLeft = self->super.samplesTick;
 
@@ -199,6 +198,8 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 					} else if (--chan->timer < 1.0) { 
 						if (!chan->mute) {
 							//__asm__("int3");
+							// FIXME this spot accesses data that has not previously been used
+							// the commented assert statement enforces the correct bounds.
 							//assert(chan->audloc < self->vector_count_memory);
 							assert(chan->audloc < AMIGA_MAX_MEMORY);
 							value = self->memory[chan->audloc] * 0.0078125;
