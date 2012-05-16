@@ -93,7 +93,7 @@ void FCPlayer_process(struct FCPlayer* self) {
 				voice->enabled = chan->enabled = 0;
 
 				temp = 8 + (((info & 0x3f) + voice->soundTranspose) << 6);
-				if (temp >= 0 && temp < self->vols->length) 
+				if (temp >= 0 && temp < ByteArray_get_length(self->vols)) 
 					ByteArray_set_position(self->vols, temp);
 
 				voice->volStep = 0;
@@ -114,7 +114,7 @@ void FCPlayer_process(struct FCPlayer* self) {
 			if (info & 0x40) {
 				voice->portamento = 0;
 			} else if (info & 0x80) {
-				voice->portamento = self->pats[int(pats->position + 1)];
+				voice->portamento = self->pats[(self->pats->position + 1)];
 				if (self->super.super.version == FUTURECOMP_10) voice->portamento <<= 1;
 			}
 			voice->patStep += 2;
@@ -190,7 +190,7 @@ void FCPlayer_process(struct FCPlayer* self) {
 					case 0xe7:  //new sequence
 						loopEffect = 1;
 						voice->frqPos = 8 + (self->frqs->readUnsignedByte() << 6);
-						if (voice->frqPos >= self->frqs->length) voice->frqPos = 0;
+						if (voice->frqPos >= ByteArray_get_length(self->frqs)) voice->frqPos = 0;
 						voice->frqStep = 0;
 						ByteArray_set_position(self->frqs, voice->frqPos);
 						break;
@@ -378,7 +378,7 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 	self->length = stream->readUnsignedInt();
 	ByteArray_set_position(stream, (self->super.super.version == FUTURECOMP_10 ? 100 : 180));
 	self->seqs = new ByteArray();
-	stream->readBytes(seqs, 0, length);
+	stream->readBytes(stream, self->seqs, 0, self->length);
 	self->length /= 13;
 
 	ByteArray_set_position(stream, 12);
@@ -386,9 +386,9 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 	ByteArray_set_position(stream, 8);
 	ByteArray_set_position(stream, stream->readUnsignedInt());
 	self->pats = new ByteArray();
-	stream->readBytes(pats, 0, len);
+	stream->readBytes(stream, self->pats, 0, len);
 
-	ByteArray_set_position(self->pats, pats->length);
+	ByteArray_set_position(self->pats, ByteArray_get_length(self->pats));
 	self->pats->writeByte(0);
 	ByteArray_set_position(self->pats, 0);
 
@@ -399,9 +399,9 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 	self->frqs = new ByteArray();
 	self->frqs->writeInt(0x01000000);
 	self->frqs->writeInt(0x000000e1);
-	stream->readBytes(frqs, 8, len);
+	stream->readBytes(stream, self->frqs, 8, len);
 
-	ByteArray_set_position(self->frqs, self->frqs->length);
+	ByteArray_set_position(self->frqs, ByteArray_get_length(self->frqs));
 	self->frqs->writeByte(0xe1);
 	ByteArray_set_position(self->frqs, 0);
 
@@ -412,7 +412,7 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 	self->vols = new ByteArray();
 	self->vols->writeInt(0x01000000);
 	self->vols->writeInt(0x000000e1);
-	stream->readBytes(vols, 8, len);
+	stream->readBytes(stream, self->vols, 8, len);
 
 	ByteArray_set_position(stream, 32);
 	size = stream->readUnsignedInt();
@@ -450,10 +450,10 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 						if ((sample->loop + sample->repeat) > sample->length)
 						sample->repeat = sample->length - sample->loop;
 
-						if ((size + sample->length) > stream->length)
-						sample->length = stream->length - size;
+						if ((size + sample->length) > ByteArray_get_length(stream))
+						sample->length = ByteArray_get_length(stream) - size;
 
-						sample->pointer = amiga->store(stream, sample->length, size + total);
+						sample->pointer = self->super.amiga->store(stream, sample->length, size + total);
 						sample->loopPtr = sample->pointer + sample->loop;
 						self->samples[(100 + (i * 10) + j)] = sample;
 						total += sample->length;
@@ -476,8 +476,8 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 				if ((sample->loop + sample->repeat) > sample->length)
 					sample->repeat = sample->length - sample->loop;
 
-				if ((size + sample->length) > stream->length)
-					sample->length = stream->length - size;
+				if ((size + sample->length) > ByteArray_get_length(stream))
+					sample->length = ByteArray_get_length(stream) - size;
 
 				sample->pointer = self->super.amiga->store(stream, sample->length, size);
 				sample->loopPtr = sample->pointer + sample->loop;
