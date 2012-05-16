@@ -25,14 +25,17 @@ void Amiga_defaults(struct Amiga* self) {
 	/* static initializers go here */	
 	self->model = MODEL_A1200;
 	self->loopLen = 4;
-	self->clock = 0.0;
-	self->master = 0.00390625;
+	self->clock = 0.0f;
+	self->master = 0.00390625f;
 }
 
 void Amiga_ctor(struct Amiga* self) {
 	CLASS_CTOR_DEF(Amiga);
 	/* original constructor code goes here */	
 	//super();
+	
+	PFUNC();
+	
 	CoreMixer_ctor(&self->super);
 	self->super.type = CM_AMIGA;
 	CoreMixer_set_bufferSize((struct CoreMixer*) self, 8192);
@@ -64,9 +67,9 @@ struct Amiga* Amiga_new(void) {
 void Amiga_set_volume(struct Amiga* self, int value) {
 	if (value > 0) {
 		if (value > 64) value = 64;
-		self->master = ((float) value / 64) * 0.00390625;
+		self->master = ((float) value / 64.f) * 0.00390625f;
 	} else {
-		self->master = 0.0;
+		self->master = 0.0f;
 	}
 }
 
@@ -93,9 +96,8 @@ int Amiga_store(struct Amiga* self, struct ByteArray *stream, int len, int point
 	}
 	
 	len += start;
-	assert(len < AMIGA_MAX_MEMORY);
-	//FIXME: imo we should set vector_count_memory to len here
-	//FIXME: it looks as if amiga.memory can be char instead of byte
+	Amiga_memory_set_length(self, len);
+	//as3 memory.length is automatically increased + 1 when a byte gets written
 	for (i = start; i < len; ++i)
 		self->memory[i] = stream->readByte(stream);
 
@@ -108,15 +110,15 @@ int Amiga_store(struct Amiga* self, struct ByteArray *stream, int len, int point
 
 //override
 void Amiga_initialize(struct Amiga* self) {
+	PFUNC();
 	//self->super->initialize();
-	ByteArray_clear(self->super.wave);
+	if(!self->super.player->record) ByteArray_clear(self->super.wave);
 	AmigaFilter_initialize(self->filter);
 
 	if (!self->memory_fixed) { 
-		// ^ FIXME need to evaluate if this was set automatically by Vector (memory.fixed)
-		// probably it was always initialised to false, so this was called only once.
-		// therefore we mimic the boolean behaviour using that variable
+		// we mimic the boolean behaviour of memory.fixed using that variable
 		self->loopPtr = self->vector_count_memory;
+		//self->loopPtr = 54686;
 		Amiga_memory_set_length(self, self->vector_count_memory + self->loopLen);
 		self->memory_fixed = true;
 	}
@@ -127,6 +129,7 @@ void Amiga_initialize(struct Amiga* self) {
 
 //override
 void Amiga_reset(struct Amiga* self) {
+	PFUNC();
       //self->memory = new Vector.<int>();
       //memset(self->memory, 0, sizeof(self->memory));
       self->vector_count_memory = 0;
@@ -182,8 +185,8 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 
 			if (chan->audena && chan->audper > 60) {
 				if (chan->mute) {
-					chan->ldata = 0.0;
-					chan->rdata = 0.0;
+					chan->ldata = 0.0f;
+					chan->rdata = 0.0f;
 				}
 
 				speed = chan->audper / self->clock;
@@ -195,14 +198,14 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 				for (i = mixPos; i < mixLen; ++i) {
 					if (chan->delay) {
 						chan->delay--;
-					} else if (--chan->timer < 1.0) { 
+					} else if (--chan->timer < 1.0f) { 
 						if (!chan->mute) {
 							//__asm__("int3");
 							// FIXME this spot accesses data that has not previously been used
 							// the commented assert statement enforces the correct bounds.
 							//assert(chan->audloc < self->vector_count_memory);
 							assert(chan->audloc < AMIGA_MAX_MEMORY);
-							value = self->memory[chan->audloc] * 0.0078125;
+							value = self->memory[chan->audloc] * 0.0078125f;
 							chan->ldata = value * lvol;
 							chan->rdata = value * rvol;
 						}
@@ -241,14 +244,14 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 		AmigaFilter_process(self->filter, self->model, sample);
 		
 		if (self->super.player->record) {
-			self->super.wave->writeShort(self->super.wave, (sample->l * (sample->l < 0 ? 32768 : 32767)));
-			self->super.wave->writeShort(self->super.wave, (sample->r * (sample->r < 0 ? 32768 : 32767)));
+			self->super.wave->writeShort(self->super.wave, (sample->l * ((sample->l < 0) ? 32768 : 32767)));
+			self->super.wave->writeShort(self->super.wave, (sample->r * ((sample->r < 0) ? 32768 : 32767)));
 		}
 
 		data->writeFloat(data, sample->l);
 		data->writeFloat(data, sample->r);
 
-		sample->l = sample->r = 0.0;
+		sample->l = sample->r = 0.0f;
 		sample = sample->next;
 	}
 
