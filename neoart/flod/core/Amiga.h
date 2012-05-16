@@ -6,8 +6,8 @@
 #include "AmigaFilter.h"
 #include "AmigaChannel.h"
 
-#define AMIGA_MAX_MEMORY_KB 128
-#define AMIGA_MAX_MEMORY ((AMIGA_MAX_MEMORY_KB * 1024) / sizeof(int))
+#define AMIGA_MAX_MEMORY_KB 64
+#define AMIGA_MAX_MEMORY ((AMIGA_MAX_MEMORY_KB * 1024) / sizeof(char))
 
 #define AMIGA_MAX_CHANNELS 4
 
@@ -22,7 +22,7 @@ struct Amiga {
 	struct AmigaFilter* filter;
 	enum AmigaModel model;
 	//int *memory; // Vector
-	int memory[AMIGA_MAX_MEMORY];
+	signed char memory[AMIGA_MAX_MEMORY];
 	unsigned vector_count_memory;
 	//struct AmigaChannel *channels; //Vector
 	struct AmigaChannel channels[AMIGA_MAX_CHANNELS];
@@ -30,7 +30,7 @@ struct Amiga {
 	int loopLen;
 	Number clock;
 	Number master;
-	int memory_fixed; //FIXME temporary hack
+	int memory_fixed;
 };
 
 void Amiga_defaults(struct Amiga* self);
