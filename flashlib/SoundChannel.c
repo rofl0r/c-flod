@@ -51,23 +51,34 @@ void SoundChannel_stop(struct SoundChannel *self) {
 	self->playing = 0;
 }
 
+static int finish_him(struct SoundChannel *self) {
+	close(self->fd);
+	ByteArray_dump_to_file(((struct Amiga*) self->param)->super.wave, "foo.wav");
+	//CorePlayer_save_record(self->param, "foo.wav");
+	exit(1);
+}
+
 void SoundChannel_idle(struct SoundChannel *self, struct Event* e)  {
 	static int counter = 0;
+	// FIXME: when the tune is finished, self playing is still true
+	// but self->data->pos is 0, which could also be the case at start
+	// find out how to detect the song end
+	// TODO find out how to loop a whittaker tune, as in the game dogs of war.
 	if(self->playing) {
 		printf("stream pos %d\n", self->data->pos);
+		counter++;
+		if(counter > 3000) {
+			finish_him(self);
+		}
 		if(self->data->pos) {
 			write(self->fd, self->data->start_addr, self->data->pos);
 			self->data->pos = 0;
-			counter++;
-			if(counter > 1000) {
-				close(self->fd);
-				ByteArray_dump_to_file(((struct Amiga*) self->param)->super.wave, "foo.wav");
-				//CorePlayer_save_record(self->param, "foo.wav");
-				exit(1);
-			}
+
 		}
 		send_need_data_event(self);
 		send_idle_event(self);
+	} else if(((struct Amiga*) self->param)->super.wave->pos) {
+		finish_him(self);
 	}
 }
 
