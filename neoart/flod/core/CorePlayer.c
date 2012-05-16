@@ -32,6 +32,7 @@ void CorePlayer_defaults(struct CorePlayer* self) {
 void CorePlayer_ctor(struct CorePlayer* self, struct CoreMixer *hardware) {
 	CLASS_CTOR_DEF(CorePlayer);
 	// original constructor code goes here
+	PFUNC();
 	hardware->player = self;
 	self->hardware = hardware;
 	
@@ -114,6 +115,7 @@ struct ByteArray *CorePlayer_get_waveform(struct CorePlayer* self) {
 }
 
 int CorePlayer_load(struct CorePlayer* self, struct ByteArray *stream) {
+	PFUNC();
 	CoreMixer_reset(self->hardware);
 	ByteArray_set_position(stream, 0);
 
@@ -139,6 +141,7 @@ int CorePlayer_load(struct CorePlayer* self, struct ByteArray *stream) {
 
 /* processor default : NULL */
 int CorePlayer_play(struct CorePlayer* self, struct Sound *processor) {
+	PFUNC();
 	if (!self->version) return 0;
 	if (self->soundPos == 0.0) {
 		//self->initialize();
@@ -160,6 +163,7 @@ int CorePlayer_play(struct CorePlayer* self, struct Sound *processor) {
 }
 
 void CorePlayer_pause(struct CorePlayer* self) {
+	PFUNC();
 	if (!self->version || !self->soundChan) return;
 	self->soundPos = SoundChannel_get_position(self->soundChan);
 	//EventDispatcher_removeEvents((struct EventDispatcher*) self);
@@ -167,6 +171,7 @@ void CorePlayer_pause(struct CorePlayer* self) {
 }
 
 void CorePlayer_stop(struct CorePlayer* self) {
+	PFUNC();
 	if (!self->version) return;
 	//if (self->soundChan) EventDispatcher_removeEvents((struct EventDispatcher*) self);
 	if (self->soundChan) CorePlayer_removeEvents(self);
@@ -178,20 +183,21 @@ void CorePlayer_stop(struct CorePlayer* self) {
 void CorePlayer_initialize(struct CorePlayer* self) {
 	self->tick = 0;
 	CoreMixer_initialize(self->hardware);
+	PFUNC();
 	if(self->hardware->type == CM_AMIGA)
 		Amiga_initialize((struct Amiga*) self->hardware);
 	else if(self->hardware->type == CM_SOUNDBLASTER)
 		Soundblaster_initialize((struct Soundblaster*) self->hardware);
 	else
 		abort();
-	//self->hardware->initialize();
+
 	self->hardware->samplesTick = 110250 / self->tempo;
 }
 
 /* callback function for EVENT_SOUND_COMPLETE */
 void CorePlayer_completeHandler(struct CorePlayer* self, struct Event *e) {
 	CorePlayer_stop(self);
-	// FIXME : disable dispatchEvent, as it'll trigger another event to be sent.
+	// disable dispatchEvent, as it'll trigger another event to be sent.
 	// we do not need to pass the event on.
 	//EventDispatcher_dispatchEvent((struct EventDispatcher*) self, e);
 }
@@ -200,7 +206,11 @@ void CorePlayer_removeEvents(struct CorePlayer* self) {
 	SoundChannel_stop(self->soundChan);
 	EventDispatcher_removeEventListener((struct EventDispatcher*) self->soundChan, EVENT_SOUND_COMPLETE, (EventHandlerFunc) CorePlayer_completeHandler);
 	//EventDispatcher_dispatchEvent((struct EventDispatcher*) self->soundChan, Event_new(EVENT_SOUND_COMPLETE));
-	// FIXME: temporarily set to self instead self->soundchan
+	// our eventdispatcher works a bit different than the actionscript one
+	// dispatchEvent will add the event (function pointer/self pointer) to a queue
+	// which is executed by the event loop.
+	// the original dispatcher can access the self pointer of the function pointer owner.
+	// originally: self->soundchan -> now self
 	EventDispatcher_dispatchEvent((struct EventDispatcher*) self, Event_new(EVENT_SOUND_COMPLETE));
 	//self->soundChan->dispatchEvent(new Event(Event->SOUND_COMPLETE));
 
