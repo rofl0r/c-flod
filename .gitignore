@@ -3,4 +3,6 @@
 *.so
 *.a
 *.out
+*.rcb
+*.wav
 
