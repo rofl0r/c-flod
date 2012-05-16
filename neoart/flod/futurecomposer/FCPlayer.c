@@ -60,7 +60,7 @@ void FCPlayer_process(struct FCPlayer* self) {
 	struct FCVoice *voice = &self->voices[0];
 
 	if (--(self->super.super.tick) == 0) {
-		base = self->seqs->position;
+		base = ByteArray_get_position(self->seqs);
 
 		while (voice) {
 			chan = voice->channel;
@@ -69,7 +69,7 @@ void FCPlayer_process(struct FCPlayer* self) {
 			temp = self->pats->readUnsignedByte();
 
 			if (voice->patStep >= 64 || temp == 0x49) {
-				if (self->seqs->position == self->length) {
+				if (ByteArray_get_position(self->seqs) == self->length) {
 					ByteArray_set_position(self->seqs, 0);
 					self->super.amiga->complete = 1;
 				}
@@ -108,20 +108,20 @@ void FCPlayer_process(struct FCPlayer* self) {
 				voice->vibratoSpeed = self->vols->readUnsignedByte();
 				voice->vibratoDepth = voice->vibrato = self->vols->readUnsignedByte();
 				voice->vibratoDelay = self->vols->readUnsignedByte();
-				voice->volPos = self->vols->position;
+				voice->volPos = ByteArray_get_position(self->vols);
 			}
 
 			if (info & 0x40) {
 				voice->portamento = 0;
 			} else if (info & 0x80) {
-				voice->portamento = self->pats[(self->pats->position + 1)];
+				voice->portamento = self->pats[(ByteArray_get_position(self->pats) + 1)];
 				if (self->super.super.version == FUTURECOMP_10) voice->portamento <<= 1;
 			}
 			voice->patStep += 2;
 			voice = voice->next;
 		}
 
-		if (self->seqs->position != base) {
+		if (ByteArray_get_position(self->seqs) != base) {
 			temp = self->seqs->readUnsignedByte();
 			if (temp) self->super.super.speed = temp;
 		}
@@ -430,7 +430,7 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 		len = stream->readUnsignedShort() << 1;
 
 		if (len > 0) {
-			position = stream->position;
+			position = ByteArray_get_position(stream);
 			ByteArray_set_position(stream, size);
 			id = stream->readMultiByte(4, ENCODING);
 
