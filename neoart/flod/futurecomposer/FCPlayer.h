@@ -14,6 +14,11 @@ enum Futurecomp_Version {
       FUTURECOMP_14 = 2,
 };
 
+#define FCPLAYER_SEQS_BUFFERSIZE 64
+#define FCPLAYER_PATS_BUFFERSIZE 64
+#define FCPLAYER_VOLS_BUFFERSIZE 64
+#define FCPLAYER_FRQS_BUFFERSIZE 64
+
 /*
 inheritance
 ??
@@ -28,6 +33,18 @@ struct FCPlayer {
 	struct ByteArray *pats;
 	struct ByteArray *vols;
 	struct ByteArray *frqs;
+	struct ByteArray seqs_struct;
+	struct ByteArray pats_struct;
+	struct ByteArray vols_struct;
+	struct ByteArray frqs_struct;
+	unsigned char seqs_buffer[FCPLAYER_SEQS_BUFFERSIZE];
+	unsigned char pats_buffer[FCPLAYER_PATS_BUFFERSIZE];
+	unsigned char vols_buffer[FCPLAYER_VOLS_BUFFERSIZE];
+	unsigned char frqs_buffer[FCPLAYER_FRQS_BUFFERSIZE];
+	off_t seqs_used;
+	off_t pats_used;
+	off_t vols_used;
+	off_t frqs_used;
 	int length;
 	// samples : Vector.<AmigaSample>,
 	struct AmigaSample samples[FCPLAYER_SAMPLES_MAX];

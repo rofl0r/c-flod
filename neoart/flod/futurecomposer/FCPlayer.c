@@ -45,6 +45,11 @@ struct FCPlayer* FCPlayer_new(struct Amiga *amiga) {
 	CLASS_NEW_BODY(FCPlayer, amiga);
 }
 
+static int my_bytesAvailable(struct ByteArray* b, unsigned b_count) {
+	assert (b->pos <= b_count);
+	return b_count - b->pos;
+}
+
 //override
 void FCPlayer_process(struct FCPlayer* self) {
 	int base; 
@@ -71,7 +76,8 @@ void FCPlayer_process(struct FCPlayer* self) {
 			if (voice->patStep >= 64 || temp == 0x49) {
 				if (ByteArray_get_position(self->seqs) == self->length) {
 					ByteArray_set_position(self->seqs, 0);
-					self->super.amiga->complete = 1;
+					CoreMixer_set_complete(&self->super.amiga->super, 1);
+					//self->super.amiga->complete = 1;
 				}
 
 				voice->patStep = 0;
@@ -90,7 +96,9 @@ void FCPlayer_process(struct FCPlayer* self) {
 				voice->note = temp & 0x7f;
 				voice->pitch = 0;
 				voice->portamento = 0;
-				voice->enabled = chan->enabled = 0;
+				AmigaChannel_set_enabled(chan, 0);
+				voice->enabled = 0;
+				//voice->enabled = chan->enabled = 0;
 
 				temp = 8 + (((info & 0x3f) + voice->soundTranspose) << 6);
 				if (temp >= 0 && temp < ByteArray_get_length(self->vols)) 
@@ -114,7 +122,8 @@ void FCPlayer_process(struct FCPlayer* self) {
 			if (info & 0x40) {
 				voice->portamento = 0;
 			} else if (info & 0x80) {
-				voice->portamento = self->pats[(ByteArray_get_position(self->pats) + 1)];
+				voice->portamento = ByteArray_getUnsignedByte(self->pats, ByteArray_get_position(self->pats) + 1);
+				//voice->portamento = self->pats[(ByteArray_get_position(self->pats) + 1)];
 				if (self->super.super.version == FUTURECOMP_10) voice->portamento <<= 1;
 			}
 			voice->patStep += 2;
@@ -143,7 +152,7 @@ void FCPlayer_process(struct FCPlayer* self) {
 
 			do {
 				loopEffect = 0;
-				if (!self->frqs->bytesAvailable) break;
+				if (!my_bytesAvailable(self->frqs, self->frqs_used)) break;
 				info = self->frqs->readUnsignedByte(self->frqs);
 				if (info == 0xe1) break;
 
@@ -155,7 +164,7 @@ void FCPlayer_process(struct FCPlayer* self) {
 
 				switch (info) {
 					case 0xe2:  //set wave
-						chan->enabled  = 0;
+						AmigaChannel_set_enabled(chan, 0);
 						voice->enabled = 1;
 						voice->volCtr  = 1;
 						voice->volStep = 0;
@@ -225,7 +234,7 @@ void FCPlayer_process(struct FCPlayer* self) {
 			voice->volSustain--;
 		} else {
 			if (voice->volBendTime) {
-				voice->volumeBend();
+				FCVoice_volumeBend(voice);
 			} else {
 				if (--(voice->volCtr) == 0) {
 					voice->volCtr = voice->volSpeed;
@@ -233,7 +242,7 @@ void FCPlayer_process(struct FCPlayer* self) {
 					do {
 						loopEffect = 0;
 						ByteArray_set_position(self->vols, voice->volPos + voice->volStep);
-						if (!self->vols->bytesAvailable) break;
+						if (!my_bytesAvailable(self->vols, self->vols_used)) break;
 						info = self->vols->readUnsignedByte(self->vols);
 						if (info == 0xe1) break;
 
@@ -242,7 +251,7 @@ void FCPlayer_process(struct FCPlayer* self) {
 								voice->volBendSpeed = self->vols->readByte(self->vols);
 								voice->volBendTime  = self->vols->readUnsignedByte(self->vols);
 								voice->volStep += 3;
-								voice->volumeBend();
+								FCVoice_volumeBend(voice);
 								break;
 							case 0xe8: //volume sustain
 								voice->volSustain = self->vols->readUnsignedByte(self->vols);
@@ -317,12 +326,12 @@ void FCPlayer_process(struct FCPlayer* self) {
 		if (period < 113) period = 113;
 		else if (period > 3424) period = 3424;
 
-		chan->period = period;
-		chan->volume = voice->volume;
+		AmigaChannel_set_period(chan, period);
+		AmigaChannel_set_volume(chan, voice->volume);
 
 		if (voice->sample) {
 			sample = voice->sample;
-			chan->enabled = voice->enabled;
+			AmigaChannel_set_enabled(chan, voice->enabled);
 			chan->pointer = sample->loopPtr;
 			chan->length  = sample->repeat;
 		}
@@ -333,7 +342,9 @@ void FCPlayer_process(struct FCPlayer* self) {
 //override
 void FCPlayer_initialize(struct FCPlayer *self) {
 	struct FCVoice *voice = &self->voices[0];
-	self->super->initialize();
+	//self->super->initialize();
+	// FIXME check if thats correct
+	CorePlayer_initialize(&self->super.super);
 
 	ByteArray_set_position(self->seqs, 0);
 	ByteArray_set_position(self->pats, 0);
@@ -341,7 +352,7 @@ void FCPlayer_initialize(struct FCPlayer *self) {
 	ByteArray_set_position(self->frqs, 0);
 
 	while (voice) {
-		voice->initialize();
+		FCVoice_initialize(voice);
 		voice->channel = self->super.amiga->channels[voice->index];
 
 		voice->pattern = self->seqs->readUnsignedByte(self->seqs) << 6;
@@ -375,13 +386,34 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 	else if (id[0] == 'F' && id[1] == 'C' && id[2] == '1' && id[3] == '4')
 		self->super.super.version = FUTURECOMP_14;
 	else return;
+	
+	// FIXME: need to find out which endianess AS3 defaults to, 
+	// probably the one of the local sys
+#define init_static_ba(ba, sz) \
+	do { \
+		self-> ## ba = &self-> ## ba ## _struct; \
+		ByteArray_ctor(self-> ## ba); \
+		ByteArray_open_mem(self-> ## ba, &self-> ## ba ## _buffer, sz); \
+		self-> ## ba ## _used = 0;  \
+	} while (0)
+	
+	init_static_ba(seqs, FCPLAYER_SEQS_BUFFERSIZE);
+	init_static_ba(vols, FCPLAYER_VOLS_BUFFERSIZE);
+	init_static_ba(frqs, FCPLAYER_FRQS_BUFFERSIZE);
+	init_static_ba(pats, FCPLAYER_PATS_BUFFERSIZE);
+	
+	// WARNING need to take special care about all length accesses
+	// of those 4 bytearrays, since they're expected to dynamically grow on each write
+	// we in turn have a static size.
+	// thus whenever we write into one of them we have to bookkeep how many bytes have been written.
+	// we do this by adding to self->xxxx_used.
 
 	ByteArray_set_position(stream, 4);
 	self->length = stream->readUnsignedInt(stream);
 	ByteArray_set_position(stream, (self->super.super.version == FUTURECOMP_10 ? 100 : 180));
-	self->seqs = new ByteArray();
-
-	stream->readBytes(stream, self->seqs, 0, self->length);
+	//self->seqs = new ByteArray();
+	
+	self->seqs_used += stream->readBytes(stream, self->seqs, 0, self->length);
 	self->length /= 13;
 
 	ByteArray_set_position(stream, 12);
@@ -389,11 +421,14 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 	ByteArray_set_position(stream, 8);
 	ByteArray_set_position(stream, stream->readUnsignedInt(stream));
 	//FIXME
-	self->pats = new ByteArray();
-	stream->readBytes(stream, self->pats, 0, len);
+	//self->pats = new ByteArray();
 
-	ByteArray_set_position(self->pats, ByteArray_get_length(self->pats));
-	self->pats->writeByte(self->pats, 0);
+	self->pats_used += stream->readBytes(stream, self->pats, 0, len);
+
+	//ByteArray_set_position(self->pats, ByteArray_get_length(self->pats));
+	ByteArray_set_position(self->pats, self->pats_used);
+	
+	self->pats_used += self->pats->writeByte(self->pats, 0);
 	ByteArray_set_position(self->pats, 0);
 
 	ByteArray_set_position(stream, 20);
@@ -401,13 +436,14 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 	ByteArray_set_position(stream, 16);
 	ByteArray_set_position(stream, stream->readUnsignedInt(stream));
 	//FIXME
-	self->frqs = new ByteArray();
-	self->frqs->writeInt(self->frqs, 0x01000000);
-	self->frqs->writeInt(self->frqs, 0x000000e1);
-	stream->readBytes(stream, self->frqs, 8, len);
+	//self->frqs = new ByteArray();
+	self->frqs_used += self->frqs->writeInt(self->frqs, 0x01000000);
+	self->frqs_used += self->frqs->writeInt(self->frqs, 0x000000e1);
+	self->frqs_used += stream->readBytes(stream, self->frqs, 8, len);
 
-	ByteArray_set_position(self->frqs, ByteArray_get_length(self->frqs));
-	self->frqs->writeByte(self->frqs, 0xe1);
+	//ByteArray_set_position(self->frqs, ByteArray_get_length(self->frqs));
+	ByteArray_set_position(self->frqs, self->frqs_used);
+	self->frqs_used += self->frqs->writeByte(self->frqs, 0xe1);
 	ByteArray_set_position(self->frqs, 0);
 
 	ByteArray_set_position(stream, 28);
@@ -415,10 +451,10 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 	ByteArray_set_position(stream, 24);
 	ByteArray_set_position(stream, stream->readUnsignedInt(stream));
 	// FIXME
-	self->vols = new ByteArray();
-	self->vols->writeInt(self->vols, 0x01000000);
-	self->vols->writeInt(self->vols, 0x000000e1);
-	stream->readBytes(stream, self->vols, 8, len);
+	//self->vols = new ByteArray();
+	self->vols_used += self->vols->writeInt(self->vols, 0x01000000);
+	self->vols_used += self->vols->writeInt(self->vols, 0x000000e1);
+	self->vols_used += stream->readBytes(stream, self->vols, 8, len);
 
 	ByteArray_set_position(stream, 32);
 	size = stream->readUnsignedInt(stream);
