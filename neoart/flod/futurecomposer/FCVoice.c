@@ -35,9 +35,37 @@ struct FCVoice* FCVoice_new(int index) {
 }
 
 void FCVoice_initialize(struct FCVoice* self) {
-	CLASS_DEF_INIT(); // zeromem
+	self->sample         = null;
+	self->enabled        = 0;
+	self->pattern        = 0;
+	self->soundTranspose = 0;
+	self->transpose      = 0;
+	self->patStep        = 0;
+	self->frqStep        = 0;
+	self->frqPos         = 0;
+	self->frqSustain     = 0;
+	self->frqTranspose   = 0;
+	self->volStep        = 0;
+	self->volPos         = 0;
 	self->volCtr         = 1;
 	self->volSpeed       = 1;
+	self->volSustain     = 0;
+	self->note           = 0;
+	self->pitch          = 0;
+	self->volume         = 0;
+	self->pitchBendFlag  = 0;
+	self->pitchBendSpeed = 0;
+	self->pitchBendTime  = 0;
+	self->portamentoFlag = 0;
+	self->portamento     = 0;
+	self->volBendFlag    = 0;
+	self->volBendSpeed   = 0;
+	self->volBendTime    = 0;
+	self->vibratoFlag    = 0;
+	self->vibratoSpeed   = 0;
+	self->vibratoDepth   = 0;
+	self->vibratoDelay   = 0;
+	self->vibrato        = 0;
 }
 
 void FCVoice_volumeBend(struct FCVoice* self) {
