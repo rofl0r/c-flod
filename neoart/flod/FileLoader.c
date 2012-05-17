@@ -19,6 +19,7 @@
 #include "FileLoader.h"
 #include "flod_internal.h"
 #include "whittaker/DWPlayer.h"
+#include "futurecomposer/FCPlayer.h"
 /*
   import flash.utils.*;
   import neoart.flip.*;
@@ -211,21 +212,24 @@ struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *st
 			}
 		}
 	}
+	*/
+	if (ByteArray_get_length(stream) > 4) {
+		char myid[4];
+		ByteArray_set_position(stream, 0);
+		stream->readMultiByte(stream, myid, 4);
 
-	if (stream->length > 4) {
-		stream->position = 0;
-		id = stream->readMultiByte(4, CorePlayer->ENCODING);
-
-		if (id == "SMOD" || id == "FC14") {
-			self->player = new FCPlayer(self->amiga);
-			self->player->load(stream);
+		if (!memcmp(myid, "SMOD", 4) || !memcmp(myid, "FC14", 4)) {
+			self->player = (struct CorePlayer*) FCPlayer_new(self->amiga);
+			CorePlayer_load(self->player, stream);
+			//self->player->load(stream);
 
 			if (self->player->version) {
-				index = FUTURECOMP;
+				self->index = FUTURECOMP;
 				return self->player;
 			}
 		}
 	}
+	/*
 
 	if (stream->length > 10) {
 		stream->position = 0;
