@@ -359,19 +359,21 @@ void FCPlayer_initialize(struct FCPlayer *self) {
 //override
 void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 	int i = 0;
-	char *id; //:String, 
-	int j; 
-	int len; 
-	int offset; 
-	int position; 
-	struct AmigaSample *sample;
-	int size;
-	int temp;
-	int total;
-	id = stream->readMultiByte(4, ENCODING);
+	char id[4]; //:String, 
+	int j = 0; 
+	int len = 0; 
+	int offset = 0; 
+	int position = 0; 
+	struct AmigaSample *sample = NULL;
+	int size = 0;
+	int temp = 0;
+	int total = 0;
+	stream->readMultiByte(stream, id, 4);
 
-	if (id == "SMOD") self->super.super.version = FUTURECOMP_10;
-	else if (id == "FC14") self->super.super.version = FUTURECOMP_14;
+	if (id[0] == 'S' && id[1] == 'M' && id[2] == 'O' && id[3] == 'D')
+		self->super.super.version = FUTURECOMP_10;
+	else if (id[0] == 'F' && id[1] == 'C' && id[2] == '1' && id[3] == '4')
+		self->super.super.version = FUTURECOMP_14;
 	else return;
 
 	ByteArray_set_position(stream, 4);
@@ -432,9 +434,9 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 		if (len > 0) {
 			position = ByteArray_get_position(stream);
 			ByteArray_set_position(stream, size);
-			id = stream->readMultiByte(4, ENCODING);
+			stream->readMultiByte(stream, id, 4);
 
-			if (id == "SSMP") {
+			if (id[0] == 'S' && id[1] == 'S' && id[2] == 'M' && id[3] == 'P') {
 				temp = len;
 
 				for (j = 0; j < 10; ++j) {
