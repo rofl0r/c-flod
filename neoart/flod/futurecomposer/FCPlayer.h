@@ -6,8 +6,16 @@
 #include "../../../flashlib/ByteArray.h"
 #include "FCVoice.h"
 
-#define FCPLAYER_SAMPLES_MAX 16
-#define FCPLAYER_VOICES_MAX 4
+#define FCPLAYER_FC13_MAX_SAMPLES 57
+#define FCPLAYER_FC14_MAX_SAMPLES 200
+
+#ifdef SUPPORT_ONLY_FC13
+#  define FCPLAYER_MAX_SAMPLES FCPLAYER_FC13_MAX_SAMPLES
+#else
+#  define FCPLAYER_MAX_SAMPLES FCPLAYER_FC14_MAX_SAMPLES
+#endif
+
+#define FCPLAYER_MAX_VOICES 4
 
 enum Futurecomp_Version {
       FUTURECOMP_10 = 1,
@@ -47,9 +55,10 @@ struct FCPlayer {
 	off_t frqs_used;
 	int length;
 	// samples : Vector.<AmigaSample>,
-	struct AmigaSample samples[FCPLAYER_SAMPLES_MAX];
+	struct AmigaSample samples[FCPLAYER_MAX_SAMPLES];
+	unsigned samples_max;
 	// voices  : Vector.<FCVoice>;
-	struct FCVoice voices[FCPLAYER_VOICES_MAX];
+	struct FCVoice voices[FCPLAYER_MAX_VOICES];
 };
 
 extern const signed char WAVES[];
