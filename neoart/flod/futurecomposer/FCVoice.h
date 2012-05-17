@@ -47,7 +47,7 @@ struct FCVoice {
 };
 
 void FCVoice_defaults(struct FCVoice* self);
-void FCVoice_ctor(struct FCVoice* self);
+void FCVoice_ctor(struct FCVoice* self, int index);
 struct FCVoice* FCVoice_new(int index);
 
 void FCVoice_initialize(struct FCVoice* self);

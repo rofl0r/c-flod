@@ -24,7 +24,7 @@ void FCVoice_defaults(struct FCVoice* self) {
 	// static initializers go here
 }
 
-void FCVoice_ctor(struct FCVoice* self) {
+void FCVoice_ctor(struct FCVoice* self, int index) {
 	CLASS_CTOR_DEF(FCVoice);
 	// original constructor code goes here
 	self->index = index;
