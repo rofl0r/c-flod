@@ -34,17 +34,18 @@ struct ByteArray {
 	signed short (*readShort)(struct ByteArray*);
 	unsigned char (*readUnsignedByte)(struct ByteArray*);
 	signed char (*readByte)(struct ByteArray*);
-	//off_t (*bytesAvailable)(struct ByteArray*);
-	void (*writeByte) (struct ByteArray* self, signed char what);
-	void (*writeUnsignedByte) (struct ByteArray* self, unsigned char what);
-	void (*writeShort) (struct ByteArray* self, signed short what);
-	void (*writeUnsignedShort) (struct ByteArray* self, unsigned short what);
-	void (*writeInt) (struct ByteArray* self, signed int what);
-	void (*writeUnsignedInt) (struct ByteArray* self, unsigned int what);
-	void (*writeMem) (struct ByteArray* self, unsigned char* what, size_t len);
-	void (*writeUTFBytes) (struct ByteArray* self, char* what);
-	void (*writeBytes) (struct ByteArray* self, struct ByteArray* what);
-	void (*writeFloat) (struct ByteArray* self, float what);
+	off_t (*readBytes) (struct ByteArray* self, struct ByteArray *dest, off_t start, off_t len);
+	off_t (*bytesAvailable)(struct ByteArray*);
+	off_t (*writeByte) (struct ByteArray* self, signed char what);
+	off_t (*writeUnsignedByte) (struct ByteArray* self, unsigned char what);
+	off_t (*writeShort) (struct ByteArray* self, signed short what);
+	off_t (*writeUnsignedShort) (struct ByteArray* self, unsigned short what);
+	off_t (*writeInt) (struct ByteArray* self, signed int what);
+	off_t (*writeUnsignedInt) (struct ByteArray* self, unsigned int what);
+	off_t (*writeMem) (struct ByteArray* self, unsigned char* what, size_t len);
+	off_t (*writeUTFBytes) (struct ByteArray* self, char* what);
+	off_t (*writeBytes) (struct ByteArray* self, struct ByteArray* what);
+	off_t (*writeFloat) (struct ByteArray* self, float what);
 };
 
 void ByteArray_defaults(struct ByteArray* self);
@@ -70,17 +71,21 @@ unsigned short ByteArray_readUnsignedShort(struct ByteArray* self);
 short ByteArray_readShort(struct ByteArray* self);
 unsigned char ByteArray_readUnsignedByte(struct ByteArray* self);
 signed char ByteArray_readByte(struct ByteArray* self);
+off_t ByteArray_readBytes(struct ByteArray* self, struct ByteArray *dest, off_t start, off_t len);
 
-void ByteArray_writeByte(struct ByteArray* self, signed char what);
-void ByteArray_writeUnsignedByte(struct ByteArray* self, unsigned char what);
-void ByteArray_writeShort(struct ByteArray* self, signed short what);
-void ByteArray_writeUnsignedShort(struct ByteArray* self, unsigned short what);
-void ByteArray_writeInt(struct ByteArray* self, signed int what);
-void ByteArray_writeUnsignedInt(struct ByteArray* self, unsigned int what);
-void ByteArray_writeFloat(struct ByteArray* self, float what);
-void ByteArray_writeMem(struct ByteArray* self, unsigned char* what, size_t len);
-void ByteArray_writeUTFBytes(struct ByteArray* self, char* what);
-void ByteArray_writeBytes(struct ByteArray* self, struct ByteArray* what);
+off_t ByteArray_writeByte(struct ByteArray* self, signed char what);
+off_t ByteArray_writeUnsignedByte(struct ByteArray* self, unsigned char what);
+off_t ByteArray_writeShort(struct ByteArray* self, signed short what);
+off_t ByteArray_writeUnsignedShort(struct ByteArray* self, unsigned short what);
+off_t ByteArray_writeInt(struct ByteArray* self, signed int what);
+off_t ByteArray_writeUnsignedInt(struct ByteArray* self, unsigned int what);
+off_t ByteArray_writeFloat(struct ByteArray* self, float what);
+off_t ByteArray_writeMem(struct ByteArray* self, unsigned char* what, size_t len);
+off_t ByteArray_writeUTFBytes(struct ByteArray* self, char* what);
+off_t ByteArray_writeBytes(struct ByteArray* self, struct ByteArray* what);
+
+unsigned char ByteArray_getUnsignedByte(struct ByteArray* self, off_t index);
+void ByteArray_setUnsignedByte(struct ByteArray* self, off_t index, unsigned char what);
 
 void ByteArray_dump_to_file(struct ByteArray* self, char* filename);
 
