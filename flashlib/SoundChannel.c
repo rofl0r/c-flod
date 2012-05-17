@@ -67,7 +67,8 @@ void SoundChannel_idle(struct SoundChannel *self, struct Event* e)  {
 	if(self->playing) {
 		printf("stream pos %d\n", self->data->pos);
 		counter++;
-		if(counter > 3000) {
+		if(counter > 10000) {
+			printf("exit_0\n");
 			finish_him(self);
 		}
 		if(self->data->pos) {
@@ -78,6 +79,7 @@ void SoundChannel_idle(struct SoundChannel *self, struct Event* e)  {
 		send_need_data_event(self);
 		send_idle_event(self);
 	} else if(((struct Amiga*) self->param)->super.wave->pos) {
+		printf("exit_1\n");
 		finish_him(self);
 	}
 }
