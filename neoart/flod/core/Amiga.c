@@ -247,7 +247,10 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 			self->super.wave->writeShort(self->super.wave, (sample->l * ((sample->l < 0) ? 32768 : 32767)));
 			self->super.wave->writeShort(self->super.wave, (sample->r * ((sample->r < 0) ? 32768 : 32767)));
 		}
-
+		// FIXME: this data is worthless, it is in the special flash sound format
+		// which is one float in the range of -1 - 1 per channel
+		// we can probably save a lot of calculations if we write the wave format directly,
+		// instead of converting the flash format into wave.
 		data->writeFloat(data, sample->l);
 		data->writeFloat(data, sample->r);
 
