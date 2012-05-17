@@ -400,22 +400,24 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 	len = stream->readUnsignedInt(stream);
 	ByteArray_set_position(stream, 16);
 	ByteArray_set_position(stream, stream->readUnsignedInt(stream));
+	//FIXME
 	self->frqs = new ByteArray();
-	self->frqs->writeInt(0x01000000);
-	self->frqs->writeInt(0x000000e1);
+	self->frqs->writeInt(self->frqs, 0x01000000);
+	self->frqs->writeInt(self->frqs, 0x000000e1);
 	stream->readBytes(stream, self->frqs, 8, len);
 
 	ByteArray_set_position(self->frqs, ByteArray_get_length(self->frqs));
-	self->frqs->writeByte(0xe1);
+	self->frqs->writeByte(self->frqs, 0xe1);
 	ByteArray_set_position(self->frqs, 0);
 
 	ByteArray_set_position(stream, 28);
 	len = stream->readUnsignedInt(stream);
 	ByteArray_set_position(stream, 24);
 	ByteArray_set_position(stream, stream->readUnsignedInt(stream));
+	// FIXME
 	self->vols = new ByteArray();
-	self->vols->writeInt(0x01000000);
-	self->vols->writeInt(0x000000e1);
+	self->vols->writeInt(self->vols, 0x01000000);
+	self->vols->writeInt(self->vols, 0x000000e1);
 	stream->readBytes(stream, self->vols, 8, len);
 
 	ByteArray_set_position(stream, 32);
