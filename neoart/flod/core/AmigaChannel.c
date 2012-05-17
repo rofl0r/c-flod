@@ -44,7 +44,6 @@ int AmigaChannel_get_enabled(struct AmigaChannel* self) {
 }
 
 void AmigaChannel_set_enabled(struct AmigaChannel* self, int value) {
-	PFUNC();
 	if (value == self->audena) return;
 
 	self->audena = value;
@@ -56,7 +55,6 @@ void AmigaChannel_set_enabled(struct AmigaChannel* self, int value) {
 }
 
 void AmigaChannel_set_period(struct AmigaChannel* self, int value) {
-	PFUNC();
 	if (value < 0) value = 0;
 	else if(value > 65535) value = 65535;
 
@@ -64,7 +62,6 @@ void AmigaChannel_set_period(struct AmigaChannel* self, int value) {
 }
 
 void AmigaChannel_set_volume(struct AmigaChannel* self, int value) {
-	PFUNC();
 	if (value < 0) value = 0;
 	else if (value > 64) value = 64;
 
