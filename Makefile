@@ -15,11 +15,13 @@ libdir = $(prefix)/lib
 FLASH_SRCS = $(sort $(wildcard flashlib/*.c))
 CORE_SRCS = $(sort $(wildcard neoart/flod/core/*.c))
 WHITTAKER_SRCS = $(sort $(wildcard neoart/flod/whittaker/*.c))
+FUTURECOMPOSER_SRCS = $(sort $(wildcard neoart/flod/futurecomposer/*.c))
+ALL_PLAYER_SRCS = $(WHITTAKER_SRCS) $(FUTURECOMPOSER_SRCS)
 
 FILELOADER_SRCS = neoart/flod/FileLoader.c
 LAUNCHER_SRCS = demos/Demo5.c
 
-SRCS = $(FLASH_SRCS) $(CORE_SRCS) $(WHITTAKER_SRCS) $(FILELOADER_SRCS) $(LAUNCHER_SRCS)
+SRCS = $(FLASH_SRCS) $(CORE_SRCS) $(ALL_PLAYER_SRCS) $(FILELOADER_SRCS) $(LAUNCHER_SRCS)
 
 OBJS = $(SRCS:.c=.o)
 
