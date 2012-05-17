@@ -8,9 +8,8 @@
 
 
 static void (*dispatchers[EVENT_MAX])(struct EventDispatcher* self, struct Event *e);
-#define MAX_EVENTS 16
+#define MAX_EVENTS 4
 
-static unsigned int evtQueueIndex = 0;
 static unsigned int evtCounter = 0;
 
 typedef struct {
@@ -38,16 +37,27 @@ void EventDispatcher_removeEvents(struct EventDispatcher* self) {
 	PFUNC();
 }
 
+static evtQueueElem *get_free_slot(void) {
+	evtQueueElem *slot = NULL;
+	unsigned i;
+	for (i = 0; i < MAX_EVENTS; i++) {
+		slot = &evtQueue[i];
+		if(!slot->evtptr) return slot;
+	}
+	return NULL;
+}
+
 void EventDispatcher_dispatchEvent(struct EventDispatcher* self, struct Event* e) {
 	PFUNC();
 	printf("eventumber :%d, have? %d\n", e->type, !!dispatchers[e->type]);
-	evtQueueElem* slot = &evtQueue[evtQueueIndex++];
+	evtQueueElem* slot = get_free_slot();
 	/* warning: if more than MAX_EVENTS events queued,
 	the first element gets overwritten, and queue could be processed in a different order
 	*/
-	if(evtQueueIndex == MAX_EVENTS) {
+	if(!slot) {
+		INT3;
 		printf("more than MAX_EVENTS events queued\n");
-		evtQueueIndex = 0;
+		exit(1);
 	}
 	evtCounter++;
 	slot->evtptr = e;
@@ -86,16 +96,17 @@ void EventDispatcher_event_loop(void) {
 		}
 		if(dispatcherlist_empty) break;
 
-		for(i = MAX_EVENTS; evtCounter && i > 0; i--) {
-			evtQueueElem *slot = &evtQueue[i - 1];
+again:
+		for(i = 0; evtCounter && i < MAX_EVENTS; i++) {
+			evtQueueElem *slot = &evtQueue[i];
 			evtQueueElem item = *slot;;
 			if(item.evtptr && dispatchers[item.evtptr->type]) {
 				printf("executing evt %d\n", item.evtptr->type);
 				slot->evtptr = NULL;
 				slot->owner = NULL;
-				evtQueueIndex = i - 1;
 				evtCounter--;
 				dispatchers[item.evtptr->type](item.owner, item.evtptr);
+				goto again;
 			}
 		}
 		msleep(2);
