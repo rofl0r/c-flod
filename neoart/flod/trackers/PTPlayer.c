@@ -302,10 +302,10 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 	int size = 0;
 	int value = 0;
 	
-	if (stream->length < 2106) return;
+	if (ByteArray_get_length(stream) < 2106) return;
 
 	ByteArray_set_position(stream, 1080);
-	id = stream->readMultiByte(4, ENCODING);
+	id = stream->readMultiByte(stream, 4, ENCODING);
 	if (id != "M->K." && id != "M!K!") return;
 
 	ByteArray_set_position(stream, 0);
@@ -314,7 +314,7 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 	ByteArray_set_position_rel(stream, +22);
 
 	for (i = 1; i < 32; ++i) {
-		value = stream->readUnsignedShort();
+		value = stream->readUnsignedShort(stream);
 
 		if (!value) {
 			self->samples[i] = null;
@@ -325,14 +325,14 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 		sample = new PTSample();
 		ByteArray_set_position_rel(stream, -24);
 
-		sample->super.name = stream->readMultiByte(22, ENCODING);
+		sample->super.name = stream->readMultiByte(stream, 22, ENCODING);
 		sample->super.length = sample->realLen = value << 1;
 		ByteArray_set_position_rel(stream, +2);
 
-		sample->finetune = stream->readUnsignedByte() * 37;
-		sample->super.volume   = stream->readUnsignedByte();
-		sample->super.loop     = stream->readUnsignedShort() << 1;
-		sample->super.repeat   = stream->readUnsignedShort() << 1;
+		sample->finetune = stream->readUnsignedByte(stream) * 37;
+		sample->super.volume   = stream->readUnsignedByte(stream);
+		sample->super.loop     = stream->readUnsignedShort(stream) << 1;
+		sample->super.repeat   = stream->readUnsignedShort(stream) << 1;
 
 		ByteArray_set_position_rel(stream, +22);
 		sample->super.pointer = size;
@@ -341,11 +341,11 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 	}
 
 	ByteArray_set_position(stream, 950);
-	self->length = stream->readUnsignedByte();
+	self->length = stream->readUnsignedByte(stream);
 	ByteArray_set_position_rel(stream, +1);
 
 	for (i = 0; i < 128; ++i) {
-		value = stream->readUnsignedByte() << 8;
+		value = stream->readUnsignedByte(stream) << 8;
 		self->track[i] = value;
 		if (value > higher) higher = value;
 	}
@@ -358,7 +358,7 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 	for (i = 0; i < higher; ++i) {
 		//FIXME
 		row = new PTRow();
-		row->step = value = stream->readUnsignedInt();
+		row->step = value = stream->readUnsignedInt(stream);
 
 		row->super.note   = (value >> 16) & 0x0fff;
 		row->super.effect = (value >>  8) & 0x0f;
