@@ -21,6 +21,7 @@
 #include "whittaker/DWPlayer.h"
 #include "futurecomposer/FCPlayer.h"
 #include "trackers/STPlayer.h"
+#include "trackers/PTPlayer.h"
 
 /*
   import flash.utils.*;
@@ -134,21 +135,26 @@ struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *st
 			}
 		}
 	}
+	
+	*/
 
-	if (stream->length > 2105) {
-		stream->position = 1080;
-		id = stream->readMultiByte(4, CorePlayer->ENCODING);
+	if (ByteArray_get_length(stream) > 2105) {
+		ByteArray_set_position(stream, 0);
+		//ByteArray_set_position(stream, 1080);
+		//id = stream->readMultiByte(4, CorePlayer->ENCODING);
 
-		if (id == "M->K." || id == "M!K!") {
-			self->player = new PTPlayer(self->amiga);
-			self->player->load(stream);
+		//if (id == "M.K." || id == "M!K!") {
+			self->player = (struct CorePlayer*) PTPlayer_new(self->amiga);
+			CorePlayer_load(self->player, stream);
 
 			if (self->player->version) {
-				index = PROTRACKER;
+				self->index = PROTRACKER;
 				return self->player;
 			}
-		}
+		//}
 	}
+	
+	/*
 
 	if (stream->length > 1685) {
 		stream->position = 60;
