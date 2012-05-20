@@ -8,6 +8,7 @@ currently done:
 - whittaker player
 - future composer
 - (ultimate) sound tracker
+- pro tracker
 - pseudo barebone flashlib
 
 in my conversion i followed a pretty straight 1:1 approach, 
