@@ -268,7 +268,7 @@ void PTPlayer_process(struct PTPlayer* self) {
 
 //override
 void PTPlayer_initialize(struct PTPlayer* self) {
-	struct PTVoice *voice = self->voices[0];
+	struct PTVoice *voice = &self->voices[0];
 
 	self->super.super.tempo        = 125;
 	self->super.super.speed        = 6;
@@ -278,14 +278,15 @@ void PTPlayer_initialize(struct PTPlayer* self) {
 	self->patternDelay = 0;
 	self->breakPos     = 0;
 	self->jumpFlag     = 0;
+	
+	CorePlayer_initialize(&self->super.super);
 
-	self->super->initialize();
-	self->force = version;
+	PTPlayer_set_force(self, self->super.super.version);
 
 	while (voice) {
-		voice->initialize();
-		voice->channel = self->super.amiga->channels[voice->index];
-		voice->sample  = self->samples[0];
+		PTVoice_initialize(voice);
+		voice->channel = &self->super.amiga->channels[voice->index];
+		voice->sample  = &self->samples[0];
 		voice = voice->next;
 	}
 }
