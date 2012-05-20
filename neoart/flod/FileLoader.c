@@ -331,8 +331,8 @@ struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *st
 	} */
 
 	if (ByteArray_get_length(stream) > 1625) {
-		self->player = STPlayer_new(self->amiga);
-		CorePlayer_load((struct CorePlayer*) self->player, stream);
+		self->player = (struct CorePlayer*) STPlayer_new(self->amiga);
+		CorePlayer_load(self->player, stream);
 
 		if (self->player->version) {
 			self->index = SOUNDTRACKER;
