@@ -1,6 +1,11 @@
 #ifndef AMIGAROW_H
 #define AMIGAROW_H
 
+/*
+inheritance
+Object
+	-> AmigaRow
+*/
 struct AmigaRow {
 	int note;
 	int sample;
