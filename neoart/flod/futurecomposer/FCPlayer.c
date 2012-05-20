@@ -20,7 +20,7 @@
 #include "FCPlayer.h"
 #include "../flod_internal.h"
 
-const unsigned short PERIODS[] = {
+static const unsigned short PERIODS[] = {
         1712,1616,1524,1440,1356,1280,1208,1140,1076,1016, 960, 906,
          856, 808, 762, 720, 678, 640, 604, 570, 538, 508, 480, 453,
          428, 404, 381, 360, 339, 320, 302, 285, 269, 254, 240, 226,
