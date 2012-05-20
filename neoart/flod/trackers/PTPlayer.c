@@ -161,8 +161,9 @@ void PTPlayer_process(struct PTPlayer* self) {
 					voice->loopPtr  = voice->funkWave = sample->super.loopPtr;
 					voice->repeat   = sample->super.repeat;
 					voice->finetune = sample->finetune;
-
-					chan->volume = voice->volume = sample->super.volume;
+					
+					voice->volume = sample->super.volume;
+					AmigaChannel_set_volume(chan, voice->volume);
 				} else {
 					sample = voice->sample;
 				}
@@ -514,7 +515,7 @@ static void effects(struct PTPlayer* self) {
 					value = VIBRATO[position];
 				}
 
-				value = ((voice->vibratoParam & 0x0f) * value) >> vibratoDepth;
+				value = ((voice->vibratoParam & 0x0f) * value) >> self->vibratoDepth;
 
 				if (voice->vibratoPos > 127) AmigaChannel_set_period(chan, voice->period - value);
 				else AmigaChannel_set_period(chan, voice->period + value);
@@ -549,8 +550,8 @@ static void effects(struct PTPlayer* self) {
 
 				value = ((voice->tremoloParam & 0x0f) * value) >> 6;
 
-				if (voice->tremoloPos > 127) chan->volume = voice->volume - value;
-				else chan->volume = voice->volume + value;
+				if (voice->tremoloPos > 127) AmigaChannel_set_volume(chan, voice->volume - value);
+				else AmigaChannel_set_volume(chan, voice->volume + value);
 
 				value = (voice->tremoloParam >> 2) & 60;
 				voice->tremoloPos = (voice->tremoloPos + value) & 255;
@@ -575,7 +576,7 @@ static void effects(struct PTPlayer* self) {
 			if (voice->volume < 0) voice->volume = 0;
 			else if (voice->volume > 64) voice->volume = 64;
 
-			chan->volume = voice->volume;
+			AmigaChannel_set_volume(chan, voice->volume);
 		}
 		voice = voice->next;
 	}
@@ -607,7 +608,7 @@ static void moreEffects(struct PTPlayer* self, struct PTVoice *voice) {
 		case 12:  //set volume
 			voice->volume = voice->param;
 			if (voice->volume > 64) voice->volume = 64;
-			chan->volume = voice->volume;
+			AmigaChannel_set_volume(chan, voice->volume);
 			break;
 		case 13:  //pattern break
 			self->breakPos = ((voice->param >> 4) * 10) + (voice->param & 0x0f);
@@ -711,16 +712,19 @@ static void extended(struct PTPlayer* self, struct PTVoice *voice) {
 			if (self->super.super.tick) return;
 			voice->volume += param;
 			if (voice->volume > 64) voice->volume = 64;
-			chan->volume = voice->volume;
+			AmigaChannel_set_volume(chan, voice->volume);
 			break;
 		case 11:  //fine volume down
 			if (self->super.super.tick) return;
 			voice->volume -= param;
 			if (voice->volume < 0) voice->volume = 0;
-			chan->volume = voice->volume;
+			AmigaChannel_set_volume(chan, voice->volume);
 			break;
 		case 12:  //note cut
-			if (self->super.super.tick == param) chan->volume = voice->volume = 0;
+			if (self->super.super.tick == param) {
+				voice->volume = 0;
+				AmigaChannel_set_volume(chan, 0);
+			}
 			break;
 		case 13:  //note delay
 			if (self->super.super.tick != param || !voice->period) return;
