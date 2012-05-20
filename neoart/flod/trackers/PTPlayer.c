@@ -90,22 +90,24 @@ void PTPlayer_defaults(struct PTPlayer* self) {
 void PTPlayer_ctor(struct PTPlayer* self, struct Amiga *amiga) {
 	CLASS_CTOR_DEF(PTPlayer);
 	// original constructor code goes here
-	super(amiga);
-
-	track   = new Vector.<int>(128, true);
-	samples = new Vector.<PTSample>(32, true);
-	voices  = new Vector.<PTVoice>(4, true);
-
-	voices[0] = new PTVoice(0);
-	voices[0].next = voices[1] = new PTVoice(1);
-	voices[1].next = voices[2] = new PTVoice(2);
-	voices[2].next = voices[3] = new PTVoice(3);	
+	AmigaPlayer_ctor(&self->super, amiga);
+	
+	unsigned i;
+	for (i = 0; i < PTPLAYER_MAX_VOICES; i++) {
+		PTVoice_ctor(&self->voices[i], i);
+		if(i) self->voices[i].next = &self->voices[i];
+	}
+	
+	//vtable
+	self->super.super.set_force = PTPlayer_set_force;
+	self->super.super.process = PTPlayer_process;
+	self->super.super.loader = PTPlayer_loader;
+	self->super.super.initialize = PTPlayer_initialize;
 }
 
 struct PTPlayer* PTPlayer_new(struct Amiga *amiga) {
 	CLASS_NEW_BODY(PTPlayer, amiga);
 }
-
 
 //override
 void PTPlayer_set_force(struct PTPlayer* self, int value) {
