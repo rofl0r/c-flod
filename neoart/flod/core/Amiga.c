@@ -244,8 +244,16 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 		AmigaFilter_process(self->filter, self->model, sample);
 		
 		if (self->super.player->record) {
-			self->super.wave->writeShort(self->super.wave, (sample->l * ((sample->l < 0) ? 32768 : 32767)));
-			self->super.wave->writeShort(self->super.wave, (sample->r * ((sample->r < 0) ? 32768 : 32767)));
+			// FIXME: this is all a hack
+			// in the end only a wav (this here) should get written into data
+			// and the backend decide whether it gets written to a wav file
+			// or to an audio device.
+			if (ByteArray_bytesAvailable(self->super.wave) >= 4) {
+				self->super.wave->writeShort(self->super.wave, (sample->l * ((sample->l < 0) ? 32768 : 32767)));
+				self->super.wave->writeShort(self->super.wave, (sample->r * ((sample->r < 0) ? 32768 : 32767)));
+			} else {
+				CoreMixer_set_complete(&self->super, 1);
+			}
 		}
 		// FIXME: this data is worthless, it is in the special flash sound format
 		// which is one float in the range of -1 - 1 per channel
