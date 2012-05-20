@@ -13,5 +13,6 @@
 
 #define PFUNC() fprintf(stderr, "%s\n", __FUNCTION__)
 #define assert_dbg(exp) do { if (!(exp)) __asm__("int3"); } while(0)
+#define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
 #endif
