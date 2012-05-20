@@ -146,7 +146,7 @@ void PTPlayer_process(struct PTPlayer* self) {
 				chan = voice->channel;
 				voice->enabled = 0;
 
-				if (!voice->step) chan->period = voice->period;
+				if (!voice->step) AmigaChannel_set_period(chan, voice->period);
 
 				row = self->patterns[pattern + voice->index];
 				voice->step   = row->step;
@@ -217,7 +217,7 @@ void PTPlayer_process(struct PTPlayer* self) {
 				chan->enabled = 0;
 				chan->pointer = voice->pointer;
 				chan->length  = voice->length;
-				chan->period  = voice->period;
+				AmigaChannel_set_period(chan, voice->period);
 
 				voice->enabled = 1;
 				moreEffects(self, voice);
@@ -411,7 +411,7 @@ static void effects(struct PTPlayer* self) {
 		if (voice->funkSpeed) updateFunk(self, voice);
 
 		if ((voice->step & 0x0fff) == 0) {
-			chan->period = voice->period;
+			AmigaChannel_set_period(chan, voice->period);
 			voice = voice->next;
 			continue;
 		}
@@ -421,7 +421,7 @@ static void effects(struct PTPlayer* self) {
 				value = self->super.super.tick % 3;
 
 				if (!value) {
-					chan->period = voice->period;
+					AmigaChannel_set_period(chan, voice->period);
 					voice = voice->next;
 					continue;
 				}
@@ -434,19 +434,19 @@ static void effects(struct PTPlayer* self) {
 
 				for (i; i < position; ++i)
 					if (voice->period >= PERIODS[i]) {
-						chan->period = PERIODS[int(i + value)];
+						AmigaChannel_set_period(chan, PERIODS[i + value]);
 						break;
 					}
 				break;
 			case 1:   //portamento up
 				voice->period -= voice->param;
 				if (voice->period < 113) voice->period = 113;
-				chan->period = voice->period;
+				AmigaChannel_set_period(chan, voice->period);
 				break;
 			case 2:   //portamento down
 				voice->period += voice->param;
 				if (voice->period > 856) voice->period = 856;
-				chan->period = voice->period;
+				AmigaChannel_set_period(chan, voice->period);
 				break;
 			case 3:   //tone portamento
 			case 5:   //tone portamento + volume slide
@@ -482,9 +482,9 @@ static void effects(struct PTPlayer* self) {
 							if (voice->period >= PERIODS[i]) break;
 
 						if (i == value) i--;
-						chan->period = PERIODS[i];
+						AmigaChannel_set_period(chan, PERIODS[i]);
 					} else {
-						chan->period = voice->period;
+						AmigaChannel_set_period(chan, voice->period);
 					}
 				}
 				break;
@@ -516,14 +516,14 @@ static void effects(struct PTPlayer* self) {
 
 				value = ((voice->vibratoParam & 0x0f) * value) >> vibratoDepth;
 
-				if (voice->vibratoPos > 127) chan->period = voice->period - value;
-				else chan->period = voice->period + value;
+				if (voice->vibratoPos > 127) AmigaChannel_set_period(chan, voice->period - value);
+				else AmigaChannel_set_period(chan, voice->period + value);
 
 				value = (voice->vibratoParam >> 2) & 60;
 				voice->vibratoPos = (voice->vibratoPos + value) & 255;
 				break;
 			case 7:   //tremolo
-				chan->period = voice->period;
+				AmigaChannel_set_period(chan, voice->period);
 
 				if (voice->param) {
 					value = voice->param & 0x0f;
@@ -649,13 +649,13 @@ static void extended(struct PTPlayer* self, struct PTVoice *voice) {
 			if (self->super.super.tick) return;
 			voice->period -= param;
 			if (voice->period < 113) voice->period = 113;
-			chan->period = voice->period;
+			AmigaChannel_set_period(chan, voice->period);
 			break;
 		case 2:   //fine portamento down
 			if (self->super.super.tick) return;
 			voice->period += param;
 			if (voice->period > 856) voice->period = 856;
-			chan->period = voice->period;
+			AmigaChannel_set_period(chan, voice->period);
 			break;
 		case 3:   //glissando control
 			voice->glissando = param;
@@ -705,7 +705,7 @@ static void extended(struct PTPlayer* self, struct PTVoice *voice) {
 			chan->enabled = 1;
 			chan->pointer = voice->loopPtr;
 			chan->length  = voice->repeat;
-			chan->period  = voice->period;
+			AmigaChannel_set_period(chan, voice->period);
 			break;
 		case 10:  //fine volume up
 			if (self->super.super.tick) return;
@@ -733,7 +733,7 @@ static void extended(struct PTPlayer* self, struct PTVoice *voice) {
 			chan->enabled = 1;
 			chan->pointer = voice->loopPtr;
 			chan->length  = voice->repeat;
-			chan->period  = voice->period;
+			AmigaChannel_set_period(chan, voice->period);
 			break;
 		case 14:  //pattern delay
 			if (self->super.super.tick || self->patternDelay) return;
