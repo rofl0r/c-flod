@@ -331,7 +331,9 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 	higher += 256;
 	//FIXME
 	//patterns = new Vector.<AmigaRow>(higher, true);
-	assert(higher < STPLAYER_MAX_PATTERNS);
+	#define assert_dbg(exp) do { if (!(exp)) __asm__("int3"); } while(0)
+
+	assert_dbg(higher < STPLAYER_MAX_PATTERNS);
 
 	i = (ByteArray_get_length(stream) - size - 600) >> 2;
 	if (higher > i) higher = i;
