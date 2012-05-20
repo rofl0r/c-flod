@@ -116,10 +116,10 @@ void PTPlayer_set_force(struct PTPlayer* self, int value) {
 	else if (value > PROTRACKER_12)
 		value = PROTRACKER_12;
 
-	version = value;
+	self->version = value;
 
-	if (value < PROTRACKER_11) vibratoDepth = 6;
-		else vibratoDepth = 7;
+	if (value < PROTRACKER_11) self->vibratoDepth = 6;
+		else self->vibratoDepth = 7;
 }
 
 //override
@@ -130,13 +130,13 @@ void PTPlayer_process(struct PTPlayer* self) {
 	struct PTRow *row = NULL;
 	struct PTSample *sample = NULL;
 	int value = 0;
-	struct PTVoice *voice = voices[0];
+	struct PTVoice *voice = self->voices[0];
 
-	if (!tick) {
-		if (patternDelay) {
+	if (!self->tick) {
+		if (self->patternDelay) {
 			effects();
 		} else {
-			pattern = track[trackPos] + patternPos;
+			pattern = self->track[self->trackPos] + self->patternPos;
 
 			while (voice) {
 				chan = voice->channel;
@@ -144,13 +144,13 @@ void PTPlayer_process(struct PTPlayer* self) {
 
 				if (!voice->step) chan->period = voice->period;
 
-				row = patterns[int(pattern + voice->index)];
+				row = self->patterns[pattern + voice->index];
 				voice->step   = row->step;
 				voice->effect = row->effect;
 				voice->param  = row->param;
 
 				if (row->sample) {
-					sample = voice->sample = samples[row->sample];
+					sample = voice->sample = self->samples[row->sample];
 
 					voice->pointer  = sample->pointer;
 					voice->length   = sample->length;
@@ -219,7 +219,7 @@ void PTPlayer_process(struct PTPlayer* self) {
 				moreEffects(voice);
 				voice = voice->next;
 			}
-			voice = voices[0];
+			voice = self->voices[0];
 
 			while (voice) {
 				chan = voice->channel;
@@ -235,27 +235,27 @@ void PTPlayer_process(struct PTPlayer* self) {
 		effects();
 	}
 
-	if (++tick == speed) {
-		tick = 0;
-		patternPos += 4;
+	if (++(self->tick) == self->speed) {
+		self->tick = 0;
+		self->patternPos += 4;
 
-		if (patternDelay)
-			if (--patternDelay) patternPos -= 4;
+		if (self->patternDelay)
+			if (--self->patternDelay) self->patternPos -= 4;
 
-		if (patternBreak) {
-			patternBreak = 0;
-			patternPos = breakPos;
-			breakPos = 0;
+		if (self->patternBreak) {
+			self->patternBreak = 0;
+			self->patternPos = self->breakPos;
+			self->breakPos = 0;
 		}
 
-		if (patternPos == 256 || jumpFlag) {
-			patternPos = breakPos;
-			breakPos = 0;
-			jumpFlag = 0;
+		if (self->patternPos == 256 || self->jumpFlag) {
+			self->patternPos = self->breakPos;
+			self->breakPos = 0;
+			self->jumpFlag = 0;
 
-			if (++trackPos == length) {
-				trackPos = 0;
-				amiga->complete = 1;
+			if (++(self->trackPos) == length) {
+				self->trackPos = 0;
+				self->amiga->complete = 1;
 			}
 		}
 	}
@@ -265,22 +265,22 @@ void PTPlayer_process(struct PTPlayer* self) {
 void PTPlayer_initialize(struct PTPlayer* self) {
 	struct PTVoice *voice = voices[0];
 
-	tempo        = 125;
-	speed        = 6;
-	trackPos     = 0;
-	patternPos   = 0;
-	patternBreak = 0;
-	patternDelay = 0;
-	breakPos     = 0;
-	jumpFlag     = 0;
+	self->tempo        = 125;
+	self->speed        = 6;
+	self->trackPos     = 0;
+	self->patternPos   = 0;
+	self->patternBreak = 0;
+	self->patternDelay = 0;
+	self->breakPos     = 0;
+	self->jumpFlag     = 0;
 
-	super->initialize();
-	force = version;
+	self->super->initialize();
+	self->force = version;
 
 	while (voice) {
 		voice->initialize();
-		voice->channel = amiga->channels[voice->index];
-		voice->sample  = samples[0];
+		voice->channel = self->amiga->channels[voice->index];
+		voice->sample  = self->samples[0];
 		voice = voice->next;
 	}
 }
@@ -303,8 +303,8 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 	if (id != "M->K." && id != "M!K!") return;
 
 	stream->position = 0;
-	title = stream->readMultiByte(20, ENCODING);
-	version = PROTRACKER_10;
+	self->title = stream->readMultiByte(20, ENCODING);
+	self->version = PROTRACKER_10;
 	stream->position += 22;
 
 	for (i = 1; i < 32; ++i) {
@@ -331,16 +331,16 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 		stream->position += 22;
 		sample->pointer = size;
 		size += sample->length;
-		samples[i] = sample;
+		self->samples[i] = sample;
 	}
 
 	stream->position = 950;
-	length = stream->readUnsignedByte();
+	self->length = stream->readUnsignedByte();
 	stream->position++;
 
 	for (i = 0; i < 128; ++i) {
 		value = stream->readUnsignedByte() << 8;
-		track[i] = value;
+		self->track[i] = value;
 		if (value > higher) higher = value;
 	}
 
@@ -357,18 +357,18 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 		row->sample = (value >> 24) & 0xf0 | (value >> 12) & 0x0f;
 		row->param  = value & 0xff;
 
-		patterns[i] = row;
+		self->patterns[i] = row;
 
 		if (row->sample > 31 || !samples[row->sample]) row->sample = 0;
 
 		if (row->effect == 15 && row->param > 31)
-		version = PROTRACKER_11;
+		self->version = PROTRACKER_11;
 
 		if (row->effect == 8)
-		version = PROTRACKER_12;
+		self->version = PROTRACKER_12;
 	}
 
-	amiga->store(stream, size);
+	self->amiga->store(stream, size);
 
 	for (i = 1; i < 32; ++i) {
 		sample = samples[i];
@@ -390,7 +390,7 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 	sample = new PTSample();
 	sample->pointer = sample->loopPtr = amiga->memory->length;
 	sample->length  = sample->repeat  = 2;
-	samples[0] = sample;
+	self->samples[0] = sample;
 }
 
 void PTPlayer_effects(struct PTPlayer* self) {
@@ -399,7 +399,7 @@ void PTPlayer_effects(struct PTPlayer* self) {
 	int position = 0;
 	int slide = 0;
 	int value = 0;
-	struct PTVoice *voice = voices[0];
+	struct PTVoice *voice = self->voices[0];
 	int wave = 0;
 
 	while (voice) {
@@ -596,9 +596,9 @@ void PTPlayer_moreEffects(struct PTPlayer* self, struct PTVoice *voice) {
 			}
 			break;
 		case 11:  //position jump
-			trackPos = voice->param - 1;
-			breakPos = 0;
-			jumpFlag = 1;
+			self->trackPos = voice->param - 1;
+			self->breakPos = 0;
+			self->jumpFlag = 1;
 			break;
 		case 12:  //set volume
 			voice->volume = voice->param;
@@ -606,12 +606,12 @@ void PTPlayer_moreEffects(struct PTPlayer* self, struct PTVoice *voice) {
 			chan->volume = voice->volume;
 			break;
 		case 13:  //pattern break
-			breakPos = ((voice->param >> 4) * 10) + (voice->param & 0x0f);
+			self->breakPos = ((voice->param >> 4) * 10) + (voice->param & 0x0f);
 
-			if (breakPos > 63) breakPos = 0;
-			else breakPos <<= 2;
+			if (self->breakPos > 63) self->breakPos = 0;
+			else self->breakPos <<= 2;
 
-			jumpFlag = 1;
+			self->jumpFlag = 1;
 			break;
 		case 14:  //extended effects
 			extended(voice);
@@ -620,9 +620,9 @@ void PTPlayer_moreEffects(struct PTPlayer* self, struct PTVoice *voice) {
 			if (!voice->param) return;
 
 			if (voice->param < 32) speed = voice->param;
-			else amiga->samplesTick = 110250 / voice->param;
+			else self->amiga->samplesTick = 110250 / voice->param;
 
-			tick = 0;
+			self->tick = 0;
 			break;
 		default:
 			break;
@@ -639,16 +639,16 @@ void PTPlayer_extended(struct PTPlayer* self, struct PTVoice *voice) {
 
 	switch (effect) {
 		case 0:   //set filter
-			amiga->filter->active = param;
+			self->amiga->filter->active = param;
 			break;
 		case 1:   //fine portamento up
-			if (tick) return;
+			if (self->tick) return;
 			voice->period -= param;
 			if (voice->period < 113) voice->period = 113;
 			chan->period = voice->period;
 			break;
 		case 2:   //fine portamento down
-			if (tick) return;
+			if (self->tick) return;
 			voice->period += param;
 			if (voice->period > 856) voice->period = 856;
 			chan->period = voice->period;
@@ -663,18 +663,18 @@ void PTPlayer_extended(struct PTPlayer* self, struct PTVoice *voice) {
 			voice->finetune = param * 37;
 			break;
 		case 6:   //pattern loop
-			if (tick) return;
+			if (self->tick) return;
 
 			if (param) {
 				if (voice->loopCtr) voice->loopCtr--;
 				else voice->loopCtr = param;
 
 				if (voice->loopCtr) {
-					breakPos = voice->loopPos << 2;
-					patternBreak = 1;
+					self->breakPos = voice->loopPos << 2;
+					self->patternBreak = 1;
 				}
 			} else {
-				voice->loopPos = patternPos >> 2;
+				voice->loopPos = self->patternPos >> 2;
 			}
 			break;
 		case 7:   //tremolo control
@@ -682,7 +682,7 @@ void PTPlayer_extended(struct PTPlayer* self, struct PTVoice *voice) {
 			break;
 		case 8:   //karplus strong
 			len = voice->length - 2;
-			memory = amiga->memory;
+			memory = self->amiga->memory;
 
 			for (i = voice->loopPtr; i < len;)
 				memory[i] = (memory[i] + memory[++i]) * 0.5;
@@ -690,8 +690,8 @@ void PTPlayer_extended(struct PTPlayer* self, struct PTVoice *voice) {
 			memory[++i] = (memory[i] + memory[0]) * 0.5;
 			break;
 		case 9:   //retrig note
-			if (tick || !param || !voice->period) return;
-			if (tick % param) return;
+			if (self->tick || !param || !voice->period) return;
+			if (self->tick % param) return;
 
 			chan->enabled = 0;
 			chan->pointer = voice->pointer;
@@ -704,22 +704,22 @@ void PTPlayer_extended(struct PTPlayer* self, struct PTVoice *voice) {
 			chan->period  = voice->period;
 			break;
 		case 10:  //fine volume up
-			if (tick) return;
+			if (self->tick) return;
 			voice->volume += param;
 			if (voice->volume > 64) voice->volume = 64;
 			chan->volume = voice->volume;
 			break;
 		case 11:  //fine volume down
-			if (tick) return;
+			if (self->tick) return;
 			voice->volume -= param;
 			if (voice->volume < 0) voice->volume = 0;
 			chan->volume = voice->volume;
 			break;
 		case 12:  //note cut
-			if (tick == param) chan->volume = voice->volume = 0;
+			if (self->tick == param) chan->volume = voice->volume = 0;
 			break;
 		case 13:  //note delay
-			if (tick != param || !voice->period) return;
+			if (self->tick != param || !voice->period) return;
 
 			chan->enabled = 0;
 			chan->pointer = voice->pointer;
@@ -732,11 +732,11 @@ void PTPlayer_extended(struct PTPlayer* self, struct PTVoice *voice) {
 			chan->period  = voice->period;
 			break;
 		case 14:  //pattern delay
-			if (tick || patternDelay) return;
-			patternDelay = ++param;
+			if (self->tick || self->patternDelay) return;
+			self->patternDelay = ++param;
 			break;
 		case 15:  //funk repeat or invert loop
-			if (tick) return;
+			if (self->tick) return;
 			voice->funkSpeed = param;
 			if (param) updateFunk(voice);
 			break;
@@ -755,7 +755,7 @@ void PTPlayer_updateFunk(struct PTPlayer* self, struct PTVoice *voice) {
 	if (voice->funkPos < 128) return;
 	voice->funkPos = 0;
 
-	if (version == PROTRACKER_10) {
+	if (self->version == PROTRACKER_10) {
 		p1 = voice->pointer + voice->sample->realLen - voice->repeat;
 		p2 = voice->funkWave + voice->repeat;
 
@@ -770,7 +770,7 @@ void PTPlayer_updateFunk(struct PTPlayer* self, struct PTVoice *voice) {
 
 		if (p2 >= p1) p2 = voice->loopPtr;
 
-		amiga->memory[p2] = -amiga->memory[p2];
+		self->amiga->memory[p2] = -self->amiga->memory[p2];
 	}
 }
 
