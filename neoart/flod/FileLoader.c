@@ -20,6 +20,8 @@
 #include "flod_internal.h"
 #include "whittaker/DWPlayer.h"
 #include "futurecomposer/FCPlayer.h"
+#include "trackers/STPlayer.h"
+
 /*
   import flash.utils.*;
   import neoart.flip.*;
@@ -312,9 +314,11 @@ struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *st
 		self->index = WHITTAKER;
 		return self->player;
 	}
-/*
-	stream->position = 0;
-	value = stream->readUnsignedShort();
+
+	ByteArray_set_position(stream, 0);
+	value = stream->readUnsignedShort(stream);
+	
+	/*
 
 	if (value == 0x6000) {
 		self->player = new RHPlayer(self->amiga);
@@ -324,19 +328,19 @@ struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *st
 			index = HUBBARD;
 			return self->player;
 		}
-	}
+	} */
 
-	if (stream->length > 1625) {
-		self->player = new STPlayer(self->amiga);
-		self->player->load(stream);
+	if (ByteArray_get_length(stream) > 1625) {
+		self->player = STPlayer_new(self->amiga);
+		CorePlayer_load((struct CorePlayer*) self->player, stream);
 
 		if (self->player->version) {
-			index = SOUNDTRACKER;
+			self->index = SOUNDTRACKER;
 			return self->player;
 		}
 	}
-*/
-	ByteArray_clear(stream);
+
+	//ByteArray_clear(stream);
 	self->index = 0;
 	return self->player = null;
 }
