@@ -55,7 +55,7 @@ struct STPlayer* STPlayer_new(struct Amiga *amiga) {
 
 
 //override
-void STPlayer_set force( int value) {
+void STPlayer_set_force( int value) {
       if (value < ULTIMATE_SOUNDTRACKER)
         value = ULTIMATE_SOUNDTRACKER;
       else if (value > DOC_SOUNDTRACKER_20)
@@ -65,7 +65,7 @@ void STPlayer_set force( int value) {
     }
 
 //override
-void STPlayer_set ntsc( int value) {
+void STPlayer_set_ntsc( int value) {
       super->ntsc = value;
 
       if (version < DOC_SOUNDTRACKER_9)
@@ -357,13 +357,13 @@ void STPlayer_arpeggio(voice:STVoice) {
       chan->period = PERIODS[int(i + param)];
     }
 
-int STPlayer_isLegal(text:String) {
-      var int ascii; i:int = 0, len:int = text->length;
-      if (!len) return 0;
+int STPlayer_isLegal(char *text) {
+	int i = 0;
+	if (!text[i]) return 0;
 
-      for (; i < len; ++i) {
-        ascii = text->charCodeAt(i);
-        if (ascii && (ascii < 32 || ascii > 127)) return 0;
-      }
-      return 1;
-    }
+	while(text[i]) {
+		if (text[i] < 32 || text[i] > 127) return 0;
+		i++;
+	}
+	return 1;
+}
