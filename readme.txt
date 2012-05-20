@@ -7,6 +7,7 @@ currently done:
 - complete flod core
 - whittaker player
 - future composer
+- (ultimate) sound tracker
 - pseudo barebone flashlib
 
 in my conversion i followed a pretty straight 1:1 approach, 
@@ -101,3 +102,4 @@ Supported Formats:
   - SoundFX 1.0/1.8/1.9/2.0
   - Soundtracker 2.3/2.5
   - Ultimate Soundtracker, The (Karsten Obarski)
+
