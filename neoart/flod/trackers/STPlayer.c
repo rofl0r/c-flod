@@ -39,18 +39,29 @@ void STPlayer_ctor(struct STPlayer* self, struct Amiga *amiga) {
 	super(amiga);
 	PERIODS->fixed = true;
 
-	track   = new Vector.<int>(128, true);
-	samples = new Vector.<AmigaSample>(16, true);
-	voices  = new Vector.<STVoice>(4, true);
+	self->track   = new Vector.<int>(128, true);
+	self->samples = new Vector.<AmigaSample>(16, true);
+	self->voices  = new Vector.<STVoice>(4, true);
 
-	voices[0] = new STVoice(0);
-	voices[0].next = voices[1] = new STVoice(1);
-	voices[1].next = voices[2] = new STVoice(2);
-	voices[2].next = voices[3] = new STVoice(3);	
+	self->voices[0] = new STVoice(0);
+	self->voices[0].next = voices[1] = new STVoice(1);
+	self->voices[1].next = voices[2] = new STVoice(2);
+	self->voices[2].next = voices[3] = new STVoice(3);	
 }
 
 struct STPlayer* STPlayer_new(struct Amiga *amiga) {
 	CLASS_NEW_BODY(STPlayer, amiga);
+}
+
+static int isLegal(char *text) {
+	int i = 0;
+	if (!text[i]) return 0;
+
+	while(text[i]) {
+		if (text[i] < 32 || text[i] > 127) return 0;
+		i++;
+	}
+	return 1;
 }
 
 
@@ -61,37 +72,41 @@ void STPlayer_set_force(struct STPlayer* self, int value) {
 	else if (value > DOC_SOUNDTRACKER_20)
 		value = DOC_SOUNDTRACKER_20;
 
-	version = value;
+	self->super.super.version = value;
 }
 
 //override
 void STPlayer_set_ntsc(struct STPlayer* self, int value) {
-	super->ntsc = value;
+	self->super->ntsc = value;
 
-	if (version < DOC_SOUNDTRACKER_9)
-		amiga->samplesTick = int((240 - tempo) * (value ? 7.5152005551 : 7.58437970472));
+	if (self->super.super.version < DOC_SOUNDTRACKER_9)
+		self->super.amiga->super.samplesTick = (240 - self->super.super.tempo) * (value ? 7.5152005551f : 7.58437970472f);
 }
 
 //override
 void STPlayer_process(struct STPlayer* self) {
-	var chan:AmigaChannel, row:AmigaRow, sample:AmigaSample, int value; voice:STVoice = voices[0];
+	struct AmigaChannel *chan = NULL;
+	struct AmigaRow *row = NULL;
+	struct AmigaSample *sample = NULL;
+	int value; 
+	struct STVoice *voice = &self->voices[0];
 
-	if (!tick) {
-		value = track[trackPos] + patternPos;
+	if (!self->super.super.tick) {
+		value = self->track[self->trackPos] + self->patternPos;
 
 		while (voice) {
 			chan = voice->channel;
 			voice->enabled = 0;
 
-			row = patterns[int(value + voice->index)];
+			row = self->patterns[int(value + voice->index)];
 			voice->period = row->note;
 			voice->effect = row->effect;
 			voice->param  = row->param;
 
 			if (row->sample) {
-				sample = voice->sample = samples[row->sample];
+				sample = voice->sample = self->samples[row->sample];
 
-				if (((version & 2) == 2) && voice->effect == 12) chan->volume = voice->param;
+				if (((self->super.super.version & 2) == 2) && voice->effect == 12) chan->volume = voice->param;
 				else chan->volume = sample->volume;
 			} else {
 				sample = voice->sample;
@@ -110,29 +125,29 @@ void STPlayer_process(struct STPlayer* self) {
 			chan->pointer = sample->loopPtr;
 			chan->length  = sample->repeat;
 
-			if (version < DOC_SOUNDTRACKER_20) {
+			if (self->super.super.version < DOC_SOUNDTRACKER_20) {
 				voice = voice->next;
 				continue;
 			}
 
 			switch (voice->effect) {
 				case 11:  //position jump
-					trackPos = voice->param - 1;
-					jumpFlag ^= 1;
+					self->trackPos = voice->param - 1;
+					self->jumpFlag ^= 1;
 					break;
 				case 12:  //set volume
 					chan->volume = voice->param;
 					break;
 				case 13:  //pattern break
-					jumpFlag ^= 1;
+					self->jumpFlag ^= 1;
 					break;
 				case 14:  //set filter
-					amiga->filter->active = voice->param ^ 1;
+					self->super.amiga->filter->active = voice->param ^ 1;
 					break;
 				case 15:  //set speed
 					if (!voice->param) break;
-					speed = voice->param & 0x0f;
-					tick = 0;
+					self->super.super.speed = voice->param & 0x0f;
+					self->super.super.tick = 0;
 					break;
 				default:
 					break;
@@ -147,9 +162,9 @@ void STPlayer_process(struct STPlayer* self) {
 			}
 			chan = voice->channel;
 
-			if (version == ULTIMATE_SOUNDTRACKER) {
+			if (self->super.super.version == ULTIMATE_SOUNDTRACKER) {
 				if (voice->effect == 1) {
-					arpeggio(voice);
+					self->arpeggio(voice);
 				} else if (voice->effect == 2) {
 					value = voice->param >> 4;
 
@@ -161,7 +176,7 @@ void STPlayer_process(struct STPlayer* self) {
 			} else {
 				switch (voice->effect) {
 					case 0: //arpeggio
-						arpeggio(voice);
+						self->arpeggio(voice);
 						break;
 					case 1: //portamento up
 						voice->last -= voice->param & 0x0f;
@@ -177,7 +192,7 @@ void STPlayer_process(struct STPlayer* self) {
 						break;
 				}
 
-				if ((version & 2) != 2) {
+				if ((self->super.super.version & 2) != 2) {
 					voice = voice->next;
 					continue;
 				}
@@ -187,10 +202,10 @@ void STPlayer_process(struct STPlayer* self) {
 						chan->volume = voice->param;
 						break;
 					case 14:  //set filter
-						amiga->filter->active = 0;
+						self->super.amiga->filter->active = 0;
 						break;
 					case 15:  //set speed
-						speed = voice->param & 0x0f;
+						self->super.super.speed = voice->param & 0x0f;
 						break;
 					default:
 						break;
@@ -200,16 +215,16 @@ void STPlayer_process(struct STPlayer* self) {
 		}
 	}
 
-	if (++tick == speed) {
-		tick = 0;
-		patternPos += 4;
+	if (++(self->super.super.tick) == self->super.super.speed) {
+		self->super.super.tick = 0;
+		self->patternPos += 4;
 
-		if (patternPos == 256 || jumpFlag) {
-			patternPos = jumpFlag = 0;
+		if (self->patternPos == 256 || self->jumpFlag) {
+			self->patternPos = self->jumpFlag = 0;
 
-			if (++trackPos == length) {
-				trackPos = 0;
-				amiga->complete = 1;
+			if (++(self->trackPos) == self->length) {
+				self->trackPos = 0;
+				self->super.amiga->complete = 1;
 			}
 		}
 	}
@@ -217,39 +232,47 @@ void STPlayer_process(struct STPlayer* self) {
 
 //override
 void STPlayer_initialize(struct STPlayer* self) {
-	var voice:STVoice = voices[0];
-	super->initialize();
-	ntsc = standard;
+	struct STVoice *voice = &self->voices[0];
+	self->super->initialize();
+	self->ntsc = standard;
 
-	speed      = 6;
-	trackPos   = 0;
-	patternPos = 0;
-	jumpFlag   = 0;
+	self->super.super.speed      = 6;
+	self->trackPos   = 0;
+	self->patternPos = 0;
+	self->jumpFlag   = 0;
 
 	while (voice) {
 		voice->initialize();
-		voice->channel = amiga->channels[voice->index];
-		voice->sample  = samples[0];
+		voice->channel = &self->super.amiga->channels[voice->index];
+		voice->sample  = &self->samples[0];
 		voice = voice->next;
 	}
 }
 
 //override
 void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
-	var int higher; int i; int j; row:AmigaRow, sample:AmigaSample, int score; int size; int value;
+	int higher = 0;
+	int i = 0; 
+	int j = 0; 
+	struct AmigaRow *row = NULL;
+	struct AmigaSample *sample = NULL;
+	int score = 0; 
+	int size = 0; 
+	int value = 0;
+	
 	if (stream->length < 1626) return;
 
-	title = stream->readMultiByte(20, ENCODING);
-	score += isLegal(title);
+	self->super.super.title = stream->readMultiByte(20, ENCODING);
+	score += isLegal(self->super.super.title);
 
-	version = ULTIMATE_SOUNDTRACKER;
+	self->super.super.version = ULTIMATE_SOUNDTRACKER;
 	stream->position = 42;
 
 	for (i = 1; i < 16; ++i) {
 		value = stream->readUnsignedShort();
 
 		if (!value) {
-			samples[i] = null;
+			self->samples[i] = null;
 			stream->position += 28;
 			continue;
 		}
@@ -268,20 +291,20 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 		stream->position += 22;
 		sample->pointer = size;
 		size += sample->length;
-		samples[i] = sample;
+		self->samples[i] = sample;
 
 		score += isLegal(sample->name);
-		if (sample->length > 9999) version = MASTER_SOUNDTRACKER;
+		if (sample->length > 9999) self->super.super.version = MASTER_SOUNDTRACKER;
 	}
 
 	stream->position = 470;
-	length = stream->readUnsignedByte();
-	tempo  = stream->readUnsignedByte();
+	self->length = stream->readUnsignedByte();
+	self->super.super.tempo  = stream->readUnsignedByte();
 
 	for (i = 0; i < 128; ++i) {
 		value = stream->readUnsignedByte() << 8;
 		if (value > 16384) score--;
-		track[i] = value;
+		self->track[i] = value;
 		if (value > higher) higher = value;
 	}
 
@@ -296,12 +319,12 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 		row = new AmigaRow();
 
 		row->note   = stream->readUnsignedShort();
-		value      = stream->readUnsignedByte();
+		value       = stream->readUnsignedByte();
 		row->param  = stream->readUnsignedByte();
 		row->effect = value & 0x0f;
 		row->sample = value >> 4;
 
-		patterns[i] = row;
+		self->patterns[i] = row;
 
 		if (row->effect > 2 && row->effect < 11) score--;
 		if (row->note) {
@@ -309,22 +332,22 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 		}
 
 		if (row->sample)
-		if (row->sample > 15 || !samples[row->sample]) {
+		if (row->sample > 15 || !self->samples[row->sample]) {
 			if (row->sample > 15) score--;
 			row->sample = 0;
 		}
 
 		if (row->effect > 2 || (!row->effect && row->param != 0))
-			version = DOC_SOUNDTRACKER_9;
+			self->super.super.version = DOC_SOUNDTRACKER_9;
 
 		if (row->effect == 11 || row->effect == 13)
-			version = DOC_SOUNDTRACKER_20;
+			self->super.super.version = DOC_SOUNDTRACKER_20;
 	}
 
-	amiga->store(stream, size);
+	self->super.amiga->store(stream, size);
 
 	for (i = 1; i < 16; ++i) {
-		sample = samples[i];
+		sample = &self->samples[i];
 		if (!sample) continue;
 
 		if (sample->loop) {
@@ -332,24 +355,26 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 			sample->pointer = sample->loopPtr;
 			sample->length  = sample->repeat;
 		} else {
-			sample->loopPtr = amiga->memory->length;
+			sample->loopPtr = self->super.amiga->memory->length;
 			sample->repeat  = 2;
 		}
 
 		size = sample->pointer + 4;
-		for (j = sample->pointer; j < size; ++j) amiga->memory[j] = 0;
+		for (j = sample->pointer; j < size; ++j) self->super.amiga->memory[j] = 0;
 	}
 
 	sample = new AmigaSample();
-	sample->pointer = sample->loopPtr = amiga->memory->length;
+	sample->pointer = sample->loopPtr = self->super.amiga->memory->length;
 	sample->length  = sample->repeat  = 2;
 	samples[0] = sample;
 
-	if (score < 1) version = 0;
+	if (score < 1) self->super.super.version = 0;
 }
 
 void STPlayer_arpeggio(struct STPlayer* self, struct STVoice *voice) {
-	var chan:AmigaChannel = voice->channel, i:int = 0, param:int = tick % 3;
+	struct AmigaChannel *chan = voice->channel;
+	int i = 0;
+	itn param = self->super.super.tick % 3;
 
 	if (!param) {
 		chan->period = voice->last;
@@ -357,19 +382,8 @@ void STPlayer_arpeggio(struct STPlayer* self, struct STVoice *voice) {
 	}
 
 	if (param == 1) param = voice->param >> 4;
-		else param = voice->param & 0x0f;
+	else param = voice->param & 0x0f;
 
 	while (voice->last != PERIODS[i]) i++;
-	chan->period = PERIODS[int(i + param)];
-}
-
-int STPlayer_isLegal(char *text) {
-	int i = 0;
-	if (!text[i]) return 0;
-
-	while(text[i]) {
-		if (text[i] < 32 || text[i] > 127) return 0;
-		i++;
-	}
-	return 1;
+	chan->period = PERIODS[i + param];
 }
