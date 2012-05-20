@@ -12,7 +12,7 @@
 #define PTPLAYER_MAX_SAMPLES 32
 #define PTPLAYER_MAX_VOICES 4
 
-#define PTPLAYER_MAX_PATTERNS 16
+#define PTPLAYER_MAX_PATTERNS (32 + 256)
 
 enum Protracker_Versions {
       PROTRACKER_10 = 1,
@@ -42,6 +42,8 @@ struct PTPlayer {
 	int breakPos;
 	int jumpFlag;
 	int vibratoDepth;
+	char title_buffer[24];
+	char sample_names[24][PTPLAYER_MAX_SAMPLES];
 };
 
 void PTPlayer_defaults(struct PTPlayer* self);

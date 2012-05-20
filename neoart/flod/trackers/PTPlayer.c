@@ -295,7 +295,7 @@ void PTPlayer_initialize(struct PTPlayer* self) {
 void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 	int higher = 0; 
 	int i = 0; 
-	char *id; //String;
+	char id[5] = {0};
 	int j = 0;
 	struct PTRow *row = NULL;
 	struct PTSample *sample = NULL;
@@ -305,11 +305,18 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 	if (ByteArray_get_length(stream) < 2106) return;
 
 	ByteArray_set_position(stream, 1080);
-	id = stream->readMultiByte(stream, 4, ENCODING);
-	if (id != "M->K." && id != "M!K!") return;
+	stream->readMultiByte(stream, id, 4);
+	
+	//FIXME "M->K." must be a typo, since its 5 bytes
+	if(memcmp(id, "M->K.", 4) && memcmp(id, "M!K!", 4)) {
+		printf("header not found, got %s\n", id);
+		return;
+	}
 
 	ByteArray_set_position(stream, 0);
-	self->super.super.title = stream->readMultiByte(20, ENCODING);
+	stream->readMultiByte(stream, self->title_buffer, 20);
+	self->super.super.title = self->title_buffer;
+	//self->super.super.title = stream->readMultiByte(20, ENCODING);
 	self->super.super.version = PROTRACKER_10;
 	ByteArray_set_position_rel(stream, +22);
 
@@ -328,8 +335,11 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 		PTSample_ctor(sample);
 		
 		ByteArray_set_position_rel(stream, -24);
+		
+		stream->readMultiByte(stream, self->sample_names[i], 22);
+		sample->super.name = self->sample_names[i];
 
-		sample->super.name = stream->readMultiByte(stream, 22, ENCODING);
+		//sample->super.name = stream->readMultiByte(stream, 22, ENCODING);
 		sample->super.length = sample->realLen = value << 1;
 		ByteArray_set_position_rel(stream, +2);
 
@@ -393,7 +403,7 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 			sample->super.loopPtr = sample->super.pointer + sample->super.loop;
 			sample->super.length  = sample->super.loop + sample->super.repeat;
 		} else {
-			sample->super.loopPtr = self->super.amiga->memory->length;
+			sample->super.loopPtr = self->super.amiga->vector_count_memory;  //self->super.amiga->memory->length;
 			sample->super.repeat  = 2;
 		}
 
@@ -406,7 +416,7 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 	PTSample_ctor(sample);
 	
 	//sample = PTSample_new();
-	sample->super.pointer = sample->super.loopPtr = self->super.amiga->memory->length;
+	sample->super.pointer = sample->super.loopPtr =  self->super.amiga->vector_count_memory; //self->super.amiga->memory->length;
 	sample->super.length  = sample->super.repeat  = 2;
 	//self->samples[0] = sample;
 }
