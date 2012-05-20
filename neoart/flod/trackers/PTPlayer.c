@@ -215,7 +215,7 @@ void PTPlayer_process(struct PTPlayer* self) {
 				if (voice->vibratoWave < 4) voice->vibratoPos = 0;
 				if (voice->tremoloWave < 4) voice->tremoloPos = 0;
 
-				chan->enabled = 0;
+				AmigaChannel_set_enabled(chan, 0);
 				chan->pointer = voice->pointer;
 				chan->length  = voice->length;
 				AmigaChannel_set_period(chan, voice->period);
@@ -228,7 +228,7 @@ void PTPlayer_process(struct PTPlayer* self) {
 
 			while (voice) {
 				chan = voice->channel;
-				if (voice->enabled) chan->enabled = 1;
+				if (voice->enabled) AmigaChannel_set_enabled(chan, 1);
 
 				chan->pointer = voice->loopPtr;
 				chan->length  = voice->repeat;
@@ -698,12 +698,12 @@ static void extended(struct PTPlayer* self, struct PTVoice *voice) {
 			if (self->super.super.tick || !param || !voice->period) return;
 			if (self->super.super.tick % param) return;
 
-			chan->enabled = 0;
+			AmigaChannel_set_enabled(chan, 0);
 			chan->pointer = voice->pointer;
 			chan->length  = voice->length;
 			chan->delay   = 30;
 
-			chan->enabled = 1;
+			AmigaChannel_set_enabled(chan, 1);
 			chan->pointer = voice->loopPtr;
 			chan->length  = voice->repeat;
 			AmigaChannel_set_period(chan, voice->period);
@@ -729,12 +729,12 @@ static void extended(struct PTPlayer* self, struct PTVoice *voice) {
 		case 13:  //note delay
 			if (self->super.super.tick != param || !voice->period) return;
 
-			chan->enabled = 0;
+			AmigaChannel_set_enabled(chan, 0);
 			chan->pointer = voice->pointer;
 			chan->length  = voice->length;
 			chan->delay   = 30;
 
-			chan->enabled = 1;
+			AmigaChannel_set_enabled(chan, 1);
 			chan->pointer = voice->loopPtr;
 			chan->length  = voice->repeat;
 			AmigaChannel_set_period(chan, voice->period);
