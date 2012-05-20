@@ -260,7 +260,7 @@ void PTPlayer_process(struct PTPlayer* self) {
 
 			if (++(self->trackPos) == self->length) {
 				self->trackPos = 0;
-				self->super.amiga->complete = 1;
+				CoreMixer_set_complete(&self->super.amiga->super, 1);
 			}
 		}
 	}
@@ -374,7 +374,7 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 		self->super.super.version = PROTRACKER_12;
 	}
 
-	self->super.amiga->store(stream, size);
+	Amiga_store(self->super.amiga, stream, size, -1);
 
 	for (i = 1; i < 32; ++i) {
 		sample = self->samples[i];
@@ -393,7 +393,8 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 			self->super.amiga->memory[j] = 0;
 	}
 
-	sample = new PTSample();
+	//FIXME
+	sample = PTSample_new();
 	sample->super.pointer = sample->super.loopPtr = self->super.amiga->memory->length;
 	sample->super.length  = sample->super.repeat  = 2;
 	self->samples[0] = sample;
@@ -640,7 +641,6 @@ static void extended(struct PTPlayer* self, struct PTVoice *voice) {
 	int effect = voice->param >> 4;
 	int i = 0;
 	int len = 0;
-	memory:Vector.<int>;
 	int param = voice->param & 0x0f;
 
 	switch (effect) {
@@ -688,12 +688,11 @@ static void extended(struct PTPlayer* self, struct PTVoice *voice) {
 			break;
 		case 8:   //karplus strong
 			len = voice->length - 2;
-			memory = self->super.amiga->memory;
 
 			for (i = voice->loopPtr; i < len;)
-				memory[i] = (memory[i] + memory[++i]) * 0.5;
+				self->super.amiga->memory[i] = (self->super.amiga->memory[i] + self->super.amiga->memory[++i]) * 0.5;
 
-			memory[++i] = (memory[i] + memory[0]) * 0.5;
+			self->super.amiga->memory[++i] = (self->super.amiga->memory[i] + self->super.amiga->memory[0]) * 0.5f;
 			break;
 		case 9:   //retrig note
 			if (self->super.super.tick || !param || !voice->period) return;
