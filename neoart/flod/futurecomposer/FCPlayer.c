@@ -203,8 +203,13 @@ void FCPlayer_process(struct FCPlayer* self) {
 		while (voice) {
 			chan = voice->channel;
 
-			xByteArray_set_position(self->pats, voice->pattern + voice->patStep);
-			temp = self->pats->readUnsignedByte(self->pats);
+			unsigned newpos = voice->pattern + voice->patStep;
+			if(newpos < xByteArray_get_length(self->pats)) {
+				xByteArray_set_position(self->pats, newpos);
+				temp = self->pats->readUnsignedByte(self->pats);
+			} else  {
+				temp = 0;
+			}
 
 			if (voice->patStep >= 64 || temp == 0x49) {
 				if (ByteArray_get_position(self->seqs) == self->length) {
@@ -214,14 +219,25 @@ void FCPlayer_process(struct FCPlayer* self) {
 				}
 
 				voice->patStep = 0;
-				voice->pattern = self->seqs->readUnsignedByte(self->seqs) << 6;
-				voice->transpose = self->seqs->readByte(self->seqs);
-				voice->soundTranspose = self->seqs->readByte(self->seqs);
-
-				xByteArray_set_position(self->pats, voice->pattern);
-				temp = self->pats->readUnsignedByte(self->pats);
+				// blue-funk.fc4, paralax.fc3, Hellsector-5.fc4 
+				// all cause an eof read here, but they play well in uade.
+				// the actionscript code triggers an eof exception as well.
+				if(my_bytesAvailable(self->seqs, self->seqs_used) >= 3) {
+					voice->pattern = self->seqs->readUnsignedByte(self->seqs) << 6;
+					voice->transpose = self->seqs->readByte(self->seqs);
+					voice->soundTranspose = self->seqs->readByte(self->seqs);
+				}
+				if(voice->pattern < xByteArray_get_length(self->pats)) {
+					xByteArray_set_position(self->pats, voice->pattern);
+					temp = self->pats->readUnsignedByte(self->pats);
+				} else {
+					temp = 0;
+				}
 			}
-			info = self->pats->readUnsignedByte(self->pats);
+			
+			if(voice->pattern < xByteArray_get_length(self->pats))
+				info = self->pats->readUnsignedByte(self->pats);
+			
 			xByteArray_set_position(self->frqs, 0);
 			xByteArray_set_position(self->vols, 0);
 
@@ -259,13 +275,19 @@ void FCPlayer_process(struct FCPlayer* self) {
 				//voice->portamento = self->pats[(ByteArray_get_position(self->pats) + 1)];
 				if (self->super.super.version == FUTURECOMP_10) voice->portamento <<= 1;
 			}
+
 			voice->patStep += 2;
 			voice = voice->next;
 		}
 
 		if (ByteArray_get_position(self->seqs) != base) {
-			temp = self->seqs->readUnsignedByte(self->seqs);
-			if (temp) self->super.super.speed = temp;
+			if (ByteArray_get_position(self->seqs) == xByteArray_get_length(self->seqs)) {
+				xByteArray_set_position(self->seqs, 0);
+				CoreMixer_set_complete(&self->super.amiga->super, 1);			
+			} else {
+				temp = self->seqs->readUnsignedByte(self->seqs);
+				if (temp) self->super.super.speed = temp;
+			}
 		}
 		self->super.super.tick = self->super.super.speed;
 	}
@@ -281,7 +303,12 @@ void FCPlayer_process(struct FCPlayer* self) {
 				voice->frqSustain--;
 				break;
 			}
-			xByteArray_set_position(self->frqs, voice->frqPos + voice->frqStep);
+			unsigned nextpos = voice->frqPos + voice->frqStep;
+			// fix for kerni-the_end.fc4
+			if(nextpos > xByteArray_get_length(self->frqs)) 
+				nextpos = xByteArray_get_length(self->frqs);
+			
+			xByteArray_set_position(self->frqs, nextpos);
 
 			do {
 				unsigned temp_idx;
@@ -597,6 +624,7 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 	self->vols_used += stream->readBytes(stream, self->vols, 8, len);
 
 	ByteArray_set_position(stream, 32);
+	// sampleOffset in http://xmms-fc.cvs.sourceforge.net/viewvc/xmms-fc/libfc14audiodecoder/src/FC.cpp?revision=1.2&view=markup
 	size = stream->readUnsignedInt(stream);
 	ByteArray_set_position(stream, 40);
 
@@ -614,6 +642,7 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 		len = stream->readUnsignedShort(stream) << 1;
 
 		if (len > 0) {
+			if(size == stream->size) continue; // fix for hydra_great_saga.fc3
 			position = ByteArray_get_position(stream);
 			ByteArray_set_position(stream, size);
 			stream->readMultiByte(stream, id, 4);
