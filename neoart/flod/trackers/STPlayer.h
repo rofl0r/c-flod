@@ -16,7 +16,7 @@ enum Soundtracker_Format {
 
 #define STPLAYER_MAX_TRACKS 128
 #define STPLAYER_MAX_SAMPLES 16
-#define STPLAYER_MAX_PATTERNS (32 + 256)
+#define STPLAYER_MAX_PATTERNS (3840 + 256)
 
 // fixed
 #define STPLAYER_MAX_VOICES 4
