@@ -55,7 +55,7 @@ static int finish_him(struct SoundChannel *self) {
 	close(self->fd);
 	ByteArray_dump_to_file(((struct Amiga*) self->param)->super.wave, "foo.wav");
 	//CorePlayer_save_record(self->param, "foo.wav");
-	exit(1);
+	exit(0);
 }
 
 void SoundChannel_idle(struct SoundChannel *self, struct Event* e)  {
