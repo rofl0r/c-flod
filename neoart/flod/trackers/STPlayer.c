@@ -55,7 +55,7 @@ struct STPlayer* STPlayer_new(struct Amiga *amiga) {
 
 
 //override
-void STPlayer_set_force( int value) {
+void STPlayer_set_force(struct STPlayer* self, int value) {
       if (value < ULTIMATE_SOUNDTRACKER)
         value = ULTIMATE_SOUNDTRACKER;
       else if (value > DOC_SOUNDTRACKER_20)
@@ -65,7 +65,7 @@ void STPlayer_set_force( int value) {
     }
 
 //override
-void STPlayer_set_ntsc( int value) {
+void STPlayer_set_ntsc(struct STPlayer* self, int value) {
       super->ntsc = value;
 
       if (version < DOC_SOUNDTRACKER_9)
@@ -73,7 +73,7 @@ void STPlayer_set_ntsc( int value) {
     }
 
 //override
-void STPlayer_process() {
+void STPlayer_process(struct STPlayer* self) {
       var chan:AmigaChannel, row:AmigaRow, sample:AmigaSample, int value; voice:STVoice = voices[0];
 
       if (!tick) {
@@ -210,7 +210,7 @@ void STPlayer_process() {
     }
 
 //override
-void STPlayer_initialize() {
+void STPlayer_initialize(struct STPlayer* self) {
       var voice:STVoice = voices[0];
       super->initialize();
       ntsc = standard;
@@ -229,7 +229,7 @@ void STPlayer_initialize() {
     }
 
 //override
-void STPlayer_loader(stream:ByteArray) {
+void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
       var int higher; int i; int j; row:AmigaRow, sample:AmigaSample, int score; int size; int value;
       if (stream->length < 1626) return;
 
@@ -342,20 +342,20 @@ void STPlayer_loader(stream:ByteArray) {
       if (score < 1) version = 0;
     }
 
-void STPlayer_arpeggio(voice:STVoice) {
-      var chan:AmigaChannel = voice->channel, i:int = 0, param:int = tick % 3;
+void STPlayer_arpeggio(struct STPlayer* self, struct STVoice *voice) {
+	var chan:AmigaChannel = voice->channel, i:int = 0, param:int = tick % 3;
 
-      if (!param) {
-        chan->period = voice->last;
-        return;
-      }
+	if (!param) {
+		chan->period = voice->last;
+		return;
+	}
 
-      if (param == 1) param = voice->param >> 4;
-        else param = voice->param & 0x0f;
+	if (param == 1) param = voice->param >> 4;
+		else param = voice->param & 0x0f;
 
-      while (voice->last != PERIODS[i]) i++;
-      chan->period = PERIODS[int(i + param)];
-    }
+	while (voice->last != PERIODS[i]) i++;
+	chan->period = PERIODS[int(i + param)];
+}
 
 int STPlayer_isLegal(char *text) {
 	int i = 0;
