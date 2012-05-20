@@ -304,45 +304,45 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 	
 	if (stream->length < 2106) return;
 
-	stream->position = 1080;
+	ByteArray_set_position(stream, 1080);
 	id = stream->readMultiByte(4, ENCODING);
 	if (id != "M->K." && id != "M!K!") return;
 
-	stream->position = 0;
-	self->title = stream->readMultiByte(20, ENCODING);
-	self->version = PROTRACKER_10;
-	stream->position += 22;
+	ByteArray_set_position(stream, 0);
+	self->super.super.title = stream->readMultiByte(20, ENCODING);
+	self->super.super.version = PROTRACKER_10;
+	ByteArray_set_position_rel(stream, +22);
 
 	for (i = 1; i < 32; ++i) {
 		value = stream->readUnsignedShort();
 
 		if (!value) {
 			self->samples[i] = null;
-			stream->position += 28;
+			ByteArray_set_position_rel(stream, +28);
 			continue;
 		}
 
 		sample = new PTSample();
-		stream->position -= 24;
+		ByteArray_set_position_rel(stream, -24);
 
 		sample->super.name = stream->readMultiByte(22, ENCODING);
 		sample->super.length = sample->realLen = value << 1;
-		stream->position += 2;
+		ByteArray_set_position_rel(stream, +2);
 
 		sample->finetune = stream->readUnsignedByte() * 37;
 		sample->super.volume   = stream->readUnsignedByte();
 		sample->super.loop     = stream->readUnsignedShort() << 1;
 		sample->super.repeat   = stream->readUnsignedShort() << 1;
 
-		stream->position += 22;
+		ByteArray_set_position_rel(stream, +22);
 		sample->super.pointer = size;
 		size += sample->super.length;
 		self->samples[i] = sample;
 	}
 
-	stream->position = 950;
+	ByteArray_set_position(stream, 950);
 	self->length = stream->readUnsignedByte();
-	stream->position++;
+	ByteArray_set_position_rel(stream, +1);
 
 	for (i = 0; i < 128; ++i) {
 		value = stream->readUnsignedByte() << 8;
@@ -350,11 +350,13 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 		if (value > higher) higher = value;
 	}
 
-	stream->position = 1084;
+	ByteArray_set_position(stream, 1084);
 	higher += 256;
+	//FIXME
 	patterns = new Vector.<PTRow>(higher, true);
 
 	for (i = 0; i < higher; ++i) {
+		//FIXME
 		row = new PTRow();
 		row->step = value = stream->readUnsignedInt();
 
