@@ -15,33 +15,31 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->trackers {
-  import neoart.flod.core.*;
 
-  public final class STVoice {
-    internal var
- int index;
-      next    : STVoice,
-      channel : AmigaChannel,
-      sample  : AmigaSample,
- int enabled;
- int period;
- int last;
- int effect;
- int param;
+#include "STVoice.h"
+#include "../flod_internal.h"
 
-     void STVoice( int index) {
-      self->index = index;
-    }
+void STVoice_defaults(struct STVoice* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
 
-    internal function initialize():void {
-      channel = null;
-      sample  = null;
-      enabled = 0;
-      period  = 0;
-      last    = 0;
-      effect  = 0;
-      param   = 0;
-    }
-  }
+void STVoice_ctor(struct STVoice* self, int index) {
+	CLASS_CTOR_DEF(STVoice);
+	// original constructor code goes here
+	self->index = index;
+}
+
+struct STVoice* STVoice_new(int index) {
+	CLASS_NEW_BODY(STVoice, index);
+}
+
+void STVoice_initialize(struct STVoice* self) {
+	self->channel = null;
+	self->sample  = null;
+	self->enabled = 0;
+	self->period  = 0;
+	self->last    = 0;
+	self->effect  = 0;
+	self->param   = 0;
 }
