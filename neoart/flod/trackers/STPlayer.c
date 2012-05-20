@@ -264,35 +264,35 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 	int size = 0; 
 	int value = 0;
 	
-	if (stream->length < 1626) return;
+	if (ByteArray_get_length(stream) < 1626) return;
 
 	self->super.super.title = stream->readMultiByte(20, ENCODING);
 	score += isLegal(self->super.super.title);
 
 	self->super.super.version = ULTIMATE_SOUNDTRACKER;
-	stream->position = 42;
+	ByteArray_set_position(stream, 42);
 
 	for (i = 1; i < 16; ++i) {
 		value = stream->readUnsignedShort();
 
 		if (!value) {
 			self->samples[i] = null;
-			stream->position += 28;
+			ByteArray_set_position_rel(stream, 28);
 			continue;
 		}
 
 		sample = new AmigaSample();
-		stream->position -= 24;
+		ByteArray_set_position_rel(stream, -24);
 
 		sample->name = stream->readMultiByte(22, ENCODING);
 		sample->length = value << 1;
-		stream->position += 3;
+		ByteArray_set_position_rel(stream, 3);
 
 		sample->volume = stream->readUnsignedByte();
 		sample->loop   = stream->readUnsignedShort();
 		sample->repeat = stream->readUnsignedShort() << 1;
 
-		stream->position += 22;
+		ByteArray_set_position_rel(stream, 22);
 		sample->pointer = size;
 		size += sample->length;
 		self->samples[i] = sample;
@@ -301,7 +301,7 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 		if (sample->length > 9999) self->super.super.version = MASTER_SOUNDTRACKER;
 	}
 
-	stream->position = 470;
+	ByteArray_set_position(stream, 470);
 	self->length = stream->readUnsignedByte();
 	self->super.super.tempo  = stream->readUnsignedByte();
 
@@ -312,11 +312,11 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 		if (value > higher) higher = value;
 	}
 
-	stream->position = 600;
+	ByteArray_set_position(stream, 600);
 	higher += 256;
 	patterns = new Vector.<AmigaRow>(higher, true);
 
-	i = (stream->length - size - 600) >> 2;
+	i = (ByteArray_get_length(stream) - size - 600) >> 2;
 	if (higher > i) higher = i;
 
 	for (i = 0; i < higher; ++i) {
