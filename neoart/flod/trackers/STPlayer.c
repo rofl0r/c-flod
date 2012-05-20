@@ -331,7 +331,6 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 	higher += 256;
 	//FIXME
 	//patterns = new Vector.<AmigaRow>(higher, true);
-	#define assert_dbg(exp) do { if (!(exp)) __asm__("int3"); } while(0)
 
 	assert_dbg(higher < STPLAYER_MAX_PATTERNS);
 
