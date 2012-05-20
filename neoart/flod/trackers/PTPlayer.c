@@ -124,7 +124,13 @@ void PTPlayer_set_force(struct PTPlayer* self, int value) {
 
 //override
 void PTPlayer_process(struct PTPlayer* self) {
-	var chan:AmigaChannel, int i; int pattern; row:PTRow, sample:PTSample, int value; voice:PTVoice = voices[0];
+	struct AmigaChannel *chan = NULL;
+	int i = 0; 
+	int pattern = 0;
+	struct PTRow *row = NULL;
+	struct PTSample *sample = NULL;
+	int value = 0;
+	struct PTVoice *voice = voices[0];
 
 	if (!tick) {
 		if (patternDelay) {
@@ -257,7 +263,7 @@ void PTPlayer_process(struct PTPlayer* self) {
 
 //override
 void PTPlayer_initialize(struct PTPlayer* self) {
-	var voice:PTVoice = voices[0];
+	struct PTVoice *voice = voices[0];
 
 	tempo        = 125;
 	speed        = 6;
@@ -281,7 +287,15 @@ void PTPlayer_initialize(struct PTPlayer* self) {
 
 //override
 void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
-	var int higher; int i; id:String, int j; row:PTRow, sample:PTSample, int size; int value;
+	int higher = 0; 
+	int i = 0; 
+	char *id; //String;
+	int j = 0;
+	struct PTRow *row = NULL;
+	struct PTSample *sample = NULL;
+	int size = 0;
+	int value = 0;
+	
 	if (stream->length < 2106) return;
 
 	stream->position = 1080;
@@ -380,7 +394,13 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 }
 
 void PTPlayer_effects(struct PTPlayer* self) {
-	var chan:AmigaChannel, int i; int position; int slide; int value; voice:PTVoice = voices[0], int wave;
+	struct AmigaChannel *chan;
+	int i = 0;
+	int position = 0;
+	int slide = 0;
+	int value = 0;
+	struct PTVoice *voice = voices[0];
+	int wave = 0;
 
 	while (voice) {
 		chan = voice->channel;
@@ -558,7 +578,9 @@ void PTPlayer_effects(struct PTPlayer* self) {
 }
 
 void PTPlayer_moreEffects(struct PTPlayer* self, struct PTVoice *voice) {
-	var chan:AmigaChannel = voice->channel, int value;
+	struct AmigaChannel *chan = voice->channel;
+	int value = 0;
+	
 	if (voice->funkSpeed) updateFunk(voice);
 
 	switch (voice->effect) {
@@ -608,7 +630,12 @@ void PTPlayer_moreEffects(struct PTPlayer* self, struct PTVoice *voice) {
 }
 
 void PTPlayer_extended(struct PTPlayer* self, struct PTVoice *voice) {
-	var chan:AmigaChannel = voice->channel, effect:int = voice->param >> 4, int i; int len; memory:Vector.<int>, param:int = voice->param & 0x0f;
+	struct AmigaChannel *chan = voice->channel;
+	int effect = voice->param >> 4;
+	int i = 0;
+	int len = 0;
+	memory:Vector.<int>;
+	int param = voice->param & 0x0f;
 
 	switch (effect) {
 		case 0:   //set filter
@@ -719,7 +746,10 @@ void PTPlayer_extended(struct PTPlayer* self, struct PTVoice *voice) {
 }
 
 void PTPlayer_updateFunk(struct PTPlayer* self, struct PTVoice *voice) {
-	var chan:AmigaChannel = voice->channel, int p1; int p2; value:int = FUNKREP[voice->funkSpeed];
+	struct AmigaChannel *chan = voice->channel;
+	int p1 = 0; 
+	int p2 = 0; 
+	int value = FUNKREP[voice->funkSpeed];
 
 	voice->funkPos += value;
 	if (voice->funkPos < 128) return;
