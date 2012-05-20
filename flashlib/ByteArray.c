@@ -140,10 +140,11 @@ int ByteArray_open_mem(struct ByteArray* self, char* data, size_t size) {
 	return 1;
 }
 
+#define assert_dbg(exp) do { if (!(exp)) __asm__("int3"); } while(0)
 void ByteArray_readMultiByte(struct ByteArray* self, char* buffer, size_t len) {
 	if(self->type == BAT_MEMSTREAM) {
-		assert(self->start_addr);
-		assert(self->pos + len < self->size);
+		assert_dbg(self->start_addr);
+		assert_dbg(self->pos + len <= self->size);
 		memcpy(buffer, &self->start_addr[self->pos], len);
 	} else {
 		ssize_t ret = read(self->fd, buffer, len);
@@ -182,7 +183,6 @@ off_t ByteArray_readBytes(struct ByteArray* self, struct ByteArray *dest, off_t 
 		abort();
 	}
 	ByteArray_readMultiByte(self, &dest->start_addr[start], len);
-	ByteArray_set_position_rel(self, len);
 	return len;
 }
 
