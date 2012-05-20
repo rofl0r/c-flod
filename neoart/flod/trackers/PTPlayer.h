@@ -12,7 +12,7 @@
 #define PTPLAYER_MAX_SAMPLES 32
 #define PTPLAYER_MAX_VOICES 4
 
-#define PTPLAYER_MAX_PATTERNS (32 + 256)
+#define PTPLAYER_MAX_PATTERNS (2048 + 256)
 
 enum Protracker_Versions {
       PROTRACKER_10 = 1,
