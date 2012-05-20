@@ -134,7 +134,7 @@ void PTPlayer_process(struct PTPlayer* self) {
 	struct PTRow *row = NULL;
 	struct PTSample *sample = NULL;
 	int value = 0;
-	struct PTVoice *voice = self->voices[0];
+	struct PTVoice *voice = &self->voices[0];
 
 	if (!self->super.super.tick) {
 		if (self->patternDelay) {
@@ -148,7 +148,8 @@ void PTPlayer_process(struct PTPlayer* self) {
 
 				if (!voice->step) AmigaChannel_set_period(chan, voice->period);
 
-				row = self->patterns[pattern + voice->index];
+				assert_dbg(pattern + voice->index < PTPLAYER_MAX_PATTERNS);
+				row = &self->patterns[pattern + voice->index];
 				voice->step   = row->step;
 				voice->effect = row->super.effect;
 				voice->param  = row->super.param;
@@ -203,7 +204,8 @@ void PTPlayer_process(struct PTPlayer* self) {
 				for (i = 0; i < 37; ++i)
 					if (row->super.note >= PERIODS[i]) break;
 
-				voice->period = PERIODS[int(voice->finetune + i)];
+				assert_dbg(voice->finetune + i < ARRAY_SIZE(PERIODS));
+				voice->period = PERIODS[voice->finetune + i];
 
 				if ((voice->step & 0x0ff0) == 0x0ed0) {
 					if (voice->funkSpeed) updateFunk(self, voice);
@@ -224,7 +226,7 @@ void PTPlayer_process(struct PTPlayer* self) {
 				moreEffects(self, voice);
 				voice = voice->next;
 			}
-			voice = self->voices[0];
+			voice = &self->voices[0];
 
 			while (voice) {
 				chan = voice->channel;
@@ -307,8 +309,7 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 	ByteArray_set_position(stream, 1080);
 	stream->readMultiByte(stream, id, 4);
 	
-	//FIXME "M->K." must be a typo, since its 5 bytes
-	if(memcmp(id, "M->K.", 4) && memcmp(id, "M!K!", 4)) {
+	if(memcmp(id, "M.K.", 4) && memcmp(id, "M!K!", 4)) {
 		printf("header not found, got %s\n", id);
 		return;
 	}
@@ -383,7 +384,8 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 
 		//self->patterns[i] = row;
 
-		if (row->super.sample > 31 || !self->samples[row->super.sample]) row->super.sample = 0;
+		// FIXME need to test for invalid sample
+		if (row->super.sample > 31 /* || !self->samples[row->super.sample] */) row->super.sample = 0;
 
 		if (row->super.effect == 15 && row->super.param > 31)
 		self->super.super.version = PROTRACKER_11;
@@ -427,7 +429,7 @@ static void effects(struct PTPlayer* self) {
 	int position = 0;
 	int slide = 0;
 	int value = 0;
-	struct PTVoice *voice = self->voices[0];
+	struct PTVoice *voice = &self->voices[0];
 	int wave = 0;
 
 	while (voice) {
