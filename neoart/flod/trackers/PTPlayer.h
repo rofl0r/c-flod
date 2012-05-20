@@ -13,6 +13,11 @@
 
 #define PTPLAYER_MAX_PATTERNS 16
 
+enum Protracker_Versions {
+      PROTRACKER_10 = 1,
+      PROTRACKER_11 = 2,
+      PROTRACKER_12 = 3,
+};
 
 struct PTPlayer {
 	int track[PTPLAYER_MAX_TRACKS];//Vector.<int>,
