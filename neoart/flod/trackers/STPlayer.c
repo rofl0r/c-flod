@@ -37,7 +37,6 @@ void STPlayer_ctor(struct STPlayer* self, struct Amiga *amiga) {
 	CLASS_CTOR_DEF(STPlayer, amiga);
 	// original constructor code goes here
 	super(amiga);
-	PERIODS->fixed = true;
 
 	self->track   = new Vector.<int>(128, true);
 	self->samples = new Vector.<AmigaSample>(16, true);
@@ -106,8 +105,10 @@ void STPlayer_process(struct STPlayer* self) {
 			if (row->sample) {
 				sample = voice->sample = self->samples[row->sample];
 
-				if (((self->super.super.version & 2) == 2) && voice->effect == 12) chan->volume = voice->param;
-				else chan->volume = sample->volume;
+				if (((self->super.super.version & 2) == 2) && voice->effect == 12) 
+					AmigaChannel_set_volume(chan, voice->param);
+				else 
+					AmigaChannel_set_volume(chan, sample->volume);
 			} else {
 				sample = voice->sample;
 			}
@@ -115,13 +116,14 @@ void STPlayer_process(struct STPlayer* self) {
 			if (voice->period) {
 				voice->enabled = 1;
 
-				chan->enabled = 0;
+				AmigaChannel_set_enabled(chan, 0);
 				chan->pointer = sample->pointer;
 				chan->length  = sample->length;
-				chan->period  = voice->last = voice->period;
+				voice->last = voice->period;
+				AmigaChannel_set_period(chan, voice->period);
 			}
 
-			if (voice->enabled) chan->enabled = 1;
+			if (voice->enabled) AmigaChannel_set_enabled(chan, 1);
 			chan->pointer = sample->loopPtr;
 			chan->length  = sample->repeat;
 
@@ -136,7 +138,7 @@ void STPlayer_process(struct STPlayer* self) {
 					self->jumpFlag ^= 1;
 					break;
 				case 12:  //set volume
-					chan->volume = voice->param;
+					AmigaChannel_set_volume(chan, voice->param);
 					break;
 				case 13:  //pattern break
 					self->jumpFlag ^= 1;
@@ -171,7 +173,7 @@ void STPlayer_process(struct STPlayer* self) {
 					if (value) voice->period += value;
 					else voice->period -= (voice->param & 0x0f);
 
-					chan->period = voice->period;
+					AmigaChannel_set_period(chan, voice->period);
 				}
 			} else {
 				switch (voice->effect) {
@@ -181,12 +183,12 @@ void STPlayer_process(struct STPlayer* self) {
 					case 1: //portamento up
 						voice->last -= voice->param & 0x0f;
 						if (voice->last < 113) voice->last = 113;
-						chan->period = voice->last;
+						AmigaChannel_set_period(chan, voice->last);
 						break;
 					case 2: //portamento down
 						voice->last += voice->param & 0x0f;
 						if (voice->last > 856) voice->last = 856;
-						chan->period = voice->last;
+						AmigaChannel_set_period(chan, voice->last);
 						break;
 					default:
 						break;
@@ -199,7 +201,7 @@ void STPlayer_process(struct STPlayer* self) {
 
 				switch (voice->effect) {
 					case 12:  //set volume
-						chan->volume = voice->param;
+						AmigaChannel_set_volume(chan, voice->param);
 						break;
 					case 14:  //set filter
 						self->super.amiga->filter->active = 0;
@@ -377,7 +379,7 @@ void STPlayer_arpeggio(struct STPlayer* self, struct STVoice *voice) {
 	itn param = self->super.super.tick % 3;
 
 	if (!param) {
-		chan->period = voice->last;
+		AmigaChannel_set_period(chan, voice->last);
 		return;
 	}
 
@@ -385,5 +387,5 @@ void STPlayer_arpeggio(struct STPlayer* self, struct STVoice *voice) {
 	else param = voice->param & 0x0f;
 
 	while (voice->last != PERIODS[i]) i++;
-	chan->period = PERIODS[i + param];
+	AmigaChannel_set_period(chan, PERIODS[i + param]);
 }
