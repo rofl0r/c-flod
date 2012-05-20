@@ -33,6 +33,7 @@ struct PTPlayer {
 	int track[PTPLAYER_MAX_TRACKS];//Vector.<int>,
 	struct PTRow patterns[PTPLAYER_MAX_PATTERNS]; //Vector.<PTRow>,
 	struct PTSample samples[PTPLAYER_MAX_SAMPLES];//Vector.<PTSample>,
+	char sample_used[PTPLAYER_MAX_SAMPLES];
 	int length;
 	struct PTVoice voices[PTPLAYER_MAX_VOICES];//Vector.<PTVoice>,
 	int trackPos;
@@ -43,7 +44,7 @@ struct PTPlayer {
 	int jumpFlag;
 	int vibratoDepth;
 	char title_buffer[24];
-	char sample_names[24][PTPLAYER_MAX_SAMPLES];
+	char sample_names[PTPLAYER_MAX_SAMPLES][24];
 };
 
 void PTPlayer_defaults(struct PTPlayer* self);

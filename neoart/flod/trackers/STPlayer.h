@@ -37,7 +37,7 @@ struct STPlayer {
 	struct AmigaRow patterns[STPLAYER_MAX_PATTERNS];
 	//samples    : Vector.<AmigaSample>,
 	struct AmigaSample samples[STPLAYER_MAX_SAMPLES];
-	char sample_names[24][STPLAYER_MAX_SAMPLES];	
+	char sample_names[STPLAYER_MAX_SAMPLES][24];
 	int length;
 	//voices     : Vector.<STVoice>,
 	struct STVoice voices[STPLAYER_MAX_VOICES];
