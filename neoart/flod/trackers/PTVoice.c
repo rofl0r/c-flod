@@ -15,77 +15,53 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->trackers {
-  import neoart.flod.core.*;
 
-  public final class PTVoice {
-    internal var
- int index;
-      next         : PTVoice,
-      channel      : AmigaChannel,
-      sample       : PTSample,
- int enabled;
- int loopCtr;
- int loopPos;
- int step;
- int period;
- int effect;
- int param;
- int volume;
- int pointer;
- int length;
- int loopPtr;
- int repeat;
- int finetune;
- int offset;
- int portaDir;
- int portaPeriod;
- int portaSpeed;
- int glissando;
- int tremoloParam;
- int tremoloPos;
- int tremoloWave;
- int vibratoParam;
- int vibratoPos;
- int vibratoWave;
- int funkPos;
- int funkSpeed;
- int funkWave;
+#include "PTVoice.h"
+#include "../flod_internal.h"
 
-     void PTVoice( int index) {
-      self->index = index;
-    }
+void PTVoice_defaults(struct PTVoice* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
 
-    internal function initialize():void {
-      channel      = null;
-      sample       = null;
-      enabled      = 0;
-      loopCtr      = 0;
-      loopPos      = 0;
-      step         = 0;
-      period       = 0;
-      effect       = 0;
-      param        = 0;
-      volume       = 0;
-      pointer      = 0;
-      length       = 0;
-      loopPtr      = 0;
-      repeat       = 0;
-      finetune     = 0;
-      offset       = 0;
-      portaDir     = 0;
-      portaPeriod  = 0;
-      portaSpeed   = 0;
-      glissando    = 0;
-      tremoloParam = 0;
-      tremoloPos   = 0;
-      tremoloWave  = 0;
-      vibratoParam = 0;
-      vibratoPos   = 0;
-      vibratoWave  = 0;
-      funkPos      = 0;
-      funkSpeed    = 0;
-      funkWave     = 0;
-    }
-  }
+void PTVoice_ctor(struct PTVoice* self, int index) {
+	CLASS_CTOR_DEF(PTVoice);
+	// original constructor code goes here
+	self->index = index;
+}
+
+struct PTVoice* PTVoice_new(int index) {
+	CLASS_NEW_BODY(PTVoice, index);
+}
+
+void PTVoice_initialize(struct PTVoice* self) {
+	self->channel      = null;
+	self->sample       = null;
+	self->enabled      = 0;
+	self->loopCtr      = 0;
+	self->loopPos      = 0;
+	self->step         = 0;
+	self->period       = 0;
+	self->effect       = 0;
+	self->param        = 0;
+	self->volume       = 0;
+	self->pointer      = 0;
+	self->length       = 0;
+	self->loopPtr      = 0;
+	self->repeat       = 0;
+	self->finetune     = 0;
+	self->offset       = 0;
+	self->portaDir     = 0;
+	self->portaPeriod  = 0;
+	self->portaSpeed   = 0;
+	self->glissando    = 0;
+	self->tremoloParam = 0;
+	self->tremoloPos   = 0;
+	self->tremoloWave  = 0;
+	self->vibratoParam = 0;
+	self->vibratoPos   = 0;
+	self->vibratoWave  = 0;
+	self->funkPos      = 0;
+	self->funkSpeed    = 0;
+	self->funkWave     = 0;
 }
