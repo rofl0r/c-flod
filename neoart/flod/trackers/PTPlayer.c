@@ -80,6 +80,10 @@ const unsigned char FUNKREP[] = {
         0,5,6,7,8,10,11,13,16,19,22,26,32,43,64,128
 };
 
+static void updateFunk(struct PTPlayer* self, struct PTVoice *voice);
+static void extended(struct PTPlayer* self, struct PTVoice *voice);
+static void moreEffects(struct PTPlayer* self, struct PTVoice *voice);
+static void effects(struct PTPlayer* self);
 
 void PTPlayer_defaults(struct PTPlayer* self) {
 	CLASS_DEF_INIT();
@@ -393,7 +397,7 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 	self->samples[0] = sample;
 }
 
-void PTPlayer_effects(struct PTPlayer* self) {
+static void effects(struct PTPlayer* self) {
 	struct AmigaChannel *chan;
 	int i = 0;
 	int position = 0;
@@ -577,7 +581,7 @@ void PTPlayer_effects(struct PTPlayer* self) {
 	}
 }
 
-void PTPlayer_moreEffects(struct PTPlayer* self, struct PTVoice *voice) {
+static void moreEffects(struct PTPlayer* self, struct PTVoice *voice) {
 	struct AmigaChannel *chan = voice->channel;
 	int value = 0;
 	
@@ -629,7 +633,7 @@ void PTPlayer_moreEffects(struct PTPlayer* self, struct PTVoice *voice) {
 	}
 }
 
-void PTPlayer_extended(struct PTPlayer* self, struct PTVoice *voice) {
+static void extended(struct PTPlayer* self, struct PTVoice *voice) {
 	struct AmigaChannel *chan = voice->channel;
 	int effect = voice->param >> 4;
 	int i = 0;
@@ -745,7 +749,7 @@ void PTPlayer_extended(struct PTPlayer* self, struct PTVoice *voice) {
 	}
 }
 
-void PTPlayer_updateFunk(struct PTPlayer* self, struct PTVoice *voice) {
+static void updateFunk(struct PTPlayer* self, struct PTVoice *voice) {
 	struct AmigaChannel *chan = voice->channel;
 	int p1 = 0; 
 	int p2 = 0; 
