@@ -154,7 +154,7 @@ void PTPlayer_process(struct PTPlayer* self) {
 				voice->param  = row->super.param;
 
 				if (row->super.sample) {
-					sample = voice->sample = self->samples[row->super.sample];
+					sample = voice->sample = &self->samples[row->super.sample];
 
 					voice->pointer  = sample->super.pointer;
 					voice->length   = sample->super.length;
@@ -317,12 +317,16 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 		value = stream->readUnsignedShort(stream);
 
 		if (!value) {
-			self->samples[i] = null;
+			// FIXME need to mark invalid/unused
+			//self->samples[i] = null;
 			ByteArray_set_position_rel(stream, +28);
 			continue;
 		}
 
-		sample = new PTSample();
+		//sample = new PTSample();
+		sample = &self->samples[i];
+		PTSample_ctor(sample);
+		
 		ByteArray_set_position_rel(stream, -24);
 
 		sample->super.name = stream->readMultiByte(stream, 22, ENCODING);
@@ -337,7 +341,7 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 		ByteArray_set_position_rel(stream, +22);
 		sample->super.pointer = size;
 		size += sample->super.length;
-		self->samples[i] = sample;
+		//self->samples[i] = sample;
 	}
 
 	ByteArray_set_position(stream, 950);
@@ -352,12 +356,14 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 
 	ByteArray_set_position(stream, 1084);
 	higher += 256;
-	//FIXME
-	patterns = new Vector.<PTRow>(higher, true);
+	//patterns = new Vector.<PTRow>(higher, true);
+	assert_dbg(higher < PTPLAYER_MAX_PATTERNS);
 
 	for (i = 0; i < higher; ++i) {
-		//FIXME
-		row = new PTRow();
+		//row = new PTRow();
+		row = &self->patterns[i];
+		PTRow_ctor(row);
+		
 		row->step = value = stream->readUnsignedInt(stream);
 
 		row->super.note   = (value >> 16) & 0x0fff;
@@ -365,7 +371,7 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 		row->super.sample = (value >> 24) & 0xf0 | (value >> 12) & 0x0f;
 		row->super.param  = value & 0xff;
 
-		self->patterns[i] = row;
+		//self->patterns[i] = row;
 
 		if (row->super.sample > 31 || !self->samples[row->super.sample]) row->super.sample = 0;
 
@@ -379,8 +385,9 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 	Amiga_store(self->super.amiga, stream, size, -1);
 
 	for (i = 1; i < 32; ++i) {
-		sample = self->samples[i];
-		if (!sample) continue;
+		sample = &self->samples[i];
+		//FIXME cannot test this way, need invalid flag or lookup table
+		//if (!sample) continue;
 
 		if (sample->super.loop || sample->super.repeat > 4) {
 			sample->super.loopPtr = sample->super.pointer + sample->super.loop;
@@ -395,11 +402,13 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 			self->super.amiga->memory[j] = 0;
 	}
 
-	//FIXME
-	sample = PTSample_new();
+	sample = &self->samples[0];
+	PTSample_ctor(sample);
+	
+	//sample = PTSample_new();
 	sample->super.pointer = sample->super.loopPtr = self->super.amiga->memory->length;
 	sample->super.length  = sample->super.repeat  = 2;
-	self->samples[0] = sample;
+	//self->samples[0] = sample;
 }
 
 static void effects(struct PTPlayer* self) {
