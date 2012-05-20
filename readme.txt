@@ -5,15 +5,15 @@ rofl0r
 currently done:
 
 - complete flod core
-- whittaker player (not 100 % accurate, there is a bug hidden, at least with DogsOfWar.DW )
+- whittaker player
+- future composer
 - pseudo barebone flashlib
 
 in my conversion i followed a pretty straight 1:1 approach, 
 so that the number of bugs introduced is minimized and future enhancement in flod
 can be backported easily.
 
-once the whittaker player runs totally smooth, i plan to port the other decoders as well, 
-altho i dont have testfiles for all of them.
+i am currently in the process of translating the remaining players (fasttracker etc).
 after all decoders work well, the next step is to add some audio backends (libao/openal)
 
 my long term goal is to remove any dynamically allocated memory so it could be used with a 
@@ -22,7 +22,10 @@ turn off unneeded decoders using some macro...
 also, the code could probably be simplified a lot by removing some of the classes and 
 using direct memory writes etc.
 
+another todo is to remove the unnecessary code which converts the wav output to flash 
+style 32bit floats and back to wave.
 
+-------------------------------------------------------------------------------------------
 
 Flod          version 4.1
 Flod JS       version 2.1
