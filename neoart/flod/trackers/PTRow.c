@@ -15,11 +15,21 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->trackers {
-  import neoart.flod.core.*;
 
-  public final class PTRow extends AmigaRow {
-    internal var
- int step;
-  }
+#include "PTRow.h"
+#include "../flod_internal.h"
+
+void PTRow_defaults(struct PTRow* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
 }
+
+void PTRow_ctor(struct PTRow* self) {
+	CLASS_CTOR_DEF(PTRow);
+	// original constructor code goes here
+}
+
+struct PTRow* PTRow_new(void) {
+	CLASS_NEW_BODY(PTRow);
+}
+
