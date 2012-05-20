@@ -5,6 +5,7 @@
 #include "../core/AmigaSample.h"
 #include "../core/AmigaRow.h"
 #include "../core/Amiga.h"
+#include "STVoice.h"
 
 enum Soundtracker_Format {
 	ULTIMATE_SOUNDTRACKER = 1,
@@ -33,12 +34,12 @@ struct STPlayer {
 	//track      : Vector.<int>,
 	int track[STPLAYER_MAX_TRACKS];
 	//patterns   : Vector.<AmigaRow>,
-	AmigaRow patterns[STPLAYER_MAX_PATTERNS];
+	struct AmigaRow patterns[STPLAYER_MAX_PATTERNS];
 	//samples    : Vector.<AmigaSample>,
-	AmigaSample samples[STPLAYER_MAX_SAMPLES];
+	struct AmigaSample samples[STPLAYER_MAX_SAMPLES];
 	int length;
 	//voices     : Vector.<STVoice>,
-	STVoice voices[STPLAYER_MAX_VOICES];
+	struct STVoice voices[STPLAYER_MAX_VOICES];
 	int trackPos;
 	int patternPos;
 	int jumpFlag;
