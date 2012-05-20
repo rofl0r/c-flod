@@ -16,6 +16,8 @@
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
 
+//FIXME this player auto-loops (at least with Gothic1.mod), as opposed to the other players.
+
 #include "PTPlayer.h"
 #include "../flod_internal.h"
 
@@ -99,7 +101,7 @@ void PTPlayer_ctor(struct PTPlayer* self, struct Amiga *amiga) {
 	unsigned i;
 	for (i = 0; i < PTPLAYER_MAX_VOICES; i++) {
 		PTVoice_ctor(&self->voices[i], i);
-		if(i) self->voices[i].next = &self->voices[i];
+		if(i) self->voices[i - 1].next = &self->voices[i];
 	}
 	
 	//vtable
@@ -123,7 +125,7 @@ void PTPlayer_set_force(struct PTPlayer* self, int value) {
 	self->super.super.version = value;
 
 	if (value < PROTRACKER_11) self->vibratoDepth = 6;
-		else self->vibratoDepth = 7;
+	else self->vibratoDepth = 7;
 }
 
 //override
@@ -272,8 +274,8 @@ void PTPlayer_process(struct PTPlayer* self) {
 void PTPlayer_initialize(struct PTPlayer* self) {
 	struct PTVoice *voice = &self->voices[0];
 
-	self->super.super.tempo        = 125;
-	self->super.super.speed        = 6;
+	self->super.super.tempo = 125;
+	self->super.super.speed = 6;
 	self->trackPos     = 0;
 	self->patternPos   = 0;
 	self->patternBreak = 0;
@@ -291,6 +293,13 @@ void PTPlayer_initialize(struct PTPlayer* self) {
 		voice->sample  = &self->samples[0];
 		voice = voice->next;
 	}
+	/*
+	unsigned i;
+	for (i = 0; i < PTPLAYER_MAX_SAMPLES; i++) {
+		self->sample_used[i] = 0;
+		self->sample_names[i][0] = 0;
+	}
+	*/
 }
 
 //override
@@ -321,18 +330,18 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 	self->super.super.version = PROTRACKER_10;
 	ByteArray_set_position_rel(stream, +22);
 
-	for (i = 1; i < 32; ++i) {
+	for (i = 1; i < PTPLAYER_MAX_SAMPLES; ++i) {
 		value = stream->readUnsignedShort(stream);
 
 		if (!value) {
-			// FIXME need to mark invalid/unused
-			//self->samples[i] = null;
+			self->sample_used[i] = 0;
 			ByteArray_set_position_rel(stream, +28);
 			continue;
 		}
 
 		//sample = new PTSample();
 		sample = &self->samples[i];
+		self->sample_used[i] = 1;
 		PTSample_ctor(sample);
 		
 		ByteArray_set_position_rel(stream, -24);
@@ -384,8 +393,8 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 
 		//self->patterns[i] = row;
 
-		// FIXME need to test for invalid sample
-		if (row->super.sample > 31 /* || !self->samples[row->super.sample] */) row->super.sample = 0;
+		if (row->super.sample > 31 || !self->sample_used[row->super.sample])
+			row->super.sample = 0;
 
 		if (row->super.effect == 15 && row->super.param > 31)
 		self->super.super.version = PROTRACKER_11;
@@ -396,10 +405,9 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 
 	Amiga_store(self->super.amiga, stream, size, -1);
 
-	for (i = 1; i < 32; ++i) {
+	for (i = 1; i < PTPLAYER_MAX_SAMPLES; ++i) {
 		sample = &self->samples[i];
-		//FIXME cannot test this way, need invalid flag or lookup table
-		//if (!sample) continue;
+		if(!self->sample_used[i]) continue;
 
 		if (sample->super.loop || sample->super.repeat > 4) {
 			sample->super.loopPtr = sample->super.pointer + sample->super.loop;
@@ -410,12 +418,15 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 		}
 
 		size = sample->super.pointer + 2;
+		//FIXME need to set vector_count_memory if we write outside bounds
 		for (j = sample->super.pointer; j < size; ++j) 
 			self->super.amiga->memory[j] = 0;
 	}
 
 	sample = &self->samples[0];
+	self->sample_used[0] = 1;
 	PTSample_ctor(sample);
+	
 	
 	//sample = PTSample_new();
 	sample->super.pointer = sample->super.loopPtr =  self->super.amiga->vector_count_memory; //self->super.amiga->memory->length;
@@ -712,10 +723,16 @@ static void extended(struct PTPlayer* self, struct PTVoice *voice) {
 		case 8:   //karplus strong
 			len = voice->length - 2;
 
-			for (i = voice->loopPtr; i < len;)
-				self->super.amiga->memory[i] = (self->super.amiga->memory[i] + self->super.amiga->memory[++i]) * 0.5;
+			assert_dbg(len + 1 < self->super.amiga->vector_count_memory);
+			for (i = voice->loopPtr; i < len;) {
+				//self->super.amiga->memory[i] = (self->super.amiga->memory[i] + self->super.amiga->memory[++i]) * 0.5;
+				self->super.amiga->memory[i] = (self->super.amiga->memory[i] + self->super.amiga->memory[i + 1]) * 0.5;
+				i++;
+			}
 
-			self->super.amiga->memory[++i] = (self->super.amiga->memory[i] + self->super.amiga->memory[0]) * 0.5f;
+			//self->super.amiga->memory[++i] = (self->super.amiga->memory[i] + self->super.amiga->memory[0]) * 0.5f;
+			i++;
+			self->super.amiga->memory[i] = (self->super.amiga->memory[i] + self->super.amiga->memory[0]) * 0.5f;
 			break;
 		case 9:   //retrig note
 			if (self->super.super.tick || !param || !voice->period) return;
@@ -801,6 +818,7 @@ static void updateFunk(struct PTPlayer* self, struct PTVoice *voice) {
 
 		if (p2 >= p1) p2 = voice->loopPtr;
 
+		assert_dbg(p2 < self->super.amiga->vector_count_memory);
 		self->super.amiga->memory[p2] = -self->super.amiga->memory[p2];
 	}
 }
