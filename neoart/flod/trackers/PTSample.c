@@ -15,12 +15,21 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->trackers {
-  import neoart.flod.core.*;
 
-  public final class PTSample extends AmigaSample {
-    internal var
- int finetune;
- int realLen;
-  }
+#include "PTSample.h"
+#include "../flod_internal.h"
+
+void PTSample_defaults(struct PTSample* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+void PTSample_ctor(struct PTSample* self) {
+	CLASS_CTOR_DEF(PTSample);
+	// original constructor code goes here
+	// FIXME check if we have to call inherited ctor
+}
+
+struct PTSample* PTSample_new(void) {
+	CLASS_NEW_BODY(PTSample);
 }
