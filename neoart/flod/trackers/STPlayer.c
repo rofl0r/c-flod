@@ -266,14 +266,17 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 	
 	if (ByteArray_get_length(stream) < 1626) return;
 
-	self->super.super.title = stream->readMultiByte(20, ENCODING);
+	
+	self->title_buf[21] = 0;
+	stream->readMultiByte(stream, self->title_buf, 20);
+	self->super.super.title = self->title_buf;
 	score += isLegal(self->super.super.title);
 
 	self->super.super.version = ULTIMATE_SOUNDTRACKER;
 	ByteArray_set_position(stream, 42);
 
 	for (i = 1; i < 16; ++i) {
-		value = stream->readUnsignedShort();
+		value = stream->readUnsignedShort(stream);
 
 		if (!value) {
 			self->samples[i] = null;
@@ -281,16 +284,19 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 			continue;
 		}
 
+		//FIXME
 		sample = new AmigaSample();
 		ByteArray_set_position_rel(stream, -24);
+		
+		ByteArray_readMultiByte(stream, self->sample_names[i], 22);
 
-		sample->name = stream->readMultiByte(22, ENCODING);
+		sample->name = self->sample_names[i];
 		sample->length = value << 1;
 		ByteArray_set_position_rel(stream, 3);
 
-		sample->volume = stream->readUnsignedByte();
-		sample->loop   = stream->readUnsignedShort();
-		sample->repeat = stream->readUnsignedShort() << 1;
+		sample->volume = stream->readUnsignedByte(stream);
+		sample->loop   = stream->readUnsignedShort(stream);
+		sample->repeat = stream->readUnsignedShort(stream) << 1;
 
 		ByteArray_set_position_rel(stream, 22);
 		sample->pointer = size;
@@ -302,11 +308,11 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 	}
 
 	ByteArray_set_position(stream, 470);
-	self->length = stream->readUnsignedByte();
-	self->super.super.tempo  = stream->readUnsignedByte();
+	self->length = stream->readUnsignedByte(stream);
+	self->super.super.tempo  = stream->readUnsignedByte(stream);
 
 	for (i = 0; i < 128; ++i) {
-		value = stream->readUnsignedByte() << 8;
+		value = stream->readUnsignedByte(stream) << 8;
 		if (value > 16384) score--;
 		self->track[i] = value;
 		if (value > higher) higher = value;
@@ -314,17 +320,19 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 
 	ByteArray_set_position(stream, 600);
 	higher += 256;
+	//FIXME
 	patterns = new Vector.<AmigaRow>(higher, true);
 
 	i = (ByteArray_get_length(stream) - size - 600) >> 2;
 	if (higher > i) higher = i;
 
 	for (i = 0; i < higher; ++i) {
+		//FIXME
 		row = new AmigaRow();
 
-		row->note   = stream->readUnsignedShort();
-		value       = stream->readUnsignedByte();
-		row->param  = stream->readUnsignedByte();
+		row->note   = stream->readUnsignedShort(stream);
+		value       = stream->readUnsignedByte(stream);
+		row->param  = stream->readUnsignedByte(stream);
 		row->effect = value & 0x0f;
 		row->sample = value >> 4;
 
