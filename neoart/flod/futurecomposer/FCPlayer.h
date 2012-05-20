@@ -22,8 +22,15 @@ enum Futurecomp_Version {
       FUTURECOMP_14 = 2,
 };
 
-#define FCPLAYER_SEQS_BUFFERSIZE 1024
-#define FCPLAYER_PATS_BUFFERSIZE 8192
+// this values were chosen to be able to play
+// all fc songs in my collection
+// you may encounter a "out of bounds access assertion"
+// while trying to use files that use larger buffers.
+// on the other hand, if you only intend to use a single
+// fc module you may want to tune them down.
+
+#define FCPLAYER_SEQS_BUFFERSIZE 3328
+#define FCPLAYER_PATS_BUFFERSIZE (8192 + 16)
 #define FCPLAYER_VOLS_BUFFERSIZE 4096
 #define FCPLAYER_FRQS_BUFFERSIZE 4096
 
