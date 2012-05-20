@@ -48,6 +48,7 @@ void CorePlayer_ctor(struct CorePlayer* self, struct CoreMixer *hardware) {
 	self->reset = CorePlayer_reset;
 	self->loader = CorePlayer_loader;
 	self->initialize = CorePlayer_initialize;
+	self->set_force = CorePlayer_set_force;
 }
 
 struct CorePlayer* CorePlayer_new(struct CoreMixer *hardware) {

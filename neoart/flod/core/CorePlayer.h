@@ -47,6 +47,7 @@ struct CorePlayer {
 	void (*reset) (struct CorePlayer* self);
 	void (*loader) (struct CorePlayer* self, struct ByteArray *stream);
 	void (*initialize) (struct CorePlayer* self);
+	void (*set_force) (struct CorePlayer* self, int value);
 	
 };
 
