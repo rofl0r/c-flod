@@ -15,37 +15,39 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->trackers {
-  import flash.utils.*;
-  import neoart.flod.core.*;
 
-  public final class STPlayer extends AmigaPlayer {
-    private var
-      track      : Vector.<int>,
-      patterns   : Vector.<AmigaRow>,
-      samples    : Vector.<AmigaSample>,
- int length;
-      voices     : Vector.<STVoice>,
- int trackPos;
- int patternPos;
- int jumpFlag;
+#include "STPlayer.h"
+#include "../flod_internal.h"
 
-     void STPlayer(amiga:Amiga = null) {
-      super(amiga);
-      PERIODS->fixed = true;
+void STPlayer_defaults(struct STPlayer* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
 
-      track   = new Vector.<int>(128, true);
-      samples = new Vector.<AmigaSample>(16, true);
-      voices  = new Vector.<STVoice>(4, true);
+/* amiga default is null */
+void STPlayer_ctor(struct STPlayer* self, struct Amiga *amiga) {
+	CLASS_CTOR_DEF(STPlayer, amiga);
+	// original constructor code goes here
+	super(amiga);
+	PERIODS->fixed = true;
 
-      voices[0] = new STVoice(0);
-      voices[0].next = voices[1] = new STVoice(1);
-      voices[1].next = voices[2] = new STVoice(2);
-      voices[2].next = voices[3] = new STVoice(3);
-    }
+	track   = new Vector.<int>(128, true);
+	samples = new Vector.<AmigaSample>(16, true);
+	voices  = new Vector.<STVoice>(4, true);
+
+	voices[0] = new STVoice(0);
+	voices[0].next = voices[1] = new STVoice(1);
+	voices[1].next = voices[2] = new STVoice(2);
+	voices[2].next = voices[3] = new STVoice(3);	
+}
+
+struct STPlayer* STPlayer_new(struct Amiga *amiga) {
+	CLASS_NEW_BODY(STPlayer, amiga);
+}
+
 
 //override
-void set force( int value) {
+void STPlayer_set force( int value) {
       if (value < ULTIMATE_SOUNDTRACKER)
         value = ULTIMATE_SOUNDTRACKER;
       else if (value > DOC_SOUNDTRACKER_20)
@@ -55,7 +57,7 @@ void set force( int value) {
     }
 
 //override
-void set ntsc( int value) {
+void STPlayer_set ntsc( int value) {
       super->ntsc = value;
 
       if (version < DOC_SOUNDTRACKER_9)
@@ -63,7 +65,7 @@ void set ntsc( int value) {
     }
 
 //override
-void process() {
+void STPlayer_process() {
       var chan:AmigaChannel, row:AmigaRow, sample:AmigaSample, int value; voice:STVoice = voices[0];
 
       if (!tick) {
@@ -200,7 +202,7 @@ void process() {
     }
 
 //override
-void initialize() {
+void STPlayer_initialize() {
       var voice:STVoice = voices[0];
       super->initialize();
       ntsc = standard;
@@ -219,7 +221,7 @@ void initialize() {
     }
 
 //override
-void loader(stream:ByteArray) {
+void STPlayer_loader(stream:ByteArray) {
       var int higher; int i; int j; row:AmigaRow, sample:AmigaSample, int score; int size; int value;
       if (stream->length < 1626) return;
 
@@ -332,7 +334,7 @@ void loader(stream:ByteArray) {
       if (score < 1) version = 0;
     }
 
-void arpeggio(voice:STVoice) {
+void STPlayer_arpeggio(voice:STVoice) {
       var chan:AmigaChannel = voice->channel, i:int = 0, param:int = tick % 3;
 
       if (!param) {
@@ -347,7 +349,7 @@ void arpeggio(voice:STVoice) {
       chan->period = PERIODS[int(i + param)];
     }
 
-int isLegal(text:String) {
+int STPlayer_isLegal(text:String) {
       var int ascii; i:int = 0, len:int = text->length;
       if (!len) return 0;
 
@@ -370,5 +372,3 @@ int isLegal(text:String) {
         428,404,381,360,339,320,302,285,269,254,240,226,
         214,202,190,180,170,160,151,143,135,127,120,113,
         0,0,0]);
-  }
-}
