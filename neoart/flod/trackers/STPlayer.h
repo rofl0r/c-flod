@@ -6,6 +6,13 @@
 #include "../core/AmigaRow.h"
 #include "../core/Amiga.h"
 
+enum Soundtracker_Format {
+	ULTIMATE_SOUNDTRACKER = 1,
+	DOC_SOUNDTRACKER_9 = 2,
+	MASTER_SOUNDTRACKER = 3,
+	DOC_SOUNDTRACKER_20 = 4,
+};
+
 #define STPLAYER_MAX_TRACKS 16
 #define STPLAYER_MAX_SAMPLES 64
 #define STPLAYER_MAX_PATTERNS 32

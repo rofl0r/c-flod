@@ -19,6 +19,14 @@
 #include "STPlayer.h"
 #include "../flod_internal.h"
 
+const unsigned short PERIODS[] = {
+        856,808,762,720,678,640,604,570,538,508,480,453,
+        428,404,381,360,339,320,302,285,269,254,240,226,
+        214,202,190,180,170,160,151,143,135,127,120,113,
+        0,0,0
+};
+
+
 void STPlayer_defaults(struct STPlayer* self) {
 	CLASS_DEF_INIT();
 	// static initializers go here
@@ -359,16 +367,3 @@ int STPlayer_isLegal(text:String) {
       }
       return 1;
     }
-
-    public static const
-      ULTIMATE_SOUNDTRACKER : int = 1,
-      DOC_SOUNDTRACKER_9    : int = 2,
-      MASTER_SOUNDTRACKER   : int = 3,
-      DOC_SOUNDTRACKER_20   : int = 4;
-
-    private const
-      PERIODS: Vector.<int> = Vector.<int>([
-        856,808,762,720,678,640,604,570,538,508,480,453,
-        428,404,381,360,339,320,302,285,269,254,240,226,
-        214,202,190,180,170,160,151,143,135,127,120,113,
-        0,0,0]);
