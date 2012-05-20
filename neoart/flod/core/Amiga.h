@@ -6,9 +6,17 @@
 #include "AmigaFilter.h"
 #include "AmigaChannel.h"
 
-#define AMIGA_MAX_MEMORY_KB 64
+// tune this value to the biggest filesize
+// of mods you want to support. a 85 KB file needs approx 80KB amiga mem.
+// TODO: eventually there's a way to point to the original file buffer
+// to make this unnecessary.
+// for a desktop player it shouldnt be a problem to set this to something
+// huge like 512 kb
+// maybe make this so the caller can provide a buffer.
+#define AMIGA_MAX_MEMORY_KB 86
 #define AMIGA_MAX_MEMORY ((AMIGA_MAX_MEMORY_KB * 1024) / sizeof(char))
 
+// this is hardwired.
 #define AMIGA_MAX_CHANNELS 4
 
 enum AmigaModel {
