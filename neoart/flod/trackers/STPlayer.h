@@ -14,8 +14,8 @@ enum Soundtracker_Format {
 	DOC_SOUNDTRACKER_20 = 4,
 };
 
-#define STPLAYER_MAX_TRACKS 16
-#define STPLAYER_MAX_SAMPLES 64
+#define STPLAYER_MAX_TRACKS 128
+#define STPLAYER_MAX_SAMPLES 16
 #define STPLAYER_MAX_PATTERNS 32
 
 // fixed
