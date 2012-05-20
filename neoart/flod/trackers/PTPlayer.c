@@ -15,43 +15,41 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->trackers {
-  import flash.utils.*;
-  import neoart.flod.core.*;
 
-  public final class PTPlayer extends AmigaPlayer {
-    private var
-      track        : Vector.<int>,
-      patterns     : Vector.<PTRow>,
-      samples      : Vector.<PTSample>,
- int length;
-      voices       : Vector.<PTVoice>,
- int trackPos;
- int patternPos;
- int patternBreak;
- int patternDelay;
- int breakPos;
- int jumpFlag;
- int vibratoDepth;
+#include "PTPlayer.h"
+#include "../flod_internal.h"
 
-     void PTPlayer(amiga:Amiga = null) {
-      super(amiga);
-      PERIODS->fixed = true;
-      VIBRATO->fixed = true;
-      FUNKREP->fixed = true;
+void PTPlayer_defaults(struct PTPlayer* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
 
-      track   = new Vector.<int>(128, true);
-      samples = new Vector.<PTSample>(32, true);
-      voices  = new Vector.<PTVoice>(4, true);
+//amiga def. value = NULL
+void PTPlayer_ctor(struct PTPlayer* self, struct Amiga *amiga) {
+	CLASS_CTOR_DEF(PTPlayer);
+	// original constructor code goes here
+	super(amiga);
+	PERIODS->fixed = true;
+	VIBRATO->fixed = true;
+	FUNKREP->fixed = true;
 
-      voices[0] = new PTVoice(0);
-      voices[0].next = voices[1] = new PTVoice(1);
-      voices[1].next = voices[2] = new PTVoice(2);
-      voices[2].next = voices[3] = new PTVoice(3);
-    }
+	track   = new Vector.<int>(128, true);
+	samples = new Vector.<PTSample>(32, true);
+	voices  = new Vector.<PTVoice>(4, true);
+
+	voices[0] = new PTVoice(0);
+	voices[0].next = voices[1] = new PTVoice(1);
+	voices[1].next = voices[2] = new PTVoice(2);
+	voices[2].next = voices[3] = new PTVoice(3);	
+}
+
+struct PTPlayer* PTPlayer_new(struct Amiga *amiga) {
+	CLASS_NEW_BODY(PTPlayer, amiga);
+}
+
 
 //override
-void set force( int value) {
+void PTPlayer_set_force(struct PTPlayer* self, int value) {
       if (value < PROTRACKER_10)
         value = PROTRACKER_10;
       else if (value > PROTRACKER_12)
@@ -61,10 +59,10 @@ void set force( int value) {
 
       if (value < PROTRACKER_11) vibratoDepth = 6;
         else vibratoDepth = 7;
-    }
+}
 
 //override
-void process() {
+void PTPlayer_process(struct PTPlayer* self) {
       var chan:AmigaChannel, int i; int pattern; row:PTRow, sample:PTSample, int value; voice:PTVoice = voices[0];
 
       if (!tick) {
@@ -194,10 +192,10 @@ void process() {
           }
         }
       }
-    }
+}
 
 //override
-void initialize() {
+void PTPlayer_initialize(struct PTPlayer* self) {
       var voice:PTVoice = voices[0];
 
       tempo        = 125;
@@ -218,10 +216,10 @@ void initialize() {
         voice->sample  = samples[0];
         voice = voice->next;
       }
-    }
+}
 
 //override
-void loader(stream:ByteArray) {
+void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
       var int higher; int i; id:String, int j; row:PTRow, sample:PTSample, int size; int value;
       if (stream->length < 2106) return;
 
@@ -317,9 +315,9 @@ void loader(stream:ByteArray) {
       sample->pointer = sample->loopPtr = amiga->memory->length;
       sample->length  = sample->repeat  = 2;
       samples[0] = sample;
-    }
+}
 
-void effects() {
+void PTPlayer_effects(struct PTPlayer* self) {
       var chan:AmigaChannel, int i; int position; int slide; int value; voice:PTVoice = voices[0], int wave;
 
       while (voice) {
@@ -493,9 +491,9 @@ void effects() {
         }
         voice = voice->next;
       }
-    }
+}
 
-void moreEffects(voice:PTVoice) {
+void PTPlayer_moreEffects(struct PTPlayer* self, struct PTVoice *voice) {
       var chan:AmigaChannel = voice->channel, int value;
       if (voice->funkSpeed) updateFunk(voice);
 
@@ -541,9 +539,9 @@ void moreEffects(voice:PTVoice) {
           tick = 0;
           break;
       }
-    }
+}
 
-void extended(voice:PTVoice) {
+void PTPlayer_extended(struct PTPlayer* self, struct PTVoice *voice) {
       var chan:AmigaChannel = voice->channel, effect:int = voice->param >> 4, int i; int len; memory:Vector.<int>, param:int = voice->param & 0x0f;
 
       switch (effect) {
@@ -650,9 +648,9 @@ void extended(voice:PTVoice) {
           if (param) updateFunk(voice);
           break;
       }
-    }
+}
 
-void updateFunk(voice:PTVoice) {
+void PTPlayer_updateFunk(struct PTPlayer* self, struct PTVoice *voice) {
       var chan:AmigaChannel = voice->channel, int p1; int p2; value:int = FUNKREP[voice->funkSpeed];
 
       voice->funkPos += value;
@@ -676,7 +674,7 @@ void updateFunk(voice:PTVoice) {
 
         amiga->memory[p2] = -amiga->memory[p2];
       }
-    }
+}
 
     public static const
       PROTRACKER_10 : int = 1,
