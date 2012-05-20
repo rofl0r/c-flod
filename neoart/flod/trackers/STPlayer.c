@@ -19,7 +19,7 @@
 #include "STPlayer.h"
 #include "../flod_internal.h"
 
-const unsigned short PERIODS[] = {
+static const unsigned short PERIODS[] = {
         856,808,762,720,678,640,604,570,538,508,480,453,
         428,404,381,360,339,320,302,285,269,254,240,226,
         214,202,190,180,170,160,151,143,135,127,120,113,
@@ -34,19 +34,27 @@ void STPlayer_defaults(struct STPlayer* self) {
 
 /* amiga default is null */
 void STPlayer_ctor(struct STPlayer* self, struct Amiga *amiga) {
-	CLASS_CTOR_DEF(STPlayer, amiga);
+	CLASS_CTOR_DEF(STPlayer);
 	// original constructor code goes here
 	//super(amiga);
 	AmigaPlayer_ctor((struct AmigaPlayer *) self, amiga);
 
-	self->track   = new Vector.<int>(128, true);
-	self->samples = new Vector.<AmigaSample>(16, true);
-	self->voices  = new Vector.<STVoice>(4, true);
-
-	self->voices[0] = new STVoice(0);
-	self->voices[0].next = voices[1] = new STVoice(1);
-	self->voices[1].next = voices[2] = new STVoice(2);
-	self->voices[2].next = voices[3] = new STVoice(3);	
+	//self->track   = new Vector.<int>(128, true);
+	//self->samples = new Vector.<AmigaSample>(16, true);
+	//self->voices  = new Vector.<STVoice>(4, true);
+	
+	unsigned i;
+	for (i = 0; i < STPLAYER_MAX_VOICES; i ++) {
+		STVoice_ctor(&self->voices[i], i);
+		if(i) self->voices[i - 1].next = &self->voices[i];
+	}
+	
+	//vtable
+	self->super.super.set_ntsc = STPlayer_set_ntsc;
+	self->super.super.set_force = STPlayer_set_force;
+	self->super.super.process = STPlayer_process;
+	self->super.super.initialize = STPlayer_initialize;
+	self->super.super.loader = STPlayer_loader;
 }
 
 struct STPlayer* STPlayer_new(struct Amiga *amiga) {
@@ -98,13 +106,13 @@ void STPlayer_process(struct STPlayer* self) {
 			chan = voice->channel;
 			voice->enabled = 0;
 
-			row = self->patterns[int(value + voice->index)];
+			row = &self->patterns[value + voice->index];
 			voice->period = row->note;
 			voice->effect = row->effect;
 			voice->param  = row->param;
 
 			if (row->sample) {
-				sample = voice->sample = self->samples[row->sample];
+				sample = voice->sample = &self->samples[row->sample];
 
 				if (((self->super.super.version & 2) == 2) && voice->effect == 12) 
 					AmigaChannel_set_volume(chan, voice->param);
@@ -279,13 +287,14 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 		value = stream->readUnsignedShort(stream);
 
 		if (!value) {
-			self->samples[i] = null;
+			// FIXME !!!
+			//self->samples[i] = null;
 			ByteArray_set_position_rel(stream, 28);
 			continue;
 		}
-
-		//FIXME
-		sample = new AmigaSample();
+		sample = &self->samples[i];
+		AmigaSample_ctor(sample);
+		//sample = new AmigaSample();
 		ByteArray_set_position_rel(stream, -24);
 		
 		ByteArray_readMultiByte(stream, self->sample_names[i], 22);
@@ -301,7 +310,7 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 		ByteArray_set_position_rel(stream, 22);
 		sample->pointer = size;
 		size += sample->length;
-		self->samples[i] = sample;
+		//self->samples[i] = sample;
 
 		score += isLegal(sample->name);
 		if (sample->length > 9999) self->super.super.version = MASTER_SOUNDTRACKER;
@@ -321,14 +330,17 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 	ByteArray_set_position(stream, 600);
 	higher += 256;
 	//FIXME
-	patterns = new Vector.<AmigaRow>(higher, true);
+	//patterns = new Vector.<AmigaRow>(higher, true);
+	assert(higher < STPLAYER_MAX_PATTERNS);
 
 	i = (ByteArray_get_length(stream) - size - 600) >> 2;
 	if (higher > i) higher = i;
 
 	for (i = 0; i < higher; ++i) {
 		//FIXME
-		row = new AmigaRow();
+		//row = new AmigaRow();
+		row = &self->patterns[i];
+		AmigaRow_ctor(row);
 
 		row->note   = stream->readUnsignedShort(stream);
 		value       = stream->readUnsignedByte(stream);
@@ -336,15 +348,15 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 		row->effect = value & 0x0f;
 		row->sample = value >> 4;
 
-		self->patterns[i] = row;
+		//self->patterns[i] = row;
 
 		if (row->effect > 2 && row->effect < 11) score--;
 		if (row->note) {
 			if (row->note < 113 || row->note > 856) score--;
 		}
 
-		if (row->sample)
-		if (row->sample > 15 || !self->samples[row->sample]) {
+		//FIXME need to create a lookup table to see which samples are assigned
+		if (row->sample && (row->sample > 15 /* || !self->samples[row->sample]*/)) {
 			if (row->sample > 15) score--;
 			row->sample = 0;
 		}
@@ -375,10 +387,12 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 		for (j = sample->pointer; j < size; ++j) self->super.amiga->memory[j] = 0;
 	}
 
-	sample = new AmigaSample();
+	sample = &self->samples[0];
+	AmigaSample_ctor(sample);
+	//sample = new AmigaSample();
 	sample->pointer = sample->loopPtr = self->super.amiga->vector_count_memory;
 	sample->length  = sample->repeat  = 2;
-	self->samples[0] = sample;
+	//self->samples[0] = sample;
 
 	if (score < 1) self->super.super.version = 0;
 }
@@ -386,7 +400,7 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 void STPlayer_arpeggio(struct STPlayer* self, struct STVoice *voice) {
 	struct AmigaChannel *chan = voice->channel;
 	int i = 0;
-	itn param = self->super.super.tick % 3;
+	int param = self->super.super.tick % 3;
 
 	if (!param) {
 		AmigaChannel_set_period(chan, voice->last);

@@ -16,7 +16,7 @@ enum Soundtracker_Format {
 
 #define STPLAYER_MAX_TRACKS 128
 #define STPLAYER_MAX_SAMPLES 16
-#define STPLAYER_MAX_PATTERNS 32
+#define STPLAYER_MAX_PATTERNS (32 + 256)
 
 // fixed
 #define STPLAYER_MAX_VOICES 4
@@ -37,18 +37,27 @@ struct STPlayer {
 	struct AmigaRow patterns[STPLAYER_MAX_PATTERNS];
 	//samples    : Vector.<AmigaSample>,
 	struct AmigaSample samples[STPLAYER_MAX_SAMPLES];
+	char sample_names[24][STPLAYER_MAX_SAMPLES];	
 	int length;
 	//voices     : Vector.<STVoice>,
 	struct STVoice voices[STPLAYER_MAX_VOICES];
 	int trackPos;
 	int patternPos;
 	int jumpFlag;
+	char title_buf[24];
 };
 
 
 void STPlayer_defaults(struct STPlayer* self);
 void STPlayer_ctor(struct STPlayer* self, struct Amiga *amiga);
 struct STPlayer* STPlayer_new(struct Amiga *amiga);
+
+void STPlayer_arpeggio(struct STPlayer* self, struct STVoice *voice);
+void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream);
+void STPlayer_initialize(struct STPlayer* self);
+void STPlayer_process(struct STPlayer* self);
+void STPlayer_set_ntsc(struct STPlayer* self, int value);
+void STPlayer_set_force(struct STPlayer* self, int value);
 
 
 #endif
