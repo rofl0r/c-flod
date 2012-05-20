@@ -138,7 +138,7 @@ void PTPlayer_process(struct PTPlayer* self) {
 
 	if (!self->tick) {
 		if (self->patternDelay) {
-			effects();
+			effects(self);
 		} else {
 			pattern = self->track[self->trackPos] + self->patternPos;
 
@@ -168,7 +168,7 @@ void PTPlayer_process(struct PTPlayer* self) {
 				}
 
 				if (!row->note) {
-					moreEffects(voice);
+					moreEffects(self, voice);
 					voice = voice->next;
 					continue;
 				} else {
@@ -195,7 +195,7 @@ void PTPlayer_process(struct PTPlayer* self) {
 							voice->portaDir = row->note > voice->portaPeriod ? 0 : 1;
 						}
 					} else if (voice->effect == 9) {
-						moreEffects(voice);
+						moreEffects(self, voice);
 					}
 				}
 
@@ -205,8 +205,8 @@ void PTPlayer_process(struct PTPlayer* self) {
 				voice->period = PERIODS[int(voice->finetune + i)];
 
 				if ((voice->step & 0x0ff0) == 0x0ed0) {
-					if (voice->funkSpeed) updateFunk(voice);
-					extended(voice);
+					if (voice->funkSpeed) updateFunk(self, voice);
+					extended(self, voice);
 					voice = voice->next;
 					continue;
 				}
@@ -220,7 +220,7 @@ void PTPlayer_process(struct PTPlayer* self) {
 				chan->period  = voice->period;
 
 				voice->enabled = 1;
-				moreEffects(voice);
+				moreEffects(self, voice);
 				voice = voice->next;
 			}
 			voice = self->voices[0];
@@ -236,7 +236,7 @@ void PTPlayer_process(struct PTPlayer* self) {
 			}
 		}
 	} else {
-		effects();
+		effects(self);
 	}
 
 	if (++(self->tick) == self->speed) {
@@ -408,7 +408,7 @@ static void effects(struct PTPlayer* self) {
 
 	while (voice) {
 		chan = voice->channel;
-		if (voice->funkSpeed) updateFunk(voice);
+		if (voice->funkSpeed) updateFunk(self, voice);
 
 		if ((voice->step & 0x0fff) == 0) {
 			chan->period = voice->period;
@@ -559,7 +559,7 @@ static void effects(struct PTPlayer* self) {
 				slide = 1;
 				break;
 			case 14:  //extended effects
-				extended(voice);
+				extended(self, voice);
 				break;
 			default:
 				break;
@@ -585,7 +585,7 @@ static void moreEffects(struct PTPlayer* self, struct PTVoice *voice) {
 	struct AmigaChannel *chan = voice->channel;
 	int value = 0;
 	
-	if (voice->funkSpeed) updateFunk(voice);
+	if (voice->funkSpeed) updateFunk(self, voice);
 
 	switch (voice->effect) {
 		case 9:   //sample offset
@@ -618,7 +618,7 @@ static void moreEffects(struct PTPlayer* self, struct PTVoice *voice) {
 			self->jumpFlag = 1;
 			break;
 		case 14:  //extended effects
-			extended(voice);
+			extended(self, voice);
 			break;
 		case 15:  //set speed
 			if (!voice->param) return;
@@ -742,7 +742,7 @@ static void extended(struct PTPlayer* self, struct PTVoice *voice) {
 		case 15:  //funk repeat or invert loop
 			if (self->tick) return;
 			voice->funkSpeed = param;
-			if (param) updateFunk(voice);
+			if (param) updateFunk(self, voice);
 			break;
 		default:
 			break;
