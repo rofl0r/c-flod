@@ -15,24 +15,29 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->fasttracker {
 
-  public final class F2Envelope {
-    internal var
- int value;
- int position;
- int frame;
- int delta;
- int fraction;
- int stopped;
+#include "F2Envelope.h"
+#include "../flod_internal.h"
 
-    internal function reset():void {
-      value    = 0;
-      position = 0;
-      frame    = 0;
-      delta    = 0;
-      fraction = 0;
-      stopped  = 0;
-    }
-  }
+void F2Envelope_defaults(struct F2Envelope* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+void F2Envelope_ctor(struct F2Envelope* self) {
+	CLASS_CTOR_DEF(F2Envelope);
+	// original constructor code goes here
+}
+
+struct F2Envelope* F2Envelope_new(void) {
+	CLASS_NEW_BODY(F2Envelope);
+}
+
+void F2Envelope_reset(struct F2Envelope* self) {
+	self->value    = 0;
+	self->position = 0;
+	self->frame    = 0;
+	self->delta    = 0;
+	self->fraction = 0;
+	self->stopped  = 0;
 }
