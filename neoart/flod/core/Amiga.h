@@ -13,7 +13,7 @@
 // for a desktop player it shouldnt be a problem to set this to something
 // huge like 512 kb
 // maybe make this so the caller can provide a buffer.
-#define AMIGA_MAX_MEMORY_KB 86
+#define AMIGA_MAX_MEMORY_KB 92
 #define AMIGA_MAX_MEMORY ((AMIGA_MAX_MEMORY_KB * 1024) / sizeof(char))
 
 // this is hardwired.
