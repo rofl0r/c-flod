@@ -15,14 +15,20 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->fasttracker {
 
-  public final class F2Row {
-    internal var
- int note;
- int instrument;
- int volume;
- int effect;
- int param;
-  }
+#include "F2Row.h"
+#include "../flod_internal.h"
+
+void F2Row_defaults(struct F2Row* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+void F2Row_ctor(struct F2Row* self) {
+	CLASS_CTOR_DEF(F2Row);
+	// original constructor code goes here
+}
+
+struct F2Row* F2Row_new(void) {
+	CLASS_NEW_BODY(F2Row);
 }
