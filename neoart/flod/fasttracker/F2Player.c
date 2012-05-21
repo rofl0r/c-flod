@@ -881,9 +881,8 @@ void F2Player_accurate(struct F2Player* self) {
 
 //override
 void F2Player_initialize(struct F2Player* self) {
-	int i = 0;
-	struct F2Voice *voice = NULL;
-	self->super->initialize();
+	SBPlayer_initialize(&self->super);
+	//self->super->initialize();
 
 	self->super.timer   = self->super.super.speed;
 	self->order         =  0;
@@ -895,17 +894,23 @@ void F2Player_initialize(struct F2Player* self) {
 	self->complete      =  0;
 	self->super.master  = 64;
 
-	voices = new Vector.<F2Voice>(self->super.super.channels, true);
+	assert_dbg(self->super.super.channels < F2PLAYER_MAX_VOICES);
+	
+	//self->voices = new Vector.<F2Voice>(self->super.super.channels, true);
+	
+	unsigned int i;
 
-	for (; i < self->super.super.channels; ++i) {
-		voice = new F2Voice(i);
+	for (i = 0; i < self->super.super.channels; ++i) {
+		struct F2Voice *voice = &self->voices[i];
+		F2Voice_ctor(voice);
+		//voice = new F2Voice(i);
 
 		voice->channel = self->super.mixer->channels[i];
 		voice->playing = self->instruments[0];
 		voice->sample  = voice->playing->samples[0];
 
-		self->voices[i] = voice;
-		if (i) self->voices[int(i - 1)].next = voice;
+		//self->voices[i] = voice;
+		if (i) self->voices[i - 1].next = voice;
 	}
 }
 
