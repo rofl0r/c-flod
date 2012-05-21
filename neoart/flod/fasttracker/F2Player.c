@@ -20,6 +20,10 @@
 #include "../flod_internal.h"
 #include "F2Player_const.h"
 
+static void F2Player_envelope(struct F2Player* self, struct F2Voice *voice, struct F2Envelope *envelope, struct F2Data *data);
+static int F2Player_amiga(struct F2Player* self, int note, int finetune);
+static void F2Player_retrig(struct F2Player* self, struct F2Voice *voice);
+
 void F2Player_defaults(struct F2Player* self) {
 	CLASS_DEF_INIT();
 	// static initializers go here
@@ -30,6 +34,12 @@ void F2Player_ctor(struct F2Player* self, struct Soundblaster *mixer) {
 	CLASS_CTOR_DEF(F2Player);
 	// original constructor code goes here
 	super(mixer);
+	//vtable
+	self->super.super.accurate = F2Player_accurate;
+	self->super.super.fast = F2Player_fast;
+	self->super.super.initialize = F2Player_initialize;
+	self->super.super.loader = F2Player_loader;
+	self->super.super.process = F2Player_process;
 }
 
 struct F2Player* F2Player_new(struct Soundblaster *mixer) {
@@ -1121,7 +1131,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
       instruments[0] = instr;
 }
 
-void F2Player_envelope(struct F2Player* self, struct F2Voice *voice, struct F2Envelope *envelope, struct F2Data *data) {
+static void F2Player_envelope(struct F2Player* self, struct F2Voice *voice, struct F2Envelope *envelope, struct F2Data *data) {
       int pos = envelope->position;
       struct F2Point *curr = data->points[pos];
       struct F2Point *next = NULL;
@@ -1157,7 +1167,7 @@ void F2Player_envelope(struct F2Player* self, struct F2Voice *voice, struct F2En
       envelope->frame++;
 }
 
-int F2Player_amiga(struct F2Player* self, int note, int finetune) {
+static int F2Player_amiga(struct F2Player* self, int note, int finetune) {
       Number delta = 0.0;
       int period = PERIODS[++note];
 
@@ -1170,7 +1180,7 @@ int F2Player_amiga(struct F2Player* self, int note, int finetune) {
       return int(period - (delta * finetune));
 }
     
-void F2Player_retrig(struct F2Player* self, struct F2Voice *voice) {
+static void F2Player_retrig(struct F2Player* self, struct F2Voice *voice) {
       switch (voice->retrigx) {
         case 1:
           voice->volume--;

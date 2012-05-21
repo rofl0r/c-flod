@@ -48,4 +48,10 @@ void F2Player_defaults(struct F2Player* self);
 void F2Player_ctor(struct F2Player* self, struct Soundblaster *mixer);
 struct F2Player* F2Player_new(struct Soundblaster *mixer);
 
+void F2Player_process(struct F2Player* self);
+void F2Player_fast(struct F2Player* self);
+void F2Player_accurate(struct F2Player* self);
+void F2Player_initialize(struct F2Player* self);
+void F2Player_loader(struct F2Player* self, struct ByteArray *stream);
+
 #endif
