@@ -15,16 +15,24 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->fasttracker {
 
-  public final class F2Point {
-    internal var
- int frame;
- int value;
+#include "F2Point.h"
+#include "../flod_internal.h"
 
-     void F2Point(x:int = 0, y:int = 0) {
-      frame = x;
-      value = y;
-    }
-  }
+void F2Point_defaults(struct F2Point* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
 }
+
+void F2Point_ctor(struct F2Point* self, int x, int y) {
+	CLASS_CTOR_DEF(F2Point);
+	// original constructor code goes here
+	self->frame = x;
+	self->value = y;	
+}
+
+/* default value for both ints: 0 */
+struct F2Point* F2Point_new(int x, int y) {
+	CLASS_NEW_BODY(F2Point, x, y);
+}
+
