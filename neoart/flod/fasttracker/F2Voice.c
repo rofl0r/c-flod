@@ -15,222 +15,18 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->fasttracker {
-  import neoart.flod.core.*;
 
-  public final class F2Voice {
-    internal var
- int index;
-      next           : F2Voice,
- int flags;
- int delay;
-      channel        : SBChannel,
- int patternLoop;
- int patternLoopRow;
-      playing        : F2Instrument,
- int note;
- int keyoff;
- int period;
- int finetune;
- int arpDelta;
- int vibDelta;
-      instrument     : F2Instrument,
- int autoVibratoPos;
- int autoSweep;
- int autoSweepPos;
-      sample         : F2Sample,
- int sampleOffset;
- int volume;
- int volEnabled;
-      volEnvelope    : F2Envelope,
- int volDelta;
- int volSlide;
- int volSlideMaster;
- int fineSlideU;
- int fineSlideD;
- int fadeEnabled;
- int fadeDelta;
- int fadeVolume;
- int panning;
- int panEnabled;
-      panEnvelope    : F2Envelope,
- int panSlide;
- int portaU;
- int portaD;
- int finePortaU;
- int finePortaD;
- int xtraPortaU;
- int xtraPortaD;
- int portaPeriod;
- int portaSpeed;
- int glissando;
- int glissPeriod;
- int vibratoPos;
- int vibratoSpeed;
- int vibratoDepth;
- int vibratoReset;
- int tremoloPos;
- int tremoloSpeed;
- int tremoloDepth;
- int waveControl;
- int tremorPos;
- int tremorOn;
- int tremorOff;
- int tremorVolume;
- int retrigx;
- int retrigy;
+#include "F2Voice.h"
+#include "../flod_internal.h"
 
-     void F2Voice( int index) {
-      self->index = index;
-      volEnvelope = new F2Envelope();
-      panEnvelope = new F2Envelope();
-    }
+// for flags enum
+#include "F2Player.h"
 
-    internal function reset():void {
-      volume   = sample->volume;
-      panning  = sample->panning;
-      finetune = (sample->finetune >> 3) << 2;
-      keyoff   = 0;
-      volDelta = 0;
+// FIXME only needed for round()
+#include <math.h>
 
-      fadeEnabled = 0;      
-      fadeDelta   = 0;
-      fadeVolume  = 65536;
 
-      autoVibratoPos = 0;
-      autoSweep      = 1;
-      autoSweepPos   = 0;
-      vibDelta       = 0;
-      portaPeriod    = 0;
-      vibratoReset   = 0;
-
-      if ((waveControl & 15) < 4) vibratoPos = 0;
-      if ((waveControl >> 4) < 4) tremoloPos = 0;
-    }
-
-    internal function autoVibrato():int {
-      var int delta;
-
-      autoVibratoPos = (autoVibratoPos + playing->vibratoSpeed) & 255;
-
-      switch (playing->vibratoType) {
-        case 0:
-          delta = AUTOVIBRATO[autoVibratoPos];
-          break;
-        case 1:
-          if (autoVibratoPos < 128) delta = -64;
-            else delta = 64;
-          break;
-        case 2:
-          delta = ((64 + (autoVibratoPos >> 1)) & 127) - 64;
-          break;
-        case 3:
-          delta = ((64 - (autoVibratoPos >> 1)) & 127) - 64;
-          break;
-      }
-
-      delta *= playing->vibratoDepth;
-
-      if (autoSweep) {
-        if (!playing->vibratoSweep) {
-          autoSweep = 0;
-        } else {
-          if (autoSweepPos > playing->vibratoSweep) {
-            if (autoSweepPos & 2) delta *= (autoSweepPos / playing->vibratoSweep);
-            autoSweep = 0;
-          } else {
-            delta *= (++autoSweepPos / playing->vibratoSweep);
-          }
-        }
-      }
-
-      flags |= F2Player->UPDATE_PERIOD;
-      return (delta >> 6);
-    }
-
-    internal function tonePortamento():void {
-      if (!glissPeriod) glissPeriod = period;
-
-      if (period < portaPeriod) {
-        glissPeriod += portaSpeed << 2;
-
-        if (!glissando) period = glissPeriod;
-          else period = Math->round(glissPeriod / 64) << 6;
-
-        if (period >= portaPeriod) {
-          period = portaPeriod;
-          glissPeriod = portaPeriod = 0;
-        }
-      } else if (period > portaPeriod) {
-        glissPeriod -= portaSpeed << 2;
-
-        if (!glissando) period = glissPeriod;
-          else period = Math->round(glissPeriod / 64) << 6;
-
-        if (period <= portaPeriod) {
-          period = portaPeriod;
-          glissPeriod = portaPeriod = 0;
-        }
-      }
-
-      flags |= F2Player->UPDATE_PERIOD;
-    }
-
-    internal function tremolo():void {
-      var delta:int = 255, position:int = tremoloPos & 31;
-
-      switch ((waveControl >> 4) & 3) {
-        case 0:
-          delta = VIBRATO[position];
-          break;
-        case 1:
-          delta = position << 3;
-          break;
-      }
-
-      volDelta = (delta * tremoloDepth) >> 6;
-      if (tremoloPos > 31) volDelta = -volDelta;
-      tremoloPos = (tremoloPos + tremoloSpeed) & 63;
-
-      flags |= F2Player->UPDATE_VOLUME;
-    }
-
-    internal function tremor():void {
-      if (tremorPos == tremorOn) {
-        tremorVolume = volume;
-        volume = 0;
-        flags |= F2Player->UPDATE_VOLUME;
-      } else if (tremorPos == tremorOff) {
-        tremorPos = 0;
-        volume = tremorVolume;
-        flags |= F2Player->UPDATE_VOLUME;
-      }
-
-      ++tremorPos;
-    }
-
-    internal function vibrato():void {
-      var delta:int = 255, position:int = vibratoPos & 31;
-
-      switch (waveControl & 3) {
-        case 0:
-          delta = VIBRATO[position];
-          break;
-        case 1:
-          delta = position << 3;
-          if (vibratoPos > 31) delta = 255 - delta;
-          break;
-      }
-
-      vibDelta = (delta * vibratoDepth) >> 7;
-      if (vibratoPos > 31) vibDelta = -vibDelta;
-      vibratoPos = (vibratoPos + vibratoSpeed) & 63;
-
-      flags |= F2Player->UPDATE_PERIOD;
-    }
-
-    private static const
-      AUTOVIBRATO : Vector.<int> = Vector.<int>([
+static const signed char AUTOVIBRATO[] = {
           0, -2, -3, -5, -6, -8, -9,-11,-12,-14,-16,-17,-19,-20,-22,-23,
         -24,-26,-27,-29,-30,-32,-33,-34,-36,-37,-38,-39,-41,-42,-43,-44,
         -45,-46,-47,-48,-49,-50,-51,-52,-53,-54,-55,-56,-56,-57,-58,-59,
@@ -246,10 +42,184 @@ package neoart->flod->fasttracker {
          64, 64, 64, 64, 64, 64, 63, 63, 63, 62, 62, 62, 61, 61, 60, 60,
          59, 59, 58, 57, 56, 56, 55, 54, 53, 52, 51, 50, 49, 48, 47, 46,
          45, 44, 43, 42, 41, 39, 38, 37, 36, 34, 33, 32, 30, 29, 27, 26,
-         24, 23, 22, 20, 19, 17, 16, 14, 12, 11,  9,  8,  6,  5,  3,  2]),
+         24, 23, 22, 20, 19, 17, 16, 14, 12, 11,  9,  8,  6,  5,  3,  2,
+};
 
-      VIBRATO : Vector.<int> = Vector.<int>([
+static const unsigned char VIBRATO[] = {
           0, 24, 49, 74, 97,120,141,161,180,197,212,224,235,244,250,253,
-        255,253,250,244,235,224,212,197,180,161,141,120, 97, 74, 49, 24]);
-  }
+        255,253,250,244,235,224,212,197,180,161,141,120, 97, 74, 49, 24,
+};
+
+void F2Voice_defaults(struct F2Voice* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
 }
+
+void F2Voice_ctor(struct F2Voice* self, int index) {
+	CLASS_CTOR_DEF(F2Voice);
+	// original constructor code goes here
+}
+
+struct F2Voice* F2Voice_new(int index) {
+	CLASS_NEW_BODY(F2Voice, index);
+	self->index = index;
+	// FIXME
+	self->volEnvelope = F2Envelope_new();
+	self->panEnvelope = F2Envelope_new();
+}
+
+
+void F2Voice_reset(struct F2Voice* self) {
+	self->volume   = self->sample->super.volume;
+	self->panning  = self->sample->panning;
+	self->finetune = (self->sample->finetune >> 3) << 2;
+	self->keyoff   = 0;
+	self->volDelta = 0;
+
+	self->fadeEnabled = 0;      
+	self->fadeDelta   = 0;
+	self->fadeVolume  = 65536;
+
+	self->autoVibratoPos = 0;
+	self->autoSweep      = 1;
+	self->autoSweepPos   = 0;
+	self->vibDelta       = 0;
+	self->portaPeriod    = 0;
+	self->vibratoReset   = 0;
+
+	if ((self->waveControl & 15) < 4) self->vibratoPos = 0;
+	if ((self->waveControl >> 4) < 4) self->tremoloPos = 0;
+}
+
+int F2Voice_autoVibrato(struct F2Voice* self) {
+	int delta = 0;
+
+	self->autoVibratoPos = (self->autoVibratoPos + self->playing->vibratoSpeed) & 255;
+
+	switch (self->playing->vibratoType) {
+		case 0:
+			delta = AUTOVIBRATO[self->autoVibratoPos];
+			break;
+		case 1:
+			if (self->autoVibratoPos < 128) delta = -64;
+			else delta = 64;
+			break;
+		case 2:
+			delta = ((64 + (self->autoVibratoPos >> 1)) & 127) - 64;
+			break;
+		case 3:
+			delta = ((64 - (self->autoVibratoPos >> 1)) & 127) - 64;
+			break;
+		default:
+			break;
+	}
+
+	delta *= self->playing->vibratoDepth;
+
+	if (self->autoSweep) {
+		if (!self->playing->vibratoSweep) {
+			self->autoSweep = 0;
+		} else {
+			if (self->autoSweepPos > self->playing->vibratoSweep) {
+				if (self->autoSweepPos & 2) delta *= (self->autoSweepPos / self->playing->vibratoSweep);
+				self->autoSweep = 0;
+			} else {
+				delta *= ((++(self->autoSweepPos)) / self->playing->vibratoSweep);
+			}
+		}
+	}
+
+	self->flags |= UPDATE_PERIOD;
+	return (delta >> 6);
+}
+
+void F2Voice_tonePortamento(struct F2Voice* self) {
+	if (!self->glissPeriod) self->glissPeriod = self->period;
+
+	// FIXME BLOAT these two blocks are equivalent, execpt for - / + and <= / >=
+	if (self->period < self->portaPeriod) {
+		self->glissPeriod += self->portaSpeed << 2;
+
+		// FIXME round expects a double
+		if (!self->glissando) self->period = self->glissPeriod;
+		else self->period = (int)(round((float) self->glissPeriod / 64.f)) << 6;
+		//else self->period = round(self->glissPeriod / 64) << 6;
+
+		if (self->period >= self->portaPeriod) {
+			self->period = self->portaPeriod;
+			self->glissPeriod = self->portaPeriod = 0;
+		}
+	} else if (self->period > self->portaPeriod) {
+		self->glissPeriod -= self->portaSpeed << 2;
+
+		if (!self->glissando) self->period = self->glissPeriod;
+		else self->period = (int)(round((float) self->glissPeriod / 64.f)) << 6;
+		//else self->period = round(self->glissPeriod / 64) << 6;
+
+		if (self->period <= self->portaPeriod) {
+			self->period = self->portaPeriod;
+			self->glissPeriod = self->portaPeriod = 0;
+		}
+	}
+
+	self->flags |= UPDATE_PERIOD;
+}
+
+void F2Voice_tremolo(struct F2Voice* self) {
+	int delta = 255;
+	int position = self->tremoloPos & 31;
+
+	switch ((self->waveControl >> 4) & 3) {
+		case 0:
+			delta = VIBRATO[position];
+			break;
+		case 1:
+			delta = position << 3;
+			break;
+		default:
+			break;
+	}
+
+	self->volDelta = (delta * self->tremoloDepth) >> 6;
+	if (self->tremoloPos > 31) self->volDelta = -self->volDelta;
+	self->tremoloPos = (self->tremoloPos + self->tremoloSpeed) & 63;
+
+	self->flags |= UPDATE_VOLUME;
+}
+
+void F2Voice_tremor(struct F2Voice* self) {
+	if (self->tremorPos == self->tremorOn) {
+		self->tremorVolume = self->volume;
+		self->volume = 0;
+		self->flags |= UPDATE_VOLUME;
+	} else if (self->tremorPos == self->tremorOff) {
+		self->tremorPos = 0;
+		self->volume = self->tremorVolume;
+		self->flags |= UPDATE_VOLUME;
+	}
+	++(self->tremorPos);
+}
+
+void F2Voice_vibrato(struct F2Voice* self) {
+	int delta = 255;
+	int position = self->vibratoPos & 31;
+
+	switch (self->waveControl & 3) {
+		case 0:
+			delta = VIBRATO[position];
+			break;
+		case 1:
+			delta = position << 3;
+			if (self->vibratoPos > 31) delta = 255 - delta;
+			break;
+		default:
+			break;
+	}
+
+	self->vibDelta = (delta * self->vibratoDepth) >> 7;
+	if (self->vibratoPos > 31) self->vibDelta = -self->vibDelta;
+	self->vibratoPos = (self->vibratoPos + self->vibratoSpeed) & 63;
+
+	self->flags |= UPDATE_PERIOD;
+}
+
