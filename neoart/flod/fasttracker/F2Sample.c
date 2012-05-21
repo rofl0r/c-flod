@@ -15,13 +15,21 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->fasttracker {
-  import neoart.flod.core.*;
 
-  public final class F2Sample extends SBSample {
-    public var
- int finetune;
- int panning;
- int relative;
-  }
+#include "F2Sample.h"
+#include "../flod_internal.h"
+
+void F2Sample_defaults(struct F2Sample* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
 }
+
+void F2Sample_ctor(struct F2Sample* self) {
+	CLASS_CTOR_DEF(F2Sample);
+	// original constructor code goes here
+}
+
+struct F2Sample* F2Sample_new(void) {
+	CLASS_NEW_BODY(F2Sample);
+}
+
