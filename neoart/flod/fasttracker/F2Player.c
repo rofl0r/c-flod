@@ -933,7 +933,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 	int value = 0;
 	
 	if (ByteArray_get_length(stream) < 360) return;
-	stream->position = 17;
+	ByteArray_set_position(stream, 17);
 
 	self->super.super.title = stream->readMultiByte(20, ENCODING);
 	stream->position++;
@@ -985,7 +985,8 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 		self->patterns[--rows] = pattern;
 	}
 
-	stream->position = pos = header + 60;
+	pos = header + 60;
+	ByteArray_set_position(stream, pos);
 	len = value;
 
 	for (i = 0; i < len; ++i) {
@@ -996,7 +997,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 		rows = pattern->size;
 
 		value = stream->readUnsignedShort();
-		stream->position = pos + header;
+		ByteArray_set_position(stream, pos + header);
 		ipos = stream->position + value;
 
 		if (value) {
@@ -1029,7 +1030,10 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 
 		self->patterns[i] = pattern;
 		pos = stream->position;
-		if (pos != ipos) pos = stream->position = ipos;
+		if (pos != ipos) {
+			pos = ipos;
+			ByteArray_set_position(stream, pos);
+		}
 	}
 
 	ipos = stream->position;
@@ -1096,8 +1100,10 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 				stream->position++;
 				sample->super.name = stream->readMultiByte(22, ENCODING);
 				instr->samples[j] = sample;
-
-				stream->position = (pos += header);
+				
+				pos += header;
+				ByteArray_set_position(stream, pos);
+				//stream->position = (pos += header);
 			}
 
 			for (j = 0; j < value; ++j) {
@@ -1116,10 +1122,10 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 				if (!sample->super.loopLen) sample->super.loopMode = 0;
 				sample->store(stream);
 				if (sample->super.loopMode) sample->super.length = sample->super.loopStart + sample->super.loopLen;
-				stream->position = pos;
+				ByteArray_set_position(stream, pos);
 			}
 		} else {
-			stream->position = ipos + iheader;
+			ByteArray_set_position(stream, ipos + iheader);
 		}
 
 		ipos = stream->position;
