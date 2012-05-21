@@ -15,33 +15,43 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->fasttracker {
-  import flash.utils.*;
-  import neoart.flod.core.*;
 
-  public final class F2Player extends SBPlayer {
-    internal var
-      patterns      : Vector.<F2Pattern>,
-      instruments   : Vector.<F2Instrument>,
- int linear;
-    private var
-      voices        : Vector.<F2Voice>,
- int order;
- int position;
- int nextOrder;
- int nextPosition;
-      pattern       : F2Pattern,
- int patternDelay;
- int patternOffset;
- int complete;
+#include "F2Player.h"
+#include "../flod_internal.h"
+#include "F2Player_const.h"
 
-     void F2Player(mixer:Soundblaster = null) {
-      super(mixer);
-    }
+void F2Player_defaults(struct F2Player* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+/* mixer default value = null */
+void F2Player_ctor(struct F2Player* self, struct Soundblaster *mixer) {
+	CLASS_CTOR_DEF(F2Player);
+	// original constructor code goes here
+	super(mixer);
+}
+
+struct F2Player* F2Player_new(struct Soundblaster *mixer) {
+	CLASS_NEW_BODY(F2Player, mixer);
+}
 
 //override
-void process() {
-      var int com; curr:F2Point, instr:F2Instrument, int i; int jumpFlag; next:F2Point, int paramx; int paramy; int porta; row:F2Row, sample:F2Sample, int slide; int value; voice:F2Voice = voices[0];
+void F2Player_process(struct F2Player* self) {
+      int com = 0;
+      struct F2Point *curr = NULL;
+      struct F2Instrument *instr = NULL;
+      int i = 0;
+      int jumpFlag = 0;
+      struct F2Point *next = NULL;
+      int paramx = 0;
+      int paramy = 0;
+      int porta = 0;
+      struct F2Row *row = NULL;
+      struct F2Sample *sample = NULL;
+      int slide = 0;
+      int value = 0;
+      struct F2Voice *voice = voices[0];
 
       if (!tick) {
         if (nextOrder >= 0) order = nextOrder;
@@ -580,11 +590,17 @@ void process() {
           }
         }
       }
-    }
+}
 
 //override
-void fast() {
-      var chan:SBChannel, int delta; int flags; instr:F2Instrument, int panning; voice:F2Voice = voices[0], Number volume;
+void F2Player_fast(struct F2Player* self) {
+      struct SBChannel *chan = NULL;
+      int delta = 0; 
+      int flags = 0; 
+      struct F2Instrument *instr = NULL;
+      int panning = 0;
+      struct F2Voice *voice = voices[0];
+      Number volume = NAN;
 
       while (voice) {
         chan  = voice->channel;
@@ -682,11 +698,21 @@ void fast() {
         }
         voice = voice->next;
       }
-    }
+}
 
 //override
-void accurate() {
-      var chan:SBChannel, int delta; int flags; instr:F2Instrument, Number lpan; Number lvol; int panning; Number rpan; Number rvol; voice:F2Voice = voices[0], Number volume; 
+void F2Player_accurate(struct F2Player* self) {
+      struct SBChannel *chan = NULL;
+      int delta = 0;
+      int flags = 0; 
+      struct F2Instrument *instr = NULL;
+      Number lpan = NAN;
+      Number lvol = NAN; 
+      int panning = 0; 
+      Number rpan = NAN; 
+      Number rvol = NAN; 
+      struct F2Voice *voice = voices[0];
+      Number volume = NAN; 
 
       while (voice) {
         chan  = voice->channel;
@@ -833,11 +859,12 @@ void accurate() {
         }
         voice = voice->next;
       }
-    }
+}
 
 //override
-void initialize() {
-      var i:int = 0, voice:F2Voice;
+void F2Player_initialize(struct F2Player* self) {
+      int i = 0;
+      struct F2Voice *voice = NULL;
       super->initialize();
 
       timer         = speed;
@@ -862,11 +889,26 @@ void initialize() {
         voices[i] = voice;
         if (i) voices[int(i - 1)].next = voice;
       }
-    }
+}
 
 //override
-void loader(stream:ByteArray) {
-      var int header; int i; id:String, int iheader; instr:F2Instrument, int ipos; int j; int len; pattern:F2Pattern, int pos; reserved:int = 22, row:F2Row, int rows; sample:F2Sample, int value;
+void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
+      int header = 0;
+      int i = 0;
+      char id[24];
+      int iheader = 0;
+      struct F2Instrument *instr = NULL;
+      int ipos = 0;
+      int j = 0; 
+      int len = 0; 
+      struct F2Pattern *pattern = NULL;
+      int pos = 0; 
+      int reserved = 22;
+      struct F2Row *row = NULL;
+      int rows = 0; 
+      struct F2Sample *sample = NULL;
+      int value = 0;
+      
       if (stream->length < 360) return;
       stream->position = 17;
 
@@ -1077,10 +1119,12 @@ void loader(stream:ByteArray) {
 
       instr->samples[0] = sample;
       instruments[0] = instr;
-    }
+}
 
-void envelope(voice:F2Voice, envelope:F2Envelope, data:F2Data) {
-      var pos:int = envelope->position, curr:F2Point = data->points[pos], next:F2Point;
+void F2Player_envelope(struct F2Player* self, struct F2Voice *voice, struct F2Envelope *envelope, struct F2Data *data) {
+      int pos = envelope->position;
+      struct F2Point *curr = data->points[pos];
+      struct F2Point *next = NULL;
 
       if (envelope->frame == curr->frame) {
         if ((data->flags & ENVELOPE_LOOP) && pos == data->loopEnd) {
@@ -1111,10 +1155,11 @@ void envelope(voice:F2Voice, envelope:F2Envelope, data:F2Data) {
 
       envelope->value = (envelope->fraction >> 8);
       envelope->frame++;
-    }
+}
 
-int amiga( int note; int finetune) {
-      var delta:Number = 0.0, period:int = PERIODS[++note];
+int F2Player_amiga(struct F2Player* self, int note, int finetune) {
+      Number delta = 0.0;
+      int period = PERIODS[++note];
 
       if (finetune < 0) {
         delta = (PERIODS[--note] - period) / 64;
@@ -1123,9 +1168,9 @@ int amiga( int note; int finetune) {
       }
 
       return int(period - (delta * finetune));
-    }
+}
     
-void retrig(voice:F2Voice) {
+void F2Player_retrig(struct F2Player* self, struct F2Voice *voice) {
       switch (voice->retrigx) {
         case 1:
           voice->volume--;
@@ -1178,125 +1223,5 @@ void retrig(voice:F2Voice) {
         else if (voice->volume > 64) voice->volume = 64;
 
       voice->flags |= UPDATE_VOLUME;
-    }
-
-    internal static const
-      UPDATE_PERIOD    : int = 1,
-      UPDATE_VOLUME    : int = 2,
-      UPDATE_PANNING   : int = 4,
-      UPDATE_TRIGGER   : int = 8,
-      UPDATE_ALL       : int = 15,
-      SHORT_RAMP       : int = 32,
-
-      ENVELOPE_ON      : int = 1,
-      ENVELOPE_SUSTAIN : int = 2,
-      ENVELOPE_LOOP    : int = 4,
-
-      LOWER_NOTE       : int = 0,
-      HIGHER_NOTE      : int = 118,
-      KEYOFF_NOTE      : int = 97,
-
-      FX_ARPEGGIO                : int = 0,
-      FX_PORTAMENTO_UP           : int = 1,
-      FX_PORTAMENTO_DOWN         : int = 2,
-      FX_TONE_PORTAMENTO         : int = 3,
-      FX_VIBRATO                 : int = 4,
-      FX_TONE_PORTA_VOLUME_SLIDE : int = 5,
-      FX_VIBRATO_VOLUME_SLIDE    : int = 6,
-      FX_TREMOLO                 : int = 7,
-      FX_SET_PANNING             : int = 8,
-      FX_SAMPLE_OFFSET           : int = 9,
-      FX_VOLUME_SLIDE            : int = 10,
-      FX_POSITION_JUMP           : int = 11,
-      FX_SET_VOLUME              : int = 12,
-      FX_PATTERN_BREAK           : int = 13,
-      FX_EXTENDED_EFFECTS        : int = 14,
-      FX_SET_SPEED               : int = 15,
-      FX_SET_GLOBAL_VOLUME       : int = 16,
-      FX_GLOBAL_VOLUME_SLIDE     : int = 17,
-      FX_KEYOFF                  : int = 20,
-      FX_SET_ENVELOPE_POSITION   : int = 21,
-      FX_PANNING_SLIDE           : int = 24,
-      FX_MULTI_RETRIG_NOTE       : int = 27,
-      FX_TREMOR                  : int = 29,
-      FX_EXTRA_FINE_PORTAMENTO   : int = 33,
-
-      EX_FINE_PORTAMENTO_UP      : int = 1,
-      EX_FINE_PORTAMENTO_DOWN    : int = 2,
-      EX_GLISSANDO_CONTROL       : int = 3,
-      EX_VIBRATO_CONTROL         : int = 4,
-      EX_SET_FINETUNE            : int = 5,
-      EX_PATTERN_LOOP            : int = 6,
-      EX_TREMOLO_CONTROL         : int = 7,
-      EX_RETRIG_NOTE             : int = 9,
-      EX_FINE_VOLUME_SLIDE_UP    : int = 10,
-      EX_FINE_VOLUME_SLIDE_DOWN  : int = 11,
-      EX_NOTE_CUT                : int = 12,
-      EX_NOTE_DELAY              : int = 13,
-      EX_PATTERN_DELAY           : int = 14,
-
-      VX_VOLUME_SLIDE_DOWN       : int = 6,
-      VX_VOLUME_SLIDE_UP         : int = 7,
-      VX_FINE_VOLUME_SLIDE_DOWN  : int = 8,
-      VX_FINE_VOLUME_SLIDE_UP    : int = 9,
-      VX_SET_VIBRATO_SPEED       : int = 10,
-      VX_VIBRATO                 : int = 11,
-      VX_SET_PANNING             : int = 12,
-      VX_PANNING_SLIDE_LEFT      : int = 13,
-      VX_PANNING_SLIDE_RIGHT     : int = 14,
-      VX_TONE_PORTAMENTO         : int = 15,
-
-      PANNING : Vector.<Number> = Vector.<Number>([
-        0.000000,0.044170,0.062489,0.076523,0.088371,0.098821,0.108239,0.116927,0.124977,
-        0.132572,0.139741,0.146576,0.153077,0.159335,0.165350,0.171152,0.176772,0.182210,
-        0.187496,0.192630,0.197643,0.202503,0.207273,0.211951,0.216477,0.220943,0.225348,
-        0.229631,0.233854,0.237985,0.242056,0.246066,0.249985,0.253873,0.257670,0.261437,
-        0.265144,0.268819,0.272404,0.275989,0.279482,0.282976,0.286409,0.289781,0.293153,
-        0.296464,0.299714,0.302965,0.306185,0.309344,0.312473,0.315602,0.318671,0.321708,
-        0.324746,0.327754,0.330700,0.333647,0.336563,0.339449,0.342305,0.345161,0.347986,
-        0.350781,0.353545,0.356279,0.359013,0.361717,0.364421,0.367094,0.369737,0.372380,
-        0.374992,0.377574,0.380157,0.382708,0.385260,0.387782,0.390303,0.392794,0.395285,
-        0.397746,0.400176,0.402606,0.405037,0.407437,0.409836,0.412206,0.414576,0.416915,
-        0.419254,0.421563,0.423841,0.426180,0.428458,0.430737,0.432985,0.435263,0.437481,
-        0.439729,0.441916,0.444134,0.446321,0.448508,0.450665,0.452852,0.455009,0.457136,
-        0.459262,0.461389,0.463485,0.465611,0.467708,0.469773,0.471839,0.473935,0.475970,
-        0.478036,0.480072,0.482077,0.484112,0.486117,0.488122,0.490127,0.492101,0.494106,
-        0.496051,0.498025,0.500000,0.501944,0.503888,0.505802,0.507746,0.509660,0.511574,
-        0.513488,0.515371,0.517255,0.519138,0.521022,0.522905,0.524758,0.526611,0.528465,
-        0.530318,0.532140,0.533993,0.535816,0.537639,0.539462,0.541254,0.543046,0.544839,
-        0.546631,0.548423,0.550216,0.551978,0.553739,0.555501,0.557263,0.558995,0.560757,
-        0.562489,0.564220,0.565952,0.567683,0.569384,0.571116,0.572817,0.574518,0.576220,
-        0.577890,0.579592,0.581262,0.582964,0.584634,0.586305,0.587946,0.589617,0.591257,
-        0.592928,0.594568,0.596209,0.597849,0.599459,0.601100,0.602710,0.604350,0.605960,
-        0.607570,0.609150,0.610760,0.612370,0.613950,0.615560,0.617139,0.618719,0.620268,
-        0.621848,0.623428,0.624977,0.626557,0.628106,0.629655,0.631205,0.632754,0.634303,
-        0.635822,0.637372,0.638890,0.640440,0.641959,0.643478,0.644966,0.646485,0.648004,
-        0.649523,0.651012,0.652500,0.653989,0.655477,0.656966,0.658454,0.659943,0.661431,
-        0.662890,0.664378,0.665836,0.667294,0.668783,0.670241,0.671699,0.673127,0.674585,
-        0.676043,0.677471,0.678929,0.680357,0.681785,0.683213,0.684641,0.686068,0.687496,
-        0.688894,0.690321,0.691749,0.693147,0.694574,0.695972,0.697369,0.698767,0.700164,
-        0.701561,0.702928,0.704326,0.705723,0.707110]),
-
-      VOLUMES : Vector.<Number> = Vector.<Number>([
-        0.000000,0.005863,0.013701,0.021569,0.029406,0.037244,0.045082,0.052919,0.060757,
-        0.068625,0.076463,0.084300,0.092138,0.099976,0.107844,0.115681,0.123519,0.131357,
-        0.139194,0.147032,0.154900,0.162738,0.170575,0.178413,0.186251,0.194119,0.201956,
-        0.209794,0.217632,0.225469,0.233307,0.241175,0.249013,0.256850,0.264688,0.272526,
-        0.280394,0.288231,0.296069,0.303907,0.311744,0.319582,0.327450,0.335288,0.343125,
-        0.350963,0.358800,0.366669,0.374506,0.382344,0.390182,0.398019,0.405857,0.413725,
-        0.421563,0.429400,0.437238,0.445076,0.452944,0.460781,0.468619,0.476457,0.484294,
-        0.492132,0.500000]),
-
-      PERIODS : Vector.<int> = Vector.<int>([
-        29024,27392,25856,24384,23040,21696,20480,19328,18240,17216,16256,15360,14512,
-        13696,12928,12192,11520,10848,10240, 9664, 9120, 8608, 8128, 7680, 7256, 6848,
-         6464, 6096, 5760, 5424, 5120, 4832, 4560, 4304, 4064, 3840, 3628, 3424, 3232,
-         3048, 2880, 2712, 2560, 2416, 2280, 2152, 2032, 1920, 1814, 1712, 1616, 1524,
-         1440, 1356, 1280, 1208, 1140, 1076, 1016,  960,  907,  856,  808,  762,  720,
-          678,  640,  604,  570,  538,  508,  480,  453,  428,  404,  381,  360,  339,
-          320,  302,  285,  269,  254,  240,  227,  214,  202,  190,  180,  169,  160,
-          151,  142,  134,  127,  120,  113,  107,  101,   95,   90,   85,   80,   75,
-           71,   67,   63,   60,   57,   53,   50,   48,   45,   42,   40,   38,   36,
-           34,   32,   30,   28]);
-  }
 }
+
