@@ -20,9 +20,9 @@
 #include "../flod_internal.h"
 #include "F2Player_const.h"
 
-static void F2Player_envelope(struct F2Player* self, struct F2Voice *voice, struct F2Envelope *envelope, struct F2Data *data);
-static int F2Player_amiga(struct F2Player* self, int note, int finetune);
-static void F2Player_retrig(struct F2Player* self, struct F2Voice *voice);
+static void envelope(F2Voice* voice, F2Envelope* envelope, F2Data* data);
+static int amiga(int note, int finetune);
+static void retrig(F2Voice* voice);
 
 void F2Player_defaults(struct F2Player* self) {
 	CLASS_DEF_INIT();
@@ -61,17 +61,17 @@ void F2Player_process(struct F2Player* self) {
 	struct F2Sample *sample = NULL;
 	int slide = 0;
 	int value = 0;
-	struct F2Voice *voice = voices[0];
+	struct F2Voice *voice = self->voices[0];
 
-	if (!tick) {
-		if (nextOrder >= 0) order = nextOrder;
-		if (nextPosition >= 0) position = nextPosition;
+	if (!self->super.super.tick) {
+		if (self->nextOrder >= 0) self->order = self->nextOrder;
+		if (self->nextPosition >= 0) self->position = self->nextPosition;
 
-		nextOrder = nextPosition = -1;
-		pattern = patterns[track[order]];
+		self->nextOrder = self->nextPosition = -1;
+		self->pattern = self->patterns[self->super.track[self->order]];
 
 		while (voice) {
-			row = pattern->rows[int(position + voice->index)];
+			row = self->pattern->rows[int(self->position + voice->index)];
 			com = row->volume >> 4;
 			porta = (int)(row->effect == FX_TONE_PORTAMENTO || row->effect == FX_TONE_PORTA_VOLUME_SLIDE || com == VX_TONE_PORTAMENTO);
 			paramx = row->param >> 4;
@@ -83,7 +83,7 @@ void F2Player_process(struct F2Player* self) {
 			}
 
 			if (row->instrument) {
-				voice->instrument = row->instrument < instruments->length ? instruments[row->instrument] : null;
+				voice->instrument = row->instrument < self->instruments->length ? self->instruments[row->instrument] : null;
 				voice->volEnvelope->reset();
 				voice->panEnvelope->reset();
 				voice->flags |= (UPDATE_VOLUME | UPDATE_PANNING | SHORT_RAMP);
@@ -123,7 +123,7 @@ void F2Player_process(struct F2Player* self) {
 						if (row->effect == FX_EXTENDED_EFFECTS && paramx == EX_SET_FINETUNE)
 							voice->finetune = ((row->param & 15) - 8) << 3;
 
-						if (linear) {
+						if (self->linear) {
 							value = ((120 - value) << 6) - voice->finetune;
 						} else {
 							value = amiga(value, voice->finetune);
@@ -230,28 +230,28 @@ void F2Player_process(struct F2Player* self) {
 						if (row->param) voice->volSlide = row->param;
 						break;
 					case FX_POSITION_JUMP:
-						nextOrder = row->param;
+						self->nextOrder = row->param;
 
-						if (nextOrder >= length) complete = 1;
-						else nextPosition = 0;
+						if (self->nextOrder >= self->length) self->complete = 1;
+						else self->nextPosition = 0;
 
 						jumpFlag      = 1;
-						patternOffset = 0;
+						self->patternOffset = 0;
 						break;
 					case FX_SET_VOLUME:
 						voice->volume = row->param;
 						voice->flags |= (UPDATE_VOLUME | SHORT_RAMP);
 						break;
 					case FX_PATTERN_BREAK:
-						nextPosition  = ((paramx * 10) + paramy) * channels;
-						patternOffset = 0;
+						self->nextPosition  = ((paramx * 10) + paramy) * self->super.super.channels;
+						self->patternOffset = 0;
 
 						if (!jumpFlag) {
-							nextOrder = order + 1;
+							self->nextOrder = self->order + 1;
 
-							if (nextOrder >= length) {
-								complete = 1;
-								nextPosition = -1;
+							if (self->nextOrder >= self->super.length) {
+								self->complete = 1;
+								self->nextPosition = -1;
 							}
 						}
 						break;
@@ -275,7 +275,7 @@ void F2Player_process(struct F2Player* self) {
 								break;
 							case EX_PATTERN_LOOP:
 								if (!paramy) {
-									voice->patternLoopRow = patternOffset = position;
+									voice->patternLoopRow = self->patternOffset = self->position;
 								} else {
 									if (!voice->patternLoop) {
 										voice->patternLoop = paramy;
@@ -284,7 +284,7 @@ void F2Player_process(struct F2Player* self) {
 									}
 
 									if (voice->patternLoop)
-										nextPosition = voice->patternLoopRow;
+										self->nextPosition = voice->patternLoopRow;
 								}
 								break;
 							case EX_TREMOLO_CONTROL:
@@ -305,7 +305,7 @@ void F2Player_process(struct F2Player* self) {
 								voice->flags = 0;
 								break;
 							case EX_PATTERN_DELAY:
-								patternDelay = paramy * timer;
+								self->patternDelay = paramy * self->super.timer;
 								break;
 							default:
 								break;
@@ -313,12 +313,12 @@ void F2Player_process(struct F2Player* self) {
 						break;
 					case FX_SET_SPEED:
 						if (!row->param) break;
-						if (row->param < 32) timer = row->param;
-						else mixer->samplesTick = 110250 / row->param;
+						if (row->param < 32) self->super.timer = row->param;
+						else self->super.mixer->super.samplesTick = 110250 / row->param;
 						break;
 					case FX_SET_GLOBAL_VOLUME:
-						master = row->param;
-						if (master > 64) master = 64;
+						self->super.master = row->param;
+						if (self->super.master > 64) self->super.master = 64;
 						voice->flags |= UPDATE_VOLUME;
 						break;
 					case FX_GLOBAL_VOLUME_SLIDE:
@@ -366,7 +366,7 @@ void F2Player_process(struct F2Player* self) {
 						if (paramy) voice->retrigy = paramy;
 
 						if (!row->volume && voice->retrigy) {
-							com = tick + 1;
+							com = self->super.super.tick + 1;
 							if (com % voice->retrigy) break;
 							if (row->volume > 80 && voice->retrigx) retrig(voice);
 						}
@@ -394,10 +394,10 @@ void F2Player_process(struct F2Player* self) {
 		}
 	} else {
 		while (voice) {
-			row = pattern->rows[int(position + voice->index)];
+			row = self->pattern->rows[int(self->position + voice->index)];
 
 			if (voice->delay) {
-				if ((row->param & 15) == tick) {
+				if ((row->param & 15) == self->super.super.tick) {
 					voice->flags = voice->delay;
 					voice->delay = 0;
 				} else {
@@ -448,25 +448,25 @@ void F2Player_process(struct F2Player* self) {
 			switch (row->effect) {
 				case FX_ARPEGGIO:
 					if (!row->param) break;
-					value = (tick - timer) % 3;
+					value = (self->super.super.tick - self->super.timer) % 3;
 					if (value < 0) value += 3;
-					if (tick == 2 && timer == 18) value = 0;
+					if (self->super.super.tick == 2 && self->super.timer == 18) value = 0;
 
 					if (!value) {
 						voice->arpDelta = 0;
 					} else if (value == 1) {
-						if (linear) {
-						voice->arpDelta = -(paramy << 6);
+						if (self->linear) {
+							voice->arpDelta = -(paramy << 6);
 						} else {
-						value = amiga(voice->note + paramy, voice->finetune);
-						voice->arpDelta = value - voice->period;
+							value = amiga(voice->note + paramy, voice->finetune);
+							voice->arpDelta = value - voice->period;
 						}
 					} else {
-						if (linear) {
-						voice->arpDelta = -(paramx << 6);
+						if (self->linear) {
+							voice->arpDelta = -(paramx << 6);
 						} else {
-						value = amiga(voice->note + paramx, voice->finetune);
-						voice->arpDelta = value - voice->period;
+							value = amiga(voice->note + paramx, voice->finetune);
+							voice->arpDelta = value - voice->period;
 						}
 					}
 
@@ -507,14 +507,14 @@ void F2Player_process(struct F2Player* self) {
 				case FX_EXTENDED_EFFECTS:
 					switch (paramx) {
 						case EX_RETRIG_NOTE:
-							if ((tick % paramy) == 0) {
+							if ((self->super.super.tick % paramy) == 0) {
 								voice->volEnvelope->reset();
 								voice->panEnvelope->reset();
 								voice->flags |= (UPDATE_VOLUME | UPDATE_PANNING | UPDATE_TRIGGER);
 							}
 							break;
 						case EX_NOTE_CUT:
-							if (tick == paramy) {
+							if (self->super.super.tick == paramy) {
 								voice->volume = 0;
 								voice->flags |= UPDATE_VOLUME;
 							}
@@ -528,17 +528,17 @@ void F2Player_process(struct F2Player* self) {
 					paramy = voice->volSlideMaster & 15;
 
 					if (paramx) {
-						master += paramx;
-						if (master > 64) master = 64;
+						self->super.master += paramx;
+						if (self->super.master > 64) self->super.master = 64;
 						voice->flags |= UPDATE_VOLUME;
 					} else if (paramy) {
-						master -= paramy;
-						if (master < 0) master = 0;
+						self->super.master -= paramy;
+						if (self->super.master < 0) self->super.master = 0;
 						voice->flags |= UPDATE_VOLUME;
 					}
 					break;
 				case FX_KEYOFF:
-					if (tick == row->param) {
+					if (self->super.super.tick == row->param) {
 						voice->fadeEnabled = 1;
 						voice->keyoff = 1;
 					}
@@ -558,11 +558,13 @@ void F2Player_process(struct F2Player* self) {
 					}
 					break;
 				case FX_MULTI_RETRIG_NOTE:
-					com = tick;
+					com = self->super.super.tick;
 					if (!row->volume) com++;
 					if (com % voice->retrigy) break;
 
-					if ((!row->volume || row->volume > 80) && voice->retrigx) retrig(voice);
+					if ((!row->volume || row->volume > 80) && voice->retrigx)
+						retrig(voice);
+					
 					voice->flags |= UPDATE_TRIGGER;
 					break;
 				case FX_TREMOR:
@@ -589,19 +591,19 @@ void F2Player_process(struct F2Player* self) {
 		}
 	}
 
-	if (++tick >= (timer + patternDelay)) {
-		patternDelay = tick = 0;
+	if (++(self->super.super.tick) >= (self->super.timer + self->patternDelay)) {
+		self->patternDelay = self->super.super.tick = 0;
 
-		if (nextPosition < 0) {
-			nextPosition = position + channels;
+		if (self->nextPosition < 0) {
+			self->nextPosition = self->position + self->super.super.channels;
 
-			if (nextPosition >= pattern->size || complete) {
-				nextOrder = order + 1;
-				nextPosition = patternOffset;
+			if (self->nextPosition >= self->pattern->size || self->complete) {
+				self->nextOrder = self->order + 1;
+				self->nextPosition = self->patternOffset;
 
-				if (nextOrder >= length) {
-					nextOrder = restart;
-					mixer->complete = 1;
+				if (self->nextOrder >= self->super.length) {
+					self->nextOrder = self->super.restart;
+					self->super.mixer->complete = 1;
 				}
 			}
 		}
@@ -615,7 +617,7 @@ void F2Player_fast(struct F2Player* self) {
 	int flags = 0; 
 	struct F2Instrument *instr = NULL;
 	int panning = 0;
-	struct F2Voice *voice = voices[0];
+	struct F2Voice *voice = self->voices[0];
 	Number volume = NAN;
 
 	while (voice) {
@@ -629,7 +631,7 @@ void F2Player_fast(struct F2Player* self) {
 			chan->dir      =  0;
 			chan->fraction =  0;
 			chan->sample   = voice->sample;
-			chan->length   = voice->sample->length;
+			chan->length   = voice->sample->super.length;
 
 			chan->enabled = chan->sample->data ? 1 : 0;
 			voice->playing = voice->instrument;
@@ -686,7 +688,7 @@ void F2Player_fast(struct F2Player* self) {
 			if (volume < 0) volume = 0;
 			else if (volume > 64) volume = 64;
 
-			chan->volume = VOLUMES[int((volume * master) >> 6)];
+			chan->volume = VOLUMES[int((volume * self->super.master) >> 6)];
 			chan->lvol = chan->volume * chan->lpan;
 			chan->rvol = chan->volume * chan->rpan;
 		}
@@ -703,7 +705,7 @@ void F2Player_fast(struct F2Player* self) {
 		if (flags & UPDATE_PERIOD) {
 			delta += voice->period + voice->arpDelta + voice->vibDelta;
 
-			if (linear) {
+			if (self->linear) {
 				chan->speed  = (int)((548077568 * Math->pow(2, ((4608 - delta) / 768))) / 44100) / 65536;
 			} else {
 				chan->speed  = (int)((65536 * (14317456 / delta)) / 44100) / 65536;
@@ -727,7 +729,7 @@ void F2Player_accurate(struct F2Player* self) {
 	int panning = 0; 
 	Number rpan = NAN; 
 	Number rvol = NAN; 
-	struct F2Voice *voice = voices[0];
+	struct F2Voice *voice = self->voices[0];
 	Number volume = NAN; 
 
 	while (voice) {
@@ -761,7 +763,7 @@ void F2Player_accurate(struct F2Player* self) {
 			chan->fraction = 0;
 			chan->sample  = voice->sample;
 			chan->pointer = voice->sampleOffset;
-			chan->length  = voice->sample->length;
+			chan->length  = voice->sample->super.length;
 
 			chan->enabled = chan->sample->data ? 1 : 0;
 			voice->playing = voice->instrument;
@@ -825,12 +827,12 @@ void F2Player_accurate(struct F2Player* self) {
 			if (volume < 0) volume = 0;
 			else if (volume > 64) volume = 64;
 
-			volume = VOLUMES[(int)((volume * master) >> 6)];
+			volume = VOLUMES[(int)((volume * self->super.master) >> 6)];
 			lvol = volume * PANNING[int(256 - panning)];
 			rvol = volume * PANNING[panning];
 
 			if (volume != chan->volume && !chan->mixCounter) {
-				chan->volCounter = (flags & SHORT_RAMP) ? 220 : mixer->samplesTick;
+				chan->volCounter = (flags & SHORT_RAMP) ? 220 : self->super.mixer->super.samplesTick;
 
 				chan->lvolDelta = (lvol - chan->lvol) / chan->volCounter;
 				chan->rvolDelta = (rvol - chan->rvol) / chan->volCounter;
@@ -846,7 +848,7 @@ void F2Player_accurate(struct F2Player* self) {
 			rpan = PANNING[panning];
 
 			if (panning != chan->panning && !chan->mixCounter && !chan->volCounter) {
-				chan->panCounter = mixer->samplesTick;
+				chan->panCounter = self->super.mixer->super.samplesTick;
 
 				chan->lpanDelta = (lpan - chan->lpan) / chan->panCounter;
 				chan->rpanDelta = (rpan - chan->rpan) / chan->panCounter;
@@ -860,7 +862,7 @@ void F2Player_accurate(struct F2Player* self) {
 		if (flags & UPDATE_PERIOD) {
 			delta += voice->period + voice->arpDelta + voice->vibDelta;
 
-			if (linear) {
+			if (self->linear) {
 				chan->speed = int((548077568 * Math->pow(2, ((4608 - delta) / 768))) / 44100) / 65536;
 			} else {
 				chan->speed  = int((65536 * (14317456 / delta)) / 44100) / 65536;
@@ -881,29 +883,29 @@ void F2Player_accurate(struct F2Player* self) {
 void F2Player_initialize(struct F2Player* self) {
 	int i = 0;
 	struct F2Voice *voice = NULL;
-	super->initialize();
+	self->super->initialize();
 
-	timer         = speed;
-	order         =  0;
-	position      =  0;
-	nextOrder     = -1;
-	nextPosition  = -1;
-	patternDelay  =  0;
-	patternOffset =  0;
-	complete      =  0;
-	master        = 64;
+	self->super.timer   = self->super.super.speed;
+	self->order         =  0;
+	self->position      =  0;
+	self->nextOrder     = -1;
+	self->nextPosition  = -1;
+	self->patternDelay  =  0;
+	self->patternOffset =  0;
+	self->complete      =  0;
+	self->super.master  = 64;
 
-	voices = new Vector.<F2Voice>(channels, true);
+	voices = new Vector.<F2Voice>(self->super.super.channels, true);
 
-	for (; i < channels; ++i) {
+	for (; i < self->super.super.channels; ++i) {
 		voice = new F2Voice(i);
 
-		voice->channel = mixer->channels[i];
-		voice->playing = instruments[0];
+		voice->channel = self->super.mixer->channels[i];
+		voice->playing = self->instruments[0];
 		voice->sample  = voice->playing->samples[0];
 
-		voices[i] = voice;
-		if (i) voices[int(i - 1)].next = voice;
+		self->voices[i] = voice;
+		if (i) self->voices[int(i - 1)].next = voice;
 	}
 }
 
@@ -928,54 +930,54 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 	if (stream->length < 360) return;
 	stream->position = 17;
 
-	title = stream->readMultiByte(20, ENCODING);
+	self->super.super.title = stream->readMultiByte(20, ENCODING);
 	stream->position++;
 	id = stream->readMultiByte(20, ENCODING);
 
 	if (id == "FastTracker v2.00   " || id == "FastTracker v 2.00  ") {
-		self->version = 1;
+		self->super.super.version = 1;
 	} else if (id == "Sk@le Tracker") {
 		reserved = 2;
-		self->version = 2;
+		self->super.super.version = 2;
 	} else if (id == "MadTracker 2.0") {
-		self->version = 3;
+		self->super.super.version = 3;
 	} else if (id == "MilkyTracker        ") {
-		self->version = 4;
+		self->super.super.version = 4;
 	} else if (id == "DigiBooster Pro 2.18") {
-		self->version = 5;
+		self->super.super.version = 5;
 	} else if (id->indexOf("OpenMPT") != -1) {
-		self->version = 6;
+		self->super.super.version = 6;
 	} else return;
 
 	stream->readUnsignedShort();
 
 	header   = stream->readUnsignedInt();
-	length   = stream->readUnsignedShort();
-	restart  = stream->readUnsignedShort();
-	channels = stream->readUnsignedShort();
+	self->super.length   = stream->readUnsignedShort();
+	self->super.restart  = stream->readUnsignedShort();
+	self->super.super.channels = stream->readUnsignedShort();
 
 	value = rows = stream->readUnsignedShort();
-	instruments = new Vector.<F2Instrument>(stream->readUnsignedShort() + 1, true);
+	self->instruments = new Vector.<F2Instrument>(stream->readUnsignedShort() + 1, true);
 
-	linear = stream->readUnsignedShort();
-	speed  = stream->readUnsignedShort();
-	tempo  = stream->readUnsignedShort();
+	self->linear = stream->readUnsignedShort();
+	self->super.super.speed  = stream->readUnsignedShort();
+	self->super.super.tempo  = stream->readUnsignedShort();
 
-	track = new Vector.<int>(length, true);
+	self->track = new Vector.<int>(length, true);
 
-	for (i = 0; i < length; ++i) {
+	for (i = 0; i < self->super.length; ++i) {
 		j = stream->readUnsignedByte();
 		if (j >= value) rows = j + 1;
-		track[i] = j;
+		self->super.track[i] = j;
 	}
 
-	patterns = new Vector.<F2Pattern>(rows, true);
+	self->patterns = new Vector.<F2Pattern>(rows, true);
 
 	if (rows != value) {
-		pattern = new F2Pattern(64, channels);
+		pattern = new F2Pattern(64, self->super.super.channels);
 		j = pattern->size;
 		for (i = 0; i < j; ++i) pattern->rows[i] = new F2Row();
-		patterns[--rows] = pattern;
+		self->patterns[--rows] = pattern;
 	}
 
 	stream->position = pos = header + 60;
@@ -985,7 +987,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 		header = stream->readUnsignedInt();
 		stream->position++;
 
-		pattern = new F2Pattern(stream->readUnsignedShort(), channels);
+		pattern = new F2Pattern(stream->readUnsignedShort(), self->super.super.channels);
 		rows = pattern->size;
 
 		value = stream->readUnsignedShort();
@@ -1013,19 +1015,20 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 
 				if (row->note != KEYOFF_NOTE) 
 					if (row->note > 96) row->note = 0;
+					
 				pattern->rows[j] = row;
 			}
 		} else {
 			for (j = 0; j < rows; ++j) pattern->rows[j] = new F2Row();
 		}
 
-		patterns[i] = pattern;
+		self->patterns[i] = pattern;
 		pos = stream->position;
 		if (pos != ipos) pos = stream->position = ipos;
 	}
 
 	ipos = stream->position;
-	len = instruments->length;
+	len = self->instruments->length;
 
 	for (i = 1; i < len; ++i) {
 		iheader = stream->readUnsignedInt();
@@ -1072,21 +1075,21 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 
 			stream->position += reserved;
 			pos = stream->position;
-			instruments[i] = instr;
+			self->instruments[i] = instr;
 
 			for (j = 0; j < value; ++j) {
 				sample = new F2Sample();
-				sample->length    = stream->readUnsignedInt();
-				sample->loopStart = stream->readUnsignedInt();
-				sample->loopLen   = stream->readUnsignedInt();
-				sample->volume    = stream->readUnsignedByte();
+				sample->super.length    = stream->readUnsignedInt();
+				sample->super.loopStart = stream->readUnsignedInt();
+				sample->super.loopLen   = stream->readUnsignedInt();
+				sample->super.volume    = stream->readUnsignedByte();
 				sample->finetune  = stream->readByte();
-				sample->loopMode  = stream->readUnsignedByte();
+				sample->super.loopMode  = stream->readUnsignedByte();
 				sample->panning   = stream->readUnsignedByte();
 				sample->relative  = stream->readByte();
 
 				stream->position++;
-				sample->name = stream->readMultiByte(22, ENCODING);
+				sample->super.name = stream->readMultiByte(22, ENCODING);
 				instr->samples[j] = sample;
 
 				stream->position = (pos += header);
@@ -1094,20 +1097,20 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 
 			for (j = 0; j < value; ++j) {
 				sample = instr->samples[j];
-				if (!sample->length) continue;
-				pos = stream->position + sample->length;
+				if (!sample->super.length) continue;
+				pos = stream->position + sample->super.length;
 
-				if (sample->loopMode & 16) {
-					sample->bits       = 16;
-					sample->loopMode  ^= 16;
-					sample->length    >>= 1;
-					sample->loopStart >>= 1;
-					sample->loopLen   >>= 1;
+				if (sample->super.loopMode & 16) {
+					sample->super.bits       = 16;
+					sample->super.loopMode  ^= 16;
+					sample->super.length    >>= 1;
+					sample->super.loopStart >>= 1;
+					sample->super.loopLen   >>= 1;
 				}
 
-				if (!sample->loopLen) sample->loopMode = 0;
+				if (!sample->super.loopLen) sample->super.loopMode = 0;
 				sample->store(stream);
-				if (sample->loopMode) sample->length = sample->loopStart + sample->loopLen;
+				if (sample->super.loopMode) sample->super.length = sample->super.loopStart + sample->super.loopLen;
 				stream->position = pos;
 			}
 		} else {
@@ -1129,16 +1132,16 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 	}
 
 	sample = new F2Sample();
-	sample->length = 220;
+	sample->super.length = 220;
 	sample->data = new Vector.<Number>(220, true);
 
-	for (i = 0; i < 220; ++i) sample->data[i] = 0.0;
+	for (i = 0; i < 220; ++i) sample->super.data[i] = 0.0;
 
 	instr->samples[0] = sample;
-	instruments[0] = instr;
+	self->instruments[0] = instr;
 }
 
-static void F2Player_envelope(struct F2Player* self, struct F2Voice *voice, struct F2Envelope *envelope, struct F2Data *data) {
+static void envelope(struct F2Voice *voice, struct F2Envelope *envelope, struct F2Data *data) {
 	int pos = envelope->position;
 	struct F2Point *curr = data->points[pos];
 	struct F2Point *next = NULL;
@@ -1174,7 +1177,7 @@ static void F2Player_envelope(struct F2Player* self, struct F2Voice *voice, stru
 	envelope->frame++;
 }
 
-static int F2Player_amiga(struct F2Player* self, int note, int finetune) {
+static int amiga(int note, int finetune) {
 	Number delta = 0.0;
 	int period = PERIODS[++note];
 
@@ -1187,7 +1190,7 @@ static int F2Player_amiga(struct F2Player* self, int note, int finetune) {
 	return int(period - (delta * finetune));
 }
     
-static void F2Player_retrig(struct F2Player* self, struct F2Voice *voice) {
+static void retrig(struct F2Voice *voice) {
 	switch (voice->retrigx) {
 		case 1:
 			voice->volume--;
