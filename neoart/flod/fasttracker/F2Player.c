@@ -71,7 +71,7 @@ void F2Player_process(struct F2Player* self) {
 		self->pattern = self->patterns[self->super.track[self->order]];
 
 		while (voice) {
-			row = self->pattern->rows[int(self->position + voice->index)];
+			row = &self->pattern->rows[self->position + voice->index];
 			com = row->volume >> 4;
 			porta = (int)(row->effect == FX_TONE_PORTAMENTO || row->effect == FX_TONE_PORTA_VOLUME_SLIDE || com == VX_TONE_PORTAMENTO);
 			paramx = row->param >> 4;
@@ -394,7 +394,7 @@ void F2Player_process(struct F2Player* self) {
 		}
 	} else {
 		while (voice) {
-			row = self->pattern->rows[int(self->position + voice->index)];
+			row = &self->pattern->rows[self->position + voice->index];
 
 			if (voice->delay) {
 				if ((row->param & 15) == self->super.super.tick) {
@@ -998,7 +998,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 
 		value = stream->readUnsignedShort();
 		ByteArray_set_position(stream, pos + header);
-		ipos = stream->position + value;
+		ipos = ByteArray_get_position(stream) + value;
 
 		if (value) {
 			for (j = 0; j < rows; ++j) {
@@ -1029,19 +1029,19 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 		}
 
 		self->patterns[i] = pattern;
-		pos = stream->position;
+		pos = ByteArray_get_position(stream);
 		if (pos != ipos) {
 			pos = ipos;
 			ByteArray_set_position(stream, pos);
 		}
 	}
 
-	ipos = stream->position;
+	ipos = ByteArray_get_position(stream);
 	len = self->instruments->length;
 
 	for (i = 1; i < len; ++i) {
 		iheader = stream->readUnsignedInt();
-		if ((stream->position + iheader) >= ByteArray_get_length(stream)) break;
+		if ((ByteArray_get_position(stream) + iheader) >= ByteArray_get_length(stream)) break;
 
 		instr = new F2Instrument();
 		instr->name = stream->readMultiByte(22, ENCODING);
@@ -1083,7 +1083,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 			instr->fadeout      = stream->readUnsignedShort() << 1;
 
 			ByteArray_set_position_rel(stream, reserved);
-			pos = stream->position;
+			pos = ByteArray_get_position(stream);
 			self->instruments[i] = instr;
 
 			for (j = 0; j < value; ++j) {
@@ -1109,7 +1109,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 			for (j = 0; j < value; ++j) {
 				sample = instr->samples[j];
 				if (!sample->super.length) continue;
-				pos = stream->position + sample->super.length;
+				pos = ByteArray_get_position(stream) + sample->super.length;
 
 				if (sample->super.loopMode & 16) {
 					sample->super.bits       = 16;
@@ -1128,7 +1128,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 			ByteArray_set_position(stream, ipos + iheader);
 		}
 
-		ipos = stream->position;
+		ipos = ByteArray_get_position(stream);
 		//FIXME: our stream position can never exceed its length
 		if (ipos >= ByteArray_get_length(stream)) break;
 	}
