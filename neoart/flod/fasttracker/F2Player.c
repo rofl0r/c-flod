@@ -219,7 +219,7 @@ void F2Player_process(struct F2Player* self) {
 					case FX_SAMPLE_OFFSET:
 						if (row->param) voice->sampleOffset = row->param << 8;
 
-						if (voice->sampleOffset >= voice->sample->length) {
+						if (voice->sampleOffset >= voice->sample->super.length) {
 							voice->volume = 0;
 							voice->sampleOffset = 0;
 							voice->flags &= ~(UPDATE_PERIOD | UPDATE_TRIGGER);
@@ -232,7 +232,7 @@ void F2Player_process(struct F2Player* self) {
 					case FX_POSITION_JUMP:
 						self->nextOrder = row->param;
 
-						if (self->nextOrder >= self->length) self->complete = 1;
+						if (self->nextOrder >= self->super.length) self->complete = 1;
 						else self->nextPosition = 0;
 
 						jumpFlag      = 1;
@@ -932,7 +932,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 	struct F2Sample *sample = NULL;
 	int value = 0;
 	
-	if (stream->length < 360) return;
+	if (ByteArray_get_length(stream) < 360) return;
 	stream->position = 17;
 
 	self->super.super.title = stream->readMultiByte(20, ENCODING);
@@ -1037,7 +1037,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 
 	for (i = 1; i < len; ++i) {
 		iheader = stream->readUnsignedInt();
-		if ((stream->position + iheader) >= stream->length) break;
+		if ((stream->position + iheader) >= ByteArray_get_length(stream)) break;
 
 		instr = new F2Instrument();
 		instr->name = stream->readMultiByte(22, ENCODING);
@@ -1123,7 +1123,8 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 		}
 
 		ipos = stream->position;
-		if (ipos >= stream->length) break;
+		//FIXME: our stream position can never exceed its length
+		if (ipos >= ByteArray_get_length(stream)) break;
 	}
 
 	instr = new F2Instrument();
