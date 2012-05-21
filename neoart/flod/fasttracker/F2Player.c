@@ -936,7 +936,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 	ByteArray_set_position(stream, 17);
 
 	self->super.super.title = stream->readMultiByte(20, ENCODING);
-	stream->position++;
+	ByteArray_set_position_rel(stream, +1);
 	id = stream->readMultiByte(20, ENCODING);
 
 	if (id == "FastTracker v2.00   " || id == "FastTracker v 2.00  ") {
@@ -991,7 +991,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 
 	for (i = 0; i < len; ++i) {
 		header = stream->readUnsignedInt();
-		stream->position++;
+		ByteArray_set_position_rel(stream, +1);
 
 		pattern = new F2Pattern(stream->readUnsignedShort(), self->super.super.channels);
 		rows = pattern->size;
@@ -1045,7 +1045,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 
 		instr = new F2Instrument();
 		instr->name = stream->readMultiByte(22, ENCODING);
-		stream->position++;
+		ByteArray_set_position_rel(stream, +1);
 
 		value = stream->readUnsignedShort();
 		if (value > 16) value = 16;
@@ -1082,7 +1082,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 			instr->vibratoSpeed = stream->readUnsignedByte();
 			instr->fadeout      = stream->readUnsignedShort() << 1;
 
-			stream->position += reserved;
+			ByteArray_set_position_rel(stream, reserved);
 			pos = stream->position;
 			self->instruments[i] = instr;
 
@@ -1097,7 +1097,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 				sample->panning   = stream->readUnsignedByte();
 				sample->relative  = stream->readByte();
 
-				stream->position++;
+				ByteArray_set_position_rel(stream, +1);
 				sample->super.name = stream->readMultiByte(22, ENCODING);
 				instr->samples[j] = sample;
 				
