@@ -15,19 +15,24 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->fasttracker {
 
-  public final class F2Data {
-    internal var
-      points    : Vector.<F2Point>,
- int total;
- int sustain;
- int loopStart;
- int loopEnd;
- int flags;
+#include "F2Data.h"
+#include "../flod_internal.h"
 
-     void F2Data() {
-      points = new Vector.<F2Point>(12, true);
-    }
-  }
+void F2Data_defaults(struct F2Data* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
 }
+
+void F2Data_ctor(struct F2Data* self) {
+	CLASS_CTOR_DEF(F2Data);
+	// original constructor code goes here
+	//points = new Vector.<F2Point>(12, true);
+	// FIXME in the original code, the points will all be null
+	// i.e. have an invalid state.
+}
+
+struct F2Data* F2Data_new(void) {
+	CLASS_NEW_BODY(F2Data);
+}
+
