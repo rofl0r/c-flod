@@ -15,18 +15,26 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->fasttracker {
 
-  public final class F2Pattern {
-    internal var
-      rows   : Vector.<F2Row>,
- int length;
- int size;
+#include "F2Pattern.h"
+#include "../flod_internal.h"
+#include "../flod.h"
 
-     void F2Pattern(length, channels) {
-      size = length * channels;
-      rows = new Vector.<F2Row>(size, true);
-      self->length = length;
-    }
-  }
+void F2Pattern_defaults(struct F2Pattern* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
 }
+
+void F2Pattern_ctor(struct F2Pattern* self, unsigned length, unsigned channels) {
+	CLASS_CTOR_DEF(F2Pattern);
+	// original constructor code goes here
+	self->size = length * channels;
+	//rows = new Vector.<F2Row>(size, true);
+	assert_dbg(size < F2PATTERN_MAX_ROWS);
+	self->length = length;	
+}
+
+struct F2Pattern* F2Pattern_new(unsigned length, unsigned channels) {
+	CLASS_NEW_BODY(F2Pattern, length, channels);
+}
+
