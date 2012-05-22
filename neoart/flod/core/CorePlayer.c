@@ -24,7 +24,6 @@
 void CorePlayer_defaults(struct CorePlayer* self) {
 	CLASS_DEF_INIT();
 	// static initializers go here
-	self->encoding = ENCODING_US_ASCII;
 	self->title = "";
 	self->soundPos = 0.0;
 }

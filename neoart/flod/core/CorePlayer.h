@@ -17,7 +17,6 @@ inheritance
 struct CorePlayer {
 	//extends EventDispatcher
 	struct EventDispatcher super;
-	enum Encoding encoding;
 	int quality;
 	int record;
 	int playSong;
