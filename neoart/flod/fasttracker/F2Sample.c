@@ -27,6 +27,8 @@ void F2Sample_defaults(struct F2Sample* self) {
 void F2Sample_ctor(struct F2Sample* self) {
 	CLASS_CTOR_DEF(F2Sample);
 	// original constructor code goes here
+	// the original constructor sets the statically assigned SBSample members
+	SBSample_defaults(&self->super);
 }
 
 struct F2Sample* F2Sample_new(void) {
