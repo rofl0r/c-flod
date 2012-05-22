@@ -22,6 +22,7 @@
 #include "futurecomposer/FCPlayer.h"
 #include "trackers/STPlayer.h"
 #include "trackers/PTPlayer.h"
+#include "fasttracker/F2Player.h"
 
 /*
   import flash.utils.*;
@@ -85,8 +86,10 @@ struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *st
 		self->player->load(stream);
 		if (self->player->version) return self->player;
 	}
+	*/
 
-	if (stream->length > 336) {
+	if (ByteArray_get_length(stream) > 336) {
+		/*
 		stream->position = 38;
 		id = stream->readMultiByte(20, CorePlayer->ENCODING);
 
@@ -97,17 +100,17 @@ struct CorePlayer *FileLoader_load(struct FileLoader* self, struct ByteArray *st
 		id == "MilkyTracker        " ||
 		id == "DigiBooster Pro 2.18" ||
 		id->indexOf("OpenMPT") != -1) {
+			*/
 
-			self->player = new F2Player(mixer);
-			self->player->load(stream);
+			self->player = (struct CorePlayer*) F2Player_new(self->mixer);
+			CorePlayer_load(self->player, stream);
 
 			if (self->player->version) {
-				index = FASTTRACKER;
+				self->index = FASTTRACKER;
 				return self->player;
 			}
-		}
+		//}
 	}
-	*/
 
 	stream->endian = BAE_BIG;
 	
