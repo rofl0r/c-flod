@@ -937,9 +937,9 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 	if (ByteArray_get_length(stream) < 360) return;
 	ByteArray_set_position(stream, 17);
 
-	self->super.super.title = stream->readMultiByte(20, ENCODING);
+	self->super.super.title = stream->readMultiByte(stream, 20, ENCODING);
 	ByteArray_set_position_rel(stream, +1);
-	id = stream->readMultiByte(20, ENCODING);
+	id = stream->readMultiByte(stream, 20, ENCODING);
 
 	if (id == "FastTracker v2.00   " || id == "FastTracker v 2.00  ") {
 		self->super.super.version = 1;
@@ -956,28 +956,28 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 		self->super.super.version = 6;
 	} else return;
 
-	stream->readUnsignedShort();
+	stream->readUnsignedShort(stream);
 
-	header   = stream->readUnsignedInt();
-	self->super.length   = stream->readUnsignedShort();
-	self->super.restart  = stream->readUnsignedShort();
-	self->super.super.channels = stream->readUnsignedShort();
+	header   = stream->readUnsignedInt(stream);
+	self->super.length   = stream->readUnsignedShort(stream);
+	self->super.restart  = stream->readUnsignedShort(stream);
+	self->super.super.channels = stream->readUnsignedShort(stream);
 
-	value = rows = stream->readUnsignedShort();
+	value = rows = stream->readUnsignedShort(stream);
 	
 	//self->instruments = new Vector.<F2Instrument>(stream->readUnsignedShort() + 1, true);
-	self->vector_count_instruments = stream->readUnsignedShort() + 1;
+	self->vector_count_instruments = stream->readUnsignedShort(stream) + 1;
 	assert_dbg(self->vector_count_instruments < F2PLAYER_MAX_INSTRUMENTS);
 
-	self->linear = stream->readUnsignedShort();
-	self->super.super.speed  = stream->readUnsignedShort();
-	self->super.super.tempo  = stream->readUnsignedShort();
+	self->linear = stream->readUnsignedShort(stream);
+	self->super.super.speed  = stream->readUnsignedShort(stream);
+	self->super.super.tempo  = stream->readUnsignedShort(stream);
 
 	//self->track = new Vector.<int>(length, true);
 	assert_dbg(self->super.length < SBPLAYER_MAX_TRACKS);
 
 	for (i = 0; i < self->super.length; ++i) {
-		j = stream->readUnsignedByte();
+		j = stream->readUnsignedByte(stream);
 		if (j >= value) rows = j + 1;
 		self->super.track[i] = j;
 	}
@@ -1005,16 +1005,16 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 
 	assert_dbg(len < F2PLAYER_MAX_PATTERNS);
 	for (i = 0; i < len; ++i) {
-		header = stream->readUnsignedInt();
+		header = stream->readUnsignedInt(stream);
 		ByteArray_set_position_rel(stream, +1);
 
-		//pattern = new F2Pattern(stream->readUnsignedShort(), self->super.super.channels);
+		//pattern = new F2Pattern(stream->readUnsignedShort(stream), self->super.super.channels);
 		pattern = &self->patterns[i];
-		F2Pattern_ctor(pattern, stream->readUnsignedShort(), self->super.super.channels);
+		F2Pattern_ctor(pattern, stream->readUnsignedShort(stream), self->super.super.channels);
 		
 		rows = pattern->size;
 
-		value = stream->readUnsignedShort();
+		value = stream->readUnsignedShort(stream);
 		ByteArray_set_position(stream, pos + header);
 		ipos = ByteArray_get_position(stream) + value;
 
@@ -1025,20 +1025,20 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 				row = &pattern->rows[j];
 				F2Row_ctor(row);
 				
-				value = stream->readUnsignedByte();
+				value = stream->readUnsignedByte(stream);
 
 				if (value & 128) {
-					if (value &  1) row->note       = stream->readUnsignedByte();
-					if (value &  2) row->instrument = stream->readUnsignedByte();
-					if (value &  4) row->volume     = stream->readUnsignedByte();
-					if (value &  8) row->effect     = stream->readUnsignedByte();
-					if (value & 16) row->param      = stream->readUnsignedByte();
+					if (value &  1) row->note       = stream->readUnsignedByte(stream);
+					if (value &  2) row->instrument = stream->readUnsignedByte(stream);
+					if (value &  4) row->volume     = stream->readUnsignedByte(stream);
+					if (value &  8) row->effect     = stream->readUnsignedByte(stream);
+					if (value & 16) row->param      = stream->readUnsignedByte(stream);
 				} else {
 					row->note       = value;
-					row->instrument = stream->readUnsignedByte();
-					row->volume     = stream->readUnsignedByte();
-					row->effect     = stream->readUnsignedByte();
-					row->param      = stream->readUnsignedByte();
+					row->instrument = stream->readUnsignedByte(stream);
+					row->volume     = stream->readUnsignedByte(stream);
+					row->effect     = stream->readUnsignedByte(stream);
+					row->param      = stream->readUnsignedByte(stream);
 				}
 
 				if (row->note != KEYOFF_NOTE) 
@@ -1067,7 +1067,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 	len = self->vector_count_instruments;
 
 	for (i = 1; i < len; ++i) {
-		iheader = stream->readUnsignedInt();
+		iheader = stream->readUnsignedInt(stream);
 		if ((ByteArray_get_position(stream) + iheader) >= ByteArray_get_length(stream)) break;
 
 		
@@ -1079,12 +1079,12 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 		// FIXME : forgotten to call F2Data_ctor on instr voldata and pandata ?
 		// the code below the loop which also called F2Instrument_new did it...
 		
-		instr->name = stream->readMultiByte(22, ENCODING);
+		instr->name = stream->readMultiByte(stream,22, ENCODING);
 		ByteArray_set_position_rel(stream, +1);
 
-		value = stream->readUnsignedShort();
+		value = stream->readUnsignedShort(stream);
 		if (value > 16) value = 16;
-		header = stream->readUnsignedInt();
+		header = stream->readUnsignedInt(stream);
 		if (reserved == 2 && header != 64) header = 64;
 
 		if (value) {
@@ -1092,35 +1092,35 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 			//instr->samples = new Vector.<F2Sample>(value, true);
 
 			for (j = 0; j < 96; ++j)
-				instr->noteSamples[j] = stream->readUnsignedByte();
+				instr->noteSamples[j] = stream->readUnsignedByte(stream);
 			for (j = 0; j < 12; ++j) {
 				//instr->volData.points[j] = new F2Point(stream->readUnsignedShort(), stream->readUnsignedShort());
-				F2Point_ctor(&instr->volData.points[j], stream->readUnsignedShort(), stream->readUnsignedShort());
+				F2Point_ctor(&instr->volData.points[j], stream->readUnsignedShort(stream), stream->readUnsignedShort(stream));
 			}
 			for (j = 0; j < 12; ++j) {
-				F2Point_ctor(&instr->panData.points[j], stream->readUnsignedShort(), stream->readUnsignedShort());
+				F2Point_ctor(&instr->panData.points[j], stream->readUnsignedShort(stream), stream->readUnsignedShort(stream));
 				//instr->panData.points[j] = new F2Point(stream->readUnsignedShort(), stream->readUnsignedShort());
 			}
 
-			instr->volData.total     = stream->readUnsignedByte();
-			instr->panData.total     = stream->readUnsignedByte();
-			instr->volData.sustain   = stream->readUnsignedByte();
-			instr->volData.loopStart = stream->readUnsignedByte();
-			instr->volData.loopEnd   = stream->readUnsignedByte();
-			instr->panData.sustain   = stream->readUnsignedByte();
-			instr->panData.loopStart = stream->readUnsignedByte();
-			instr->panData.loopEnd   = stream->readUnsignedByte();
-			instr->volData.flags     = stream->readUnsignedByte();
-			instr->panData.flags     = stream->readUnsignedByte();
+			instr->volData.total     = stream->readUnsignedByte(stream);
+			instr->panData.total     = stream->readUnsignedByte(stream);
+			instr->volData.sustain   = stream->readUnsignedByte(stream);
+			instr->volData.loopStart = stream->readUnsignedByte(stream);
+			instr->volData.loopEnd   = stream->readUnsignedByte(stream);
+			instr->panData.sustain   = stream->readUnsignedByte(stream);
+			instr->panData.loopStart = stream->readUnsignedByte(stream);
+			instr->panData.loopEnd   = stream->readUnsignedByte(stream);
+			instr->volData.flags     = stream->readUnsignedByte(stream);
+			instr->panData.flags     = stream->readUnsignedByte(stream);
 
 			if (instr->volData.flags & ENVELOPE_ON) instr->volEnabled = 1;
 			if (instr->panData.flags & ENVELOPE_ON) instr->panEnabled = 1;
 
-			instr->vibratoType  = stream->readUnsignedByte();
-			instr->vibratoSweep = stream->readUnsignedByte();
-			instr->vibratoDepth = stream->readUnsignedByte();
-			instr->vibratoSpeed = stream->readUnsignedByte();
-			instr->fadeout      = stream->readUnsignedShort() << 1;
+			instr->vibratoType  = stream->readUnsignedByte(stream);
+			instr->vibratoSweep = stream->readUnsignedByte(stream);
+			instr->vibratoDepth = stream->readUnsignedByte(stream);
+			instr->vibratoSpeed = stream->readUnsignedByte(stream);
+			instr->fadeout      = stream->readUnsignedShort(stream) << 1;
 
 			ByteArray_set_position_rel(stream, reserved);
 			pos = ByteArray_get_position(stream);
@@ -1133,17 +1133,17 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 				sample = &instr->samples[j];
 				F2Sample_ctor(sample);
 				
-				sample->super.length    = stream->readUnsignedInt();
-				sample->super.loopStart = stream->readUnsignedInt();
-				sample->super.loopLen   = stream->readUnsignedInt();
-				sample->super.volume    = stream->readUnsignedByte();
-				sample->finetune  = stream->readByte();
-				sample->super.loopMode  = stream->readUnsignedByte();
-				sample->panning   = stream->readUnsignedByte();
-				sample->relative  = stream->readByte();
+				sample->super.length    = stream->readUnsignedInt(stream);
+				sample->super.loopStart = stream->readUnsignedInt(stream);
+				sample->super.loopLen   = stream->readUnsignedInt(stream);
+				sample->super.volume    = stream->readUnsignedByte(stream);
+				sample->finetune  = stream->readByte(stream);
+				sample->super.loopMode  = stream->readUnsignedByte(stream);
+				sample->panning   = stream->readUnsignedByte(stream);
+				sample->relative  = stream->readByte(stream);
 
 				ByteArray_set_position_rel(stream, +1);
-				sample->super.name = stream->readMultiByte(22, ENCODING);
+				sample->super.name = stream->readMultiByte(stream, 22, ENCODING);
 				//instr->samples[j] = sample;
 				
 				pos += header;
