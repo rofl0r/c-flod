@@ -1133,24 +1133,35 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 		if (ipos >= ByteArray_get_length(stream)) break;
 	}
 
-	instr = new F2Instrument();
-	instr->volData = new F2Data();
-	instr->panData = new F2Data();
-	instr->samples = new Vector.<F2Sample>(1, true);
+	//instr = new F2Instrument();
+	instr = &self->instruments[0];
+	F2Instrument_ctor(instr);
+	
+	//instr->volData = new F2Data();
+	//instr->panData = new F2Data();
+	F2Data_ctor(instr->volData);
+	F2Data_ctor(instr->panData);
+	
+	//instr->samples = new Vector.<F2Sample>(1, true);
 
-	for (i = 0; i < 12; ++i) {
-		instr->volData->points[i] = new F2Point();
-		instr->panData->points[i] = new F2Point();
+	for (i = 0; i < F2DATA_MAX_POINTS; ++i) {
+		//instr->volData->points[i] = new F2Point();
+		//instr->panData->points[i] = new F2Point();
+		F2Point_ctor(&instr->volData[0].points[i], 0, 0);
+		F2Point_ctor(&instr->panData[0].points[i], 0, 0);
 	}
 
-	sample = new F2Sample();
+	//sample = new F2Sample();
+	sample = &instr->samples[0];
+	F2Sample_ctor(sample);
+	
 	sample->super.length = 220;
-	sample->data = new Vector.<Number>(220, true);
+	//sample->data = new Vector.<Number>(220, true);
 
 	for (i = 0; i < 220; ++i) sample->super.data[i] = 0.0;
 
-	instr->samples[0] = sample;
-	self->instruments[0] = instr;
+	//instr->samples[0] = sample;
+	//self->instruments[0] = instr;
 }
 
 static void envelope(struct F2Voice *voice, struct F2Envelope *envelope, struct F2Data *data) {

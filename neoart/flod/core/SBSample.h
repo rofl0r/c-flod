@@ -1,7 +1,7 @@
 #ifndef SBSAMPLE_H
 #define SBSAMPLE_H
 
-#define SBSAMPLE_MAX_DATA 128
+#define SBSAMPLE_MAX_DATA 220
 
 #include "../flod.h"
 #include "../../../flashlib/ByteArray.h"
@@ -19,6 +19,7 @@ struct SBSample {
 	//data      : Vector.<Number>,
 	//Number* data;
 	Number data[SBSAMPLE_MAX_DATA];
+	//unsigned vector_count_data;
 	int loopMode;
 	int loopStart;
 	int loopLen;

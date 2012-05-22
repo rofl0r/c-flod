@@ -5,7 +5,7 @@
 #include "F2Data.h"
 
 
-#define F2INSTRUMENT_MAX_SAMPLES 4
+#define F2INSTRUMENT_MAX_SAMPLES 1
 
 // fixed
 #define F2INSTRUMENT_MAX_NOTESAMPLES 96
@@ -23,9 +23,9 @@ struct F2Instrument {
 	int noteSamples[F2INSTRUMENT_MAX_NOTESAMPLES];
 	//noteSamples  : Vector.<int>,
 	int fadeout;
-	struct F2Data *volData;
+	struct F2Data volData[1];
 	int volEnabled;
-	struct F2Data *panData;
+	struct F2Data panData[1];
 	int panEnabled;
 	int vibratoType;
 	int vibratoSweep;
