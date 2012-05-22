@@ -58,14 +58,14 @@ void F2Voice_defaults(struct F2Voice* self) {
 void F2Voice_ctor(struct F2Voice* self, int index) {
 	CLASS_CTOR_DEF(F2Voice);
 	// original constructor code goes here
+	self->index = index;
+	// FIXME
+	self->volEnvelope = F2Envelope_new();
+	self->panEnvelope = F2Envelope_new();	
 }
 
 struct F2Voice* F2Voice_new(int index) {
 	CLASS_NEW_BODY(F2Voice, index);
-	self->index = index;
-	// FIXME
-	self->volEnvelope = F2Envelope_new();
-	self->panEnvelope = F2Envelope_new();
 }
 
 

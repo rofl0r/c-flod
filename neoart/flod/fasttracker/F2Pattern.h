@@ -3,7 +3,7 @@
 
 #include "F2Row.h"
 
-#define F2PATTERN_MAX_ROWS 4
+#define F2PATTERN_MAX_ROWS 256
 
 /*
 inheritance

@@ -4,7 +4,7 @@
 #include "CorePlayer.h"
 #include "Soundblaster.h"
 
-#define SBPLAYER_MAX_TRACKS 4
+#define SBPLAYER_MAX_TRACKS 8
 
 /*
 inheritance

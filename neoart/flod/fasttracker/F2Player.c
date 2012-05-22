@@ -1013,7 +1013,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 		self->super.track[i] = j;
 	}
 	
-	assert_dbg(rows < F2PLAYER_MAX_PATTERNS);
+	assert_dbg(rows <= F2PLAYER_MAX_PATTERNS);
 	//self->patterns = new Vector.<F2Pattern>(rows, true);
 
 	if (rows != value) {
@@ -1034,7 +1034,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 	ByteArray_set_position(stream, pos);
 	len = value;
 
-	assert_dbg(len < F2PLAYER_MAX_PATTERNS);
+	assert_dbg(len <= F2PLAYER_MAX_PATTERNS);
 	for (i = 0; i < len; ++i) {
 		header = stream->readUnsignedInt(stream);
 		ByteArray_set_position_rel(stream, +1);
@@ -1050,7 +1050,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 		ipos = ByteArray_get_position(stream) + value;
 
 		if (value) {
-			assert_dbg(rows < F2PATTERN_MAX_ROWS);
+			assert_dbg(rows <= F2PATTERN_MAX_ROWS);
 			for (j = 0; j < rows; ++j) {
 				//row = new F2Row();
 				row = &pattern->rows[j];
@@ -1078,7 +1078,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 				//pattern->rows[j] = row;
 			}
 		} else {
-			assert_dbg(rows < F2PATTERN_MAX_ROWS);
+			assert_dbg(rows <= F2PATTERN_MAX_ROWS);
 			for (j = 0; j < rows; ++j) {
 				//pattern->rows[j] = new F2Row();
 				F2Row_ctor(&pattern->rows[j]);
@@ -1122,7 +1122,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 		if (reserved == 2 && header != 64) header = 64;
 
 		if (value) {
-			assert_dbg(value < F2INSTRUMENT_MAX_SAMPLES);
+			assert_dbg(value <= F2INSTRUMENT_MAX_SAMPLES);
 			//instr->samples = new Vector.<F2Sample>(value, true);
 
 			for (j = 0; j < 96; ++j)
@@ -1160,7 +1160,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 			pos = ByteArray_get_position(stream);
 			//self->instruments[i] = instr;
 			
-			assert_dbg(value < F2INSTRUMENT_MAX_SAMPLES);
+			assert_dbg(value <= F2INSTRUMENT_MAX_SAMPLES);
 
 			for (j = 0; j < value; ++j) {
 				//sample = new F2Sample();

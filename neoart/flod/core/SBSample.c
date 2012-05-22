@@ -49,10 +49,10 @@ void SBSample_store(struct SBSample* self, struct ByteArray* stream) {
 
 	if (self->loopMode) {
 		len = self->loopStart + self->loopLen;
-		assert(len + 1 < SBSAMPLE_MAX_DATA);
+		assert_dbg(len + 1 <= SBSAMPLE_MAX_DATA);
 		//data = new Vector.<Number>(len + 1, true);
 	} else {
-		assert(self->length + 1 < SBSAMPLE_MAX_DATA);
+		assert_dbg(self->length + 1 <= SBSAMPLE_MAX_DATA);
 		//data = new Vector.<Number>(self->length + 1, true);
 	}
 
@@ -62,7 +62,7 @@ void SBSample_store(struct SBSample* self, struct ByteArray* stream) {
 		if (total > ByteArray_get_position(stream))
 			len = ByteArray_get_length(stream) - pos;
 		
-		assert(len < SBSAMPLE_MAX_DATA);
+		assert_dbg(len <= SBSAMPLE_MAX_DATA);
 
 		for (i = 0; i < len; ++i) {
 			value = stream->readByte(stream) + delta;

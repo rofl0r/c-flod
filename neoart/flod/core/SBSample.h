@@ -1,7 +1,8 @@
 #ifndef SBSAMPLE_H
 #define SBSAMPLE_H
 
-#define SBSAMPLE_MAX_DATA 220
+//#define SBSAMPLE_MAX_DATA 220
+#define SBSAMPLE_MAX_DATA 16384
 
 #include "../flod.h"
 #include "../../../flashlib/ByteArray.h"
