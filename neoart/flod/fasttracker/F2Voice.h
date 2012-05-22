@@ -73,19 +73,15 @@ struct F2Voice {
 	int retrigy;
 };
 
-void F2Voice_defaults(struct F2Voice* self) {
-	CLASS_DEF_INIT();
-	// static initializers go here
-}
+void F2Voice_defaults(struct F2Voice* self);
+void F2Voice_ctor(struct F2Voice* self, int index);
+struct F2Voice* F2Voice_new(int index);
 
-void F2Voice_ctor(struct F2Voice* self, int index) {
-	CLASS_CTOR_DEF(F2Voice);
-	// original constructor code goes here
-}
-
-struct F2Voice* F2Voice_new(int index) {
-	CLASS_NEW_BODY(F2Voice, index);
-}
-
+void F2Voice_reset(struct F2Voice* self);
+int F2Voice_autoVibrato(struct F2Voice* self);
+void F2Voice_tonePortamento(struct F2Voice* self);
+void F2Voice_tremolo(struct F2Voice* self);
+void F2Voice_tremor(struct F2Voice* self);
+void F2Voice_vibrato(struct F2Voice* self);
 
 #endif

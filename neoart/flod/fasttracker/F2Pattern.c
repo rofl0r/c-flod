@@ -30,8 +30,8 @@ void F2Pattern_ctor(struct F2Pattern* self, unsigned length, unsigned channels) 
 	// original constructor code goes here
 	self->size = length * channels;
 	//rows = new Vector.<F2Row>(size, true);
-	assert_dbg(size < F2PATTERN_MAX_ROWS);
-	self->length = length;	
+	assert_dbg(self->size < F2PATTERN_MAX_ROWS);
+	self->length = length;
 }
 
 struct F2Pattern* F2Pattern_new(unsigned length, unsigned channels) {

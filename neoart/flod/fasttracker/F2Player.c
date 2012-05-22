@@ -21,10 +21,12 @@
 #include "../flod_internal.h"
 #include "../flod.h"
 
+//FIXME only needed for pow
+#include <math.h>
 
-static void envelope(F2Voice* voice, F2Envelope* envelope, F2Data* data);
+static void envelope(struct F2Voice* voice, struct F2Envelope* envelope, struct F2Data* data);
 static int amiga(int note, int finetune);
-static void retrig(F2Voice* voice);
+static void retrig(struct F2Voice* voice);
 
 void F2Player_defaults(struct F2Player* self) {
 	CLASS_DEF_INIT();
@@ -63,17 +65,22 @@ void F2Player_process(struct F2Player* self) {
 	struct F2Sample *sample = NULL;
 	int slide = 0;
 	int value = 0;
-	struct F2Voice *voice = self->voices[0];
+	struct F2Voice *voice = &self->voices[0];
 
 	if (!self->super.super.tick) {
 		if (self->nextOrder >= 0) self->order = self->nextOrder;
 		if (self->nextPosition >= 0) self->position = self->nextPosition;
 
 		self->nextOrder = self->nextPosition = -1;
-		self->pattern = self->patterns[self->super.track[self->order]];
+		assert_dbg(self->order < SBPLAYER_MAX_TRACKS);
+		unsigned idx = self->super.track[self->order];
+		assert_dbg(idx < F2PLAYER_MAX_PATTERNS);
+		self->pattern = &self->patterns[idx];
 
 		while (voice) {
-			row = &self->pattern->rows[self->position + voice->index];
+			idx = self->position + voice->index;
+			assert_dbg(idx < F2PATTERN_MAX_ROWS);
+			row = &self->pattern->rows[idx];
 			com = row->volume >> 4;
 			porta = (int)(row->effect == FX_TONE_PORTAMENTO || row->effect == FX_TONE_PORTA_VOLUME_SLIDE || com == VX_TONE_PORTAMENTO);
 			paramx = row->param >> 4;
@@ -85,9 +92,12 @@ void F2Player_process(struct F2Player* self) {
 			}
 
 			if (row->instrument) {
-				voice->instrument = row->instrument < self->instruments->length ? self->instruments[row->instrument] : null;
-				voice->volEnvelope->reset();
-				voice->panEnvelope->reset();
+				voice->instrument = 
+					((row->instrument < self->vector_count_instruments)
+					? &self->instruments[row->instrument] : null);
+					
+				F2Envelope_reset(voice->volEnvelope);
+				F2Envelope_reset(voice->panEnvelope);
 				voice->flags |= (UPDATE_VOLUME | UPDATE_PANNING | SHORT_RAMP);
 			} else if (row->note == KEYOFF_NOTE || (row->effect == FX_KEYOFF && !row->param)) {
 				voice->fadeEnabled = 1;
@@ -98,7 +108,10 @@ void F2Player_process(struct F2Player* self) {
 				if (voice->instrument) {
 					instr  = voice->instrument;
 					value  = row->note - 1;
-					sample = instr->samples[instr->noteSamples[value]];
+					assert_dbg(value < F2INSTRUMENT_MAX_NOTESAMPLES);
+					idx = instr->noteSamples[value];
+					assert_dbg(idx < F2INSTRUMENT_MAX_SAMPLES);
+					sample = &instr->samples[idx];
 					value += sample->relative;
 
 					if (value >= LOWER_NOTE && value <= HIGHER_NOTE) {
@@ -116,7 +129,7 @@ void F2Player_process(struct F2Player* self) {
 						}
 
 						if (row->instrument) {
-							voice->reset();
+							F2Voice_reset(voice);
 							voice->fadeDelta = instr->fadeout;
 						} else {
 							voice->finetune = (sample->finetune >> 3) << 2;
@@ -352,8 +365,9 @@ void F2Player_process(struct F2Player* self) {
 							voice->volEnvelope->frame = value;
 							if (value > instr->volData.points[i].frame) voice->volEnvelope->position++;
 
-							curr = instr->volData.points[i];
-							next = instr->volData.points[++i];
+							assert_dbg(i + 1 < F2DATA_MAX_POINTS);
+							curr = &instr->volData.points[i];
+							next = &instr->volData.points[++i];
 							value = next->frame - curr->frame;
 
 							voice->volEnvelope->delta = value ? ((next->value - curr->value) << 8) / value : 0;
@@ -424,7 +438,7 @@ void F2Player_process(struct F2Player* self) {
 						voice->flags |= UPDATE_VOLUME;
 						break;
 					case VX_VIBRATO:
-						voice->vibrato();
+						F2Voice_vibrato(voice);
 						break;
 					case VX_PANNING_SLIDE_LEFT:
 						voice->panning -= paramy;
@@ -437,7 +451,7 @@ void F2Player_process(struct F2Player* self) {
 						voice->flags |= UPDATE_PANNING;
 						break;
 					case VX_TONE_PORTAMENTO:
-						if (voice->portaPeriod) voice->tonePortamento();
+						if (voice->portaPeriod) F2Voice_tonePortamento(voice);
 						break;
 					default: 
 						break;
@@ -485,23 +499,23 @@ void F2Player_process(struct F2Player* self) {
 					voice->flags |= UPDATE_PERIOD;
 					break;
 				case FX_TONE_PORTAMENTO:
-					if (voice->portaPeriod) voice->tonePortamento();
+					if (voice->portaPeriod) F2Voice_tonePortamento(voice);
 					break;
 				case FX_VIBRATO:
 					if (paramx) voice->vibratoSpeed = paramx;
 					if (paramy) voice->vibratoDepth = paramy << 2;
-					voice->vibrato();
+					F2Voice_vibrato(voice);
 					break;
 				case FX_TONE_PORTA_VOLUME_SLIDE:
 					slide = 1;
-					if (voice->portaPeriod) voice->tonePortamento();
+					if (voice->portaPeriod) F2Voice_tonePortamento(voice);
 					break;
 				case FX_VIBRATO_VOLUME_SLIDE:
 					slide = 1;
-					voice->vibrato();
+					F2Voice_vibrato(voice);
 					break;
 				case FX_TREMOLO:
-					voice->tremolo();
+					F2Voice_tremolo(voice);
 					break;
 				case FX_VOLUME_SLIDE:
 					slide = 1;
@@ -510,8 +524,8 @@ void F2Player_process(struct F2Player* self) {
 					switch (paramx) {
 						case EX_RETRIG_NOTE:
 							if ((self->super.super.tick % paramy) == 0) {
-								voice->volEnvelope->reset();
-								voice->panEnvelope->reset();
+								F2Envelope_reset(voice->volEnvelope);
+								F2Envelope_reset(voice->panEnvelope);
 								voice->flags |= (UPDATE_VOLUME | UPDATE_PANNING | UPDATE_TRIGGER);
 							}
 							break;
@@ -570,7 +584,7 @@ void F2Player_process(struct F2Player* self) {
 					voice->flags |= UPDATE_TRIGGER;
 					break;
 				case FX_TREMOR:
-					voice->tremor();
+					F2Voice_tremor(voice);
 					break;
 				default:
 					break;
@@ -605,12 +619,26 @@ void F2Player_process(struct F2Player* self) {
 
 				if (self->nextOrder >= self->super.length) {
 					self->nextOrder = self->super.restart;
-					self->super.mixer->complete = 1;
+					CoreMixer_set_complete(&self->super.mixer->super, 1);
 				}
 			}
 		}
 	}
 }
+
+/* not sure what this does... */
+static inline Number linear_transform(int linear, int delta) {
+	Number ret;
+	if (linear) {
+		//chan->speed  = (int)((548077568 * pow(2, ((4608 - delta) / 768))) / 44100) / 65536;
+		ret  = (int)((548077568.f * pow(2.f, ((float) (4608 - delta) / 768.f))) / 44100.f) / 65536.f;
+	} else {
+		//chan->speed  = (int)((65536 * (14317456 / delta)) / 44100) / 65536;
+		ret  = (int)((65536.f * (14317456.f / (float) delta)) / 44100.f) / 65536.f;
+	}
+	return ret;
+}
+
 
 //override
 void F2Player_fast(struct F2Player* self) {
@@ -619,7 +647,7 @@ void F2Player_fast(struct F2Player* self) {
 	int flags = 0; 
 	struct F2Instrument *instr = NULL;
 	int panning = 0;
-	struct F2Voice *voice = self->voices[0];
+	struct F2Voice *voice = &self->voices[0];
 	Number volume = NAN;
 
 	while (voice) {
@@ -632,7 +660,7 @@ void F2Player_fast(struct F2Player* self) {
 			chan->pointer  = -1;
 			chan->dir      =  0;
 			chan->fraction =  0;
-			chan->sample   = voice->sample;
+			chan->sample   = (struct SBSample*) voice->sample;
 			chan->length   = voice->sample->super.length;
 
 			chan->enabled = chan->sample->data ? 1 : 0;
@@ -641,13 +669,13 @@ void F2Player_fast(struct F2Player* self) {
 		}
 
 		instr = voice->playing;
-		delta = instr->vibratoSpeed ? voice->autoVibrato() : 0;
+		delta = instr->vibratoSpeed ? F2Voice_autoVibrato(voice) : 0;
 
 		volume = voice->volume + voice->volDelta;
 
 		if (instr->volEnabled) {
 			if (voice->volEnabled && !voice->volEnvelope->stopped)
-				envelope(voice, voice->volEnvelope, instr->volData);
+				envelope(voice, voice->volEnvelope, &instr->volData);
 
 			volume = (volume * voice->volEnvelope->value) >> 6;
 			flags |= UPDATE_VOLUME;
@@ -706,12 +734,8 @@ void F2Player_fast(struct F2Player* self) {
 
 		if (flags & UPDATE_PERIOD) {
 			delta += voice->period + voice->arpDelta + voice->vibDelta;
-
-			if (self->linear) {
-				chan->speed  = (int)((548077568 * Math->pow(2, ((4608 - delta) / 768))) / 44100) / 65536;
-			} else {
-				chan->speed  = (int)((65536 * (14317456 / delta)) / 44100) / 65536;
-			}
+			
+			chan->speed = linear_transform(self->linear, delta);
 
 			chan->delta  = (int)(chan->speed);
 			chan->speed -= chan->delta;
@@ -773,7 +797,7 @@ void F2Player_accurate(struct F2Player* self) {
 		}
 
 		instr = voice->playing;
-		delta = instr->vibratoSpeed ? voice->autoVibrato() : 0;
+		delta = instr->vibratoSpeed ? F2Voice_autoVibrato(voice) : 0;
 
 		volume = voice->volume + voice->volDelta;
 
@@ -863,12 +887,7 @@ void F2Player_accurate(struct F2Player* self) {
 
 		if (flags & UPDATE_PERIOD) {
 			delta += voice->period + voice->arpDelta + voice->vibDelta;
-
-			if (self->linear) {
-				chan->speed = int((548077568 * Math->pow(2, ((4608 - delta) / 768))) / 44100) / 65536;
-			} else {
-				chan->speed  = int((65536 * (14317456 / delta)) / 44100) / 65536;
-			}
+			chan->speed = linear_transform(self->linear, delta);
 		}
 
 		if (chan->mixCounter) {
@@ -907,9 +926,9 @@ void F2Player_initialize(struct F2Player* self) {
 		F2Voice_ctor(voice);
 		//voice = new F2Voice(i);
 
-		voice->channel = self->super.mixer->channels[i];
-		voice->playing = self->instruments[0];
-		voice->sample  = voice->playing->samples[0];
+		voice->channel = &self->super.mixer->channels[i];
+		voice->playing = &self->instruments[0];
+		voice->sample  = &voice->playing->samples[0];
 
 		//self->voices[i] = voice;
 		if (i) self->voices[i - 1].next = voice;

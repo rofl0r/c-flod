@@ -17,7 +17,7 @@ struct F2Pattern {
 	int size;
 };
 
-void F2Pattern_defaults(struct F2Pattern* self;
+void F2Pattern_defaults(struct F2Pattern* self);
 void F2Pattern_ctor(struct F2Pattern* self, unsigned length, unsigned channels);
 struct F2Pattern* F2Pattern_new(unsigned length, unsigned channels);
 

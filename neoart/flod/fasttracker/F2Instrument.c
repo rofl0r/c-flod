@@ -28,9 +28,10 @@ void F2Instrument_ctor(struct F2Instrument* self) {
 	CLASS_CTOR_DEF(F2Instrument);
 	// original constructor code goes here
 	//noteSamples = new Vector.<int>(96, true);
-	//FIXME
-	self->volData = F2Data_new();
-	self->panData = F2Data_new();
+	//self->volData = F2Data_new();
+	//self->panData = F2Data_new();
+	F2Data_ctor(&self->volData);
+	F2Data_ctor(&self->panData);
 }
 
 struct F2Instrument* F2Instrument_new(void) {
