@@ -37,7 +37,8 @@ void F2Player_defaults(struct F2Player* self) {
 void F2Player_ctor(struct F2Player* self, struct Soundblaster *mixer) {
 	CLASS_CTOR_DEF(F2Player);
 	// original constructor code goes here
-	super(mixer);
+	SBPlayer_ctor(&self->super, mixer);
+	//super(mixer);
 	//vtable
 	self->super.super.accurate = F2Player_accurate;
 	self->super.super.fast = F2Player_fast;
@@ -677,7 +678,7 @@ void F2Player_fast(struct F2Player* self) {
 			if (voice->volEnabled && !voice->volEnvelope->stopped)
 				envelope(voice, voice->volEnvelope, &instr->volData);
 
-			volume = (volume * voice->volEnvelope->value) >> 6;
+			volume = (int)(volume * voice->volEnvelope->value) >> 6;
 			flags |= UPDATE_VOLUME;
 
 			if (voice->fadeEnabled) {
@@ -693,7 +694,7 @@ void F2Player_fast(struct F2Player* self) {
 					voice->volEnvelope->stopped = 1;
 					voice->panEnvelope->stopped = 1;
 				} else {
-					volume = (volume * voice->fadeVolume) >> 16;
+					volume = (int) (volume * voice->fadeVolume) >> 16;
 				}
 			}
 		} else if (voice->keyoff) {
@@ -705,7 +706,7 @@ void F2Player_fast(struct F2Player* self) {
 
 		if (instr->panEnabled) {
 			if (voice->panEnabled && !voice->panEnvelope->stopped)
-				envelope(voice, voice->panEnvelope, instr->panData);
+				envelope(voice, voice->panEnvelope, &instr->panData);
 
 			panning = (voice->panEnvelope->value << 2);
 			flags |= UPDATE_PANNING;
@@ -718,14 +719,14 @@ void F2Player_fast(struct F2Player* self) {
 			if (volume < 0) volume = 0;
 			else if (volume > 64) volume = 64;
 
-			chan->volume = VOLUMES[int((volume * self->super.master) >> 6)];
+			chan->volume = VOLUMES[(int)(volume * self->super.master) >> 6];
 			chan->lvol = chan->volume * chan->lpan;
 			chan->rvol = chan->volume * chan->rpan;
 		}
 
 		if (flags & UPDATE_PANNING) {
 			chan->panning = panning;
-			chan->lpan = PANNING[int(256 - panning)];
+			chan->lpan = PANNING[256 - panning];
 			chan->rpan = PANNING[panning];
 
 			chan->lvol = chan->volume * chan->lpan;
@@ -737,7 +738,7 @@ void F2Player_fast(struct F2Player* self) {
 			
 			chan->speed = linear_transform(self->linear, delta);
 
-			chan->delta  = (int)(chan->speed);
+			chan->delta  = chan->speed;
 			chan->speed -= chan->delta;
 		}
 		voice = voice->next;
@@ -755,7 +756,7 @@ void F2Player_accurate(struct F2Player* self) {
 	int panning = 0; 
 	Number rpan = NAN; 
 	Number rvol = NAN; 
-	struct F2Voice *voice = self->voices[0];
+	struct F2Voice *voice = &self->voices[0];
 	Number volume = NAN; 
 
 	while (voice) {
@@ -787,7 +788,7 @@ void F2Player_accurate(struct F2Player* self) {
 
 			chan->dir = 1;
 			chan->fraction = 0;
-			chan->sample  = voice->sample;
+			chan->sample  = (struct SBSample*) voice->sample;
 			chan->pointer = voice->sampleOffset;
 			chan->length  = voice->sample->super.length;
 
@@ -803,9 +804,9 @@ void F2Player_accurate(struct F2Player* self) {
 
 		if (instr->volEnabled) {
 			if (voice->volEnabled && !voice->volEnvelope->stopped)
-				envelope(voice, voice->volEnvelope, instr->volData);
+				envelope(voice, voice->volEnvelope, &instr->volData);
 
-			volume = (volume * voice->volEnvelope->value) >> 6;
+			volume = (int)(volume * voice->volEnvelope->value) >> 6;
 			flags |= UPDATE_VOLUME;
 
 			if (voice->fadeEnabled) {
@@ -821,7 +822,7 @@ void F2Player_accurate(struct F2Player* self) {
 					voice->volEnvelope->stopped = 1;
 					voice->panEnvelope->stopped = 1;
 				} else {
-					volume = (volume * voice->fadeVolume) >> 16;
+					volume = (int)(volume * voice->fadeVolume) >> 16;
 				}
 			}
 		} else if (voice->keyoff) {
@@ -833,7 +834,7 @@ void F2Player_accurate(struct F2Player* self) {
 
 		if (instr->panEnabled) {
 			if (voice->panEnabled && !voice->panEnvelope->stopped)
-				envelope(voice, voice->panEnvelope, instr->panData);
+				envelope(voice, voice->panEnvelope, &instr->panData);
 
 			panning = (voice->panEnvelope->value << 2);
 			flags |= UPDATE_PANNING;
@@ -852,9 +853,11 @@ void F2Player_accurate(struct F2Player* self) {
 		if (flags & UPDATE_VOLUME) {
 			if (volume < 0) volume = 0;
 			else if (volume > 64) volume = 64;
-
-			volume = VOLUMES[(int)((volume * self->super.master) >> 6)];
-			lvol = volume * PANNING[int(256 - panning)];
+			
+			unsigned vidx = (int)(volume * self->super.master) >> 6;
+			assert_dbg(vidx < ARRAY_SIZE(VOLUMES));
+			volume = VOLUMES[vidx];
+			lvol = volume * PANNING[256 - panning];
 			rvol = volume * PANNING[panning];
 
 			if (volume != chan->volume && !chan->mixCounter) {
@@ -870,7 +873,7 @@ void F2Player_accurate(struct F2Player* self) {
 		}
 
 		if (flags & UPDATE_PANNING) {
-			lpan = PANNING[int(256 - panning)];
+			lpan = PANNING[256 - panning];
 			rpan = PANNING[panning];
 
 			if (panning != chan->panning && !chan->mixCounter && !chan->volCounter) {
@@ -923,7 +926,7 @@ void F2Player_initialize(struct F2Player* self) {
 
 	for (i = 0; i < self->super.super.channels; ++i) {
 		struct F2Voice *voice = &self->voices[i];
-		F2Voice_ctor(voice);
+		F2Voice_ctor(voice, i);
 		//voice = new F2Voice(i);
 
 		voice->channel = &self->super.mixer->channels[i];
@@ -1188,7 +1191,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 			}
 
 			for (j = 0; j < value; ++j) {
-				sample = instr->samples[j];
+				sample = &instr->samples[j];
 				if (!sample->super.length) continue;
 				pos = ByteArray_get_position(stream) + sample->super.length;
 
@@ -1248,13 +1251,18 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 
 static void envelope(struct F2Voice *voice, struct F2Envelope *envelope, struct F2Data *data) {
 	int pos = envelope->position;
-	struct F2Point *curr = data->points[pos];
+	struct F2Point *curr = NULL;
 	struct F2Point *next = NULL;
+	
+	assert_dbg(pos < F2DATA_MAX_POINTS);
+	curr = &data->points[pos];
 
 	if (envelope->frame == curr->frame) {
 		if ((data->flags & ENVELOPE_LOOP) && pos == data->loopEnd) {
 			pos  = envelope->position = data->loopStart;
-			curr = data->points[pos];
+			assert_dbg(pos < F2DATA_MAX_POINTS);
+			
+			curr = &data->points[pos];
 			envelope->frame = curr->frame;
 		}
 
@@ -1270,7 +1278,8 @@ static void envelope(struct F2Voice *voice, struct F2Envelope *envelope, struct 
 		}
 
 		envelope->position++;
-		next = data->points[envelope->position];
+		assert_dbg(envelope->position < F2DATA_MAX_POINTS);
+		next = &data->points[envelope->position];
 
 		envelope->delta = ((next->value - curr->value) << 8) / (next->frame - curr->frame);
 		envelope->fraction = (curr->value << 8);
@@ -1292,7 +1301,7 @@ static int amiga(int note, int finetune) {
 		delta = (period - PERIODS[++note]) / 64;
 	}
 
-	return int(period - (delta * finetune));
+	return period - (delta * finetune);
 }
     
 static void retrig(struct F2Voice *voice) {
@@ -1319,7 +1328,7 @@ static void retrig(struct F2Voice *voice) {
 			voice->volume >>= 1;
 			break;
 		case 8:
-			voice->volume = voice->sample->volume;
+			voice->volume = voice->sample->super.volume;
 			break;
 		case 9:
 			voice->volume++;
