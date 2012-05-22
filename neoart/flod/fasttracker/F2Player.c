@@ -661,9 +661,10 @@ void F2Player_fast(struct F2Player* self) {
 			chan->pointer  = -1;
 			chan->dir      =  0;
 			chan->fraction =  0;
-			chan->sample   = (struct SBSample*) voice->sample;
+			chan->sample   = &voice->sample->super;
 			chan->length   = voice->sample->super.length;
 
+			//FIXME: this test is bogus since sample->data is a static array
 			chan->enabled = chan->sample->data ? 1 : 0;
 			voice->playing = voice->instrument;
 			voice->sampleOffset = 0;
@@ -788,10 +789,11 @@ void F2Player_accurate(struct F2Player* self) {
 
 			chan->dir = 1;
 			chan->fraction = 0;
-			chan->sample  = (struct SBSample*) voice->sample;
+			chan->sample  = &voice->sample->super;
 			chan->pointer = voice->sampleOffset;
 			chan->length  = voice->sample->super.length;
 
+			//FIXME: this test is bogus since sample->data is a static array
 			chan->enabled = chan->sample->data ? 1 : 0;
 			voice->playing = voice->instrument;
 			voice->sampleOffset = 0;
@@ -918,7 +920,7 @@ void F2Player_initialize(struct F2Player* self) {
 	self->complete      =  0;
 	self->super.master  = 64;
 
-	assert_dbg(self->super.super.channels < F2PLAYER_MAX_VOICES);
+	assert_dbg(self->super.super.channels <= F2PLAYER_MAX_VOICES);
 	
 	//self->voices = new Vector.<F2Voice>(self->super.super.channels, true);
 	
@@ -998,14 +1000,14 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 	
 	//self->instruments = new Vector.<F2Instrument>(stream->readUnsignedShort() + 1, true);
 	self->vector_count_instruments = stream->readUnsignedShort(stream) + 1;
-	assert_dbg(self->vector_count_instruments < F2PLAYER_MAX_INSTRUMENTS);
+	assert_dbg(self->vector_count_instruments <= F2PLAYER_MAX_INSTRUMENTS);
 
 	self->linear = stream->readUnsignedShort(stream);
 	self->super.super.speed  = stream->readUnsignedShort(stream);
 	self->super.super.tempo  = stream->readUnsignedShort(stream);
 
 	//self->track = new Vector.<int>(length, true);
-	assert_dbg(self->super.length < SBPLAYER_MAX_TRACKS);
+	assert_dbg(self->super.length <= SBPLAYER_MAX_TRACKS);
 
 	for (i = 0; i < self->super.length; ++i) {
 		j = stream->readUnsignedByte(stream);
@@ -1129,10 +1131,14 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 				instr->noteSamples[j] = stream->readUnsignedByte(stream);
 			for (j = 0; j < 12; ++j) {
 				//instr->volData.points[j] = new F2Point(stream->readUnsignedShort(), stream->readUnsignedShort());
-				F2Point_ctor(&instr->volData.points[j], stream->readUnsignedShort(stream), stream->readUnsignedShort(stream));
+				unsigned short x = stream->readUnsignedShort(stream);
+				unsigned short y = stream->readUnsignedShort(stream);
+				F2Point_ctor(&instr->volData.points[j], x, y);
 			}
 			for (j = 0; j < 12; ++j) {
-				F2Point_ctor(&instr->panData.points[j], stream->readUnsignedShort(stream), stream->readUnsignedShort(stream));
+				unsigned short x = stream->readUnsignedShort(stream);
+				unsigned short y = stream->readUnsignedShort(stream);
+				F2Point_ctor(&instr->panData.points[j], x, y);
 				//instr->panData.points[j] = new F2Point(stream->readUnsignedShort(), stream->readUnsignedShort());
 			}
 
@@ -1281,7 +1287,9 @@ static void envelope(struct F2Voice *voice, struct F2Envelope *envelope, struct 
 		assert_dbg(envelope->position < F2DATA_MAX_POINTS);
 		next = &data->points[envelope->position];
 
-		envelope->delta = ((next->value - curr->value) << 8) / (next->frame - curr->frame);
+		int divisor = next->frame - curr->frame;
+		//FIXME: examine how as3 handles a div by zero
+		envelope->delta = ((next->value - curr->value) << 8) / (divisor ? divisor : 1);
 		envelope->fraction = (curr->value << 8);
 	} else {
 		envelope->fraction += envelope->delta;
