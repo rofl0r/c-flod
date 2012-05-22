@@ -45,9 +45,7 @@ struct Soundblaster* Soundblaster_new(void) {
 
 void Soundblaster_setup(struct Soundblaster* self, unsigned int len) {
 	DEBUGP("calling %s with %d channels\n", __FUNCTION__, len);
-	if(len > SOUNDBLASTER_MAX_CHANNELS) {
-		abort();
-	}
+	assert_dbg(len <= SOUNDBLASTER_MAX_CHANNELS);
 /*	int i = 1;
 	self->channels = new Vector.<SBChannel>(len, true);
 	self->channels[0] = new SBChannel();
@@ -196,8 +194,12 @@ void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
 			if (sample->r > 1.0) sample->r = 1.0;
 			else if (sample->r < -1.0) sample->r = -1.0;
 
-			self->super.wave->writeShort(self->super.wave, (sample->l * (sample->l < 0 ? 32768 : 32767)));
-			self->super.wave->writeShort(self->super.wave, (sample->r * (sample->r < 0 ? 32768 : 32767)));
+			if(ByteArray_bytesAvailable(self->super.wave) >= 4) {
+				self->super.wave->writeShort(self->super.wave, (sample->l * (sample->l < 0 ? 32768 : 32767)));
+				self->super.wave->writeShort(self->super.wave, (sample->r * (sample->r < 0 ? 32768 : 32767)));
+			} else {
+				CoreMixer_set_complete(&self->super, 1);
+			}
 
 			data->writeFloat(data, sample->l);
 			data->writeFloat(data, sample->r);
@@ -443,8 +445,12 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 			if (sample->r > 1.0) sample->r = 1.0;
 			else if (sample->r < -1.0) sample->r = -1.0;
 
-			self->super.wave->writeShort(self->super.wave, (int)(sample->l * (sample->l < 0 ? 32768 : 32767)));
-			self->super.wave->writeShort(self->super.wave, (int)(sample->r * (sample->r < 0 ? 32768 : 32767)));
+			if(ByteArray_bytesAvailable(self->super.wave) >= 4) {
+				self->super.wave->writeShort(self->super.wave, (int)(sample->l * (sample->l < 0 ? 32768 : 32767)));
+				self->super.wave->writeShort(self->super.wave, (int)(sample->r * (sample->r < 0 ? 32768 : 32767)));
+			} else {
+				CoreMixer_set_complete(&self->super, 1);
+			}
 
 			data->writeFloat(data, sample->l);
 			data->writeFloat(data, sample->r);
