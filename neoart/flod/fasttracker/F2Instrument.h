@@ -23,9 +23,9 @@ struct F2Instrument {
 	int noteSamples[F2INSTRUMENT_MAX_NOTESAMPLES];
 	//noteSamples  : Vector.<int>,
 	int fadeout;
-	struct F2Data volData[1];
+	struct F2Data volData;
 	int volEnabled;
-	struct F2Data panData[1];
+	struct F2Data panData;
 	int panEnabled;
 	int vibratoType;
 	int vibratoSweep;

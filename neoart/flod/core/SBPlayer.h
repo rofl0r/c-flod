@@ -4,6 +4,8 @@
 #include "CorePlayer.h"
 #include "Soundblaster.h"
 
+#define SBPLAYER_MAX_TRACKS 4
+
 /*
 inheritance
 ??
@@ -17,7 +19,7 @@ struct SBPlayer {
 	int length;
 	int restart;
 	//track   : Vector.<int>;
-	int *track;
+	int track[SBPLAYER_MAX_TRACKS];
 	//protected 
 	int timer;
 	int master;

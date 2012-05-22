@@ -32,6 +32,7 @@ struct F2Player {
 	struct SBPlayer super;
 	struct F2Pattern patterns[F2PLAYER_MAX_PATTERNS]; // Vector
 	struct F2Instrument instruments[F2PLAYER_MAX_INSTRUMENTS]; // Vector
+	unsigned vector_count_instruments;
 	int linear;
 	struct F2Voice voices[F2PLAYER_MAX_VOICES];// Vector
 	int order;
