@@ -28,7 +28,7 @@ void F2Point_ctor(struct F2Point* self, int x, int y) {
 	CLASS_CTOR_DEF(F2Point);
 	// original constructor code goes here
 	self->frame = x;
-	self->value = y;	
+	self->value = y;
 }
 
 /* default value for both ints: 0 */

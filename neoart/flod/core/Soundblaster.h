@@ -4,7 +4,7 @@
 #include "CoreMixer.h"
 #include "SBChannel.h"
 
-#define SOUNDBLASTER_MAX_CHANNELS 16
+#define SOUNDBLASTER_MAX_CHANNELS 24
 
 // extends CoreMixer
 struct Soundblaster  {

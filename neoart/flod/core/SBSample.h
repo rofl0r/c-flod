@@ -2,7 +2,9 @@
 #define SBSAMPLE_H
 
 //#define SBSAMPLE_MAX_DATA 220
-#define SBSAMPLE_MAX_DATA 16384
+// FIXME hmm, it seems sample lengths can vary radically.
+// probably not the best idea to make them all the same size
+#define SBSAMPLE_MAX_DATA (20 * 1024)
 
 #include "../flod.h"
 #include "../../../flashlib/ByteArray.h"

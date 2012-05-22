@@ -16,9 +16,9 @@ enum F2Player_Flags {
       SHORT_RAMP = 32,
 };
 
-#define F2PLAYER_MAX_PATTERNS 4
+#define F2PLAYER_MAX_PATTERNS 24
 #define F2PLAYER_MAX_INSTRUMENTS 24
-#define F2PLAYER_MAX_VOICES 4
+#define F2PLAYER_MAX_VOICES 24
 
 /*
 inheritance
