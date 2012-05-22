@@ -937,22 +937,31 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 	if (ByteArray_get_length(stream) < 360) return;
 	ByteArray_set_position(stream, 17);
 
-	self->super.super.title = stream->readMultiByte(stream, 20, ENCODING);
+	//self->super.super.title = stream->readMultiByte(stream, 20, ENCODING);
+	stream->readMultiByte(stream, self->title_buffer, 20);
+	self->super.super.title = self->title_buffer;
+	
 	ByteArray_set_position_rel(stream, +1);
-	id = stream->readMultiByte(stream, 20, ENCODING);
-
-	if (id == "FastTracker v2.00   " || id == "FastTracker v 2.00  ") {
+	//id = stream->readMultiByte(stream, 20, ENCODING);
+	stream->readMultiByte(stream, id, 20);
+	
+#define STRSZ(X) X , sizeof(X) - 1
+#define is_str(chr, lit) (!memcmp(chr, STRSZ(lit)))
+	
+	if (is_str(id, "FastTracker v2.00   ") || is_str(id, "FastTracker v 2.00  ")) {
 		self->super.super.version = 1;
-	} else if (id == "Sk@le Tracker") {
+	} else if (is_str(id, "Sk@le Tracker")) {
 		reserved = 2;
 		self->super.super.version = 2;
-	} else if (id == "MadTracker 2.0") {
+	} else if (is_str(id, "MadTracker 2.0")) {
 		self->super.super.version = 3;
-	} else if (id == "MilkyTracker        ") {
+	} else if (is_str(id, "MilkyTracker        ")) {
 		self->super.super.version = 4;
-	} else if (id == "DigiBooster Pro 2.18") {
+	} else if (is_str(id, "DigiBooster Pro 2.18")) {
 		self->super.super.version = 5;
-	} else if (id->indexOf("OpenMPT") != -1) {
+	// FIXME maybe this tests if the string is *contained*, not starting with
+	//} else if (id->indexOf("OpenMPT") != -1) {
+	} else if (is_str(id, "OpenMPT")) {	
 		self->super.super.version = 6;
 	} else return;
 
@@ -1079,7 +1088,10 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 		// FIXME : forgotten to call F2Data_ctor on instr voldata and pandata ?
 		// the code below the loop which also called F2Instrument_new did it...
 		
-		instr->name = stream->readMultiByte(stream,22, ENCODING);
+		//instr->name = stream->readMultiByte(stream,22, ENCODING);
+		stream->readMultiByte(stream, self->instrument_names[i], 22);
+		instr->name = self->instrument_names[i];
+		
 		ByteArray_set_position_rel(stream, +1);
 
 		value = stream->readUnsignedShort(stream);
@@ -1143,7 +1155,12 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 				sample->relative  = stream->readByte(stream);
 
 				ByteArray_set_position_rel(stream, +1);
-				sample->super.name = stream->readMultiByte(stream, 22, ENCODING);
+				
+				stream->readMultiByte(stream, sample->name_buffer, 22);
+				sample->super.name = sample->name_buffer;
+				
+				//sample->super.name = stream->readMultiByte(stream, 22, ENCODING);
+				
 				//instr->samples[j] = sample;
 				
 				pos += header;

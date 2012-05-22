@@ -14,6 +14,7 @@ struct F2Sample {
 	int finetune;
 	int panning;
 	int relative;
+	char name_buffer[24];
 };
 
 void F2Sample_defaults(struct F2Sample* self);
