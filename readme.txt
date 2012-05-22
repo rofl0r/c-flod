@@ -9,6 +9,7 @@ currently done:
 - future composer
 - (ultimate) sound tracker
 - pro tracker
+- fasttracker 2
 - pseudo barebone flashlib
 
 in my conversion i followed a pretty straight 1:1 approach, 
