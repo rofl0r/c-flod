@@ -1,3 +1,5 @@
+#include <time.h>
+
 #include "backends/wavewriter.h"
 #include "backends/aowriter.h"
 
@@ -163,6 +165,8 @@ play:
 	
 	player.core.initialize(&player.core);
 	
+#define MAX_PLAYTIME (60 * 5)
+	time_t stoptime = time(NULL) + MAX_PLAYTIME;
 	
 	while(!CoreMixer_get_complete(&hardware.core)) {
 		hardware.core.accurate(&hardware.core, NULL);
@@ -173,9 +177,15 @@ play:
 			printf("wave pos is 0\n");
 			break;
 		}
+		if(time(NULL) > stoptime) {
+			printf("hit timeout\n");
+			break;
+		}
 	}
 	
 	backend_info[backend_type].close_func(&writer.backend);
+	
+	printf("finished playing %s\n", argv[startarg]);
 	
 	return 0;
 }
