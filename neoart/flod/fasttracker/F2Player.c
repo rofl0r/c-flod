@@ -45,6 +45,8 @@ void F2Player_ctor(struct F2Player* self, struct Soundblaster *mixer) {
 	self->super.super.initialize = F2Player_initialize;
 	self->super.super.loader = F2Player_loader;
 	self->super.super.process = F2Player_process;
+	
+	self->super.super.min_filesize = 336;
 }
 
 struct F2Player* F2Player_new(struct Soundblaster *mixer) {
@@ -97,8 +99,8 @@ void F2Player_process(struct F2Player* self) {
 					((row->instrument < self->vector_count_instruments)
 					? &self->instruments[row->instrument] : null);
 					
-				F2Envelope_reset(voice->volEnvelope);
-				F2Envelope_reset(voice->panEnvelope);
+				F2Envelope_reset(&voice->volEnvelope);
+				F2Envelope_reset(&voice->panEnvelope);
 				voice->flags |= (UPDATE_VOLUME | UPDATE_PANNING | SHORT_RAMP);
 			} else if (row->note == KEYOFF_NOTE || (row->effect == FX_KEYOFF && !row->param)) {
 				voice->fadeEnabled = 1;
@@ -349,30 +351,30 @@ void F2Player_process(struct F2Player* self) {
 						for (i = 0; i < paramx; ++i)
 						if (value < instr->volData.points[i].frame) break;
 
-						voice->volEnvelope->position = --i;
+						voice->volEnvelope.position = --i;
 						paramx--;
 
 						if ((instr->volData.flags & ENVELOPE_LOOP) && i == instr->volData.loopEnd) {
-							i = voice->volEnvelope->position = instr->volData.loopStart;
+							i = voice->volEnvelope.position = instr->volData.loopStart;
 							value = instr->volData.points[i].frame;
-							voice->volEnvelope->frame = value;
+							voice->volEnvelope.frame = value;
 						}
 
 						if (i >= paramx) {
-							voice->volEnvelope->value = instr->volData.points[paramx].value;
-							voice->volEnvelope->stopped = 1;
+							voice->volEnvelope.value = instr->volData.points[paramx].value;
+							voice->volEnvelope.stopped = 1;
 						} else {
-							voice->volEnvelope->stopped = 0;
-							voice->volEnvelope->frame = value;
-							if (value > instr->volData.points[i].frame) voice->volEnvelope->position++;
+							voice->volEnvelope.stopped = 0;
+							voice->volEnvelope.frame = value;
+							if (value > instr->volData.points[i].frame) voice->volEnvelope.position++;
 
 							assert_dbg(i + 1 < F2DATA_MAX_POINTS);
 							curr = &instr->volData.points[i];
 							next = &instr->volData.points[++i];
 							value = next->frame - curr->frame;
 
-							voice->volEnvelope->delta = value ? ((next->value - curr->value) << 8) / value : 0;
-							voice->volEnvelope->fraction = (curr->value << 8);
+							voice->volEnvelope.delta = value ? ((next->value - curr->value) << 8) / value : 0;
+							voice->volEnvelope.fraction = (curr->value << 8);
 						}
 						break;
 					case FX_PANNING_SLIDE:
@@ -525,8 +527,8 @@ void F2Player_process(struct F2Player* self) {
 					switch (paramx) {
 						case EX_RETRIG_NOTE:
 							if ((self->super.super.tick % paramy) == 0) {
-								F2Envelope_reset(voice->volEnvelope);
-								F2Envelope_reset(voice->panEnvelope);
+								F2Envelope_reset(&voice->volEnvelope);
+								F2Envelope_reset(&voice->panEnvelope);
 								voice->flags |= (UPDATE_VOLUME | UPDATE_PANNING | UPDATE_TRIGGER);
 							}
 							break;
@@ -676,10 +678,10 @@ void F2Player_fast(struct F2Player* self) {
 		volume = voice->volume + voice->volDelta;
 
 		if (instr->volEnabled) {
-			if (voice->volEnabled && !voice->volEnvelope->stopped)
-				envelope(voice, voice->volEnvelope, &instr->volData);
+			if (voice->volEnabled && !voice->volEnvelope.stopped)
+				envelope(voice, &voice->volEnvelope, &instr->volData);
 
-			volume = (int)(volume * voice->volEnvelope->value) >> 6;
+			volume = (int)(volume * voice->volEnvelope.value) >> 6;
 			flags |= UPDATE_VOLUME;
 
 			if (voice->fadeEnabled) {
@@ -691,9 +693,9 @@ void F2Player_fast(struct F2Player* self) {
 					voice->fadeVolume  = 0;
 					voice->fadeEnabled = 0;
 
-					voice->volEnvelope->value   = 0;
-					voice->volEnvelope->stopped = 1;
-					voice->panEnvelope->stopped = 1;
+					voice->volEnvelope.value   = 0;
+					voice->volEnvelope.stopped = 1;
+					voice->panEnvelope.stopped = 1;
 				} else {
 					volume = (int) (volume * voice->fadeVolume) >> 16;
 				}
@@ -706,10 +708,10 @@ void F2Player_fast(struct F2Player* self) {
 		panning = voice->panning;
 
 		if (instr->panEnabled) {
-			if (voice->panEnabled && !voice->panEnvelope->stopped)
-				envelope(voice, voice->panEnvelope, &instr->panData);
+			if (voice->panEnabled && !voice->panEnvelope.stopped)
+				envelope(voice, &voice->panEnvelope, &instr->panData);
 
-			panning = (voice->panEnvelope->value << 2);
+			panning = (voice->panEnvelope.value << 2);
 			flags |= UPDATE_PANNING;
 
 			if (panning < 0) panning = 0;
@@ -805,10 +807,10 @@ void F2Player_accurate(struct F2Player* self) {
 		volume = voice->volume + voice->volDelta;
 
 		if (instr->volEnabled) {
-			if (voice->volEnabled && !voice->volEnvelope->stopped)
-				envelope(voice, voice->volEnvelope, &instr->volData);
+			if (voice->volEnabled && !voice->volEnvelope.stopped)
+				envelope(voice, &voice->volEnvelope, &instr->volData);
 
-			volume = (int)(volume * voice->volEnvelope->value) >> 6;
+			volume = (int)(volume * voice->volEnvelope.value) >> 6;
 			flags |= UPDATE_VOLUME;
 
 			if (voice->fadeEnabled) {
@@ -820,9 +822,9 @@ void F2Player_accurate(struct F2Player* self) {
 					voice->fadeVolume  = 0;
 					voice->fadeEnabled = 0;
 
-					voice->volEnvelope->value   = 0;
-					voice->volEnvelope->stopped = 1;
-					voice->panEnvelope->stopped = 1;
+					voice->volEnvelope.value   = 0;
+					voice->volEnvelope.stopped = 1;
+					voice->panEnvelope.stopped = 1;
 				} else {
 					volume = (int)(volume * voice->fadeVolume) >> 16;
 				}
@@ -835,10 +837,10 @@ void F2Player_accurate(struct F2Player* self) {
 		panning = voice->panning;
 
 		if (instr->panEnabled) {
-			if (voice->panEnabled && !voice->panEnvelope->stopped)
-				envelope(voice, voice->panEnvelope, &instr->panData);
+			if (voice->panEnabled && !voice->panEnvelope.stopped)
+				envelope(voice, &voice->panEnvelope, &instr->panData);
 
-			panning = (voice->panEnvelope->value << 2);
+			panning = (voice->panEnvelope.value << 2);
 			flags |= UPDATE_PANNING;
 
 			if (panning < 0) panning = 0;

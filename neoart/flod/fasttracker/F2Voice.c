@@ -59,9 +59,8 @@ void F2Voice_ctor(struct F2Voice* self, int index) {
 	CLASS_CTOR_DEF(F2Voice);
 	// original constructor code goes here
 	self->index = index;
-	// FIXME
-	self->volEnvelope = F2Envelope_new();
-	self->panEnvelope = F2Envelope_new();	
+	F2Envelope_ctor(&self->volEnvelope);
+	F2Envelope_ctor(&self->panEnvelope);
 }
 
 struct F2Voice* F2Voice_new(int index) {

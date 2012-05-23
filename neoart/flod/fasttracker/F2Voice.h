@@ -34,7 +34,7 @@ struct F2Voice {
 	int sampleOffset;
 	int volume;
 	int volEnabled;
-	struct F2Envelope *volEnvelope;
+	struct F2Envelope volEnvelope;
 	int volDelta;
 	int volSlide;
 	int volSlideMaster;
@@ -45,7 +45,7 @@ struct F2Voice {
 	int fadeVolume;
 	int panning;
 	int panEnabled;
-	struct F2Envelope *panEnvelope;
+	struct F2Envelope panEnvelope;
 	int panSlide;
 	int portaU;
 	int portaD;
