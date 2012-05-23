@@ -186,42 +186,28 @@ void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
 
 	sample = &self->super.buffer[0];
 
-	if (self->super.player->record) {
-		for (i = 0; i < size; ++i) {
-			if (sample->l > 1.0) sample->l = 1.0;
-			else if (sample->l < -1.0) sample->l = -1.0;
 
-			if (sample->r > 1.0) sample->r = 1.0;
-			else if (sample->r < -1.0) sample->r = -1.0;
+	for (i = 0; i < size; ++i) {
+		if (sample->l > 1.0) sample->l = 1.0;
+		else if (sample->l < -1.0) sample->l = -1.0;
 
-			if(ByteArray_bytesAvailable(self->super.wave) >= 4) {
-				self->super.wave->writeShort(self->super.wave, (sample->l * (sample->l < 0 ? 32768 : 32767)));
-				self->super.wave->writeShort(self->super.wave, (sample->r * (sample->r < 0 ? 32768 : 32767)));
-			} else {
-				CoreMixer_set_complete(&self->super, 1);
-			}
+		if (sample->r > 1.0) sample->r = 1.0;
+		else if (sample->r < -1.0) sample->r = -1.0;
 
-			//data->writeFloat(data, sample->l);
-			//data->writeFloat(data, sample->r);
-
-			sample->l = sample->r = 0.0;
-			sample = sample->next;
+		if(ByteArray_bytesAvailable(self->super.wave) >= 4) {
+			self->super.wave->writeShort(self->super.wave, (sample->l * (sample->l < 0 ? 32768 : 32767)));
+			self->super.wave->writeShort(self->super.wave, (sample->r * (sample->r < 0 ? 32768 : 32767)));
+		} else {
+			CoreMixer_set_complete(&self->super, 1);
 		}
-	} else {
-		for (i = 0; i < size; ++i) {
-			if (sample->l > 1.0) sample->l = 1.0;
-			else if (sample->l < -1.0) sample->l = -1.0;
 
-			if (sample->r > 1.0) sample->r = 1.0;
-			else if (sample->r < -1.0) sample->r = -1.0;
+		//data->writeFloat(data, sample->l);
+		//data->writeFloat(data, sample->r);
 
-			//data->writeFloat(data, sample->l);
-			//data->writeFloat(data, sample->r);
-
-			sample->l = sample->r = 0.0;
-			sample = sample->next;
-		}
+		sample->l = sample->r = 0.0;
+		sample = sample->next;
 	}
+
 }
 
 //override
@@ -437,40 +423,24 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 
 	sample = &self->super.buffer[0];
 
-	if (self->super.player->record) {
-		for (i = 0; i < size; ++i) {
-			if (sample->l > 1.0) sample->l = 1.0;
-			else if (sample->l < -1.0) sample->l = -1.0;
+	for (i = 0; i < size; ++i) {
+		if (sample->l > 1.0) sample->l = 1.0;
+		else if (sample->l < -1.0) sample->l = -1.0;
 
-			if (sample->r > 1.0) sample->r = 1.0;
-			else if (sample->r < -1.0) sample->r = -1.0;
+		if (sample->r > 1.0) sample->r = 1.0;
+		else if (sample->r < -1.0) sample->r = -1.0;
 
-			if(ByteArray_bytesAvailable(self->super.wave) >= 4) {
-				self->super.wave->writeShort(self->super.wave, (int)(sample->l * (sample->l < 0 ? 32768 : 32767)));
-				self->super.wave->writeShort(self->super.wave, (int)(sample->r * (sample->r < 0 ? 32768 : 32767)));
-			} else {
-				CoreMixer_set_complete(&self->super, 1);
-			}
+		if(ByteArray_bytesAvailable(self->super.wave) >= 4) {
+			self->super.wave->writeShort(self->super.wave, (int)(sample->l * (sample->l < 0 ? 32768 : 32767)));
+			self->super.wave->writeShort(self->super.wave, (int)(sample->r * (sample->r < 0 ? 32768 : 32767)));
+		} else {
+			CoreMixer_set_complete(&self->super, 1);
+		}
 
 //			data->writeFloat(data, sample->l);
 //			data->writeFloat(data, sample->r);
 
-			sample->l = sample->r = 0.0;
-			sample = sample->next;
-		}
-	} else {
-		for (i = 0; i < size; ++i) {
-			if (sample->l > 1.0) sample->l = 1.0;
-			else if (sample->l < -1.0) sample->l = -1.0;
-
-			if (sample->r > 1.0) sample->r = 1.0;
-			else if (sample->r < -1.0) sample->r = -1.0;
-
-//			data->writeFloat(data, sample->l);
-//			data->writeFloat(data, sample->r);
-
-			sample->l = sample->r = 0.0;
-			sample = sample->next;
-		}
+		sample->l = sample->r = 0.0;
+		sample = sample->next;
 	}
 }
