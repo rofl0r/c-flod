@@ -11,7 +11,13 @@
 #include "../../flashlib/EventDispatcher.h"
 #include "../../flashlib/SampleDataEvent.h"
 
+#define PFUNC_QUIET
+#ifndef PFUNC_QUIET
 #define PFUNC() fprintf(stderr, "%s\n", __FUNCTION__)
+#else
+#define PFUNC() do { } while(0)
+#endif
+
 #define assert_dbg(exp) do { if (!(exp)) __asm__("int3"); } while(0)
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
