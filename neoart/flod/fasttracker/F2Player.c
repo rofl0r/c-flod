@@ -1308,9 +1308,9 @@ static int amiga(int note, int finetune) {
 	int period = PERIODS[++note];
 
 	if (finetune < 0) {
-		delta = (PERIODS[--note] - period) / 64;
+		delta = (float) (PERIODS[--note] - period) / 64.f;
 	} else if (finetune > 0) {
-		delta = (period - PERIODS[++note]) / 64;
+		delta = (float) (period - PERIODS[++note]) / 64.f;
 	}
 
 	return period - (delta * finetune);
