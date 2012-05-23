@@ -1,17 +1,17 @@
 #include <time.h>
 
-#include "backends/wavewriter.h"
-#include "backends/aowriter.h"
+#include "../backends/wavewriter.h"
+#include "../backends/aowriter.h"
 
-#include "flashlib/ByteArray.h"
-#include "flashlib/SoundChannel.h"
+#include "../flashlib/ByteArray.h"
+#include "../flashlib/SoundChannel.h"
 
-#include "neoart/flod/core/CorePlayer.h"
-#include "neoart/flod/fasttracker/F2Player.h"
-#include "neoart/flod/trackers/PTPlayer.h"
-#include "neoart/flod/trackers/STPlayer.h"
-#include "neoart/flod/whittaker/DWPlayer.h"
-#include "neoart/flod/futurecomposer/FCPlayer.h"
+#include "../neoart/flod/core/CorePlayer.h"
+#include "../neoart/flod/fasttracker/F2Player.h"
+#include "../neoart/flod/trackers/PTPlayer.h"
+#include "../neoart/flod/trackers/STPlayer.h"
+#include "../neoart/flod/whittaker/DWPlayer.h"
+#include "../neoart/flod/futurecomposer/FCPlayer.h"
 
 enum PlayerType {
 	P_S_FT2 = 0,
