@@ -11,30 +11,82 @@
 #include "neoart/flod/whittaker/DWPlayer.h"
 #include "neoart/flod/futurecomposer/FCPlayer.h"
 
-enum {
-	AP_PT = 0,
-	AP_DW,
-	AP_FC,
-	AP_ST,
-	AP_MAX
-} AmigaPlayers;
+enum PlayerType {
+	P_S_FT2 = 0,
+	P_A_PT,
+	P_A_DW,
+	P_A_FC,
+	P_A_ST,
+	P_MAX
+};
 
-enum {
-	SP_FT2,
-	SP_MAX
-} SoundblasterPlayers;
+enum HardwareType {
+	HT_SB,
+	HT_AMIGA,
+	HT_MAX,
+};
+
+static const char player_hardware[] = {
+	[P_S_FT2] = HT_SB,
+	[P_A_PT]  = HT_AMIGA,
+	[P_A_DW]  = HT_AMIGA,
+	[P_A_FC]  = HT_AMIGA,
+	[P_A_ST]  = HT_AMIGA,
+};
 
 typedef void (*player_ctor_func) (struct CorePlayer*, struct CoreMixer*);
+typedef void (*hardware_ctor_func) (struct CoreMixer*);
+
+static const player_ctor_func player_ctors[] = {
+	[P_A_PT]  = (player_ctor_func) PTPlayer_ctor,
+	[P_A_ST]  = (player_ctor_func) STPlayer_ctor,
+	[P_A_FC]  = (player_ctor_func) FCPlayer_ctor,
+	[P_A_DW]  = (player_ctor_func) DWPlayer_ctor,
+	[P_S_FT2] = (player_ctor_func) F2Player_ctor,
+};
+
+static const hardware_ctor_func hardware_ctors[] = {
+	[HT_SB]    = (hardware_ctor_func) Soundblaster_ctor,
+	[HT_AMIGA] = (hardware_ctor_func) Amiga_ctor,
+};
+
+enum BackendType {
+	BE_WAVE,
+	BE_AO,
+	BE_MAX,
+};
+
 typedef int (*backend_write_func) (struct Backend *, void*, size_t);
 typedef int (*backend_close_func) (struct Backend *);
+typedef int (*backend_init_func)  (struct Backend *, void*);
+
+static const struct BackendInfo {
+	const char *name;
+	backend_init_func  init_func;
+	backend_write_func write_func;
+	backend_close_func close_func;
+} backend_info[] = {
+	[BE_WAVE] = {
+		.name = "WaveWriter",
+		.init_func  = (backend_init_func)  WaveWriter_init,
+		.write_func = (backend_write_func) WaveWriter_write,
+		.close_func = (backend_close_func) WaveWriter_close,
+	},
+	[BE_AO] = {
+		.name = "AoWriter",
+		.init_func  = (backend_init_func)  AoWriter_init,
+		.write_func = (backend_write_func) AoWriter_write,
+		.close_func = (backend_close_func) AoWriter_close,
+	},
+};
 
 int main(int argc, char** argv) {
 	int startarg;
-	int wave_backend = 0;
+	enum BackendType backend_type = BE_AO;
 	
 	for(startarg = 1; startarg < argc; startarg++) {
 		if(argv[startarg][0] == '-' && argv[startarg][1] == 'w')
-			wave_backend = 1;
+			backend_type = BE_WAVE;
 		else
 			break;
 	}
@@ -67,39 +119,25 @@ int main(int argc, char** argv) {
 		struct Soundblaster soundblaster;
 	} hardware;
 	
-	player_ctor_func Amiga_ctors[] = {
-		[AP_PT] = (player_ctor_func) PTPlayer_ctor,
-		[AP_ST] = (player_ctor_func) STPlayer_ctor,
-		[AP_FC] = (player_ctor_func) FCPlayer_ctor,
-		[AP_DW] = (player_ctor_func) DWPlayer_ctor,
-	};
-	
-	player_ctor_func Soundblaster_ctors[] = {
-		[SP_FT2] = (player_ctor_func) F2Player_ctor,
-	};
-	
+
 	unsigned i;
+	enum HardwareType current_hw = HT_MAX;
 	
-	Soundblaster_ctor(&hardware.soundblaster);
-	for(i = 0; i < SP_MAX; i++) {
-		Soundblaster_ctors[i](&player.core, &hardware.core);
-		CorePlayer_load(&player.core, &stream);
-		if (player.core.version) goto play;
+	for(i = 0; i < P_MAX; i++) {
+		if(current_hw != player_hardware[i]) {
+			current_hw = player_hardware[i];
+			hardware_ctors[current_hw](&hardware.core);
+		}
+		player_ctors[i](&player.core, &hardware.core);
+		if(ByteArray_get_length(&stream) > player.core.min_filesize) {
+			CorePlayer_load(&player.core, &stream);
+			if (player.core.version) goto play;
+		}
 	}
 	
-	Amiga_ctor(&hardware.amiga);
-	for(i = 0; i < AP_MAX; i++) {
-		Amiga_ctors[i](&player.core, &hardware.core);
-		CorePlayer_load(&player.core, &stream);
-		if (player.core.version) goto play;
-	}
-	
-	printf("couldn't find a player for %s\n", argv[1]);
+	printf("couldn't find a player for %s\n", argv[startarg]);
 	return 1;
 
-	backend_write_func backend_write;
-	backend_close_func backend_close;
-	
 	union {
 		struct Backend backend;
 		struct WaveWriter ww;
@@ -107,24 +145,14 @@ int main(int argc, char** argv) {
 	} writer;
 
 play:
-	
-	if(wave_backend) {
-		backend_write = WaveWriter_write;
-		backend_close = WaveWriter_close;
-		if(!WaveWriter_init(&writer.ww, "foo.wav")) {
-			perror("wavewriter");
-			return 1;
-		}
-	} else {
-		backend_write = AoWriter_write;
-		backend_close = AoWriter_close;
-		if(!AoWriter_init(&writer.ao)) {
-			perror("aowriter");
-			return 1;
-		}
+	if(!backend_info[backend_type].init_func(&writer.backend, "foo.wav")) {
+		perror(backend_info[backend_type].name);
+		return 1;
 	}
 	
-	unsigned char wave_buffer[SOUNDCHANNEL_BUFFER_MAX];
+	unsigned char wave_buffer[SOUNDCHANNEL_BUFFER_MAX]; 
+	// FIXME SOUNDCHANNEL_BUFFER_MAX is currently needed, because the CoreMixer descendants will 
+	// misbehave if the stream buffer size is not COREMIXER_MAX_BUFFER * 2 * sizeof(float)
 	struct ByteArray wave;
 	ByteArray_ctor(&wave);
 	wave.endian = BAE_LITTLE;
@@ -136,11 +164,10 @@ play:
 	player.core.initialize(&player.core);
 	
 	
-	
 	while(!CoreMixer_get_complete(&hardware.core)) {
 		hardware.core.accurate(&hardware.core, NULL);
 		if(wave.pos) {
-			backend_write(&writer.backend, wave_buffer, wave.pos);
+			backend_info[backend_type].write_func(&writer.backend, wave_buffer, wave.pos);
 			wave.pos = 0;
 		} else {
 			printf("wave pos is 0\n");
@@ -148,7 +175,7 @@ play:
 		}
 	}
 	
-	backend_close(&writer.backend);
+	backend_info[backend_type].close_func(&writer.backend);
 	
 	return 0;
 }
