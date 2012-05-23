@@ -40,6 +40,7 @@ OBJCOPY = $(CROSS_COMPILE)objcopy
 
 #ALL_LIBS = libflod.a 
 ALL_TOOLS = flodplayer
+#ALL_TOOLS = flod_demo.out
 
 -include config.mak
 
@@ -57,6 +58,9 @@ clean:
 	$(CC) $(CFLAGS) $(INC) -c -o $@ $<
 
 flodplayer: $(OBJS)
+	$(CC) -o $@ $(OBJS) -lm -lao
+
+flod_demo.out: $(OBJS)
 	$(CC) -o $@ $(OBJS) -lm -lao
 
 libflod.a: $(OBJS)
