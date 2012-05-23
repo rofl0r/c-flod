@@ -973,7 +973,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 	
 #define STRSZ(X) X , sizeof(X) - 1
 #define is_str(chr, lit) (!memcmp(chr, STRSZ(lit)))
-	
+	//FIXME its probably better to just test for "Extended Module" at the stream start
 	if (is_str(id, "FastTracker v2.00   ") || is_str(id, "FastTracker v 2.00  ")) {
 		self->super.super.version = 1;
 	} else if (is_str(id, "Sk@le Tracker")) {
@@ -989,6 +989,8 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 	//} else if (id->indexOf("OpenMPT") != -1) {
 	} else if (is_str(id, "OpenMPT")) {	
 		self->super.super.version = 6;
+	} else if (is_str(id, "MOD2XM 1.0")) {
+		self->super.super.version = 7;
 	} else return;
 
 	stream->readUnsignedShort(stream);
