@@ -1,6 +1,7 @@
 #include "aowriter.h"
 
-int AoWriter_init(struct AoWriter *self) {
+int AoWriter_init(struct AoWriter *self, void* data) {
+	(void) data;
 	ao_initialize();
 	self->format.bits = 16;
 	self->format.channels = 2;

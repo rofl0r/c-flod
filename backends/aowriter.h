@@ -14,7 +14,7 @@ struct AoWriter {
 	int aodriver;
 };
 
-int AoWriter_init(struct AoWriter *self);
+int AoWriter_init(struct AoWriter *self, void* data);
 int AoWriter_write(struct AoWriter *self, void* buffer, size_t bufsize);
 int AoWriter_close(struct AoWriter *self);
 
