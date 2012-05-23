@@ -4,7 +4,9 @@
 //#define SBSAMPLE_MAX_DATA 220
 // FIXME hmm, it seems sample lengths can vary radically.
 // probably not the best idea to make them all the same size
-#define SBSAMPLE_MAX_DATA (20 * 1024)
+// idea is to store the offset where the sample starts in the code instead
+// (if thats possible, i.e. the sample does not get transformed during load)
+#define SBSAMPLE_MAX_DATA (42 * 1024)
 
 #include "../flod.h"
 #include "../../../flashlib/ByteArray.h"
