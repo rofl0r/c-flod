@@ -112,7 +112,7 @@ int Amiga_store(struct Amiga* self, struct ByteArray *stream, int len, int point
 void Amiga_initialize(struct Amiga* self) {
 	PFUNC();
 	//self->super->initialize();
-	if(!self->super.player->record) ByteArray_clear(self->super.wave);
+	//if(!self->super.player->record) ByteArray_clear(self->super.wave);
 	AmigaFilter_initialize(self->filter);
 
 	if (!self->memory_fixed) { 
@@ -138,7 +138,7 @@ void Amiga_reset(struct Amiga* self) {
     //override
 void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 	struct AmigaChannel *chan = NULL;
-	struct ByteArray *data = e->data;
+	//struct ByteArray *data = e->data;
 	int i = 0;
 	Number lvol = NAN;
 	int mixed = 0;
@@ -243,7 +243,7 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 	for (i = 0; i < size; ++i) {
 		AmigaFilter_process(self->filter, self->model, sample);
 		
-		if (self->super.player->record) {
+		//if (self->super.player->record) {
 			// FIXME: this is all a hack
 			// in the end only a wav (this here) should get written into data
 			// and the backend decide whether it gets written to a wav file
@@ -254,13 +254,13 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 			} else {
 				CoreMixer_set_complete(&self->super, 1);
 			}
-		}
+		//}
 		// FIXME: this data is worthless, it is in the special flash sound format
 		// which is one float in the range of -1 - 1 per channel
 		// we can probably save a lot of calculations if we write the wave format directly,
 		// instead of converting the flash format into wave.
-		data->writeFloat(data, sample->l);
-		data->writeFloat(data, sample->r);
+		//data->writeFloat(data, sample->l);
+		//data->writeFloat(data, sample->r);
 
 		sample->l = sample->r = 0.0f;
 		sample = sample->next;

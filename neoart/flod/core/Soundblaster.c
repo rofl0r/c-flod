@@ -81,7 +81,7 @@ void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
 	struct SBChannel *chan;
 	//d:Vector.<Number>,
 	Number* d;
-	struct ByteArray* data = e->data;
+	//struct ByteArray* data = e->data;
 	
 	int i = 0;
 	int mixed = 0;
@@ -201,8 +201,8 @@ void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
 				CoreMixer_set_complete(&self->super, 1);
 			}
 
-			data->writeFloat(data, sample->l);
-			data->writeFloat(data, sample->r);
+			//data->writeFloat(data, sample->l);
+			//data->writeFloat(data, sample->r);
 
 			sample->l = sample->r = 0.0;
 			sample = sample->next;
@@ -215,8 +215,8 @@ void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
 			if (sample->r > 1.0) sample->r = 1.0;
 			else if (sample->r < -1.0) sample->r = -1.0;
 
-			data->writeFloat(data, sample->l);
-			data->writeFloat(data, sample->r);
+			//data->writeFloat(data, sample->l);
+			//data->writeFloat(data, sample->r);
 
 			sample->l = sample->r = 0.0;
 			sample = sample->next;
@@ -232,7 +232,7 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 	//d2:Vector.<Number>;
 	Number *d1 = null;
 	Number *d2 = null;
-	struct ByteArray* data = e->data;
+	//struct ByteArray* data = e->data;
 	int delta = 0;
 	int i = 0; 
 	int mixed = 0; 
@@ -452,8 +452,8 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 				CoreMixer_set_complete(&self->super, 1);
 			}
 
-			data->writeFloat(data, sample->l);
-			data->writeFloat(data, sample->r);
+//			data->writeFloat(data, sample->l);
+//			data->writeFloat(data, sample->r);
 
 			sample->l = sample->r = 0.0;
 			sample = sample->next;
@@ -466,8 +466,8 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 			if (sample->r > 1.0) sample->r = 1.0;
 			else if (sample->r < -1.0) sample->r = -1.0;
 
-			data->writeFloat(data, sample->l);
-			data->writeFloat(data, sample->r);
+//			data->writeFloat(data, sample->l);
+//			data->writeFloat(data, sample->r);
 
 			sample->l = sample->r = 0.0;
 			sample = sample->next;
