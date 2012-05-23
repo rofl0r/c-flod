@@ -55,6 +55,8 @@ void STPlayer_ctor(struct STPlayer* self, struct Amiga *amiga) {
 	self->super.super.process = STPlayer_process;
 	self->super.super.initialize = STPlayer_initialize;
 	self->super.super.loader = STPlayer_loader;
+	
+	self->super.super.min_filesize = 1625;
 }
 
 struct STPlayer* STPlayer_new(struct Amiga *amiga) {

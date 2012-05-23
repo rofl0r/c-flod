@@ -169,7 +169,10 @@ void FCPlayer_ctor(struct FCPlayer* self, struct Amiga *amiga) {
 	//add vtable
 	self->super.super.process = FCPlayer_process;
 	self->super.super.loader = FCPlayer_loader;
-	self->super.super.initialize = FCPlayer_initialize;	
+	self->super.super.initialize = FCPlayer_initialize;
+	
+	// TODO: not very accurate...
+	self->super.super.min_filesize = 16;
 	
 }
 

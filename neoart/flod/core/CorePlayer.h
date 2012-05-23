@@ -17,6 +17,7 @@ inheritance
 struct CorePlayer {
 	//extends EventDispatcher
 	struct EventDispatcher super;
+	unsigned int min_filesize;
 	int quality;
 	int record;
 	int playSong;

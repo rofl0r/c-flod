@@ -49,6 +49,9 @@ void DWPlayer_ctor(struct DWPlayer* self, struct Amiga* amiga) {
 	self->super.super.loader = DWPlayer_loader;
 	
 	self->super.super.initialize = DWPlayer_initialize;
+	
+	// TODO: this is not very accurate...
+	self->super.super.min_filesize = 64;
 }
 
 struct DWPlayer* DWPlayer_new(struct Amiga* amiga) {

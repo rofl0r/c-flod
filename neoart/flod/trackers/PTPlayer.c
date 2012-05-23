@@ -109,6 +109,8 @@ void PTPlayer_ctor(struct PTPlayer* self, struct Amiga *amiga) {
 	self->super.super.process = PTPlayer_process;
 	self->super.super.loader = PTPlayer_loader;
 	self->super.super.initialize = PTPlayer_initialize;
+	
+	self->super.super.min_filesize = 2105;
 }
 
 struct PTPlayer* PTPlayer_new(struct Amiga *amiga) {
