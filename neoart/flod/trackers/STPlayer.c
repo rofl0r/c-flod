@@ -274,7 +274,7 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 	int size = 0; 
 	int value = 0;
 	
-	if (ByteArray_get_length(stream) < 1626) return;
+	if (ByteArray_get_length(stream) <= self->super.super.min_filesize) return;
 
 	
 	self->title_buf[21] = 0;
@@ -284,7 +284,11 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 
 	self->super.super.version = ULTIMATE_SOUNDTRACKER;
 	ByteArray_set_position(stream, 42);
-
+	// FIXME this player has a very weak format detection mechanism.
+	// it goes half the way through the loader routine using 
+	// gatecrashing.XM, and then hits the assertion below labeled
+	// "weak spot". therefore it should always be tried last,
+	// until it has been fixed.
 	for (i = 1; i < 16; ++i) {
 		value = stream->readUnsignedShort(stream);
 
@@ -333,7 +337,8 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 	higher += 256;
 	//FIXME
 	//patterns = new Vector.<AmigaRow>(higher, true);
-
+	
+	// "weak spot"
 	assert_dbg(higher < STPLAYER_MAX_PATTERNS);
 
 	i = (ByteArray_get_length(stream) - size - 600) >> 2;
