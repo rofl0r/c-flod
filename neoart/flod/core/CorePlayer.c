@@ -79,41 +79,6 @@ void CorePlayer_loader(struct CorePlayer* self, struct ByteArray *stream) { }
 void CorePlayer_fast(struct CorePlayer* self) {}
 void CorePlayer_accurate(struct CorePlayer* self) {}
 
-void CorePlayer_record(struct CorePlayer* self) {
-	self->record = 1;
-	self->hardware->wave = ByteArray_new();
-	void *ptr = malloc(128 * 1024 * 1024 + (44));
-	ByteArray_open_mem(self->hardware->wave, ptr, 128 * 1024 * 1024 + (44));
-	
-	struct ByteArray *file = self->hardware->wave;
-	file->endian = BAE_LITTLE;
-
-	file->writeUTFBytes(file, "RIFF");
-	//file->writeInt(file, ByteArray_get_length(self->wave) + 44);
-	file->writeInt(file, file->size);
-	file->writeUTFBytes(file, "WAVEfmt ");
-	file->writeInt(file, 16);
-	file->writeShort(file, 1);
-	file->writeShort(file, 2);
-	file->writeInt(file, 44100);
-	file->writeInt(file, 44100 << 2);
-	file->writeShort(file, 4);
-	file->writeShort(file, 16);
-	file->writeUTFBytes(file, "data");
-	//file->writeInt(file, ByteArray_get_length(self->wave));
-	file->writeInt(file, file->size - 44);
-	
-	//CoreMixer_waveform(self->hardware);
-}
-
-void CorePlayer_save_record(struct CorePlayer* self, char* filename) {
-	ByteArray_dump_to_file(self->hardware->wave, filename);
-}
-
-struct ByteArray *CorePlayer_get_waveform(struct CorePlayer* self) {
-	return CoreMixer_waveform(self->hardware);
-}
-
 int CorePlayer_load(struct CorePlayer* self, struct ByteArray *stream) {
 	PFUNC();
 	CoreMixer_reset(self->hardware);

@@ -41,7 +41,6 @@ int CoreMixer_get_complete(struct CoreMixer* self);
 void CoreMixer_set_complete(struct CoreMixer* self, int value);
 int CoreMixer_get_bufferSize(struct CoreMixer* self);
 void CoreMixer_set_bufferSize(struct CoreMixer* self, int value);
-struct ByteArray* CoreMixer_waveform(struct CoreMixer* self);
 
 /* stub */
 void CoreMixer_reset(struct CoreMixer* self);
