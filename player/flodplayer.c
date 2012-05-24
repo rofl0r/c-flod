@@ -59,6 +59,14 @@ static const char player_hardware[] = {
 	[P_A_ST]  = HT_AMIGA,
 };
 
+static const char *player_name[] = {
+	[P_S_FT2] = "FastTracker 2",
+	[P_A_PT]  = "ProTracker",
+	[P_A_DW]  = "David Whittaker",
+	[P_A_FC]  = "Future Composer",
+	[P_A_ST]  = "SoundTracker",
+};
+
 typedef void (*player_ctor_func) (struct CorePlayer*, struct CoreMixer*);
 typedef void (*hardware_ctor_func) (struct CoreMixer*);
 
@@ -158,7 +166,10 @@ int main(int argc, char** argv) {
 		player_ctors[i](&player.core, &hardware.core);
 		if(ByteArray_get_length(&stream) > player.core.min_filesize) {
 			CorePlayer_load(&player.core, &stream);
-			if (player.core.version) goto play;
+			if (player.core.version) {
+				printf("::: using %s player :::\n", player_name[i]);
+				goto play;
+			}
 		}
 	}
 	
