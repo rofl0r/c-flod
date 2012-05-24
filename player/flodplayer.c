@@ -15,6 +15,13 @@
 
 #include "keyboard.h"
 
+enum KeyboardCommand {
+	KC_NONE,
+	KC_PAUSE,
+	KC_QUIT,
+	KC_NEXT,
+};
+
 int check_keyboard(void) {
 	if(kbhit()) {
 		switch(readch()) {
@@ -24,16 +31,18 @@ int check_keyboard(void) {
 			case 0x1b: // ESC
 			case 'q':
 			case 'x':
-				return -1;
+				return KC_QUIT;
+			case 'p':
+				return KC_PAUSE;
 			case '\t':
 			case '\r':
 			case '\n':
-				return 1; // next song
+				return KC_NEXT;
 			default:
 				break;
 		}
 	}
-	return(0);
+	return KC_NONE;
 }
 
 enum PlayerType {
@@ -203,6 +212,7 @@ play:
 	
 #define MAX_PLAYTIME (60 * 5)
 	time_t stoptime = time(NULL) + MAX_PLAYTIME;
+	int paused = 0;
 	
 	init_keyboard();
 	
@@ -219,7 +229,14 @@ play:
 			printf("hit timeout\n");
 			break;
 		}
-		if(check_keyboard()) break;
+		enum KeyboardCommand kc;
+ck:
+		if((kc = check_keyboard()) == KC_QUIT) break;
+		else if(kc == KC_PAUSE) paused = !paused;
+		if(paused) {
+			sleep(1);
+			goto ck;
+		}
 	}
 	
 	backend_info[backend_type].close_func(&writer.backend);
