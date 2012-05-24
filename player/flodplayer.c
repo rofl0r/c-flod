@@ -20,6 +20,7 @@ enum KeyboardCommand {
 	KC_PAUSE,
 	KC_QUIT,
 	KC_NEXT,
+	KC_SKIP,
 };
 
 int check_keyboard(void) {
@@ -34,10 +35,10 @@ int check_keyboard(void) {
 				return KC_QUIT;
 			case 'p':
 				return KC_PAUSE;
-			case '\t':
-			case '\r':
-			case '\n':
+			case '\t': case '\r': case '\n':
 				return KC_NEXT;
+			case '.':
+				return KC_SKIP;
 			default:
 				break;
 		}
@@ -212,14 +213,17 @@ play:
 	
 #define MAX_PLAYTIME (60 * 5)
 	time_t stoptime = time(NULL) + MAX_PLAYTIME;
-	int paused = 0;
+	int paused = 0, skip = 0;
 	
 	init_keyboard();
 	
 	while(!CoreMixer_get_complete(&hardware.core)) {
 		hardware.core.accurate(&hardware.core, NULL);
 		if(wave.pos) {
-			backend_info[backend_type].write_func(&writer.backend, wave_buffer, wave.pos);
+			if(!skip)
+				backend_info[backend_type].write_func(&writer.backend, wave_buffer, wave.pos);
+			else
+				skip--;
 			wave.pos = 0;
 		} else {
 			printf("wave pos is 0\n");
@@ -233,6 +237,7 @@ play:
 ck:
 		if((kc = check_keyboard()) == KC_QUIT) break;
 		else if(kc == KC_PAUSE) paused = !paused;
+		else if(kc == KC_SKIP) skip += 10;
 		if(paused) {
 			sleep(1);
 			goto ck;
