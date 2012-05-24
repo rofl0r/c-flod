@@ -122,6 +122,22 @@ static const struct BackendInfo {
 	},
 };
 
+
+static union {
+	struct CorePlayer core;
+	struct F2Player f2;
+	struct PTPlayer pt;
+	struct STPlayer st;
+	struct FCPlayer fc;
+	struct DWPlayer dw;
+} player;
+
+static union {
+	struct CoreMixer core;
+	struct Amiga amiga;
+	struct Soundblaster soundblaster;
+} hardware;
+
 int main(int argc, char** argv) {
 	int startarg;
 	enum BackendType backend_type = BE_AO;
@@ -148,22 +164,6 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	
-	union {
-		struct CorePlayer core;
-		struct F2Player f2;
-		struct PTPlayer pt;
-		struct STPlayer st;
-		struct FCPlayer fc;
-		struct DWPlayer dw;
-	} player;
-	
-	union {
-		struct CoreMixer core;
-		struct Amiga amiga;
-		struct Soundblaster soundblaster;
-	} hardware;
-	
-
 	unsigned i;
 	enum HardwareType current_hw = HT_MAX;
 	
