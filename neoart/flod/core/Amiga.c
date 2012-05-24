@@ -136,6 +136,29 @@ void Amiga_reset(struct Amiga* self) {
 }
 
 #include "Hardware.h"
+
+static void process_wave(struct Amiga* self, unsigned int size) {
+	struct Sample *sample = &self->super.buffer[0];
+	off_t avail = ByteArray_bytesAvailable(self->super.wave);
+	int complete_flag = 0;
+	unsigned int i;
+	
+	if(size / 4 > avail) {
+		size = avail * 4;
+		complete_flag = 1;
+	}
+
+	for (i = 0; i < size; ++i) {
+		AmigaFilter_process(self->filter, self->model, sample);
+		self->super.wave->writeShort(self->super.wave, convert_sample16(sample->l));
+		self->super.wave->writeShort(self->super.wave, convert_sample16(sample->r));
+		sample->l = sample->r = 0.0;
+		sample = sample->next;
+	}
+	
+	if(complete_flag) CoreMixer_set_complete(&self->super, 1);
+}
+
     //override
 void Amiga_fast(struct Amiga* self) {
 	struct AmigaChannel *chan = NULL;
@@ -159,7 +182,7 @@ void Amiga_fast(struct Amiga* self) {
 	}
 
 	while (mixed < size) {
-		if (!self->super.samplesLeft) {
+		if (unlikely(!self->super.samplesLeft)) {
 
 			self->super.player->process(self->super.player);
 			self->super.samplesLeft = self->super.samplesTick;
@@ -184,7 +207,7 @@ void Amiga_fast(struct Amiga* self) {
 			sample = &self->super.buffer[mixPos];
 
 			if (chan->audena && chan->audper > 60) {
-				if (chan->mute) {
+				if (unlikely(chan->mute)) {
 					chan->ldata = 0.0f;
 					chan->rdata = 0.0f;
 				}
@@ -237,8 +260,10 @@ void Amiga_fast(struct Amiga* self) {
 		mixed += toMix;
 		self->super.samplesLeft -= toMix;
 	}
-
 	
+	process_wave(self, size);
+
+	/*
 	off_t avail = ByteArray_bytesAvailable(self->super.wave);
 	int complete_flag = 0;
 	if(size / 4 > avail) {
@@ -257,6 +282,6 @@ void Amiga_fast(struct Amiga* self) {
 	}
 	
 	if(complete_flag) CoreMixer_set_complete(&self->super, 1);
-
+*/
 }
 
