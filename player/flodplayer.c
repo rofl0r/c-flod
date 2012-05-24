@@ -13,6 +13,29 @@
 #include "../neoart/flod/whittaker/DWPlayer.h"
 #include "../neoart/flod/futurecomposer/FCPlayer.h"
 
+#include "keyboard.h"
+
+int check_keyboard(void) {
+	if(kbhit()) {
+		switch(readch()) {
+			case 0x03: // CTRL-C
+			case 0x04: // CTRL-D
+			case 0x1a: // CTRL-Z
+			case 0x1b: // ESC
+			case 'q':
+			case 'x':
+				return -1;
+			case '\t':
+			case '\r':
+			case '\n':
+				return 1; // next song
+			default:
+				break;
+		}
+	}
+	return(0);
+}
+
 enum PlayerType {
 	P_S_FT2 = 0,
 	P_A_PT,
@@ -98,6 +121,8 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	
+	printf("opening %s\n", argv[startarg]);
+	
 	struct ByteArray stream;
 	ByteArray_ctor(&stream);	
 	
@@ -168,6 +193,8 @@ play:
 #define MAX_PLAYTIME (60 * 5)
 	time_t stoptime = time(NULL) + MAX_PLAYTIME;
 	
+	init_keyboard();
+	
 	while(!CoreMixer_get_complete(&hardware.core)) {
 		hardware.core.accurate(&hardware.core, NULL);
 		if(wave.pos) {
@@ -181,11 +208,14 @@ play:
 			printf("hit timeout\n");
 			break;
 		}
+		if(check_keyboard()) break;
 	}
 	
 	backend_info[backend_type].close_func(&writer.backend);
 	
 	printf("finished playing %s\n", argv[startarg]);
+	
+	close_keyboard();
 	
 	return 0;
 }
