@@ -144,7 +144,7 @@ void PTPlayer_process(struct PTPlayer* self) {
 		if (self->patternDelay) {
 			effects(self);
 		} else {
-			pattern = self->track[self->trackPos] + self->patternPos;
+			pattern = (self->track[self->trackPos] * self->chans * 64) + self->patternPos;
 
 			while (voice) {
 				chan = voice->channel;
@@ -315,14 +315,35 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 	int size = 0;
 	int value = 0;
 	
+	self->chans = 4;
+	
 	if (ByteArray_get_length(stream) < 2106) return;
 
 	ByteArray_set_position(stream, 1080);
 	stream->readMultiByte(stream, id, 4);
 	
 	if(memcmp(id, "M.K.", 4) && memcmp(id, "M!K!", 4)) {
-		printf("header not found, got %s\n", id);
-		return;
+		if(!memcmp(id, "8CHN", 4)) {
+			self->chans = 8;
+chn_print:
+			printf("warning: support for %s subformat not yet complete.\n", id);
+			/* TODO the parsing works, sound works, but we have to play all chans
+			 * currently only 4 are played.
+			 *  see "FireLight Mod Player Tutorial.txt" for detailed info */
+/*
+The 6 and 8 channel mod files differ from the normal mods in two ways:
+
+1) The signature string "M.K." at offset 1080 is either "6CHN" or "8CHN".
+2) The pattern data table starting at offset 1084 stores 6 or 8 notes for
+   each pattern position position. 
+*/
+		} else if (!memcmp(id, "6CHN", 4)) {
+			self->chans = 6;
+			goto chn_print;
+		} else {
+			printf("header not found, got %s\n", id);
+			return;
+		}
 	}
 
 	ByteArray_set_position(stream, 0);
@@ -366,22 +387,28 @@ void PTPlayer_loader(struct PTPlayer* self, struct ByteArray *stream) {
 		//self->samples[i] = sample;
 	}
 
+	/* read pattern order table
+	   self->length == SONG_LENGTH 
+	   higher  == NUMBER_OF_PATTERNS
+	   self->track[i] == ORDER
+	 */
 	ByteArray_set_position(stream, 950);
 	self->length = stream->readUnsignedByte(stream);
 	ByteArray_set_position_rel(stream, +1);
 
-	for (i = 0; i < 128; ++i) {
-		value = stream->readUnsignedByte(stream) << 8;
+	for (i = 0; i < PTPLAYER_MAX_TRACKS; ++i) {
+		value = stream->readUnsignedByte(stream);
 		self->track[i] = value;
 		if (value > higher) higher = value;
 	}
 
 	ByteArray_set_position(stream, 1084);
-	higher += 256;
+	//higher += 256;
 	//patterns = new Vector.<PTRow>(higher, true);
-	assert_dbg(higher < PTPLAYER_MAX_PATTERNS);
+	unsigned int row_max = (higher + 1) * (64 * self->chans);
+	assert_dbg(row_max <= PTPLAYER_MAX_PATTERNS);
 
-	for (i = 0; i < higher; ++i) {
+	for (i = 0; i < row_max; ++i) {
 		//row = new PTRow();
 		row = &self->patterns[i];
 		PTRow_ctor(row);

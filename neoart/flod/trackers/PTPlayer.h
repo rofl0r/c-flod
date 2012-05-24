@@ -30,7 +30,7 @@ inheritance
 */
 struct PTPlayer {
 	struct AmigaPlayer super;
-	int track[PTPLAYER_MAX_TRACKS];//Vector.<int>,
+	unsigned char track[PTPLAYER_MAX_TRACKS];//Vector.<int>,
 	struct PTRow patterns[PTPLAYER_MAX_PATTERNS]; //Vector.<PTRow>,
 	struct PTSample samples[PTPLAYER_MAX_SAMPLES];//Vector.<PTSample>,
 	char sample_used[PTPLAYER_MAX_SAMPLES];
@@ -45,6 +45,7 @@ struct PTPlayer {
 	int vibratoDepth;
 	char title_buffer[24];
 	char sample_names[PTPLAYER_MAX_SAMPLES][24];
+	unsigned char chans;
 };
 
 void PTPlayer_defaults(struct PTPlayer* self);
