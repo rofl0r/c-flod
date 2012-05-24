@@ -35,8 +35,8 @@ void Soundblaster_ctor(struct Soundblaster* self) {
 	self->super.type = CM_SOUNDBLASTER;
 	
 	//vtable
-	self->super.fast = (EventHandlerFunc) Soundblaster_fast;
-	self->super.accurate = (EventHandlerFunc) Soundblaster_accurate;
+	self->super.fast = Soundblaster_fast;
+	self->super.accurate = Soundblaster_accurate;
 }
 
 struct Soundblaster* Soundblaster_new(void) {
@@ -75,13 +75,35 @@ void Soundblaster_initialize(struct Soundblaster* self) {
 	}
 }
 
+#include "Hardware.h"
+
+static void process_wave(struct Soundblaster* self, unsigned int size) {
+	struct Sample *sample = &self->super.buffer[0];
+	off_t avail = ByteArray_bytesAvailable(self->super.wave);
+	int complete_flag = 0;
+	unsigned int i;
+	
+	if(size / 4 > avail) {
+		size = avail * 4;
+		complete_flag = 1;
+	}
+
+	for (i = 0; i < size; ++i) {
+		self->super.wave->writeShort(self->super.wave, convert_sample16(sample->l));
+		self->super.wave->writeShort(self->super.wave, convert_sample16(sample->r));
+		sample->l = sample->r = 0.0;
+		sample = sample->next;
+	}
+	
+	if(complete_flag) CoreMixer_set_complete(&self->super, 1);
+}
+
 //override
-void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
+void Soundblaster_fast(struct Soundblaster* self) {
 	PFUNC();
 	struct SBChannel *chan;
 	//d:Vector.<Number>,
 	Number* d;
-	//struct ByteArray* data = e->data;
 	
 	int i = 0;
 	int mixed = 0;
@@ -184,41 +206,18 @@ void Soundblaster_fast(struct Soundblaster* self, struct SampleDataEvent* e) {
 		self->super.samplesLeft -= toMix;
 	}
 
-	sample = &self->super.buffer[0];
-
-
-	for (i = 0; i < size; ++i) {
-		if (sample->l > 1.0) sample->l = 1.0;
-		else if (sample->l < -1.0) sample->l = -1.0;
-
-		if (sample->r > 1.0) sample->r = 1.0;
-		else if (sample->r < -1.0) sample->r = -1.0;
-
-		if(ByteArray_bytesAvailable(self->super.wave) >= 4) {
-			self->super.wave->writeShort(self->super.wave, (sample->l * (sample->l < 0 ? 32768 : 32767)));
-			self->super.wave->writeShort(self->super.wave, (sample->r * (sample->r < 0 ? 32768 : 32767)));
-		} else {
-			CoreMixer_set_complete(&self->super, 1);
-		}
-
-		//data->writeFloat(data, sample->l);
-		//data->writeFloat(data, sample->r);
-
-		sample->l = sample->r = 0.0;
-		sample = sample->next;
-	}
+	process_wave(self, size);
 
 }
 
 //override
-void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e) {
+void Soundblaster_accurate(struct Soundblaster* self) {
 	PFUNC();
 	struct SBChannel *chan = NULL;
 	//d1:Vector.<Number>;
 	//d2:Vector.<Number>;
 	Number *d1 = null;
 	Number *d2 = null;
-	//struct ByteArray* data = e->data;
 	int delta = 0;
 	int i = 0; 
 	int mixed = 0; 
@@ -293,15 +292,15 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 						chan->pointer += delta;
 
 						if (chan->pointer > chan->length) {
-						chan->fraction += chan->pointer - chan->length;
-						chan->pointer = chan->length;
+							chan->fraction += chan->pointer - chan->length;
+							chan->pointer = chan->length;
 						}
 					} else {
 						chan->pointer -= delta;
 
 						if (chan->pointer < chan->length) {
-						chan->fraction += chan->length - chan->pointer;
-						chan->pointer = chan->length;
+							chan->fraction += chan->length - chan->pointer;
+							chan->pointer = chan->length;
 						}
 					}
 				}
@@ -420,27 +419,7 @@ void Soundblaster_accurate(struct Soundblaster* self, struct SampleDataEvent* e)
 		mixed += toMix;
 		self->super.samplesLeft -= toMix;
 	}
-
-	sample = &self->super.buffer[0];
-
-	for (i = 0; i < size; ++i) {
-		if (sample->l > 1.0) sample->l = 1.0;
-		else if (sample->l < -1.0) sample->l = -1.0;
-
-		if (sample->r > 1.0) sample->r = 1.0;
-		else if (sample->r < -1.0) sample->r = -1.0;
-
-		if(ByteArray_bytesAvailable(self->super.wave) >= 4) {
-			self->super.wave->writeShort(self->super.wave, (int)(sample->l * (sample->l < 0 ? 32768 : 32767)));
-			self->super.wave->writeShort(self->super.wave, (int)(sample->r * (sample->r < 0 ? 32768 : 32767)));
-		} else {
-			CoreMixer_set_complete(&self->super, 1);
-		}
-
-//			data->writeFloat(data, sample->l);
-//			data->writeFloat(data, sample->r);
-
-		sample->l = sample->r = 0.0;
-		sample = sample->next;
-	}
+	
+	process_wave(self, size);
 }
+

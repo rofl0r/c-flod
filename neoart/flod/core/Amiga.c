@@ -135,10 +135,10 @@ void Amiga_reset(struct Amiga* self) {
       self->vector_count_memory = 0;
 }
 
+#include "Hardware.h"
     //override
-void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
+void Amiga_fast(struct Amiga* self) {
 	struct AmigaChannel *chan = NULL;
-	//struct ByteArray *data = e->data;
 	int i = 0;
 	Number lvol = NAN;
 	int mixed = 0;
@@ -238,22 +238,25 @@ void Amiga_fast(struct Amiga* self, struct SampleDataEvent *e) {
 		self->super.samplesLeft -= toMix;
 	}
 
+	
+	off_t avail = ByteArray_bytesAvailable(self->super.wave);
+	int complete_flag = 0;
+	if(size / 4 > avail) {
+		size = avail * 4;
+		complete_flag = 1;
+	}
+	
 	sample = &self->super.buffer[0];
 
 	for (i = 0; i < size; ++i) {
 		AmigaFilter_process(self->filter, self->model, sample);
-		
-		if (ByteArray_bytesAvailable(self->super.wave) >= 4) {
-			self->super.wave->writeShort(self->super.wave, (sample->l * ((sample->l < 0) ? 32768 : 32767)));
-			self->super.wave->writeShort(self->super.wave, (sample->r * ((sample->r < 0) ? 32768 : 32767)));
-		} else {
-			CoreMixer_set_complete(&self->super, 1);
-		}
-
-
+		self->super.wave->writeShort(self->super.wave, convert_sample16(sample->l));
+		self->super.wave->writeShort(self->super.wave, convert_sample16(sample->r));
 		sample->l = sample->r = 0.0f;
 		sample = sample->next;
 	}
+	
+	if(complete_flag) CoreMixer_set_complete(&self->super, 1);
 
 }
 
