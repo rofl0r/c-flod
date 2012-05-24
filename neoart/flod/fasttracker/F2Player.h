@@ -31,6 +31,7 @@ object
 struct F2Player {
 	struct SBPlayer super;
 	struct F2Pattern patterns[F2PLAYER_MAX_PATTERNS]; // Vector
+	/* the instrument is what has the samples assigned (one per instr) */
 	struct F2Instrument instruments[F2PLAYER_MAX_INSTRUMENTS]; // Vector
 	char instrument_names[F2PLAYER_MAX_INSTRUMENTS][24];
 	unsigned vector_count_instruments;

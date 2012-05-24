@@ -46,7 +46,7 @@ void F2Player_ctor(struct F2Player* self, struct Soundblaster *mixer) {
 	self->super.super.loader = F2Player_loader;
 	self->super.super.process = F2Player_process;
 	
-	self->super.super.min_filesize = 336;
+	self->super.super.min_filesize = 360;
 }
 
 struct F2Player* F2Player_new(struct Soundblaster *mixer) {
@@ -942,6 +942,10 @@ void F2Player_initialize(struct F2Player* self) {
 	}
 }
 
+
+#define STRSZ(X) X , sizeof(X) - 1
+#define is_str(chr, lit) (!memcmp(chr, STRSZ(lit)))
+
 //override
 void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 	int header = 0;
@@ -960,7 +964,12 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 	struct F2Sample *sample = NULL;
 	int value = 0;
 	
-	if (ByteArray_get_length(stream) < 360) return;
+	if (ByteArray_get_length(stream) <= self->super.super.min_filesize) return;
+	ByteArray_set_position(stream, 0);
+	stream->readMultiByte(stream, id, 17);
+	if (!is_str(id, "Extended Module: ")) return;
+	assert(stream->pos == 17);
+	
 	ByteArray_set_position(stream, 17);
 
 	//self->super.super.title = stream->readMultiByte(stream, 20, ENCODING);
@@ -971,8 +980,6 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 	//id = stream->readMultiByte(stream, 20, ENCODING);
 	stream->readMultiByte(stream, id, 20);
 	
-#define STRSZ(X) X , sizeof(X) - 1
-#define is_str(chr, lit) (!memcmp(chr, STRSZ(lit)))
 	//FIXME its probably better to just test for "Extended Module" at the stream start
 	if (is_str(id, "FastTracker v2.00   ") || is_str(id, "FastTracker v 2.00  ")) {
 		self->super.super.version = 1;
@@ -991,7 +998,13 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 		self->super.super.version = 6;
 	} else if (is_str(id, "MOD2XM 1.0")) {
 		self->super.super.version = 7;
-	} else return;
+	} else if (is_str(id, "XMLiTE")) {
+		self->super.super.version = 9;
+	} else {
+		self->super.super.version = 8;
+		id[20] = 0;
+		printf("warning: unknown tracker %s\n", id);
+	}
 
 	stream->readUnsignedShort(stream);
 
