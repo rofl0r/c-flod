@@ -11,24 +11,27 @@ currently done:
 - pro tracker
 - fasttracker 2
 - pseudo barebone flashlib
+- libao and wave writer backends.
 
 in my conversion i followed a pretty straight 1:1 approach, 
-so that the number of bugs introduced is minimized and future enhancement in flod
-can be backported easily.
+so that the number of bugs introduced is minimized and future enhancement 
+in flod can be backported easily.
 
-i am currently in the process of translating the remaining players (fasttracker etc).
-after all decoders work well, the next step is to add some audio backends (libao/openal)
+i am currently in the process of translating the remaining players 
+(rob hubbard etc).
 
-my long term goal is to remove any dynamically allocated memory so it could be used with a 
-fixed memory usage profile on low end hardware (gba, nds).
-turn off unneeded decoders using some macro...
-also, the code could probably be simplified a lot by removing some of the classes and 
-using direct memory writes etc.
+my goal is to remove any dynamically allocated memory so it could 
+be used with a fixed memory usage profile on low end hardware (gba, nds).
+since the samples for the fasttracker can be of any size, this needs either
+a custom allocator or a pretty huge buffer for each instrument.
 
-another todo is to remove the unnecessary code which converts the wav output to flash 
-style 32bit floats and back to wave.
+the build system should allow to turn off unneeded players and set the size
+of buffers manually for the specific need.
 
--------------------------------------------------------------------------------------------
+also, the code could probably be simplified a lot by removing some of the 
+classes and using direct memory writes etc.
+
+--------------------------------------------------------------------------------------
 
 Flod          version 4.1
 Flod JS       version 2.1
