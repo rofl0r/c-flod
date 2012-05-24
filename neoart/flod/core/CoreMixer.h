@@ -29,8 +29,8 @@ struct CoreMixer {
 	int completed;
 	struct ByteArray* wave;
 	enum CoreMixer_type type;
-	void (*fast) (struct CoreMixer* self, struct SampleDataEvent *e);
-	void (*accurate) (struct CoreMixer* self, struct SampleDataEvent *e);	
+	void (*fast) (struct CoreMixer* self);
+	void (*accurate) (struct CoreMixer* self);
 };
 
 void CoreMixer_defaults(struct CoreMixer* self);
@@ -42,12 +42,10 @@ void CoreMixer_set_complete(struct CoreMixer* self, int value);
 int CoreMixer_get_bufferSize(struct CoreMixer* self);
 void CoreMixer_set_bufferSize(struct CoreMixer* self, int value);
 
-/* stub */
+/* stubs */
 void CoreMixer_reset(struct CoreMixer* self);
-/* stub */
-void CoreMixer_fast(struct CoreMixer* self, struct SampleDataEvent *e);
-/* stub */
-void CoreMixer_accurate(struct CoreMixer* self, struct SampleDataEvent *e);
+void CoreMixer_fast(struct CoreMixer* self);
+void CoreMixer_accurate(struct CoreMixer* self);
 
 
 //RcB: DEP "CoreMixer.c"

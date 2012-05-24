@@ -4,7 +4,6 @@
 #include "../backends/aowriter.h"
 
 #include "../flashlib/ByteArray.h"
-#include "../flashlib/SoundChannel.h"
 
 #include "../neoart/flod/core/CorePlayer.h"
 #include "../neoart/flod/fasttracker/F2Player.h"
@@ -142,7 +141,7 @@ int main(int argc, char** argv) {
 	printf("opening %s\n", argv[startarg]);
 	
 	struct ByteArray stream;
-	ByteArray_ctor(&stream);	
+	ByteArray_ctor(&stream);
 	
 	if(!ByteArray_open_file(&stream, argv[startarg])) {
 		perror("couldnt open file");
@@ -198,7 +197,7 @@ play:
 		return 1;
 	}
 	
-	unsigned char wave_buffer[SOUNDCHANNEL_BUFFER_MAX]; 
+	unsigned char wave_buffer[COREMIXER_MAX_BUFFER * 2 * sizeof(float)]; 
 	// FIXME SOUNDCHANNEL_BUFFER_MAX is currently needed, because the CoreMixer descendants will 
 	// misbehave if the stream buffer size is not COREMIXER_MAX_BUFFER * 2 * sizeof(float)
 	struct ByteArray wave;
@@ -218,7 +217,7 @@ play:
 	init_keyboard();
 	
 	while(!CoreMixer_get_complete(&hardware.core)) {
-		hardware.core.accurate(&hardware.core, NULL);
+		hardware.core.fast(&hardware.core);
 		if(wave.pos) {
 			if(!skip)
 				backend_info[backend_type].write_func(&writer.backend, wave_buffer, wave.pos);

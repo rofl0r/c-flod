@@ -23,10 +23,9 @@ enum F2Player_Flags {
 /*
 inheritance
 object
-	-> EventDispatcher
-		->CorePlayer
-			->SBPlayer
-				->F2Player
+	->CorePlayer
+		->SBPlayer
+			->F2Player
 */
 struct F2Player {
 	struct SBPlayer super;

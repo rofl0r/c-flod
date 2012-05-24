@@ -24,10 +24,9 @@ enum Soundtracker_Format {
 /*
 inheritance
 ??
-   -> EventDispatcher
-                     ->CorePlayer
-                                 ->AmigaPlayer
-                                              ->STPlayer
+	->CorePlayer
+		->AmigaPlayer
+			->STPlayer
 */
 struct STPlayer {
 	struct AmigaPlayer super;

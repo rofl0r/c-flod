@@ -37,10 +37,9 @@ enum Futurecomp_Version {
 /*
 inheritance
 ??
-   -> EventDispatcher
-                     ->CorePlayer
-                                 ->AmigaPlayer
-                                              ->FCPlayer
+	->CorePlayer
+		->AmigaPlayer
+			->FCPlayer
 */
 struct FCPlayer {
 	struct AmigaPlayer super;

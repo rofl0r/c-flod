@@ -23,10 +23,9 @@ enum Protracker_Versions {
 /*
 inheritance
 ??
-   -> EventDispatcher
-                     ->CorePlayer
-                                 ->AmigaPlayer
-                                              ->PTPlayer
+	->CorePlayer
+		->AmigaPlayer
+			->PTPlayer
 */
 struct PTPlayer {
 	struct AmigaPlayer super;

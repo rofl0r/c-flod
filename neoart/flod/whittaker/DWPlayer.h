@@ -14,10 +14,9 @@
 /*
 inheritance
 ??
-   -> EventDispatcher
-                     ->CorePlayer
-                                 ->AmigaPlayer
-                                              ->DWPlayer
+	->CorePlayer
+		->AmigaPlayer
+			->DWPlayer
 */
 struct DWPlayer {
 	struct AmigaPlayer super;

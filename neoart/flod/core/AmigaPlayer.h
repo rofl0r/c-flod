@@ -7,9 +7,8 @@
 /*
 inheritance
 ??
-   -> EventDispatcher
-                     ->CorePlayer
-                                 ->AmigaPlayer
+	->CorePlayer
+		->AmigaPlayer
 */
 struct AmigaPlayer {
 	struct CorePlayer super;

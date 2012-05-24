@@ -48,8 +48,8 @@ void CoreMixer_reset(struct CoreMixer* self) {
 		Amiga_reset((struct Amiga*)self);
 }
 
-void CoreMixer_fast(struct CoreMixer* self, struct SampleDataEvent *e) {}
-void CoreMixer_accurate(struct CoreMixer* self, struct SampleDataEvent *e) {}
+void CoreMixer_fast(struct CoreMixer* self) {}
+void CoreMixer_accurate(struct CoreMixer* self) {}
 
 //js function reset
 void CoreMixer_initialize(struct CoreMixer* self) {

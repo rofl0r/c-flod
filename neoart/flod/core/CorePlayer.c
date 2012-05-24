@@ -104,46 +104,6 @@ int CorePlayer_load(struct CorePlayer* self, struct ByteArray *stream) {
 	return self->version;
 }
 
-/* processor default : NULL */
-int CorePlayer_play(struct CorePlayer* self, struct Sound *processor) {
-	PFUNC();
-	if (!self->version) return 0;
-	if (self->soundPos == 0.0) {
-		//self->initialize();
-		self->initialize(self);
-	}
-	self->sound = processor ? processor : Sound_new();
-
-	//if (self->quality && (self->hardware->type == CM_SOUNDBLASTER)) {
-	if (self->quality) {
-		EventDispatcher_addEventListener((struct EventDispatcher*) self->sound, EVENT_SAMPLE_DATA, (EventHandlerFunc) self->hardware->accurate);
-	} else {
-		EventDispatcher_addEventListener((struct EventDispatcher*) self->sound, EVENT_SAMPLE_DATA, (EventHandlerFunc) self->hardware->fast);
-	}
-
-	self->soundChan = Sound_play(self->sound, self->soundPos, self->hardware);
-	EventDispatcher_addEventListener((struct EventDispatcher*) self->soundChan, EVENT_SOUND_COMPLETE, (EventHandlerFunc) CorePlayer_completeHandler);
-	self->soundPos = 0.0;
-	return 1;
-}
-
-void CorePlayer_pause(struct CorePlayer* self) {
-	PFUNC();
-	if (!self->version || !self->soundChan) return;
-	self->soundPos = SoundChannel_get_position(self->soundChan);
-	//EventDispatcher_removeEvents((struct EventDispatcher*) self);
-	CorePlayer_removeEvents(self);
-}
-
-void CorePlayer_stop(struct CorePlayer* self) {
-	PFUNC();
-	if (!self->version) return;
-	//if (self->soundChan) EventDispatcher_removeEvents((struct EventDispatcher*) self);
-	if (self->soundChan) CorePlayer_removeEvents(self);
-	self->soundPos = 0.0;
-	self->reset(self);
-}
-
     //js function reset
 void CorePlayer_initialize(struct CorePlayer* self) {
 	self->tick = 0;
@@ -159,30 +119,23 @@ void CorePlayer_initialize(struct CorePlayer* self) {
 	self->hardware->samplesTick = 110250 / self->tempo;
 }
 
-/* callback function for EVENT_SOUND_COMPLETE */
-void CorePlayer_completeHandler(struct CorePlayer* self, struct Event *e) {
-	CorePlayer_stop(self);
-	// disable dispatchEvent, as it'll trigger another event to be sent.
-	// we do not need to pass the event on.
-	//EventDispatcher_dispatchEvent((struct EventDispatcher*) self, e);
-}
-
-void CorePlayer_removeEvents(struct CorePlayer* self) {
-	SoundChannel_stop(self->soundChan);
-	EventDispatcher_removeEventListener((struct EventDispatcher*) self->soundChan, EVENT_SOUND_COMPLETE, (EventHandlerFunc) CorePlayer_completeHandler);
-	//EventDispatcher_dispatchEvent((struct EventDispatcher*) self->soundChan, Event_new(EVENT_SOUND_COMPLETE));
-	// our eventdispatcher works a bit different than the actionscript one
-	// dispatchEvent will add the event (function pointer/self pointer) to a queue
-	// which is executed by the event loop.
-	// the original dispatcher can access the self pointer of the function pointer owner.
-	// originally: self->soundchan -> now self
-	EventDispatcher_dispatchEvent((struct EventDispatcher*) self, Event_new(EVENT_SOUND_COMPLETE));
-	//self->soundChan->dispatchEvent(new Event(Event->SOUND_COMPLETE));
-
-	if (self->quality) {
-		EventDispatcher_removeEventListener((struct EventDispatcher*) self->sound, EVENT_SAMPLE_DATA, (EventHandlerFunc) self->hardware->accurate);
-	} else {
-		EventDispatcher_removeEventListener((struct EventDispatcher*) self->sound, EVENT_SAMPLE_DATA, (EventHandlerFunc) self->hardware->fast);
+#if 0
+/* processor default : NULL */
+int CorePlayer_play(struct CorePlayer* self) {
+	PFUNC();
+	if (!self->version) return 0;
+	if (self->soundPos == 0.0) {
+		//self->initialize();
+		self->initialize(self);
 	}
+	self->soundPos = 0.0;
+	return 1;
 }
 
+void CorePlayer_stop(struct CorePlayer* self) {
+	PFUNC();
+	if (!self->version) return;
+	self->soundPos = 0.0;
+	self->reset(self);
+}
+#endif

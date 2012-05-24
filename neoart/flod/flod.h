@@ -4,12 +4,16 @@
 #include <string.h>
 #include <unistd.h>
 #include <stdlib.h>
+
+#define NO_ASSERT
+#ifndef NO_ASSERT
 #include <assert.h>
+#else
+#define assert(x) do {} while(0)
+#endif
+
 #include "../../flashlib/Common.h"
 #include "../../flashlib/ByteArray.h"
-#include "../../flashlib/Encoding.h"
-#include "../../flashlib/EventDispatcher.h"
-#include "../../flashlib/SampleDataEvent.h"
 
 #define PFUNC_QUIET
 #ifndef PFUNC_QUIET

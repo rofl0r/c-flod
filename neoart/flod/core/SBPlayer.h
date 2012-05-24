@@ -9,9 +9,8 @@
 /*
 inheritance
 ??
-   -> EventDispatcher
-                     ->CorePlayer
-                                 ->SBPlayer
+	->CorePlayer
+		->SBPlayer
 */
 struct SBPlayer {
 	struct CorePlayer super;
