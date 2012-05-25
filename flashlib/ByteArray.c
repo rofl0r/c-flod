@@ -1,7 +1,7 @@
 #include "ByteArray.h"
 #include "../neoart/flod/flod_internal.h"
 #include "../include/debug.h"
-#include "endianness.h"
+#include "../include/endianness.h"
 #include <assert.h>
 
 void ByteArray_defaults(struct ByteArray* self) {

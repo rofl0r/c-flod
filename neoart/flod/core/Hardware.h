@@ -1,4 +1,4 @@
-#include "../../../flashlib/endianness.h"
+#include "../../../include/endianness.h"
 #include <math.h>
 #ifdef __GNUC__
 #define likely(x)       __builtin_expect((x),1)

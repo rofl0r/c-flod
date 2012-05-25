@@ -4,7 +4,7 @@
 #include <unistd.h>
 
 #include "wavewriter.h"
-#include "../flashlib/endianness.h"
+#include "../include/endianness.h"
 
 typedef union {
 	uint8_t chars[2];
