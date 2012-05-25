@@ -67,11 +67,12 @@ void AmigaFilter_process(struct AmigaFilter* self, int model, struct Sample* sam
 		sample->l = self->l4 = FL * self->l3 + d * self->l4;
 		sample->r = self->r4 = FL * self->r3 + d * self->r4;
 	}
-
+	/* //clipping is done in the wave writer code as well
 	if (sample->l > 1.0f) sample->l = 1.0f;
 	else if (sample->l < -1.0f) sample->l = -1.0f;
 
 	if (sample->r > 1.0f) sample->r = 1.0f;
 	else if (sample->r < -1.0f) sample->r = -1.0f;
+	*/
 }
 
