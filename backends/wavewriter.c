@@ -103,14 +103,6 @@ int WaveWriter_write(struct WaveWriter *self, void* buffer, size_t bufsize) {
 	return success;
 }
 
-#ifdef IS_LITTLE_ENDIAN
-#define le32(X) (X)
-#define le16(X) (X)
-#else
-#define le32(X) byteswap32(X)
-#define le16(X) byteswap16(X)
-#endif
-
 int WaveWriter_close(struct WaveWriter *self) {
 	const int channels = 2;
 	const int samplerate = 44100;

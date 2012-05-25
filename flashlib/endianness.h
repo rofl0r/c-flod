@@ -58,4 +58,12 @@ static inline uint64_t byteswap64(uint64_t x) {
 	return r.ll;
 }
 
+#ifdef IS_LITTLE_ENDIAN
+#define le32(X) (X)
+#define le16(X) (X)
+#else
+#define le32(X) byteswap32(X)
+#define le16(X) byteswap16(X)
+#endif
+
 #endif /* ENDIANNESS_H_ */
