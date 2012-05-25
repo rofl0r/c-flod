@@ -9,7 +9,7 @@
 
 #define DWPLAYER_MAX_VOICES 4
 #define DWPLAYER_MAX_SONGS 16
-#define DWPLAYER_MAX_SAMPLES 16
+#define DWPLAYER_MAX_SAMPLES 19
 
 /*
 inheritance
