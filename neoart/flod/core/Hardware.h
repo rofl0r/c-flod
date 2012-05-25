@@ -17,6 +17,23 @@
 union float_repr { float __f; __uint32_t __i; };
 #define floatrepr(f) (((union __float_repr){ (float)(f) }).__i)
 
+/* this one uses the original behaviour */
+static inline int convert_sample16a(Number sample) {
+	Number mul;
+	if (unlikely(sample > 1.0)) return 32767;
+	if (unlikely(sample < -1.0)) return -32768;
+	mul = 32767.f;
+	if(sample < 0.0) mul = 32768.f;
+	return sample * mul;
+}
+
+/* this one uses the original behaviour, but a constant factor 
+   according to my tests, it is the fastest variant. */
+static inline int convert_sample16b(Number sample) {
+	if (unlikely(sample > 1.0)) return 32767;
+	if (unlikely(sample < -1.0))return -32767;
+	return sample * 32767.f;
+}
 
 static inline int clip(int sample) {
 	if(unlikely(sample > 32767)) return 32767;
@@ -24,20 +41,15 @@ static inline int clip(int sample) {
 	return sample;
 }
 
-static inline int convert_sample16(Number sample) {
+/* this one uses rounding which is supposed to be faster,
+   but at least using the denormal hack its 4 times slower. */
+static inline int convert_sample16r(Number sample) {
 	int ret = lrintf(denormal(sample) * 32767.f);
 	return clip(ret);
 	//return clip(floatrepr((denormal(sample) * 32767.f) + 0x1.8p23f) & 0x3fffff );
-	//
-	
-	/*
-	Number mul;
-	if (sample > 1.0) return 32767;
-	if (sample < -1.0) return -32768;
-	mul = 32767.f;
-	if(sample < 0.0) mul = 32768.f;
-	return sample * mul; */
 }
+
+#define convert_sample16 convert_sample16b
 
 #ifdef HARDWARE_FROM_AMIGA
 static inline void process_wave(struct Amiga* self, unsigned int size) {
