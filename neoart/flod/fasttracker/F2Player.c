@@ -75,14 +75,14 @@ void F2Player_process(struct F2Player* self) {
 		if (self->nextPosition >= 0) self->position = self->nextPosition;
 
 		self->nextOrder = self->nextPosition = -1;
-		assert_dbg(self->order < SBPLAYER_MAX_TRACKS);
+		assert_op(self->order, <, SBPLAYER_MAX_TRACKS);
 		unsigned idx = self->super.track[self->order];
-		assert_dbg(idx < F2PLAYER_MAX_PATTERNS);
+		assert_op(idx, <, F2PLAYER_MAX_PATTERNS);
 		self->pattern = &self->patterns[idx];
 
 		while (voice) {
 			idx = self->position + voice->index;
-			assert_dbg(idx < F2PATTERN_MAX_ROWS);
+			assert_op(idx, <, F2PATTERN_MAX_ROWS);
 			row = &self->pattern->rows[idx];
 			com = row->volume >> 4;
 			porta = (int)(row->effect == FX_TONE_PORTAMENTO || row->effect == FX_TONE_PORTA_VOLUME_SLIDE || com == VX_TONE_PORTAMENTO);
@@ -111,9 +111,9 @@ void F2Player_process(struct F2Player* self) {
 				if (voice->instrument) {
 					instr  = voice->instrument;
 					value  = row->note - 1;
-					assert_dbg(value < F2INSTRUMENT_MAX_NOTESAMPLES);
+					assert_op(value, <, F2INSTRUMENT_MAX_NOTESAMPLES);
 					idx = instr->noteSamples[value];
-					assert_dbg(idx < F2INSTRUMENT_MAX_SAMPLES);
+					assert_op(idx, <, F2INSTRUMENT_MAX_SAMPLES);
 					sample = &instr->samples[idx];
 					value += sample->relative;
 
@@ -368,7 +368,7 @@ void F2Player_process(struct F2Player* self) {
 							voice->volEnvelope.frame = value;
 							if (value > instr->volData.points[i].frame) voice->volEnvelope.position++;
 
-							assert_dbg(i + 1 < F2DATA_MAX_POINTS);
+							assert_op(i + 1, <, F2DATA_MAX_POINTS);
 							curr = &instr->volData.points[i];
 							next = &instr->volData.points[++i];
 							value = next->frame - curr->frame;
@@ -859,7 +859,7 @@ void F2Player_accurate(struct F2Player* self) {
 			else if (volume > 64) volume = 64;
 			
 			unsigned vidx = (int)(volume * self->super.master) >> 6;
-			assert_dbg(vidx < ARRAY_SIZE(VOLUMES));
+			assert_op(vidx, <, ARRAY_SIZE(VOLUMES));
 			volume = VOLUMES[vidx];
 			lvol = volume * PANNING[256 - panning];
 			rvol = volume * PANNING[panning];
@@ -922,7 +922,7 @@ void F2Player_initialize(struct F2Player* self) {
 	self->complete      =  0;
 	self->super.master  = 64;
 
-	assert_dbg(self->super.super.channels <= F2PLAYER_MAX_VOICES);
+	assert_op(self->super.super.channels, <=, F2PLAYER_MAX_VOICES);
 	
 	//self->voices = new Vector.<F2Voice>(self->super.super.channels, true);
 	
@@ -968,9 +968,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 	ByteArray_set_position(stream, 0);
 	stream->readMultiByte(stream, id, 17);
 	if (!is_str(id, "Extended Module: ")) return;
-	assert(stream->pos == 17);
-	
-	ByteArray_set_position(stream, 17);
+	assert_op(stream->pos, ==, 17);
 
 	//self->super.super.title = stream->readMultiByte(stream, 20, ENCODING);
 	stream->readMultiByte(stream, self->title_buffer, 20);
@@ -1017,14 +1015,14 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 	
 	//self->instruments = new Vector.<F2Instrument>(stream->readUnsignedShort() + 1, true);
 	self->vector_count_instruments = stream->readUnsignedShort(stream) + 1;
-	assert_dbg(self->vector_count_instruments <= F2PLAYER_MAX_INSTRUMENTS);
+	assert_op(self->vector_count_instruments, <=, F2PLAYER_MAX_INSTRUMENTS);
 
 	self->linear = stream->readUnsignedShort(stream);
 	self->super.super.speed  = stream->readUnsignedShort(stream);
 	self->super.super.tempo  = stream->readUnsignedShort(stream);
 
 	//self->track = new Vector.<int>(length, true);
-	assert_dbg(self->super.length <= SBPLAYER_MAX_TRACKS);
+	assert_op(self->super.length, <=, SBPLAYER_MAX_TRACKS);
 
 	for (i = 0; i < self->super.length; ++i) {
 		j = stream->readUnsignedByte(stream);
@@ -1032,7 +1030,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 		self->super.track[i] = j;
 	}
 	
-	assert_dbg(rows <= F2PLAYER_MAX_PATTERNS);
+	assert_op(rows, <=, F2PLAYER_MAX_PATTERNS);
 	//self->patterns = new Vector.<F2Pattern>(rows, true);
 
 	if (rows != value) {
@@ -1040,7 +1038,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 		F2Pattern_ctor(pattern, 64, self->super.super.channels);
 		//pattern = new F2Pattern(64, self->super.super.channels);
 		j = pattern->size;
-		assert_dbg(j < F2PATTERN_MAX_ROWS);
+		assert_op(j, <, F2PATTERN_MAX_ROWS);
 		for (i = 0; i < j; ++i) {
 			//pattern->rows[i] = new F2Row();
 			F2Row_ctor(&pattern->rows[i]);
@@ -1053,7 +1051,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 	ByteArray_set_position(stream, pos);
 	len = value;
 
-	assert_dbg(len <= F2PLAYER_MAX_PATTERNS);
+	assert_op(len, <=, F2PLAYER_MAX_PATTERNS);
 	for (i = 0; i < len; ++i) {
 		header = stream->readUnsignedInt(stream);
 		ByteArray_set_position_rel(stream, +1);
@@ -1069,7 +1067,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 		ipos = ByteArray_get_position(stream) + value;
 
 		if (value) {
-			assert_dbg(rows <= F2PATTERN_MAX_ROWS);
+			assert_op(rows, <=, F2PATTERN_MAX_ROWS);
 			for (j = 0; j < rows; ++j) {
 				//row = new F2Row();
 				row = &pattern->rows[j];
@@ -1097,7 +1095,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 				//pattern->rows[j] = row;
 			}
 		} else {
-			assert_dbg(rows <= F2PATTERN_MAX_ROWS);
+			assert_op(rows, <=, F2PATTERN_MAX_ROWS);
 			for (j = 0; j < rows; ++j) {
 				//pattern->rows[j] = new F2Row();
 				F2Row_ctor(&pattern->rows[j]);
@@ -1141,7 +1139,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 		if (reserved == 2 && header != 64) header = 64;
 
 		if (value) {
-			assert_dbg(value <= F2INSTRUMENT_MAX_SAMPLES);
+			assert_op(value, <=, F2INSTRUMENT_MAX_SAMPLES);
 			//instr->samples = new Vector.<F2Sample>(value, true);
 
 			for (j = 0; j < 96; ++j)
@@ -1183,7 +1181,7 @@ void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 			pos = ByteArray_get_position(stream);
 			//self->instruments[i] = instr;
 			
-			assert_dbg(value <= F2INSTRUMENT_MAX_SAMPLES);
+			assert_op(value, <=, F2INSTRUMENT_MAX_SAMPLES);
 
 			for (j = 0; j < value; ++j) {
 				//sample = new F2Sample();
@@ -1277,13 +1275,13 @@ static void envelope(struct F2Voice *voice, struct F2Envelope *envelope, struct 
 	struct F2Point *curr = NULL;
 	struct F2Point *next = NULL;
 	
-	assert_dbg(pos < F2DATA_MAX_POINTS);
+	assert_op(pos, <, F2DATA_MAX_POINTS);
 	curr = &data->points[pos];
 
 	if (envelope->frame == curr->frame) {
 		if ((data->flags & ENVELOPE_LOOP) && pos == data->loopEnd) {
 			pos  = envelope->position = data->loopStart;
-			assert_dbg(pos < F2DATA_MAX_POINTS);
+			assert_op(pos, <, F2DATA_MAX_POINTS);
 			
 			curr = &data->points[pos];
 			envelope->frame = curr->frame;
@@ -1301,7 +1299,7 @@ static void envelope(struct F2Voice *voice, struct F2Envelope *envelope, struct 
 		}
 
 		envelope->position++;
-		assert_dbg(envelope->position < F2DATA_MAX_POINTS);
+		assert_op(envelope->position, <, F2DATA_MAX_POINTS);
 		next = &data->points[envelope->position];
 
 		int divisor = next->frame - curr->frame;

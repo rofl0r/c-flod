@@ -74,7 +74,7 @@ void Amiga_set_volume(struct Amiga* self, int value) {
 }
 
 static void Amiga_memory_set_length(struct Amiga *self, unsigned len) {
-	assert_dbg(len <= AMIGA_MAX_MEMORY);
+	assert_op(len, <=, AMIGA_MAX_MEMORY);
 	self->vector_count_memory = len;
 }
 
@@ -103,7 +103,7 @@ int Amiga_store(struct Amiga* self, struct ByteArray *stream, int len, int point
 
 	//self->memory->length += add;
 	Amiga_memory_set_length(self, self->vector_count_memory + add); // FIXME dubious, why add and not len ?
-	assert(self->vector_count_memory <= AMIGA_MAX_MEMORY);
+	assert_op(self->vector_count_memory, <=, AMIGA_MAX_MEMORY);
 	if (pointer > -1) ByteArray_set_position(stream, pos);
 	return start;
 }
@@ -182,7 +182,7 @@ void Amiga_fast(struct Amiga* self) {
 		chan = &self->channels[0];
 
 		while (chan) {
-			assert(mixPos < COREMIXER_MAX_BUFFER);
+			assert_op(mixPos, <, COREMIXER_MAX_BUFFER);
 			sample = &self->super.buffer[mixPos];
 
 			if (chan->audena && chan->audper > 60) {
@@ -202,11 +202,8 @@ void Amiga_fast(struct Amiga* self) {
 						chan->delay--;
 					} else if (--chan->timer < 1.0f) { 
 						if (!chan->mute) {
-							//__asm__("int3");
-							// FIXME this spot accesses data that has not previously been used
-							// the commented assert statement enforces the correct bounds.
-							//assert(chan->audloc < self->vector_count_memory);
-							assert(chan->audloc < AMIGA_MAX_MEMORY);
+							assert_op(chan->audloc, <, self->vector_count_memory);
+							//assert_op(chan->audloc, <, AMIGA_MAX_MEMORY);
 							value = self->memory[chan->audloc] * 0.0078125f;
 							chan->ldata = value * lvol;
 							chan->rdata = value * rvol;

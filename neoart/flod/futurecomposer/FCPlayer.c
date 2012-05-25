@@ -182,7 +182,7 @@ struct FCPlayer* FCPlayer_new(struct Amiga *amiga) {
 
 static int my_bytesAvailable(struct ByteArray* b, unsigned b_count) {
 	if(b->pos > b_count)  { INT3; }
-	//assert (b->pos <= b_count);
+	//assert_op (b->pos, <=, b_count);
 	return b_count - b->pos;
 }
 
@@ -335,7 +335,7 @@ void FCPlayer_process(struct FCPlayer* self) {
 						// FIXME break forgotten or fallthrough?
 					case 0xe4:  //change wave:
 						temp_idx = self->frqs->readUnsignedByte(self->frqs);
-						assert(temp_idx < self->samples_max);
+						assert_op(temp_idx, <, self->samples_max);
 						sample = &self->samples[temp_idx];
 						//FIXME we need a lookup table for assigned samples
 						if (sample) {
@@ -350,7 +350,7 @@ void FCPlayer_process(struct FCPlayer* self) {
 					case 0xe9:  //set pack
 						temp = 100 + (self->frqs->readUnsignedByte(self->frqs) * 10);
 						temp_idx = (temp + self->frqs->readUnsignedByte(self->frqs));
-						assert(temp_idx < self->samples_max);
+						assert_op(temp_idx, <, self->samples_max);
 						sample = &self->samples[temp_idx];
 
 						if (sample) {
@@ -443,7 +443,7 @@ void FCPlayer_process(struct FCPlayer* self) {
 		info = voice->frqTranspose;
 		if (info >= 0) info += (voice->note + voice->transpose);
 		info &= 0x7f;
-		assert(info < (sizeof(PERIODS) / sizeof(PERIODS[0])));
+		assert_op(info, <, ARRAY_SIZE(PERIODS));
 		period = PERIODS[info];
 
 		if (voice->vibratoDelay) {
@@ -675,7 +675,7 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 						sample->pointer = Amiga_store(self->super.amiga, stream, sample->length, size + total);
 						sample->loopPtr = sample->pointer + sample->loop;
 						unsigned dest_index = (100 + (i * 10) + j);
-						assert(dest_index < self->samples_max);
+						assert_op(dest_index, <, self->samples_max);
 						self->samples[dest_index] = *sample;
 						total += sample->length;
 						ByteArray_set_position_rel(stream, 6);
@@ -704,7 +704,7 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 
 				sample->pointer = Amiga_store(self->super.amiga, stream, sample->length, size);
 				sample->loopPtr = sample->pointer + sample->loop;
-				assert(i < self->samples_max);
+				assert_op(i, <, self->samples_max);
 				self->samples[i] = *sample;
 				size += sample->length;
 			}
@@ -721,7 +721,7 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 			sample = &temp_sample;
 			AmigaSample_ctor(sample);
 			//sample = new AmigaSample();
-			assert(offset + 1 < sizeof(WAVES));
+			assert_op(offset + 1, <, sizeof(WAVES));
 			sample->length  = WAVES[offset++] << 1;
 			sample->loop    = 0;
 			sample->repeat  = sample->length;
@@ -730,19 +730,16 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 			position = self->super.amiga->vector_count_memory;
 			sample->pointer = position;
 			sample->loopPtr = position;
-			assert(i < self->samples_max);
+			assert_op(i, <, self->samples_max);
 			self->samples[i] = *sample;
 
 			len = position + sample->length;
 			
-			assert(len < AMIGA_MAX_MEMORY);
+			assert_op(len, <, AMIGA_MAX_MEMORY);
 			if(len > self->super.amiga->vector_count_memory)
 				self->super.amiga->vector_count_memory = len;
-			assert((len - position) >= 0);
-			if(temp + (len - position) > sizeof(WAVES)) {
-				INT3;
-			}
-			assert(temp + (len - position) <= sizeof(WAVES)); // <= because of x++
+			assert_op((len - position), >=, 0);
+			assert_op(temp + (len - position), <=, sizeof(WAVES)); // <= because of x++
 			for (j = position; j < len; ++j)
 				self->super.amiga->memory[j] = WAVES[temp++];
 		}
@@ -768,7 +765,7 @@ void FCPlayer_loader(struct FCPlayer *self, struct ByteArray *stream) {
 
 			sample->pointer = Amiga_store(self->super.amiga, stream, sample->length, size);
 			sample->loopPtr = sample->pointer;
-			assert(i < self->samples_max);
+			assert_op(i, <, self->samples_max);
 			self->samples[i] = *sample;
 			size += sample->length;
 		}

@@ -49,10 +49,10 @@ void SBSample_store(struct SBSample* self, struct ByteArray* stream) {
 
 	if (self->loopMode) {
 		len = self->loopStart + self->loopLen;
-		assert_dbg(len + 1 <= SBSAMPLE_MAX_DATA);
+		assert_op(len + 1, <=, SBSAMPLE_MAX_DATA);
 		//data = new Vector.<Number>(len + 1, true);
 	} else {
-		assert_dbg(self->length + 1 <= SBSAMPLE_MAX_DATA);
+		assert_op(self->length + 1, <=, SBSAMPLE_MAX_DATA);
 		//data = new Vector.<Number>(self->length + 1, true);
 	}
 
@@ -62,7 +62,7 @@ void SBSample_store(struct SBSample* self, struct ByteArray* stream) {
 		if (total > ByteArray_get_position(stream))
 			len = ByteArray_get_length(stream) - pos;
 		
-		assert_dbg(len <= SBSAMPLE_MAX_DATA);
+		assert_op(len, <=, SBSAMPLE_MAX_DATA);
 
 		for (i = 0; i < len; ++i) {
 			value = stream->readByte(stream) + delta;
@@ -79,7 +79,7 @@ void SBSample_store(struct SBSample* self, struct ByteArray* stream) {
 		if (total > ByteArray_get_length(stream))
 			len = (ByteArray_get_length(stream) - pos) >> 1;
 		
-		assert(len < SBSAMPLE_MAX_DATA);
+		assert_op(len, <, SBSAMPLE_MAX_DATA);
 
 		for (i = 0; i < len; ++i) {
 			value = stream->readShort(stream) + delta;
@@ -95,15 +95,15 @@ void SBSample_store(struct SBSample* self, struct ByteArray* stream) {
 	total = pos + self->length;
 
 	if (!self->loopMode) {
-		assert(self->length < SBSAMPLE_MAX_DATA);
+		assert_op(self->length, <, SBSAMPLE_MAX_DATA);
 		self->data[self->length] = 0.0;
 	} else {
 		self->length = self->loopStart + self->loopLen;
 		
-		assert(len < SBSAMPLE_MAX_DATA);
+		assert_op(len, <, SBSAMPLE_MAX_DATA);
 
 		if (self->loopMode == 1) {
-			assert(self->loopStart < SBSAMPLE_MAX_DATA);
+			assert_op(self->loopStart, <, SBSAMPLE_MAX_DATA);
 			self->data[len] = self->data[self->loopStart];
 		} else {
 			self->data[len] = self->data[len - 1];
@@ -111,7 +111,7 @@ void SBSample_store(struct SBSample* self, struct ByteArray* stream) {
 	}
 
 	if (len != self->length) {
-		assert(len < SBSAMPLE_MAX_DATA);
+		assert_op(len, <, SBSAMPLE_MAX_DATA);
 		sample = self->data[len - 1];
 		for (i = len; i < self->length; ++i) self->data[i] = sample;
 	}

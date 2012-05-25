@@ -45,7 +45,7 @@ struct Soundblaster* Soundblaster_new(void) {
 
 void Soundblaster_setup(struct Soundblaster* self, unsigned int len) {
 	DEBUGP("calling %s with %d channels\n", __FUNCTION__, len);
-	assert_dbg(len <= SOUNDBLASTER_MAX_CHANNELS);
+	assert_op(len, <=, SOUNDBLASTER_MAX_CHANNELS);
 /*	int i = 1;
 	self->channels = new Vector.<SBChannel>(len, true);
 	self->channels[0] = new SBChannel();
@@ -129,7 +129,7 @@ void Soundblaster_fast(struct Soundblaster* self) {
 
 			s = chan->sample;
 			d = s->data;
-			assert(mixPos < COREMIXER_MAX_BUFFER);
+			assert_op(mixPos, <, COREMIXER_MAX_BUFFER);
 			sample  = &self->super.buffer[mixPos];
 
 			for (i = mixPos; i < mixLen; ++i) {
@@ -155,7 +155,7 @@ void Soundblaster_fast(struct Soundblaster* self) {
 					if (!chan->mute) {
 						unsigned int temp;
 						temp = chan->dir ? chan->dir - chan->pointer : chan->pointer;
-						assert(temp < SBSAMPLE_MAX_DATA);
+						assert_op(temp, <, SBSAMPLE_MAX_DATA);
 						value = d[temp];
 
 						chan->ldata = value * chan->lvol;
@@ -248,7 +248,7 @@ void Soundblaster_accurate(struct Soundblaster* self) {
 			s2 = chan->oldSample;
 			if (s2) d2 = s2->data;
 			
-			assert(mixPos < COREMIXER_MAX_BUFFER);
+			assert_op(mixPos, <, COREMIXER_MAX_BUFFER);
 
 			sample = &self->super.buffer[mixPos];
 
@@ -256,11 +256,11 @@ void Soundblaster_accurate(struct Soundblaster* self) {
 				if(chan->mute)
 					value = 0.0;
 				else {
-					assert(chan->pointer < SBSAMPLE_MAX_DATA);
+					assert_op(chan->pointer, <, SBSAMPLE_MAX_DATA);
 					value = d1[chan->pointer];
 				}
 				//value = chan->mute ? 0.0 : d1[chan->pointer];
-				assert(chan->pointer + chan->dir < SBSAMPLE_MAX_DATA);
+				assert_op(chan->pointer + chan->dir, <, SBSAMPLE_MAX_DATA);
 				value += (d1[chan->pointer + chan->dir] - value) * chan->fraction;
 
 				if ((chan->fraction += chan->speed) >= 1.0) {
@@ -305,11 +305,11 @@ void Soundblaster_accurate(struct Soundblaster* self) {
 						if(chan->mute) {
 							mixValue = 0.0;
 						} else {
-							assert(chan->oldPointer < SBSAMPLE_MAX_DATA);
+							assert_op(chan->oldPointer, <, SBSAMPLE_MAX_DATA);
 							mixValue = d2[chan->oldPointer];
 						}
 						//mixValue = chan->mute ? 0.0 : d2[chan->oldPointer];
-						assert(chan->oldPointer + chan->oldDir < SBSAMPLE_MAX_DATA);
+						assert_op(chan->oldPointer + chan->oldDir, <, SBSAMPLE_MAX_DATA);
 						mixValue += (d2[chan->oldPointer + chan->oldDir] - mixValue) * chan->oldFraction;
 
 						if ((chan->oldFraction += chan->oldSpeed) > 1) {

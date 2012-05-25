@@ -152,7 +152,7 @@ void PTPlayer_process(struct PTPlayer* self) {
 
 				if (!voice->step) AmigaChannel_set_period(chan, voice->period);
 
-				assert_dbg(pattern + voice->index < PTPLAYER_MAX_PATTERNS);
+				assert_op(pattern + voice->index, <, PTPLAYER_MAX_PATTERNS);
 				row = &self->patterns[pattern + voice->index];
 				voice->step   = row->step;
 				voice->effect = row->super.effect;
@@ -208,7 +208,7 @@ void PTPlayer_process(struct PTPlayer* self) {
 				for (i = 0; i < 37; ++i)
 					if (row->super.note >= PERIODS[i]) break;
 
-				assert_dbg(voice->finetune + i < ARRAY_SIZE(PERIODS));
+				assert_op(voice->finetune + i, <, ARRAY_SIZE(PERIODS));
 				voice->period = PERIODS[voice->finetune + i];
 
 				if ((voice->step & 0x0ff0) == 0x0ed0) {
@@ -406,7 +406,7 @@ The 6 and 8 channel mod files differ from the normal mods in two ways:
 	//higher += 256;
 	//patterns = new Vector.<PTRow>(higher, true);
 	unsigned int row_max = (higher + 1) * (64 * self->chans);
-	assert_dbg(row_max <= PTPLAYER_MAX_PATTERNS);
+	assert_op(row_max, <=, PTPLAYER_MAX_PATTERNS);
 
 	for (i = 0; i < row_max; ++i) {
 		//row = new PTRow();
@@ -752,7 +752,7 @@ static void extended(struct PTPlayer* self, struct PTVoice *voice) {
 		case 8:   //karplus strong
 			len = voice->length - 2;
 
-			assert_dbg(len + 1 < self->super.amiga->vector_count_memory);
+			assert_op(len + 1, <, self->super.amiga->vector_count_memory);
 			for (i = voice->loopPtr; i < len;) {
 				//self->super.amiga->memory[i] = (self->super.amiga->memory[i] + self->super.amiga->memory[++i]) * 0.5;
 				self->super.amiga->memory[i] = (self->super.amiga->memory[i] + self->super.amiga->memory[i + 1]) * 0.5;
@@ -847,7 +847,7 @@ static void updateFunk(struct PTPlayer* self, struct PTVoice *voice) {
 
 		if (p2 >= p1) p2 = voice->loopPtr;
 
-		assert_dbg(p2 < self->super.amiga->vector_count_memory);
+		assert_op(p2, <, self->super.amiga->vector_count_memory);
 		self->super.amiga->memory[p2] = -self->super.amiga->memory[p2];
 	}
 }

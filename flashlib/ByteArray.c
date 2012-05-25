@@ -1,5 +1,6 @@
 #include "ByteArray.h"
 #include "../neoart/flod/flod_internal.h"
+#include "../include/debug.h"
 #include "endianness.h"
 #include <assert.h>
 
@@ -49,8 +50,8 @@ struct ByteArray* ByteArray_new(void) {
 // where len is equivalent to the bytes written into it
 void ByteArray_clear(struct ByteArray* self) {
 	fprintf(stderr, "clear called\n");
-	assert(self->type == BAT_MEMSTREAM);
-	assert(self->start_addr);
+	assert_op(self->type, ==, BAT_MEMSTREAM);
+	assert_op(self->start_addr, !=, 0);
 	memset(self->start_addr, 0, self->size);
 }
 
@@ -140,11 +141,10 @@ int ByteArray_open_mem(struct ByteArray* self, char* data, size_t size) {
 	return 1;
 }
 
-#define assert_dbg(exp) do { if (!(exp)) __asm__("int3"); } while(0)
 void ByteArray_readMultiByte(struct ByteArray* self, char* buffer, size_t len) {
 	if(self->type == BAT_MEMSTREAM) {
-		assert_dbg(self->start_addr);
-		assert_dbg(self->pos + len <= self->size);
+		assert_op(self->start_addr, !=, 0);
+		assert_op(self->pos + len, <=, self->size);
 		memcpy(buffer, &self->start_addr[self->pos], len);
 	} else {
 		ssize_t ret = read(self->fd, buffer, len);
@@ -257,9 +257,9 @@ signed char ByteArray_readByte(struct ByteArray* self) {
 
 /* equivalent to foo = self[x]; (pos stays unchanged) */
 unsigned char ByteArray_getUnsignedByte(struct ByteArray* self, off_t index) {
-	assert(self->type == BAT_MEMSTREAM);
-	assert(index < self->size);
-	assert(self->start_addr);
+	assert_op(self->type, ==, BAT_MEMSTREAM);
+	assert_op(index, <, self->size);
+	assert_op(self->start_addr, !=, 0);
 	return (self->start_addr[index]);
 }
 
@@ -339,7 +339,7 @@ off_t ByteArray_writeMem(struct ByteArray* self, unsigned char* what, size_t len
 		__asm__("int3");
 		return 0;
 	}
-	assert(self->start_addr);
+	assert_op(self->start_addr, !=, 0);
 
 	memcpy(&self->start_addr[self->pos], what, len);
 	self->pos += len;
@@ -376,7 +376,7 @@ off_t ByteArray_writeFloat(struct ByteArray* self, float what) {
 }
 
 void ByteArray_dump_to_file(struct ByteArray* self, char* filename) {
-	assert(self->type == BAT_MEMSTREAM);
+	assert_op(self->type, ==, BAT_MEMSTREAM);
 	int fd = open(filename, O_CREAT | O_TRUNC | O_WRONLY, 0666);
 	write(fd, self->start_addr, self->size);
 	close(fd);

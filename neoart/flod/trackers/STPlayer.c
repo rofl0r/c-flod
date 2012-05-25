@@ -339,7 +339,7 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 	//patterns = new Vector.<AmigaRow>(higher, true);
 	
 	// "weak spot"
-	assert_dbg(higher < STPLAYER_MAX_PATTERNS);
+	assert_op(higher, <, STPLAYER_MAX_PATTERNS);
 
 	i = (ByteArray_get_length(stream) - size - 600) >> 2;
 	if (higher > i) higher = i;

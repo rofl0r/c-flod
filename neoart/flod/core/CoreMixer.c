@@ -84,7 +84,7 @@ void CoreMixer_set_bufferSize(struct CoreMixer* self, int value) {
 	PFUNC();
 	int i = 0; int len = 0;
 	if (value == len || value < 2048) return;
-	assert(value <= COREMIXER_MAX_BUFFER);
+	assert_op(value, <=, COREMIXER_MAX_BUFFER);
 
 	len = self->vector_count_buffer;
 	self->vector_count_buffer = value;
