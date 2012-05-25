@@ -2,15 +2,19 @@
 #define DEBUG_H
 
 #define empty_body do {} while(0)
+#if defined(__x86_64) || defined(__x86_64__)
+#  define INTEL_CPU 64
+#elif defined(__x86) || defined(__x86__) || defined(__i386) || defined(__i386__)
+#  define INTEL_CPU 32
+#endif
 
 //#define NO_BREAKPOINTS
 #ifdef NO_BREAKPOINTS
 #  define breakpoint() empty_body
 #else
-#  if ((defined(__X86)) || (defined(__X86_64)) || (defined(__X86__)) || (defined(__X86_64__)))
+#  ifdef INTEL_CPU
 #    define breakpoint() __asm__("int3")
 #  else
-#    warning "untested"
 #    include <signal.h>
 #    include <unistd.h>
 #    define breakpoint() kill(getpid(), SIGTRAP)
