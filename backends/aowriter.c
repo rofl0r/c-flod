@@ -1,8 +1,10 @@
 #include "aowriter.h"
+#include <string.h>
 
 int AoWriter_init(struct AoWriter *self, void* data) {
 	(void) data;
 	ao_initialize();
+	memset(self, 0, sizeof(*self));
 	self->format.bits = 16;
 	self->format.channels = 2;
 	self->format.rate = 44100;
