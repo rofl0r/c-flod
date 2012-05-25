@@ -208,6 +208,9 @@ play:
 	
 	hardware.core.wave = &wave;
 	
+	init_keyboard();
+	
+play_song:
 	player.core.initialize(&player.core);
 	
 #define MAX_PLAYTIME (60 * 5)
@@ -216,7 +219,7 @@ play:
 	unsigned bytes_played = 0;
 	int paused = 0, skip = 0;
 	
-	init_keyboard();
+	printf("playing subsong [%d/%d]\n", player.core.playSong + 1, player.core.lastSong + 1);
 	
 	while(!CoreMixer_get_complete(&hardware.core)) {
 		hardware.core.accurate(&hardware.core);
@@ -244,6 +247,10 @@ ck:
 			sleep(1);
 			goto ck;
 		}
+	}
+	
+	if(++player.core.playSong <= player.core.lastSong) {
+		goto play_song;
 	}
 	
 	backend_info[backend_type].close_func(&writer.backend);
