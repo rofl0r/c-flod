@@ -211,7 +211,9 @@ play:
 	player.core.initialize(&player.core);
 	
 #define MAX_PLAYTIME (60 * 5)
-	time_t stoptime = time(NULL) + MAX_PLAYTIME;
+	const unsigned bytespersec = 44100 * 2 * (16 / 8);
+	const unsigned max_bytes = bytespersec * MAX_PLAYTIME;
+	unsigned bytes_played = 0;
 	int paused = 0, skip = 0;
 	
 	init_keyboard();
@@ -223,12 +225,13 @@ play:
 				backend_info[backend_type].write_func(&writer.backend, wave_buffer, wave.pos);
 			else
 				skip--;
+			bytes_played += wave.pos;
 			wave.pos = 0;
 		} else {
 			printf("wave pos is 0\n");
 			break;
 		}
-		if(time(NULL) > stoptime) {
+		if(bytes_played >= max_bytes) {
 			printf("hit timeout\n");
 			break;
 		}
