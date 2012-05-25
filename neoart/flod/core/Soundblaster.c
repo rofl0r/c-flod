@@ -77,27 +77,6 @@ void Soundblaster_initialize(struct Soundblaster* self) {
 
 #include "Hardware.h"
 
-static void process_wave(struct Soundblaster* self, unsigned int size) {
-	struct Sample *sample = &self->super.buffer[0];
-	off_t avail = ByteArray_bytesAvailable(self->super.wave);
-	int complete_flag = 0;
-	unsigned int i;
-	
-	if(size / 4 > avail) {
-		size = avail * 4;
-		complete_flag = 1;
-	}
-
-	for (i = 0; i < size; ++i) {
-		self->super.wave->writeShort(self->super.wave, convert_sample16(sample->l));
-		self->super.wave->writeShort(self->super.wave, convert_sample16(sample->r));
-		sample->l = sample->r = 0.0;
-		sample = sample->next;
-	}
-	
-	if(complete_flag) CoreMixer_set_complete(&self->super, 1);
-}
-
 //override
 void Soundblaster_fast(struct Soundblaster* self) {
 	PFUNC();

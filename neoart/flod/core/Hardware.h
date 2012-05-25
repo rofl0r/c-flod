@@ -1,3 +1,4 @@
+#include "../../../flashlib/endianness.h"
 #include <math.h>
 #ifdef __GNUC__
 #define likely(x)       __builtin_expect((x),1)
@@ -17,7 +18,7 @@ union float_repr { float __f; __uint32_t __i; };
 #define floatrepr(f) (((union __float_repr){ (float)(f) }).__i)
 
 
-static int clip(int sample) {
+static inline int clip(int sample) {
 	if(unlikely(sample > 32767)) return 32767;
 	else if(unlikely(sample < -32767)) return -32768;
 	return sample;
@@ -36,4 +37,35 @@ static inline int convert_sample16(Number sample) {
 	mul = 32767.f;
 	if(sample < 0.0) mul = 32768.f;
 	return sample * mul; */
+}
+
+#ifdef HARDWARE_FROM_AMIGA
+static inline void process_wave(struct Amiga* self, unsigned int size) {
+#else
+static inline void process_wave(struct Soundblaster* self, unsigned int size) {
+#endif
+	struct Sample *sample = &self->super.buffer[0];
+	off_t avail = ByteArray_bytesAvailable(self->super.wave);
+	int complete_flag = 0;
+	unsigned int i;
+	signed short *dest = (signed short*) &self->super.wave->start_addr[self->super.wave->pos];
+	
+	if(size * 4 > avail) {
+		size = avail / 4;
+		complete_flag = 1;
+	}
+
+	for (i = 0; i < size; ++i) {
+#ifdef HARDWARE_FROM_AMIGA
+		AmigaFilter_process(self->filter, self->model, sample);
+#endif
+		*dest++ = le16(convert_sample16(sample->l));
+		*dest++ = le16(convert_sample16(sample->r));
+		//self->super.wave->writeShort(self->super.wave, convert_sample16(sample->l));
+		//self->super.wave->writeShort(self->super.wave, convert_sample16(sample->r));
+		sample->l = sample->r = 0.0;
+		sample = sample->next;
+	}
+	ByteArray_set_position_rel(self->super.wave, size * 4);
+	if(complete_flag) CoreMixer_set_complete(&self->super, 1);
 }

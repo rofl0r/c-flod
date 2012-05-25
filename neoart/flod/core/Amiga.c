@@ -135,29 +135,8 @@ void Amiga_reset(struct Amiga* self) {
       self->vector_count_memory = 0;
 }
 
+#define HARDWARE_FROM_AMIGA
 #include "Hardware.h"
-
-static void process_wave(struct Amiga* self, unsigned int size) {
-	struct Sample *sample = &self->super.buffer[0];
-	off_t avail = ByteArray_bytesAvailable(self->super.wave);
-	int complete_flag = 0;
-	unsigned int i;
-	
-	if(size / 4 > avail) {
-		size = avail * 4;
-		complete_flag = 1;
-	}
-
-	for (i = 0; i < size; ++i) {
-		AmigaFilter_process(self->filter, self->model, sample);
-		self->super.wave->writeShort(self->super.wave, convert_sample16(sample->l));
-		self->super.wave->writeShort(self->super.wave, convert_sample16(sample->r));
-		sample->l = sample->r = 0.0;
-		sample = sample->next;
-	}
-	
-	if(complete_flag) CoreMixer_set_complete(&self->super, 1);
-}
 
     //override
 void Amiga_fast(struct Amiga* self) {
@@ -263,25 +242,5 @@ void Amiga_fast(struct Amiga* self) {
 	
 	process_wave(self, size);
 
-	/*
-	off_t avail = ByteArray_bytesAvailable(self->super.wave);
-	int complete_flag = 0;
-	if(size / 4 > avail) {
-		size = avail * 4;
-		complete_flag = 1;
-	}
-	
-	sample = &self->super.buffer[0];
-
-	for (i = 0; i < size; ++i) {
-		AmigaFilter_process(self->filter, self->model, sample);
-		self->super.wave->writeShort(self->super.wave, convert_sample16(sample->l));
-		self->super.wave->writeShort(self->super.wave, convert_sample16(sample->r));
-		sample->l = sample->r = 0.0f;
-		sample = sample->next;
-	}
-	
-	if(complete_flag) CoreMixer_set_complete(&self->super, 1);
-*/
 }
 
