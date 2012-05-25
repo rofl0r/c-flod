@@ -69,7 +69,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 	struct DWVoice *voice = NULL;
 	int volume = 0;
 	
-	assert(self->active < DWPLAYER_MAX_VOICES);
+	assert_op(self->active, <, DWPLAYER_MAX_VOICES);
 	voice = &self->voices[self->active];
 
 	if (self->slower) {
@@ -124,9 +124,11 @@ void DWPlayer_process(struct DWPlayer* self) {
 
 			if (sample->super.loopPtr < 0) {
 				chan->pointer = self->super.amiga->loopPtr;
+				assert_op(chan->pointer, <, AMIGA_MAX_MEMORY);
 				chan->length  = self->super.amiga->loopLen;
 			} else {
 				chan->pointer = sample->super.pointer + sample->super.loopPtr;
+				assert_op(chan->pointer, <, AMIGA_MAX_MEMORY);
 				chan->length  = sample->super.length  - sample->super.loopPtr;
 			}
 		}
@@ -143,7 +145,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 						voice->speed = self->super.super.speed * (value + 33);
 					} else if (value >= self->com2) {
 						value -= self->com2;
-						assert(value < self->vector_count_samples);
+						assert_op(value, <, self->vector_count_samples);
 						voice->sample = sample = &self->samples[value];
 					} else if (value >= self->com3) {
 						pos = ByteArray_get_position(self->stream);
@@ -217,6 +219,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 									//chan->enabled = 0;
 								} else {
 									chan->pointer = self->super.amiga->loopPtr;
+									assert_op(chan->pointer, <, AMIGA_MAX_MEMORY);
 									chan->length  = self->super.amiga->loopLen;
 								}
 
@@ -304,6 +307,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 					}
 
 					chan->pointer = sample->super.pointer;
+					assert_op(chan->pointer, <, AMIGA_MAX_MEMORY);
 					chan->length  = sample->super.length;
 					AmigaChannel_set_volume(chan, volume);
 					//chan->volume  = volume;
@@ -414,7 +418,7 @@ void DWPlayer_initialize(struct DWPlayer* self) {
 	
 	PFUNC();
 	
-	assert(self->active < DWPLAYER_MAX_VOICES);
+	assert_op(self->active, <, DWPLAYER_MAX_VOICES);
 	voice = &self->voices[self->active];
 	CorePlayer_initialize(&self->super.super);
 	//self->super->initialize();
@@ -466,7 +470,7 @@ void DWPlayer_initialize(struct DWPlayer* self) {
 			voice->frqseqPtr = self->base + self->stream->readUnsignedShort(self->stream);
 			voice->frqseqPos = voice->frqseqPtr;
 		}
-		assert(voice != voice->next);
+		assert_op(voice, !=, voice->next);
 		voice = voice->next;
 	}
 }
@@ -493,12 +497,15 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 	self->readLen = 2;
 	self->super.super.variant = 0;
 
-	if (stream->readUnsignedShort(stream) == 0x48e7) {                               //movem->l
+	if (stream->readUnsignedShort(stream) == 0x48e7) {                               //movem.l
 		ByteArray_set_position(stream, 4);
-		if (stream->readUnsignedShort(stream) != 0x6100) return;                       //bsr->w
-		savepos = ByteArray_get_position(stream);
-		ByteArray_set_position(stream, savepos + stream->readUnsignedShort(stream));
-		self->super.super.variant = 30;
+		int insn = stream->readUnsignedShort(stream);
+		if(insn != 0x4240) { //clr.w
+			if (insn != 0x6100) return;                       //bsr.>w
+			savepos = ByteArray_get_position(stream);
+			ByteArray_set_position(stream, savepos + stream->readUnsignedShort(stream));
+			self->super.super.variant = 30;
+		}
 	} else {
 		ByteArray_set_position(stream, 0);
 	}
@@ -510,11 +517,11 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 			case 0x47fa:                                                          //lea x,a3
 				self->base = ByteArray_get_position(stream) + stream->readShort(stream);
 				break;
-			case 0x6100:                                                          //bsr->w
+			case 0x6100:                                                          //bsr.w
 				ByteArray_set_position_rel(stream, 2);
 				info = ByteArray_get_position(stream);
 
-				if (stream->readUnsignedShort(stream) == 0x6100)                           //bsr->w
+				if (stream->readUnsignedShort(stream) == 0x6100)                           //bsr.w
 				info = ByteArray_get_position(stream) + stream->readUnsignedShort(stream);
 				break;
 			case 0xc0fc:                                                          //mulu->w #x,d0
@@ -532,7 +539,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 
 				if (stream->readUnsignedShort(stream) == 0x1230) flag = 1;
 				break;
-			case 0x1230:                                                          //move->b (a0,d0.w),d1
+			case 0x1230:                                                          //move.b (a0,d0.w),d1
 				ByteArray_set_position_rel(stream, -6);
 
 				if (stream->readUnsignedShort(stream) == 0x41fa) {
@@ -542,7 +549,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 
 				ByteArray_set_position_rel(stream, 4);
 				break;
-			case 0xbe7c:                                                          //cmp->w #x,d7
+			case 0xbe7c:                                                          //cmp.w #x,d7
 				self->super.super.channels = stream->readUnsignedShort(stream);
 				ByteArray_set_position_rel(stream, 2);
 
@@ -652,11 +659,20 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 				pos = ByteArray_get_position(stream);
 				
 				++total;
-				assert(total < DWPLAYER_MAX_SAMPLES);
+				assert_op(total, <=, DWPLAYER_MAX_SAMPLES);
 				self->vector_count_samples = total;
 				//samples = new Vector.<DWSample>(++total, true);
 				ByteArray_set_position(stream, headers);
-
+				/* 
+				sample
+				length | relative | sample_data | 
+				U32    | U16      | U8 x length |
+				
+				info
+				??? | loopPtr |
+				x32 | S32 ?   |
+				 */
+				retry:
 				for (i = 0; i < total; ++i) {
 					//sample = DWSample_new();
 					sample = &self->samples[i];
@@ -670,6 +686,20 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 					value = ByteArray_get_position(stream);
 					ByteArray_set_position(stream, info + (i * size) + 4);
 					sample->super.loopPtr = stream->readInt(stream);
+					/* 
+					 FIXME: there are a lot of mods that have sample->super.loopPtr
+					 out of bounds, and it is later used to assign an array index into mem
+					 however setting it to 0 causes mods to misplay. one of them is dogsofwar
+					 they do not seem to trigger the code tho that assigns the array index.
+					 only jaws.dw does. 
+					 jaws.dw: either info or size is not calculated right, the values in info
+					 look very random at this point
+					*/
+					//if(sample->super.loopPtr >= AMIGA_MAX_MEMORY) {
+					//	sample->super.loopPtr = AMIGA_MAX_MEMORY - 64;
+					//}
+					/* jaws has another problem, the subsong 5/6 loops indefinitely, but shouldnt */
+					//assert_op(sample->super.loopPtr, <, AMIGA_MAX_MEMORY);
 
 					if (self->super.super.variant == 0) {
 						ByteArray_set_position_rel(stream, 6);
@@ -697,7 +727,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 					break;
 				}
 				unsigned int temp = (value - info) / size;
-				assert(temp < self->vector_count_samples);
+				assert_op(temp, <, self->vector_count_samples);
 				self->wave = &self->samples[temp];
 				self->waveCenter = (stream->readUnsignedShort(stream) + 1) << 1;
 
@@ -711,7 +741,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 				total = stream->readUnsignedShort(stream);
 				unsigned int temp2;
 				temp2 = (stream->readUnsignedShort(stream) - info) / size;
-				assert(temp2 < self->vector_count_samples);
+				assert_op(temp2, <, self->vector_count_samples);
 				sample = &self->samples[temp2];
 
 				if (value == 0x066b) {
@@ -792,7 +822,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 			case 0x7e03:                                                          //moveq #3,d7
 				self->active = value & 0xf;
 				total = self->super.super.channels - 1;
-				assert(total < DWPLAYER_MAX_VOICES);
+				assert_op(total, <, DWPLAYER_MAX_VOICES);
 
 				if (self->active) {
 					self->voices[0].next = null;
