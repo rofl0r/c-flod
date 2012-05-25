@@ -217,7 +217,7 @@ play:
 	init_keyboard();
 	
 	while(!CoreMixer_get_complete(&hardware.core)) {
-		hardware.core.fast(&hardware.core);
+		hardware.core.accurate(&hardware.core);
 		if(wave.pos) {
 			if(!skip)
 				backend_info[backend_type].write_func(&writer.backend, wave_buffer, wave.pos);
