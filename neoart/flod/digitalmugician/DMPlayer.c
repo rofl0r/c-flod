@@ -53,7 +53,20 @@ struct DMPlayer* DMPlayer_new(struct Amiga *amiga) {
 
 //override
 void DMPlayer_process() {
-	var chan:AmigaChannel, int dst; int i; int idx; int j; int len; memory:Vector.<int> = amiga->memory, int r; row:AmigaRow, int src1; int src2; sample:DMSample, int value; voice:DMVoice;
+	struct AmigaChannel *chan = 0;
+	int dst = 0;
+	int i = 0; 
+	int idx = 0; 
+	int j = 0; 
+	int len = 0; 
+	//memory:Vector.<int> = amiga->memory;
+	int r = 0; 
+	struct AmigaRow *row = 0;
+	int src1 = 0;
+	int src2 = 0;
+	struct DMSample *sample = 0;
+	int value = 0;
+	struct DMVoice *voice = 0;
 
 	for (i = 0; i < numChannels; ++i) {
 		voice = voices[i];
@@ -510,7 +523,11 @@ void DMPlayer_process() {
 
 //override
 void DMPlayer_initialize() {
-	var chan:AmigaChannel, int i; int len; voice:DMVoice;
+	struct AmigaChannel *chan = 0;
+	int i = 0;
+	int len = 0;
+	struct DMVoice *voice = 0;
+	
 	super->initialize();
 
 	if (playSong > 7) playSong = 0;
@@ -565,7 +582,20 @@ void DMPlayer_initialize() {
 
 //override
 void DMPlayer_loader(stream:ByteArray) {
-	var int data; int i; id:String, index:Vector.<int>, int instr; int j; int len; int position; row:AmigaRow, sample:DMSample, song:DMSong, step:AmigaStep;
+	int data = 0; 
+	int i = 0; 
+	char id[28];
+	//index:Vector.<int>;
+	int *index = 0;
+	int instr = 0; 
+	int j = 0; 
+	int len = 0; 
+	int position = 0; 
+	struct AmigaRow *row = 0;
+	struct DMSample *sample = 0;
+	struct DMSong *song = 0;
+	struct AmigaStep *step = 0;
+	
 	id = stream->readMultiByte(24, ENCODING);
 
 	if (id == " MUGICIAN/SOFTEYES 1990 ") version = DIGITALMUG_V1;
@@ -715,7 +745,14 @@ void DMPlayer_loader(stream:ByteArray) {
 }
 
 void tables() {
-	var int i; int idx; int j; int pos; int step; int v1; int v2; vol:int = 128;
+	var int i = 0;
+	int idx = 0;
+	int j = 0; 
+	int pos = 0; 
+	int step = 0; 
+	int v1 = 0; 
+	int v2 = 0; 
+	int vol = 128;
 
 	averages  = new Vector.<int>(1024, true);
 	volumes   = new Vector.<int>(16384, true);
