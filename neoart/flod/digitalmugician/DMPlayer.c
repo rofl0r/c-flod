@@ -34,20 +34,16 @@ void DMPlayer_defaults(struct DMPlayer* self) {
 void DMPlayer_ctor(struct DMPlayer* self, struct Amiga *amiga) {
 	CLASS_CTOR_DEF(DMPlayer);
 	// original constructor code goes here
-	super(amiga);
-	PERIODS->fixed = true;
+	//super(amiga);
+	AmigaPlayer_ctor(&self->super, amiga);
 
-	songs     = new Vector.<DMSong>(8, true);
-	arpeggios = new Vector.<int>(256, true);
-	voices    = new Vector.<DMVoice>(7, true);
+	//songs     = new Vector.<DMSong>(8, true);
+	//arpeggios = new Vector.<int>(256, true);
+	//voices    = new Vector.<DMVoice>(7, true);
+	unsigned i = 0;
+	for(; i < DMPLAYER_MAX_VOICES; i++)
+		DMVoice_ctor(&self->voices[i]);
 
-	voices[0] = new DMVoice();
-	voices[1] = new DMVoice();
-	voices[2] = new DMVoice();
-	voices[3] = new DMVoice();
-	voices[4] = new DMVoice();
-	voices[5] = new DMVoice();
-	voices[6] = new DMVoice();
 	tables();
 	
 	//vtable
