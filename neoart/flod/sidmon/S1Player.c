@@ -264,7 +264,7 @@ void S1Player_process(struct S1Player* self) {
 			}
 		}
 		if (self->audPtr > -1) chan->pointer = self->audPtr;
-		if (self->audPer != 0) chan->period  = voice->period;
+		if (self->audPer != 0) AmigaChannel_set_period(chan, voice->period);
 		if (self->audLen != 0) chan->length  = self->audLen;
 
 		if (sample->super.volume) chan->volume = sample->super.volume;
@@ -370,7 +370,7 @@ void S1Player_initialize(struct S1Player* self) {
 		voice->sample = self->patterns[voice->row].super.sample;
 
 		chan->length  = 32;
-		chan->period  = voice->period;
+		AmigaChannel_set_period(chan, voice->period);
 		AmigaChannel_set_enabled(chan, 1);
 
 		voice = voice->next;
