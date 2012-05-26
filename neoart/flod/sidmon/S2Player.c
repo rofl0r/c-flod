@@ -72,7 +72,7 @@ void S2Player_process(struct S2Player* self) {
 	self->arpeggioPos = ++(self->arpeggioPos) & 3;
 
 	if (++(self->super.super.tick) >= self->super.super.speed) {
-		self->super.tick = 0;
+		self->super.super.tick = 0;
 
 		while (voice) {
 			chan = voice->channel;
@@ -90,7 +90,7 @@ void S2Player_process(struct S2Player* self) {
 				if (row->super.note) {
 					voice->enabled = 1;
 					voice->note    = row->super.note + voice->step->super.transpose;
-					chan->enabled  = 0;
+					AmigaChannel_set_enabled(chan, 0);
 				}
 			}
 			voice->pitchBend = 0;
@@ -116,7 +116,7 @@ void S2Player_process(struct S2Player* self) {
 				sample = voice->sample;
 				chan->pointer = sample->super.pointer;
 				chan->length  = sample->super.length;
-				chan->enabled = voice->enabled;
+				AmigaChannel_set_enabled(chan, voice->enabled);
 				chan->pointer = sample->super.loopPtr;
 				chan->length  = sample->super.repeat;
 			}
