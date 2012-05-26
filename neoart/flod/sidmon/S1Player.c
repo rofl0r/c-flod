@@ -426,7 +426,7 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 	ByteArray_set_position(stream, position - 8);
 	start = stream->readUnsignedInt(stream);
 	len   = stream->readUnsignedInt(stream);
-	if (len < start) len = stream->length - position;
+	if (len < start) len = ByteArray_get_length(stream) - position;
 
 	totPatterns = (len - start) >> 2;
 	self->patternsPtr = new Vector.<int>(totPatterns);
@@ -600,7 +600,7 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 				sample->waveform = 0;
 			} else {
 				start = headers + ((sample->waveform - 16) << 5);
-				if (start >= stream->length) continue;
+				if (start >= ByteArray_get_length(stream)) continue;
 				j = ByteArray_get_position(stream);
 
 				ByteArray_set_position(stream, start);
