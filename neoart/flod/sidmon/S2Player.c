@@ -109,7 +109,9 @@ void S2Player_process(struct S2Player* self) {
 					voice->sample = self->samples[self->waves[voice->instr->wave]];
 				}
 				voice->original = voice->note + self->arpeggios[voice->instr->arpeggio];
-				chan->period    = voice->period = PERIODS[voice->original];
+				
+				voice->period = PERIODS[voice->original];
+				AmigaChannel_set_period(chan, voice->period);
 
 				sample = voice->sample;
 				chan->pointer = sample->super.pointer;
@@ -354,7 +356,7 @@ void S2Player_process(struct S2Player* self) {
 		if (voice->period < 95) voice->period = 95;
 		else if (voice->period > 5760) voice->period = 5760;
 
-		chan->period = voice->period;
+		AmigaChannel_set_period(chan, voice->period);
 		voice = voice->next;
 	}
 }
