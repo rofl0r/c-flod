@@ -128,7 +128,8 @@ void S2Player_process(struct S2Player* self) {
 
 			if (++(self->trackPos) == self->length) {
 				self->trackPos = 0;
-				self->amiga->complete = 1;
+				CoreMixer_set_complete(&self->super.amiga->super, 1);
+				//self->amiga->complete = 1;
 			}
 		}
 	}
