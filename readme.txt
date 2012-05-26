@@ -10,6 +10,7 @@ currently done:
 - (ultimate) sound tracker
 - pro tracker
 - fasttracker 2
+- digital mugician
 - pseudo barebone flashlib
 - libao and wave writer backends.
 
