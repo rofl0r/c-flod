@@ -31,17 +31,17 @@ void S2Player_defaults(struct S2Player* self) {
 void S2Player_ctor(struct S2Player* self, struct Amiga *amiga) {
 	CLASS_CTOR_DEF(S2Player);
 	// original constructor code goes here
-	super(amiga);
-	PERIODS->fixed = true;
-
-	arpeggioFx = new Vector.<int>(4, true);
-	voices     = new Vector.<S2Voice>(4, true);
-
-	voices[0] = new S2Voice(0);
-	voices[0].next = voices[1] = new S2Voice(1);
-	voices[1].next = voices[2] = new S2Voice(2);
-	voices[2].next = voices[3] = new S2Voice(3);
+	AmigaPlayer_ctor(&self->super, amiga);
+	//super(amiga);
 	
+	//arpeggioFx = new Vector.<int>(4, true);
+	//voices     = new Vector.<S2Voice>(4, true);
+	unsigned i = 0;
+	for(; i < 4; i++) {
+		S2Voice_ctor(&self->voices[i]);
+		if(i) self->voices[i - 1].next = &self->voices[i];
+	}
+
 	self->super.super.loader = S2Player_loader;
 	self->super.super.process = S2Player_process;
 	self->super.super.initialize = S2Player_initialize;
@@ -69,27 +69,27 @@ void S2Player_process(struct S2Player* self) {
 	int value = 0; 
 	struct S2Voice *voice = &self->voices[0];
 	
-	arpeggioPos = ++arpeggioPos & 3;
+	self->arpeggioPos = ++(self->arpeggioPos) & 3;
 
-	if (++tick >= speed) {
-		tick = 0;
+	if (++(self->super.super.tick) >= self->super.super.speed) {
+		self->super.tick = 0;
 
 		while (voice) {
 			chan = voice->channel;
 			voice->enabled = voice->note = 0;
 
-			if (!patternPos) {
-				voice->step    = tracks[int(trackPos + voice->index * length)];
-				voice->pattern = voice->step->pattern;
+			if (!self->patternPos) {
+				voice->step    = &self->tracks[int(self->trackPos + voice->index * self->length)];
+				voice->pattern = voice->step->super.pattern;
 				voice->speed   = 0;
 			}
 			if (--voice->speed < 0) {
-				voice->row   = row = patterns[voice->pattern++];
+				voice->row   = row = self->patterns[voice->pattern++];
 				voice->speed = row->speed;
 
-				if (row->note) {
+				if (row->super.note) {
 					voice->enabled = 1;
-					voice->note    = row->note + voice->step->transpose;
+					voice->note    = row->super.note + voice->step->super.transpose;
 					chan->enabled  = 0;
 				}
 			}
@@ -103,34 +103,34 @@ void S2Player_process(struct S2Player* self) {
 				voice->adsrPos = 4;
 				voice->volume  = 0;
 
-				if (row->sample) {
-					voice->instrument = row->sample;
-					voice->instr  = instruments[int(voice->instrument + voice->step->soundTranspose)];
-					voice->sample = samples[waves[voice->instr->wave]];
+				if (row->super.sample) {
+					voice->instrument = row->super.sample;
+					voice->instr  = self->instruments[int(voice->instrument + voice->step->soundTranspose)];
+					voice->sample = self->samples[self->waves[voice->instr->wave]];
 				}
-				voice->original = voice->note + arpeggios[voice->instr->arpeggio];
+				voice->original = voice->note + self->arpeggios[voice->instr->arpeggio];
 				chan->period    = voice->period = PERIODS[voice->original];
 
 				sample = voice->sample;
-				chan->pointer = sample->pointer;
-				chan->length  = sample->length;
+				chan->pointer = sample->super.pointer;
+				chan->length  = sample->super.length;
 				chan->enabled = voice->enabled;
-				chan->pointer = sample->loopPtr;
-				chan->length  = sample->repeat;
+				chan->pointer = sample->super.loopPtr;
+				chan->length  = sample->super.repeat;
 			}
 			voice = voice->next;
 		}
 
-		if (++patternPos == patternLen) {
-			patternPos = 0;
+		if (++(self->patternPos) == self->patternLen) {
+			self->patternPos = 0;
 
-			if (++trackPos == length) {
-				trackPos = 0;
-				amiga->complete = 1;
+			if (++(self->trackPos) == self->length) {
+				self->trackPos = 0;
+				self->amiga->complete = 1;
 			}
 		}
 	}
-	voice = voices[0];
+	voice = self->voices[0];
 
 	while (voice) {
 		if (!voice->sample) {
@@ -156,7 +156,7 @@ void S2Player_process(struct S2Player* self) {
 			}
 
 			value = sample->negStart + sample->negPos;
-			amiga->memory[value] = ~amiga->memory[value];
+			self->super.amiga->memory[value] = ~self->super.amiga->memory[value];
 			sample->negPos += sample->negOffset;
 			value = sample->negLen - 1;
 
@@ -178,7 +178,7 @@ void S2Player_process(struct S2Player* self) {
 		}
 		voice = voice->next;
 	}
-	voice = voices[0];
+	voice = &self->voices[0];
 
 	while (voice) {
 		if (!voice->sample) {
@@ -188,7 +188,7 @@ void S2Player_process(struct S2Player* self) {
 		voice->sample->negToggle = 0;
 		voice = voice->next;
 	}
-	voice = voices[0];
+	voice = &self->voices[0];
 
 	while (voice) {
 		chan  = voice->channel;
@@ -237,9 +237,9 @@ void S2Player_process(struct S2Player* self) {
 				if (voice->wavePos == instr->waveLen) voice->wavePos = 0;
 				else voice->wavePos++;
 
-				voice->sample = sample = samples[waves[int(instr->wave + voice->wavePos)]];
-				chan->pointer = sample->pointer;
-				chan->length  = sample->length;
+				voice->sample = sample = self->samples[self->waves[int(instr->wave + voice->wavePos)]];
+				chan->pointer = sample->super.pointer;
+				chan->length  = sample->super.length;
 			} else
 				voice->waveCtr++;
 		}
@@ -250,39 +250,39 @@ void S2Player_process(struct S2Player* self) {
 				if (voice->arpeggioPos == instr->arpeggioLen) voice->arpeggioPos = 0;
 				else voice->arpeggioPos++;
 
-				value = voice->original + arpeggios[int(instr->arpeggio + voice->arpeggioPos)];
+				value = voice->original + self->arpeggios[int(instr->arpeggio + voice->arpeggioPos)];
 				voice->period = PERIODS[value];
 			} else
 				voice->arpeggioCtr++;
 		}
 		row = voice->row;
 
-		if (tick) {
-			switch (row->effect) {
+		if (self->super.super.tick) {
+			switch (row->super.effect) {
 				case 0:
 					break;
 				case 0x70:  //arpeggio
-					arpeggioFx[0] = row->param >> 4;
-					arpeggioFx[2] = row->param & 15;
-					value = voice->original + arpeggioFx[arpeggioPos];
+					self->arpeggioFx[0] = row->super.param >> 4;
+					self->arpeggioFx[2] = row->super.param & 15;
+					value = voice->original + self->arpeggioFx[self->arpeggioPos];
 					voice->period = PERIODS[value];
 					break;
 				case 0x71:  //pitch up
-					voice->pitchBend = -row->param;
+					voice->pitchBend = -row->super.param;
 					break;
 				case 0x72:  //pitch down
-					voice->pitchBend = row->param;
+					voice->pitchBend = row->super.param;
 					break;
 				case 0x73:  //volume up
 					if (voice->adsrPos != 0) break;
 					if (voice->instrument != 0) voice->volume = instr->attackMax;
-					voice->volume += row->param << 2;
+					voice->volume += row->super.param << 2;
 					if (voice->volume >= 256) voice->volume = -1;
 					break;
 				case 0x74:  //volume down
 					if (voice->adsrPos != 0) break;
 					if (voice->instrument != 0) voice->volume = instr->attackMax;
-					voice->volume -= row->param << 2;
+					voice->volume -= row->super.param << 2;
 					if (voice->volume < 0) voice->volume = 0;
 					break;
 				default:
@@ -290,25 +290,25 @@ void S2Player_process(struct S2Player* self) {
 			}
 		}
 
-		switch (row->effect) {
+		switch (row->super.effect) {
 			default:
 			case 0:
 				break;
 			case 0x75:  //set adsr attack
-				instr->attackMax   = row->param;
-				instr->attackSpeed = row->param;
+				instr->attackMax   = row->super.param;
+				instr->attackSpeed = row->super.param;
 				break;
 			case 0x76:  //set pattern length
-				patternLen = row->param;
+				self->patternLen = row->super.param;
 				break;
 			case 0x7c:  //set volume
-				chan->volume  = row->param;
-				voice->volume = row->param << 2;
+				chan->volume  = row->super.param;
+				voice->volume = row->super.param << 2;
 				if (voice->volume >= 255) voice->volume = 255;
 				break;
 			case 0x7f:  //set speed
-				value = row->param & 15;
-				if (value) speed = value;
+				value = row->super.param & 15;
+				if (value) self->super.super.speed = value;
 				break;
 		}
 
@@ -318,7 +318,7 @@ void S2Player_process(struct S2Player* self) {
 				if (voice->vibratoPos == instr->vibratoLen) voice->vibratoPos = 0;
 				else voice->vibratoPos++;
 
-				voice->period += vibratos[int(instr->vibrato + voice->vibratoPos)];
+				voice->period += self->vibratos[int(instr->vibrato + voice->vibratoPos)];
 			} else
 				voice->vibratoCtr++;
 		}
@@ -330,10 +330,10 @@ void S2Player_process(struct S2Player* self) {
 				voice->pitchBendCtr++;
 		}
 
-		if (row->param) {
-			if (row->effect && row->effect < 0x70) {
-				voice->noteSlideTo = PERIODS[int(row->effect + voice->step->transpose)];
-				value = row->param;
+		if (row->super.param) {
+			if (row->super.effect && row->super.effect < 0x70) {
+				voice->noteSlideTo = PERIODS[int(row->super.effect + voice->step->super.transpose)];
+				value = row->super.param;
 				if ((voice->noteSlideTo - voice->period) < 0) value = -value;
 					voice->noteSlideSpeed = value;
 			}
@@ -362,20 +362,20 @@ void S2Player_process(struct S2Player* self) {
 //override
 void S2Player_initialize(struct S2Player* self) {
 	struct S2Voice *voice = &self->voices[0];
-	super->initialize();
+	self->super->initialize();
 
-	speed      = speedDef;
-	tick       = speedDef;
-	trackPos   = 0;
-	patternPos = 0;
-	patternLen = 64;
+	self->super.super.speed      = self->speedDef;
+	self->super.super.tick       = self->speedDef;
+	self->trackPos   = 0;
+	self->patternPos = 0;
+	self->patternLen = 64;
 
 	while (voice) {
 		voice->initialize();
-		voice->channel = amiga->channels[voice->index];
-		voice->instr   = instruments[0];
+		voice->channel = self->super.amiga->channels[voice->index];
+		voice->instr   = self->instruments[0];
 
-		arpeggioFx[voice->index] = 0;
+		self->arpeggioFx[voice->index] = 0;
 		voice = voice->next;
 	}
 }
@@ -403,29 +403,29 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	if (!is_str(id, "SIDMON II - THE MIDI VERSION")) return;
 
 	stream->position = 2;
-	length   = stream->readUnsignedByte();
-	speedDef = stream->readUnsignedByte();
-	samples  = new Vector.<S2Sample>(stream->readUnsignedShort() >> 6, true);
+	self->length   = stream->readUnsignedByte();
+	self->speedDef = stream->readUnsignedByte();
+	self->samples  = new Vector.<S2Sample>(stream->readUnsignedShort() >> 6, true);
 
 	stream->position = 14;
 	len = stream->readUnsignedInt();
-	tracks = new Vector.<S2Step>(len, true);
+	self->tracks = new Vector.<S2Step>(len, true);
 	stream->position = 90;
 
 	for (; i < len; ++i) {
 		step = new S2Step();
-		step->pattern = stream->readUnsignedByte();
-		if (step->pattern > higher) higher = step->pattern;
-		tracks[i] = step;
+		step->super.pattern = stream->readUnsignedByte();
+		if (step->super.pattern > higher) higher = step->super.pattern;
+		self->tracks[i] = step;
 	}
 
 	for (i = 0; i < len; ++i) {
-		step = tracks[i];
-		step->transpose = stream->readByte();
+		step = self->tracks[i];
+		step->super.transpose = stream->readByte();
 	}
 
 	for (i = 0; i < len; ++i) {
-		step = tracks[i];
+		step = self->tracks[i];
 		step->soundTranspose = stream->readByte();
 	}
 
@@ -435,7 +435,7 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	instruments = new Vector.<S2Instrument>(++len, true);
 	stream->position = position;
 
-	instruments[0] = new S2Instrument();
+	self->instruments[0] = new S2Instrument();
 
 	for (i = 0; ++i < len;) {
 		instr = new S2Instrument();
@@ -462,7 +462,7 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 		instr->sustain        = stream->readUnsignedByte();
 		instr->releaseMin     = stream->readUnsignedByte();
 		instr->releaseSpeed   = stream->readUnsignedByte();
-		instruments[i] = instr;
+		self->instruments[i] = instr;
 		stream->position += 9;
 	}
 
@@ -472,7 +472,7 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	waves = new Vector.<int>(len, true);
 	stream->position = position;
 
-	for (i = 0; i < len; ++i) waves[i] = stream->readUnsignedByte();
+	for (i = 0; i < len; ++i) self->waves[i] = stream->readUnsignedByte();
 
 	position = stream->position;
 	stream->position = 34;
@@ -480,7 +480,7 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	arpeggios = new Vector.<int>(len, true);
 	stream->position = position;
 
-	for (i = 0; i < len; ++i) arpeggios[i] = stream->readByte();
+	for (i = 0; i < len; ++i) self->arpeggios[i] = stream->readByte();
 
 	position = stream->position;
 	stream->position = 38;
@@ -488,17 +488,17 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	vibratos = new Vector.<int>(len, true);
 	stream->position = position;
 
-	for (i = 0; i < len; ++i) vibratos[i] = stream->readByte();
+	for (i = 0; i < len; ++i) self->vibratos[i] = stream->readByte();
 
-	len = samples->length;
+	len = self->samples->length;
 	position = 0;
 
 	for (i = 0; i < len; ++i) {
 		sample = new S2Sample();
 		stream->readUnsignedInt();
-		sample->length    = stream->readUnsignedShort() << 1;
-		sample->loop      = stream->readUnsignedShort() << 1;
-		sample->repeat    = stream->readUnsignedShort() << 1;
+		sample->super.length    = stream->readUnsignedShort() << 1;
+		sample->super.loop      = stream->readUnsignedShort() << 1;
+		sample->super.repeat    = stream->readUnsignedShort() << 1;
 		sample->negStart  = position + (stream->readUnsignedShort() << 1);
 		sample->negLen    = stream->readUnsignedShort() << 1;
 		sample->negSpeed  = stream->readUnsignedShort();
@@ -507,12 +507,12 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 		sample->negPos    = stream->readUnsignedInt();
 		sample->negCtr    = stream->readUnsignedShort();
 		stream->position += 6;
-		sample->name      = stream->readMultiByte(32, ENCODING);
+		sample->super.name      = stream->readMultiByte(32, ENCODING);
 
-		sample->pointer = position;
-		sample->loopPtr = position + sample->loop;
-		position += sample->length;
-		samples[i] = sample;
+		sample->super.pointer = position;
+		sample->super.loopPtr = position + sample->super.loop;
+		position += sample->super.length;
+		self->samples[i] = sample;
 	}
 
 	sampleData = position;
@@ -532,57 +532,57 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 		value = stream->readByte();
 
 		if (!value) {
-			row->effect = stream->readByte();
-			row->param  = stream->readUnsignedByte();
+			row->super.effect = stream->readByte();
+			row->super.param  = stream->readUnsignedByte();
 			i += 2;
 		} else if (value < 0) {
 			row->speed = ~value;
 		} else if (value < 112) {
-			row->note = value;
+			row->super.note = value;
 			value = stream->readByte();
 			i++;
 
 			if (value < 0) {
 				row->speed = ~value;
 			} else if (value < 112) {
-				row->sample = value;
+				row->super.sample = value;
 				value = stream->readByte();
 				i++;
 
 				if (value < 0) {
 					row->speed = ~value;
 				} else {
-					row->effect = value;
-					row->param  = stream->readUnsignedByte();
+					row->super.effect = value;
+					row->super.param  = stream->readUnsignedByte();
 					i++;
 				}
 			} else {
-				row->effect = value;
-				row->param  = stream->readUnsignedByte();
+				row->super.effect = value;
+				row->super.param  = stream->readUnsignedByte();
 				i++;
 			}
 		} else {
-			row->effect = value;
-			row->param  = stream->readUnsignedByte();
+			row->super.effect = value;
+			row->super.param  = stream->readUnsignedByte();
 			i++;
 		}
 
-		patterns[pos++] = row;
+		self->patterns[pos++] = row;
 		if ((position + pointers[j]) == stream->position) pointers[j++] = pos;
 	}
-	pointers[j] = patterns->length;
-	patterns->fixed = true;
+	pointers[j] = self->patterns->length;
+	self->patterns->fixed = true;
 
 	if ((stream->position & 1) != 0) stream->position++;
-	amiga->store(stream, sampleData);
-	len = tracks->length;
+	self->super.amiga->store(stream, sampleData);
+	len = self->tracks.length;
 
 	for (i = 0; i < len; ++i) {
-		step = tracks[i];
-		step->pattern = pointers[step->pattern];
+		step = &self->tracks[i];
+		step->super.pattern = pointers[step->super.pattern];
 	}
 
-	length++;
-	version = 2;
+	self->length++;
+	self->super.super.version = 2;
 }
 
