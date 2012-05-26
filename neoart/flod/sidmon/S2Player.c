@@ -375,7 +375,7 @@ void S2Player_initialize(struct S2Player* self) {
 	self->patternLen = 64;
 
 	while (voice) {
-		voice->initialize();
+		S2Voice_initialize(voice);
 		voice->channel = self->super.amiga->channels[voice->index];
 		voice->instr   = self->instruments[0];
 

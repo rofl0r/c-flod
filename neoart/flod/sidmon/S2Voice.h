@@ -41,4 +41,6 @@ void S2Voice_defaults(struct S2Voice* self);
 void S2Voice_ctor(struct S2Voice* self, int index);
 struct S2Voice* S2Voice_new(int index);
 
+void S2Voice_initialize(struct S2Voice* self);
+
 #endif
