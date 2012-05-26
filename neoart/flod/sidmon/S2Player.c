@@ -38,7 +38,7 @@ void S2Player_ctor(struct S2Player* self, struct Amiga *amiga) {
 	//voices     = new Vector.<S2Voice>(4, true);
 	unsigned i = 0;
 	for(; i < 4; i++) {
-		S2Voice_ctor(&self->voices[i]);
+		S2Voice_ctor(&self->voices[i], i);
 		if(i) self->voices[i - 1].next = &self->voices[i];
 	}
 
@@ -51,7 +51,7 @@ struct S2Player* S2Player_new(struct Amiga *amiga) {
 	CLASS_NEW_BODY(S2Player, amiga);
 }
 
-static const unsigned short PERIODS = {0,
+static const unsigned short PERIODS[] = {0,
         5760,5424,5120,4832,4560,4304,4064,3840,3616,3424,3232,3048,
         2880,2712,2560,2416,2280,2152,2032,1920,1808,1712,1616,1524,
         1440,1356,1280,1208,1140,1076,1016, 960, 904, 856, 808, 762,
@@ -257,7 +257,7 @@ void S2Player_process(struct S2Player* self) {
 				assert_op(idxx, <, S2PLAYER_MAX_WAVES);
 				idxx = self->waves[idxx];
 				assert_op(idxx, <, S2PLAYER_MAX_WAVES);
-				voice->sample = sample = self->samples[idxx];
+				voice->sample = sample = &self->samples[idxx];
 				chan->pointer = sample->super.pointer;
 				chan->length  = sample->super.length;
 			} else
@@ -469,7 +469,7 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	}
 
 	for (i = 0; i < len; ++i) {
-		step = self->tracks[i];
+		step = &self->tracks[i];
 		step->soundTranspose = stream->readByte(stream);
 	}
 
@@ -646,7 +646,7 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	//self->patterns->fixed = true;
 	 
 	if ((ByteArray_get_position(stream) & 1) != 0) ByteArray_set_position_rel(stream, +1);
-	Amiga_store(self->super.amiga, stream, sampleData);
+	Amiga_store(self->super.amiga, stream, sampleData, -1);
 
 	//len = self->tracks.length;
 	len = tracks_count;
