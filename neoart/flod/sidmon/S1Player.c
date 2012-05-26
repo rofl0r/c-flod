@@ -536,7 +536,7 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 				return;
 			}
 		}
-		stream->position += stream->readUnsignedShort(stream);
+		ByteArray_set_position_rel(stream, stream->readUnsignedShort(stream));
 		self->samples = new Vector.<S1Sample>(len + 3, true);
 
 		for (i = 0; i < 3; ++i) {
@@ -548,7 +548,7 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 			sample->super.repeat   = 4;
 			sample->super.volume   = 64;
 			self->samples[int(len + i)] = sample;
-			stream->position += sample->super.length;
+			ByteArray_set_position_rel(stream, sample->super.length);
 		}
 	} else {
 		samples = new Vector.<S1Sample>(len, true);
