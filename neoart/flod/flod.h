@@ -18,4 +18,7 @@
 
 #define ARRAY_SIZE(x) (sizeof(x) / sizeof(x[0]))
 
+#define STRSZ(X) X , sizeof(X) - 1
+#define is_str(chr, lit) (!memcmp(chr, STRSZ(lit)))
+
 #endif

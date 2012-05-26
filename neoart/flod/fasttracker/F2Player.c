@@ -942,10 +942,6 @@ void F2Player_initialize(struct F2Player* self) {
 	}
 }
 
-
-#define STRSZ(X) X , sizeof(X) - 1
-#define is_str(chr, lit) (!memcmp(chr, STRSZ(lit)))
-
 //override
 void F2Player_loader(struct F2Player* self, struct ByteArray *stream) {
 	int header = 0;
