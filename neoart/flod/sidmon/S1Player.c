@@ -32,21 +32,25 @@ void S1Player_defaults(struct S1Player* self) {
 void S1Player_ctor(struct S1Player* self, struct Amiga *amiga) {
 	CLASS_CTOR_DEF(S1Player);
 	// original constructor code goes here
-	super(amiga);
-	PERIODS->fixed = true;
+	AmigaPlayer_ctor(&self->super, amiga);
+	//super(amiga);
 
-	tracksPtr = new Vector.<int>(4, true);
-	voices    = new Vector.<S1Voice>(4, true);
 
-	voices[0] = new S1Voice(0);
-	voices[0].next = voices[1] = new S1Voice(1);
-	voices[1].next = voices[2] = new S1Voice(2);
-	voices[2].next = voices[3] = new S1Voice(3);
+	//tracksPtr = new Vector.<int>(4, true);
+	//voices    = new Vector.<S1Voice>(4, true);
 	
+	unsigned i = 0;
+	for(; i < S1PLAYER_VOICES_MAX; i++) {
+		S1Voice_ctor(&self->voices[i]);
+		if(i) self->voices[i - 1].next = &self->voices[i];
+	}
+
 	//vtable
 	self->super.super.loader = S1Player_loader;
 	self->super.super.process = S1Player_process;
 	self->super.super.initialize = S1Player_initialize;
+	
+	self->super.super.min_filesize = 5220;
 	
 }
 

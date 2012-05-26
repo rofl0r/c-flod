@@ -18,15 +18,17 @@ enum S1PlayerVersion {
 	SIDMON_1444 = 0x1444,
 };
 
-#define S1PLAYER_TRACKSPTR_MAX 4
+
 #define S1PLAYER_PATTERNSPTR_MAX 4
 #define S1PLAYER_WAVELISTS_MAX 4
 
 #define S1PLAYER_TRACKS_MAX 4
 #define S1PLAYER_PATTERNS_MAX 4
 #define S1PLAYER_SAMPLES_MAX 4
-#define S1PLAYER_VOICES_MAX 4
 
+// fixed
+#define S1PLAYER_TRACKSPTR_MAX 4
+#define S1PLAYER_VOICES_MAX 4
 
 struct S1Player {
 	struct AmigaPlayer super;
