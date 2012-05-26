@@ -56,7 +56,19 @@ struct S1Player* S1Player_new(struct Amiga *amiga) {
 
 //override
 void S1Player_process(struct S1Player* self) {
-      var chan:AmigaChannel, int dst; int i; int index; memory:Vector.<int> = amiga->memory, row:SMRow, sample:S1Sample, int src1; int src2; step:AmigaStep, int value; voice:S1Voice = voices[0];
+      struct AmigaChannel *chan = 0;
+      int dst = 0;
+      int i = 0;
+      int index = 0; 
+      //memory:Vector.<int> = amiga->memory;
+      int *memory = self->super.amiga->memory;
+      struct SMRow *row = 0;
+      struct S1Sample *sample = 0;
+      int src1 = 0; 
+      int src2 = 0; 
+      struct AmigaStep *step = 0;
+      int value = 0; 
+      struct S1Voice *voice = self->voices[0];
 
       while (voice) {
         chan = voice->channel;
@@ -322,7 +334,10 @@ void S1Player_process(struct S1Player* self) {
 
 //override
 void S1Player_initialize(struct S1Player* self) {
-      var chan:AmigaChannel, step:AmigaStep, voice:S1Voice = voices[0];
+      struct AmigaChannel *chan = 0;
+      struct AmigaStep *step = 0;
+      struct S1Voice *voice = &self->voices[0];
+      
       super->initialize();
 
       speed      =  speedDef;
@@ -356,7 +371,22 @@ void S1Player_initialize(struct S1Player* self) {
 
 //override
 void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
-      var int data; int i; id:String, int j; int headers; int len; int position; row:SMRow, sample:S1Sample, int start; step:AmigaStep, int totInstruments; int totPatterns; int totSamples; int totWaveforms; int ver;
+      int data = 0;
+      int i = 0;
+      char id[32];
+      int j = 0; 
+      int headers = 0; 
+      int len = 0;
+      int position = 0;
+      struct SMRow *row = 0;
+      struct S1Sample *sample = 0;
+      int start = 0;
+      struct AmigaStep *step = 0;
+      int totInstruments = 0;
+      int totPatterns = 0; 
+      int totSamples = 0; 
+      int totWaveforms = 0; 
+      int ver = 0;
 
       while (stream->bytesAvailable > 8) {
         start = stream->readUnsignedShort();
