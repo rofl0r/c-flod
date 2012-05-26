@@ -140,7 +140,9 @@ void DMPlayer_process(struct DMPlayer* self) {
 							if (sample->effect != 0 && voice->val1 != 2 && voice->val1 != 4) {
 								len  = dst + 128;
 								src1 = sample->source1 << 7;
+								assert_op(len, <=, AMIGA_MAX_MEMORY);
 								for (j = dst; j < len; ++j) memory[j] = memory[src1++];
+								// FIXME: we may have to increment vector_count_memory here
 
 								sample->effectStep = 0;
 								voice->effectCtr   = sample->effectSpeed;
@@ -211,6 +213,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 
 					switch (sample->effect) {
 						case 1:   //filter
+							assert_op(dst + 127, <, AMIGA_MAX_MEMORY);
 							for (j = 0; j < 127; ++j) {
 								value  = memory[dst];
 								value += memory[int(dst + 1)];
@@ -223,7 +226,8 @@ void DMPlayer_process(struct DMPlayer* self) {
 							idx  = sample->effectStep;
 							len  = sample->waveLen;
 							sample->effectStep = ++sample->effectStep & 127;
-
+							assert_op(dst + len, <, AMIGA_MAX_MEMORY);
+							// FIXME assert on the idx mem access
 							for (j = 0; j < len; ++j) {
 								value  = memory[src1++];
 								value += memory[int(src2 + idx)];
@@ -232,29 +236,37 @@ void DMPlayer_process(struct DMPlayer* self) {
 							}
 							break;
 						case 3:   //scr left
+							assert_op(dst + 127, <, AMIGA_MAX_MEMORY);
 							value = memory[dst];
 							for (j = 0; j < 127; ++j) memory[dst] = memory[++dst];
 							memory[dst] = value;
 							break;
 						case 4:   //scr right
 							dst += 127;
+							assert_op(dst + 127, <, AMIGA_MAX_MEMORY);
 							value = memory[dst];
 							for (j = 0; j < 127; ++j) memory[dst] = memory[--dst];
 							memory[dst] = value;
 							break;
 						case 5:   //upsample
 							idx = value = dst;
+							assert_op(dst + (64 * 2), <, AMIGA_MAX_MEMORY);
+							assert_op(idx + 64, <, AMIGA_MAX_MEMORY);
 							for (j = 0; j < 64; ++j) {
 								memory[idx++] = memory[dst++];
 								dst++;
 							}
 							idx = dst = value;
 							idx += 64;
+							assert_op(idx + 64, <, AMIGA_MAX_MEMORY);
+							assert_op(dst + 64, <, AMIGA_MAX_MEMORY);
 							for (j = 0; j < 64; ++j) memory[idx++] = memory[dst++];
 							break;
 						case 6:   //downsample
 							src1 = dst + 64;
 							dst += 128;
+							assert_op(dst, <, AMIGA_MAX_MEMORY);
+							assert_op(src1, <, AMIGA_MAX_MEMORY);
 							for (j = 0; j < 64; ++j) {
 								memory[--dst] = memory[--src1];
 								memory[--dst] = memory[src1];
@@ -262,16 +274,19 @@ void DMPlayer_process(struct DMPlayer* self) {
 							break;
 						case 7:   //negate
 							dst += sample->effectStep;
+							assert_op(dst, <, AMIGA_MAX_MEMORY);
 							memory[dst] = ~memory[dst] + 1;
 							if (++sample->effectStep >= sample->waveLen) sample->effectStep = 0;
 							break;
 						case 8:   //madmix 1
 							sample->effectStep = ++sample->effectStep & 127;
 							src2 = (sample->source2 << 7) + sample->effectStep;
+							assert_op(src2, <, AMIGA_MAX_MEMORY);
 							idx  = memory[src2];
 							len  = sample->waveLen;
 							value = 3;
-
+							
+							assert_op(dst + (len * 1), <, AMIGA_MAX_MEMORY);
 							for (j = 0; j < len; ++j) {
 								src1 = memory[dst] + value;
 								if (src1 < -128) src1 += 256;
@@ -287,7 +302,9 @@ void DMPlayer_process(struct DMPlayer* self) {
 						case 9:   //addition
 							src2 = sample->source2 << 7;
 							len  = sample->waveLen;
-
+							
+							assert_op(dst + len, <, AMIGA_MAX_MEMORY);
+							assert_op(src2 + len, <, AMIGA_MAX_MEMORY);
 							for (j = 0; j < len; ++j) {
 								value  = memory[src2++];
 								value += memory[dst];
@@ -296,6 +313,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 							}
 							break;
 						case 10:  //filter 2
+							assert_op(dst + 127, <, AMIGA_MAX_MEMORY);
 							for (j = 0; j < 126; ++j) {
 								value  = memory[dst++] * 3;
 								value += memory[int(dst + 1)];
@@ -311,7 +329,10 @@ void DMPlayer_process(struct DMPlayer* self) {
 							value = sample->effectStep;
 							if (value >= 64) value = 127 - value;
 							idx = (value ^ 255) & 63;
-
+							
+							assert_op(dst + len, <, AMIGA_MAX_MEMORY);
+							assert_op(src1 + len, <, AMIGA_MAX_MEMORY);
+							assert_op(src2 + len, <, AMIGA_MAX_MEMORY);
 							for (j = 0; j < len; ++j) {
 								r  = memory[src1++] * value;
 								r += memory[src2++] * idx;
@@ -328,6 +349,10 @@ void DMPlayer_process(struct DMPlayer* self) {
 							if (value >= 16) value = 31 - value;
 							idx = (value ^ 255) & 15;
 
+							assert_op(dst + len, <, AMIGA_MAX_MEMORY);
+							assert_op(src1 + len, <, AMIGA_MAX_MEMORY);
+							assert_op(src2 + len, <, AMIGA_MAX_MEMORY);
+
 							for (j = 0; j < len; ++j) {
 								r  = memory[src1++] * value;
 								r += memory[src2++] * idx;
@@ -335,6 +360,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 							}
 							break;
 						case 13:  //filter 3
+							assert_op(dst + 127, <, AMIGA_MAX_MEMORY);
 							for (j = 0; j < 126; ++j) {
 								value  = memory[dst++];
 								value += memory[int(dst + 1)];
@@ -343,14 +369,17 @@ void DMPlayer_process(struct DMPlayer* self) {
 							break;
 						case 14:  //polygate
 							idx = dst + sample->effectStep;
+							assert_op(idx, <, AMIGA_MAX_MEMORY);
 							memory[idx] = ~memory[idx] + 1;
 							idx = (sample->effectStep + sample->source2) & (sample->waveLen - 1);
 							idx += dst;
+							assert_op(idx, <, AMIGA_MAX_MEMORY);
 							memory[idx] = ~memory[idx] + 1;
 							if (++sample->effectStep >= sample->waveLen) sample->effectStep = 0;
 							break;
 						case 15:  //colgate
 							idx = dst;
+							assert_op(dst + 128, <, AMIGA_MAX_MEMORY);
 							for (j = 0; j < 127; ++j) {
 								value  = memory[dst];
 								value += memory[int(dst + 1)];
@@ -362,7 +391,8 @@ void DMPlayer_process(struct DMPlayer* self) {
 							if (sample->effectStep == sample->source2) {
 								sample->effectStep = 0;
 								idx = value = dst;
-
+								assert_op(idx + 64, <, AMIGA_MAX_MEMORY);
+								assert_op(dst + 64, <, AMIGA_MAX_MEMORY);
 								for (j = 0; j < 64; ++j) {
 									memory[idx++] = memory[dst++];
 									dst++;
@@ -390,6 +420,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 
 				if (voice->volumeStep || sample->volumeLoop) {
 					idx = voice->volumeStep + (sample->super.volume << 7);
+					assert_op(idx, <, AMIGA_MAX_MEMORY);
 					value = ~(memory[idx] + 129) + 1;
 
 					voice->volume = (value & 255) >> 2;
@@ -433,6 +464,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 				if (voice->pitchStep == 0) voice->pitchStep = sample->pitchLoop;
 
 				idx += sample->pitch << 7;
+				assert_op(idx, <, AMIGA_MAX_MEMORY);
 				value = memory[idx];
 				voice->finalPeriod += (~value + 1);
 			}
@@ -470,12 +502,14 @@ void DMPlayer_process(struct DMPlayer* self) {
 			dst = 0;
 
 			for (j = 3; j < 7; ++j) {
+				unsigned idxx = (voice->mixPtr + (voice->mixStep >> 16));
 				voice = self->voices[j];
-				src2 = (memory[int(voice->mixPtr + (voice->mixStep >> 16))] & 255) + voice->mixVolume;
+				assert_op(idxx, <, AMIGA_MAX_MEMORY);
+				src2 = (memory[idxx] & 255) + voice->mixVolume;
 				dst += self->volumes[src2];
 				voice->mixStep += voice->mixSpeed;
 			}
-
+			assert_op(src1 + 1, <, AMIGA_MAX_MEMORY);
 			memory[src1++] = self->averages[dst];
 		}
 		chan->length = 350;
@@ -583,6 +617,7 @@ void DMPlayer_initialize(struct DMPlayer* self) {
 		chan->volume  = 64;
 
 		len = self->buffer1 + 700;
+		assert_op(len, <, AMIGA_MAX_MEMORY);
 		for (i = self->buffer1; i < len; ++i) self->super.amiga->memory[i] = 0;
 	}
 }
@@ -593,7 +628,7 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 	int i = 0; 
 	char id[28];
 	//index:Vector.<int>;
-	int *index = 0;
+	int index[8] = 0;
 	int instr = 0; 
 	int j = 0; 
 	int len = 0; 
@@ -610,8 +645,8 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 	else return;
 
 	ByteArray_set_position(stream, 28);
-	index = new Vector.<int>(8, true);
-	for (; i < 8; ++i) index[i] = stream->readUnsignedInt();
+	//index = new Vector.<int>(8, true);
+	for (; i < ARRAY_SIZE(index); ++i) index[i] = stream->readUnsignedInt();
 
 	ByteArray_set_position(stream, 76);
 
@@ -644,14 +679,21 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 60);
 	len = stream->readUnsignedInt();
-	self->samples = new Vector.<DMSample>(++len, true);
+	
+	assert_op(len + 1, <=, DMPLAYER_MAX_SAMPLES);
+	//self->samples = new Vector.<DMSample>(++len, true);
+	len++;
+	
 	ByteArray_set_position(stream, position);
 
 	for (i = 1; i < len; ++i) {
-		sample = new DMSample();
+		sample = &self->samples[i];
+		DMSample_ctor(sample);
+		
+		//sample = new DMSample();
 		sample->wave        = stream->readUnsignedByte();
 		sample->waveLen     = stream->readUnsignedByte() << 1;
-		sample->volume      = stream->readUnsignedByte();
+		sample->super.volume= stream->readUnsignedByte();
 		sample->volumeSpeed = stream->readUnsignedByte();
 		sample->arpeggio    = stream->readUnsignedByte();
 		sample->pitch       = stream->readUnsignedByte();
@@ -665,15 +707,17 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 		sample->source2     = stream->readUnsignedByte();
 		sample->effectSpeed = stream->readUnsignedByte();
 		sample->volumeLoop  = stream->readUnsignedByte();
-		self->samples[i] = sample;
+		//self->samples[i] = sample;
 	}
+	// FIXME this assumes a pointer!
 	self->samples[0] = self->samples[1];
 
 	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 64;
 	len = stream->readUnsignedInt() << 7;
 	ByteArray_set_position(stream, position);
-	self->super.amiga->store(stream, len);
+	Amiga_store(self->super.amiga, stream, len, -1);
+	//self->super.amiga->store(stream, len);
 
 	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 68);
@@ -681,18 +725,24 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 
 	ByteArray_set_position(stream, 26);
 	len = stream->readUnsignedShort() << 6;
-	patterns = new Vector.<AmigaRow>(len, true);
+	
+	assert_op(len, <=, DMPLAYER_MAX_PATTERNS);
+	//patterns = new Vector.<AmigaRow>(len, true);
+	
 	ByteArray_set_position(stream, position + (instr << 5));
 
 	if (instr) instr = position;
 
 	for (i = 0; i < len; ++i) {
-		row = new AmigaRow();
+		//row = new AmigaRow();
+		row = &self->patterns[i];
+		AmigaRow_ctor(row);
+		
 		row->note   = stream->readUnsignedByte();
 		row->sample = stream->readUnsignedByte() & 63;
 		row->effect = stream->readUnsignedByte();
 		row->param  = stream->readByte();
-		self->patterns[i] = row;
+		//self->patterns[i] = row;
 	}
 
 	position = ByteArray_get_position(stream);
@@ -701,20 +751,21 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 	if (instr) {
 		len = stream->readUnsignedInt();
 		ByteArray_set_position(stream, position);
-		data = amiga->store(stream, len);
+		data = Amiga_store(self->super.amiga, stream, len, -1);
 		position = ByteArray_get_position(stream);
 
-		self->super.amiga->memory->length += 350;
-		self->buffer1 = self->super.amiga->memory->length;
-		self->super.amiga->memory->length += 350;
-		self->buffer2 = self->super.amiga->memory->length;
-		self->super.amiga->memory->length += 350;
+		Amiga_memory_set_length(self->super.amiga->vector_count_memory + 350);
+		self->buffer1 = self->super.amiga->vector_count_memory;
+		Amiga_memory_set_length(self->super.amiga->vector_count_memory + 350);
+		self->buffer2 = self->super.amiga->vector_count_memory;
+		Amiga_memory_set_length(self->super.amiga->vector_count_memory + 350);
 		self->super.amiga->loopLen = 8;
 
-		len = self->samples->length;
+		//len = self->samples->length;
+		len = DMPLAYER_MAX_SAMPLES;
 
 		for (i = 1; i < len; ++i) {
-			sample = self->samples[i];
+			sample = &self->samples[i];
 			if (sample->wave < 32) continue;
 			ByteArray_set_position(stream, instr + ((sample->wave - 32) << 5));
 
@@ -728,7 +779,7 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 				sample->super.repeat = sample->super.length - sample->super.loop;
 				if ((sample->super.repeat & 1) != 0) sample->super.repeat--;
 			} else {
-				sample->super.loopPtr = amiga->memory->length;
+				sample->super.loopPtr = self->super.amiga->vector_count_memory;
 				sample->super.repeat  = 8;
 			}
 
@@ -745,7 +796,7 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 
 	if (stream->readUnsignedShort() == 1) {
 		ByteArray_set_position(stream, position);
-		len = stream->length - ByteArray_get_position(stream);
+		len = ByteArray_get_length(stream) - ByteArray_get_position(stream);
 		if (len > 256) len = 256;
 		for (i = 0; i < len; ++i) self->arpeggios[i] = stream->readUnsignedByte();
 	}
