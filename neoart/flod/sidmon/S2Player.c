@@ -403,35 +403,35 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	if (!is_str(id, "SIDMON II - THE MIDI VERSION")) return;
 
 	ByteArray_set_position(stream, 2);
-	self->length   = stream->readUnsignedByte();
-	self->speedDef = stream->readUnsignedByte();
-	self->samples  = new Vector.<S2Sample>(stream->readUnsignedShort() >> 6, true);
+	self->length   = stream->readUnsignedByte(stream);
+	self->speedDef = stream->readUnsignedByte(stream);
+	self->samples  = new Vector.<S2Sample>(stream->readUnsignedShort(stream) >> 6, true);
 
 	ByteArray_set_position(stream, 14);
-	len = stream->readUnsignedInt();
+	len = stream->readUnsignedInt(stream);
 	self->tracks = new Vector.<S2Step>(len, true);
 	ByteArray_set_position(stream, 90);
 
 	for (; i < len; ++i) {
 		step = new S2Step();
-		step->super.pattern = stream->readUnsignedByte();
+		step->super.pattern = stream->readUnsignedByte(stream);
 		if (step->super.pattern > higher) higher = step->super.pattern;
 		self->tracks[i] = step;
 	}
 
 	for (i = 0; i < len; ++i) {
 		step = self->tracks[i];
-		step->super.transpose = stream->readByte();
+		step->super.transpose = stream->readByte(stream);
 	}
 
 	for (i = 0; i < len; ++i) {
 		step = self->tracks[i];
-		step->soundTranspose = stream->readByte();
+		step->soundTranspose = stream->readByte(stream);
 	}
 
 	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 26);
-	len = stream->readUnsignedInt() >> 5;
+	len = stream->readUnsignedInt(stream) >> 5;
 	self->instruments = new Vector.<S2Instrument>(++len, true);
 	ByteArray_set_position(stream, position);
 
@@ -439,75 +439,75 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 
 	for (i = 0; ++i < len;) {
 		instr = new S2Instrument();
-		instr->wave           = stream->readUnsignedByte() << 4;
-		instr->waveLen        = stream->readUnsignedByte();
-		instr->waveSpeed      = stream->readUnsignedByte();
-		instr->waveDelay      = stream->readUnsignedByte();
-		instr->arpeggio       = stream->readUnsignedByte() << 4;
-		instr->arpeggioLen    = stream->readUnsignedByte();
-		instr->arpeggioSpeed  = stream->readUnsignedByte();
-		instr->arpeggioDelay  = stream->readUnsignedByte();
-		instr->vibrato        = stream->readUnsignedByte() << 4;
-		instr->vibratoLen     = stream->readUnsignedByte();
-		instr->vibratoSpeed   = stream->readUnsignedByte();
-		instr->vibratoDelay   = stream->readUnsignedByte();
-		instr->pitchBend      = stream->readByte();
-		instr->pitchBendDelay = stream->readUnsignedByte();
-		stream->readByte();
-		stream->readByte();
-		instr->attackMax      = stream->readUnsignedByte();
-		instr->attackSpeed    = stream->readUnsignedByte();
-		instr->decayMin       = stream->readUnsignedByte();
-		instr->decaySpeed     = stream->readUnsignedByte();
-		instr->sustain        = stream->readUnsignedByte();
-		instr->releaseMin     = stream->readUnsignedByte();
-		instr->releaseSpeed   = stream->readUnsignedByte();
+		instr->wave           = stream->readUnsignedByte(stream) << 4;
+		instr->waveLen        = stream->readUnsignedByte(stream);
+		instr->waveSpeed      = stream->readUnsignedByte(stream);
+		instr->waveDelay      = stream->readUnsignedByte(stream);
+		instr->arpeggio       = stream->readUnsignedByte(stream) << 4;
+		instr->arpeggioLen    = stream->readUnsignedByte(stream);
+		instr->arpeggioSpeed  = stream->readUnsignedByte(stream);
+		instr->arpeggioDelay  = stream->readUnsignedByte(stream);
+		instr->vibrato        = stream->readUnsignedByte(stream) << 4;
+		instr->vibratoLen     = stream->readUnsignedByte(stream);
+		instr->vibratoSpeed   = stream->readUnsignedByte(stream);
+		instr->vibratoDelay   = stream->readUnsignedByte(stream);
+		instr->pitchBend      = stream->readByte(stream);
+		instr->pitchBendDelay = stream->readUnsignedByte(stream);
+		stream->readByte(stream);
+		stream->readByte(stream);
+		instr->attackMax      = stream->readUnsignedByte(stream);
+		instr->attackSpeed    = stream->readUnsignedByte(stream);
+		instr->decayMin       = stream->readUnsignedByte(stream);
+		instr->decaySpeed     = stream->readUnsignedByte(stream);
+		instr->sustain        = stream->readUnsignedByte(stream);
+		instr->releaseMin     = stream->readUnsignedByte(stream);
+		instr->releaseSpeed   = stream->readUnsignedByte(stream);
 		self->instruments[i] = instr;
 		ByteArray_set_position_rel(stream, + 9);
 	}
 
 	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 30);
-	len = stream->readUnsignedInt();
+	len = stream->readUnsignedInt(stream);
 	self->waves = new Vector.<int>(len, true);
 	ByteArray_set_position(stream, position);
 
-	for (i = 0; i < len; ++i) self->waves[i] = stream->readUnsignedByte();
+	for (i = 0; i < len; ++i) self->waves[i] = stream->readUnsignedByte(stream);
 
 	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 34);
-	len = stream->readUnsignedInt();
+	len = stream->readUnsignedInt(stream);
 	self->arpeggios = new Vector.<int>(len, true);
 	ByteArray_set_position(stream, position);
 
-	for (i = 0; i < len; ++i) self->arpeggios[i] = stream->readByte();
+	for (i = 0; i < len; ++i) self->arpeggios[i] = stream->readByte(stream);
 
 	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 38);
-	len = stream->readUnsignedInt();
+	len = stream->readUnsignedInt(stream);
 	vibratos = new Vector.<int>(len, true);
 	ByteArray_set_position(stream, position);
 
-	for (i = 0; i < len; ++i) self->vibratos[i] = stream->readByte();
+	for (i = 0; i < len; ++i) self->vibratos[i] = stream->readByte(stream);
 
 	len = self->samples->length;
 	position = 0;
 
 	for (i = 0; i < len; ++i) {
 		sample = new S2Sample();
-		stream->readUnsignedInt();
-		sample->super.length    = stream->readUnsignedShort() << 1;
-		sample->super.loop      = stream->readUnsignedShort() << 1;
-		sample->super.repeat    = stream->readUnsignedShort() << 1;
-		sample->negStart  = position + (stream->readUnsignedShort() << 1);
-		sample->negLen    = stream->readUnsignedShort() << 1;
-		sample->negSpeed  = stream->readUnsignedShort();
-		sample->negDir    = stream->readUnsignedShort();
-		sample->negOffset = stream->readShort();
-		sample->negPos    = stream->readUnsignedInt();
-		sample->negCtr    = stream->readUnsignedShort();
+		stream->readUnsignedInt(stream);
+		sample->super.length    = stream->readUnsignedShort(stream) << 1;
+		sample->super.loop      = stream->readUnsignedShort(stream) << 1;
+		sample->super.repeat    = stream->readUnsignedShort(stream) << 1;
+		sample->negStart  = position + (stream->readUnsignedShort(stream) << 1);
+		sample->negLen    = stream->readUnsignedShort(stream) << 1;
+		sample->negSpeed  = stream->readUnsignedShort(stream);
+		sample->negDir    = stream->readUnsignedShort(stream);
+		sample->negOffset = stream->readShort(stream);
+		sample->negPos    = stream->readUnsignedInt(stream);
+		sample->negCtr    = stream->readUnsignedShort(stream);
 		ByteArray_set_position_rel(stream, + 6);
-		sample->super.name      = stream->readMultiByte(32, ENCODING);
+		sample->super.name      = stream->readMultiByte(stream, 32, ENCODING);
 
 		sample->super.pointer = position;
 		sample->super.loopPtr = position + sample->super.loop;
@@ -518,52 +518,52 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	sampleData = position;
 	len = ++higher;
 	pointers = new Vector.<int>(++higher, true);
-	for (i = 0; i < len; ++i) pointers[i] = stream->readUnsignedShort();
+	for (i = 0; i < len; ++i) pointers[i] = stream->readUnsignedShort(stream);
 
 	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 50);
-	len = stream->readUnsignedInt();
+	len = stream->readUnsignedInt(stream);
 	patterns = new Vector.<SMRow>();
 	ByteArray_set_position(stream, position);
 	j = 1;
 
 	for (i = 0; i < len; ++i) {
 		row   = new SMRow();
-		value = stream->readByte();
+		value = stream->readByte(stream);
 
 		if (!value) {
-			row->super.effect = stream->readByte();
-			row->super.param  = stream->readUnsignedByte();
+			row->super.effect = stream->readByte(stream);
+			row->super.param  = stream->readUnsignedByte(stream);
 			i += 2;
 		} else if (value < 0) {
 			row->speed = ~value;
 		} else if (value < 112) {
 			row->super.note = value;
-			value = stream->readByte();
+			value = stream->readByte(stream);
 			i++;
 
 			if (value < 0) {
 				row->speed = ~value;
 			} else if (value < 112) {
 				row->super.sample = value;
-				value = stream->readByte();
+				value = stream->readByte(stream);
 				i++;
 
 				if (value < 0) {
 					row->speed = ~value;
 				} else {
 					row->super.effect = value;
-					row->super.param  = stream->readUnsignedByte();
+					row->super.param  = stream->readUnsignedByte(stream);
 					i++;
 				}
 			} else {
 				row->super.effect = value;
-				row->super.param  = stream->readUnsignedByte();
+				row->super.param  = stream->readUnsignedByte(stream);
 				i++;
 			}
 		} else {
 			row->super.effect = value;
-			row->super.param  = stream->readUnsignedByte();
+			row->super.param  = stream->readUnsignedByte(stream);
 			i++;
 		}
 
