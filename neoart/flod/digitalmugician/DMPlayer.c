@@ -126,7 +126,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 					if (sample->wave > 31) {
 						chan->pointer  = sample->super.pointer;
 						chan->length   = sample->super.length;
-						chan->enabled  = 0;
+						AmigaChannel_set_enabled(chan, 0);
 						voice->mixPtr  = sample->super.pointer;
 						voice->mixEnd  = sample->super.pointer + sample->super.length;
 						voice->mixMute = 0;
@@ -134,7 +134,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 						dst = sample->wave << 7;
 						chan->pointer = dst;
 						chan->length  = sample->waveLen;
-						if (voice->val1 != 10) chan->enabled = 0;
+						if (voice->val1 != 10) AmigaChannel_set_enabled(chan, 0);
 
 						if (self->numChannels == 4) {
 							if (sample->effect != 0 && voice->val1 != 2 && voice->val1 != 4) {
@@ -557,7 +557,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 
 		if (i < 4) {
 			chan = voice->channel;
-			chan->enabled = 1;
+			AmigaChannel_set_enabled(chan, 1);
 		}
 	}
 }
@@ -592,7 +592,7 @@ void DMPlayer_initialize(struct DMPlayer* self) {
 
 		if (i < 4) {
 			chan = self->super.amiga->channels[i];
-			chan->enabled = 0;
+			AmigaChannel_set_enabled(chan, 0);
 			chan->pointer = self->super.amiga->loopPtr;
 			chan->length  = 2;
 			chan->period  = 124;
