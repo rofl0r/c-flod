@@ -79,12 +79,16 @@ void S2Player_process(struct S2Player* self) {
 			voice->enabled = voice->note = 0;
 
 			if (!self->patternPos) {
-				voice->step    = &self->tracks[int(self->trackPos + voice->index * self->length)];
+				unsigned idxx = self->trackPos + voice->index * self->length;
+				assert_op(idxx, <, S2PLAYER_MAX_TRACKS);
+				voice->step    = &self->tracks[idxx];
 				voice->pattern = voice->step->super.pattern;
 				voice->speed   = 0;
 			}
 			if (--voice->speed < 0) {
-				voice->row   = row = self->patterns[voice->pattern++];
+				voice->pattern++;
+				assert_op(voice->pattern, <, S2PLAYER_MAX_PATTERNS);
+				voice->row   = row = &self->patterns[voice->pattern];
 				voice->speed = row->speed;
 
 				if (row->super.note) {
@@ -105,11 +109,18 @@ void S2Player_process(struct S2Player* self) {
 
 				if (row->super.sample) {
 					voice->instrument = row->super.sample;
-					voice->instr  = self->instruments[int(voice->instrument + voice->step->soundTranspose)];
-					voice->sample = self->samples[self->waves[voice->instr->wave]];
+					unsigned idxx = voice->instrument + voice->step->soundTranspose;
+					assert_op(idxx, <, S2PLAYER_MAX_INSTRUMENTS);
+					voice->instr  = &self->instruments[idxx];
+					assert_op(voice->instr->wave, <, S2PLAYER_MAX_WAVES);
+					idxx = self->waves[voice->instr->wave];
+					assert_op(idxx, <, S2PLAYER_MAX_SAMPLES);
+					voice->sample = &self->samples[idxx];
 				}
+				assert_op(voice->instr->arpeggio, <, S2PLAYER_MAX_ARPEGGIOS);
 				voice->original = voice->note + self->arpeggios[voice->instr->arpeggio];
 				
+				assert_op(voice->original, <, ARRAY_SIZE(PERIODS));
 				voice->period = PERIODS[voice->original];
 				AmigaChannel_set_period(chan, voice->period);
 
@@ -133,7 +144,7 @@ void S2Player_process(struct S2Player* self) {
 			}
 		}
 	}
-	voice = self->voices[0];
+	voice = &self->voices[0];
 
 	while (voice) {
 		if (!voice->sample) {
@@ -159,6 +170,7 @@ void S2Player_process(struct S2Player* self) {
 			}
 
 			value = sample->negStart + sample->negPos;
+			assert_op(value, <, AMIGA_MAX_MEMORY);
 			self->super.amiga->memory[value] = ~self->super.amiga->memory[value];
 			sample->negPos += sample->negOffset;
 			value = sample->negLen - 1;
@@ -240,8 +252,12 @@ void S2Player_process(struct S2Player* self) {
 				voice->waveCtr = instr->waveDelay - instr->waveSpeed;
 				if (voice->wavePos == instr->waveLen) voice->wavePos = 0;
 				else voice->wavePos++;
-
-				voice->sample = sample = self->samples[self->waves[int(instr->wave + voice->wavePos)]];
+				
+				unsigned idxx = instr->wave + voice->wavePos;
+				assert_op(idxx, <, S2PLAYER_MAX_WAVES);
+				idxx = self->waves[idxx];
+				assert_op(idxx, <, S2PLAYER_MAX_WAVES);
+				voice->sample = sample = self->samples[idxx];
 				chan->pointer = sample->super.pointer;
 				chan->length  = sample->super.length;
 			} else
@@ -254,7 +270,10 @@ void S2Player_process(struct S2Player* self) {
 				if (voice->arpeggioPos == instr->arpeggioLen) voice->arpeggioPos = 0;
 				else voice->arpeggioPos++;
 
-				value = voice->original + self->arpeggios[int(instr->arpeggio + voice->arpeggioPos)];
+				unsigned idxx = instr->arpeggio + voice->arpeggioPos;
+				assert_op(idxx, <, S2PLAYER_MAX_ARPEGGIOS);
+				value = voice->original + self->arpeggios[idxx];
+				assert_op(value, <, ARRAY_SIZE(PERIODS));
 				voice->period = PERIODS[value];
 			} else
 				voice->arpeggioCtr++;
@@ -268,7 +287,9 @@ void S2Player_process(struct S2Player* self) {
 				case 0x70:  //arpeggio
 					self->arpeggioFx[0] = row->super.param >> 4;
 					self->arpeggioFx[2] = row->super.param & 15;
+					assert_op(self->arpeggioPos, <, S2PLAYER_MAX_ARPEGGIOFX);
 					value = voice->original + self->arpeggioFx[self->arpeggioPos];
+					assert_op(value, <, ARRAY_SIZE(PERIODS));
 					voice->period = PERIODS[value];
 					break;
 				case 0x71:  //pitch up
@@ -322,7 +343,9 @@ void S2Player_process(struct S2Player* self) {
 				if (voice->vibratoPos == instr->vibratoLen) voice->vibratoPos = 0;
 				else voice->vibratoPos++;
 
-				voice->period += self->vibratos[int(instr->vibrato + voice->vibratoPos)];
+				unsigned idxx = instr->vibrato + voice->vibratoPos;
+				assert_op(idxx, <, S2PLAYER_MAX_VIBRATOS);
+				voice->period += self->vibratos[idxx];
 			} else
 				voice->vibratoCtr++;
 		}
@@ -336,7 +359,9 @@ void S2Player_process(struct S2Player* self) {
 
 		if (row->super.param) {
 			if (row->super.effect && row->super.effect < 0x70) {
-				voice->noteSlideTo = PERIODS[int(row->super.effect + voice->step->super.transpose)];
+				unsigned idxx = row->super.effect + voice->step->super.transpose;
+				assert_op(idxx, <, ARRAY_SIZE(PERIODS));
+				voice->noteSlideTo = PERIODS[idxx];
 				value = row->super.param;
 				if ((voice->noteSlideTo - voice->period) < 0) value = -value;
 					voice->noteSlideSpeed = value;
@@ -377,8 +402,8 @@ void S2Player_initialize(struct S2Player* self) {
 
 	while (voice) {
 		S2Voice_initialize(voice);
-		voice->channel = self->super.amiga->channels[voice->index];
-		voice->instr   = self->instruments[0];
+		voice->channel = &self->super.amiga->channels[voice->index];
+		voice->instr   = &self->instruments[0];
 
 		self->arpeggioFx[voice->index] = 0;
 		voice = voice->next;
@@ -394,7 +419,8 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	int j = 0;
 	int len = 0; 
 	//pointers:Vector.<int>;
-	int pointers[]; // FIXME
+#define MAX_POINTERS 4
+	int pointers[MAX_POINTERS]; // FIXME
 	int position = 0; 
 	int pos = 0; 
 	struct SMRow *row = 0;
@@ -402,6 +428,8 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	struct S2Sample *sample = 0;
 	int sampleData = 0;
 	int value = 0;
+	unsigned samples_count;
+	unsigned tracks_count;
 	
 	ByteArray_set_position(stream, 58);
 	stream->readMultiByte(stream, id, 28);
@@ -410,22 +438,33 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	ByteArray_set_position(stream, 2);
 	self->length   = stream->readUnsignedByte(stream);
 	self->speedDef = stream->readUnsignedByte(stream);
-	self->samples  = new Vector.<S2Sample>(stream->readUnsignedShort(stream) >> 6, true);
+	
+	samples_count = stream->readUnsignedShort(stream) >> 6;
+	assert_op(samples_count, <=, S2PLAYER_MAX_SAMPLES);
+	
+	//self->samples  = new Vector.<S2Sample>(stream->readUnsignedShort(stream) >> 6, true);
 
 	ByteArray_set_position(stream, 14);
 	len = stream->readUnsignedInt(stream);
-	self->tracks = new Vector.<S2Step>(len, true);
+	
+	tracks_count = len;
+	assert_op(tracks_count, <=, S2PLAYER_MAX_TRACKS);
+	
+	//self->tracks = new Vector.<S2Step>(len, true);
 	ByteArray_set_position(stream, 90);
 
 	for (; i < len; ++i) {
-		step = new S2Step();
+		//step = new S2Step();
+		step = &self->tracks[i];
+		S2Step_ctor(step);
+		
 		step->super.pattern = stream->readUnsignedByte(stream);
 		if (step->super.pattern > higher) higher = step->super.pattern;
-		self->tracks[i] = step;
+		//self->tracks[i] = step;
 	}
 
 	for (i = 0; i < len; ++i) {
-		step = self->tracks[i];
+		step = &self->tracks[i];
 		step->super.transpose = stream->readByte(stream);
 	}
 
@@ -437,13 +476,20 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 26);
 	len = stream->readUnsignedInt(stream) >> 5;
-	self->instruments = new Vector.<S2Instrument>(++len, true);
+	//self->instruments = new Vector.<S2Instrument>(++len, true);
+	++len;
+	assert_op(len, <=, S2PLAYER_MAX_INSTRUMENTS);
 	ByteArray_set_position(stream, position);
 
-	self->instruments[0] = new S2Instrument();
+	//self->instruments[0] = new S2Instrument();
+	S2Instrument_ctor(&self->instruments[0]);
 
-	for (i = 0; ++i < len;) {
-		instr = new S2Instrument();
+	for(i = 1; i < len; i++) {
+	//for (i = 0; ++i < len;) {
+		//instr = new S2Instrument();
+		instr = &self->instruments[i];
+		S2Instrument_ctor(instr);
+		
 		instr->wave           = stream->readUnsignedByte(stream) << 4;
 		instr->waveLen        = stream->readUnsignedByte(stream);
 		instr->waveSpeed      = stream->readUnsignedByte(stream);
@@ -467,14 +513,15 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 		instr->sustain        = stream->readUnsignedByte(stream);
 		instr->releaseMin     = stream->readUnsignedByte(stream);
 		instr->releaseSpeed   = stream->readUnsignedByte(stream);
-		self->instruments[i] = instr;
+		//self->instruments[i] = instr;
 		ByteArray_set_position_rel(stream, + 9);
 	}
 
 	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 30);
 	len = stream->readUnsignedInt(stream);
-	self->waves = new Vector.<int>(len, true);
+	//self->waves = new Vector.<int>(len, true);
+	assert_op(len, <=, S2PLAYER_MAX_WAVES);
 	ByteArray_set_position(stream, position);
 
 	for (i = 0; i < len; ++i) self->waves[i] = stream->readUnsignedByte(stream);
@@ -482,7 +529,8 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 34);
 	len = stream->readUnsignedInt(stream);
-	self->arpeggios = new Vector.<int>(len, true);
+	//self->arpeggios = new Vector.<int>(len, true);
+	assert_op(len, <=, S2PLAYER_MAX_ARPEGGIOS);
 	ByteArray_set_position(stream, position);
 
 	for (i = 0; i < len; ++i) self->arpeggios[i] = stream->readByte(stream);
@@ -490,16 +538,22 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 38);
 	len = stream->readUnsignedInt(stream);
-	vibratos = new Vector.<int>(len, true);
+	//vibratos = new Vector.<int>(len, true);
+	assert_op(len, <=, S2PLAYER_MAX_VIBRATOS);
 	ByteArray_set_position(stream, position);
 
 	for (i = 0; i < len; ++i) self->vibratos[i] = stream->readByte(stream);
 
-	len = self->samples->length;
+	len = samples_count; //self->samples->length;
 	position = 0;
+	
+	assert_op(len, <, S2PLAYER_MAX_SAMPLES);
 
 	for (i = 0; i < len; ++i) {
-		sample = new S2Sample();
+		//sample = new S2Sample();
+		sample = &self->samples[i];
+		S2Sample_ctor(sample);
+		
 		stream->readUnsignedInt(stream);
 		sample->super.length    = stream->readUnsignedShort(stream) << 1;
 		sample->super.loop      = stream->readUnsignedShort(stream) << 1;
@@ -517,23 +571,33 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 		sample->super.pointer = position;
 		sample->super.loopPtr = position + sample->super.loop;
 		position += sample->super.length;
-		self->samples[i] = sample;
+		//self->samples[i] = sample;
 	}
 
 	sampleData = position;
 	len = ++higher;
-	pointers = new Vector.<int>(++higher, true);
+	//pointers = new Vector.<int>(++higher, true);
+	++higher;
+	assert_op(higher + 1, <=, MAX_POINTERS);
 	for (i = 0; i < len; ++i) pointers[i] = stream->readUnsignedShort(stream);
 
 	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 50);
 	len = stream->readUnsignedInt(stream);
-	patterns = new Vector.<SMRow>();
+	//self->patterns = new Vector.<SMRow>();
+	
 	ByteArray_set_position(stream, position);
 	j = 1;
+	
+	unsigned pattern_count = len + pos; // FIXME compare with as3 code patterns.length after loop
+	assert_op(len + pos, <, S2PLAYER_MAX_PATTERNS);
+	assert_op(j + 1 + len, <, MAX_POINTERS);
 
 	for (i = 0; i < len; ++i) {
-		row   = new SMRow();
+		//row   = new SMRow();
+		row = &self->patterns[pos];
+		SMRow_ctor(row);
+		
 		value = stream->readByte(stream);
 
 		if (!value) {
@@ -572,15 +636,19 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 			i++;
 		}
 
-		self->patterns[pos++] = row;
+		//self->patterns[pos++] = row;
+		pos++;
 		if ((position + pointers[j]) == ByteArray_get_position(stream)) pointers[j++] = pos;
 	}
-	pointers[j] = self->patterns->length;
-	self->patterns->fixed = true;
+	//pointers[j] = self->patterns->length;
+	pointers[j] = pattern_count;
+	//self->patterns->fixed = true;
 	 
 	if ((ByteArray_get_position(stream) & 1) != 0) ByteArray_set_position_rel(stream, +1);
-	self->super.amiga->store(stream, sampleData);
-	len = self->tracks.length;
+	Amiga_store(self->super.amiga, stream, sampleData);
+
+	//len = self->tracks.length;
+	len = tracks_count;
 
 	for (i = 0; i < len; ++i) {
 		step = &self->tracks[i];
