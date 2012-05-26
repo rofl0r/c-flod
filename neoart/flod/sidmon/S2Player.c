@@ -86,9 +86,10 @@ void S2Player_process(struct S2Player* self) {
 				voice->speed   = 0;
 			}
 			if (--voice->speed < 0) {
-				voice->pattern++;
+				
 				assert_op(voice->pattern, <, S2PLAYER_MAX_PATTERNS);
 				voice->row   = row = &self->patterns[voice->pattern];
+				voice->pattern++;
 				voice->speed = row->speed;
 
 				if (row->super.note) {
@@ -125,6 +126,7 @@ void S2Player_process(struct S2Player* self) {
 				AmigaChannel_set_period(chan, voice->period);
 
 				sample = voice->sample;
+				assert_op(sample, !=, 0);
 				chan->pointer = sample->super.pointer;
 				chan->length  = sample->super.length;
 				AmigaChannel_set_enabled(chan, voice->enabled);
@@ -419,8 +421,8 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	int j = 0;
 	int len = 0; 
 	//pointers:Vector.<int>;
-#define MAX_POINTERS 4
-	int pointers[MAX_POINTERS]; // FIXME
+#define STACK_MAX_POINTERS 258
+	int pointers[STACK_MAX_POINTERS]; // FIXME
 	int position = 0; 
 	int pos = 0; 
 	struct SMRow *row = 0;
@@ -547,7 +549,7 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	len = samples_count; //self->samples->length;
 	position = 0;
 	
-	assert_op(len, <, S2PLAYER_MAX_SAMPLES);
+	assert_op(len, <=, S2PLAYER_MAX_SAMPLES);
 
 	for (i = 0; i < len; ++i) {
 		//sample = new S2Sample();
@@ -579,7 +581,7 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	len = ++higher;
 	//pointers = new Vector.<int>(++higher, true);
 	++higher;
-	assert_op(higher + 1, <=, MAX_POINTERS);
+	assert_op(higher + 1, <=, STACK_MAX_POINTERS);
 	for (i = 0; i < len; ++i) pointers[i] = stream->readUnsignedShort(stream);
 
 	position = ByteArray_get_position(stream);
@@ -590,9 +592,8 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	ByteArray_set_position(stream, position);
 	j = 1;
 	
-	unsigned pattern_count = len + pos; // FIXME compare with as3 code patterns.length after loop
+	unsigned pattern_count = pos; // not finished yet
 	assert_op(len + pos, <, S2PLAYER_MAX_PATTERNS);
-	assert_op(j + 1 + len, <, MAX_POINTERS);
 
 	for (i = 0; i < len; ++i) {
 		//row   = new SMRow();
@@ -639,8 +640,10 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 
 		//self->patterns[pos++] = row;
 		pos++;
+		assert_op(j + 1, <, STACK_MAX_POINTERS);
 		if ((position + pointers[j]) == ByteArray_get_position(stream)) pointers[j++] = pos;
 	}
+	pattern_count = pos - pattern_count;
 	//pointers[j] = self->patterns->length;
 	pointers[j] = pattern_count;
 	//self->patterns->fixed = true;
@@ -653,6 +656,7 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 
 	for (i = 0; i < len; ++i) {
 		step = &self->tracks[i];
+		assert_op(step->super.pattern, <, STACK_MAX_POINTERS);
 		step->super.pattern = pointers[step->super.pattern];
 	}
 
