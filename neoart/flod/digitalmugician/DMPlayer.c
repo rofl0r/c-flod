@@ -44,7 +44,7 @@ void DMPlayer_ctor(struct DMPlayer* self, struct Amiga *amiga) {
 	for(; i < DMPLAYER_MAX_VOICES; i++)
 		DMVoice_ctor(&self->voices[i]);
 
-	tables();
+	tables(self);
 	
 	//vtable
 	self->super.super.process = DMPlayer_process;
@@ -76,29 +76,33 @@ void DMPlayer_process(struct DMPlayer* self) {
 	struct DMVoice *voice = 0;
 
 	for (i = 0; i < self->numChannels; ++i) {
-		voice = self->voices[i];
+		voice = &self->voices[i];
 		sample = voice->sample;
 
 		if (i < 3 || self->numChannels == 4) {
 			chan = voice->channel;
-			if (self->stepEnd) voice->step = self->song1->tracks[int(self->trackPos + i)];
+			assert_op((self->trackPos + i), <, DMSONG_MAX_TRACKS);
+			if (self->stepEnd) voice->step = &self->song1->tracks[(self->trackPos + i)];
 
 			if (sample->wave > 31) {
 				chan->pointer = sample->super.loopPtr;
 				chan->length  = sample->super.repeat;
 			}
 		} else {
-			chan = self->mixChannel;
-			if (self->stepEnd) voice->step = self->song2->tracks[int(self->trackPos + (i - 3))];
+			chan = &self->mixChannel;
+			assert_op(self->trackPos + (i - 3), <, DMSONG_MAX_TRACKS);
+			if (self->stepEnd) voice->step = &self->song2->tracks[(self->trackPos + (i - 3))];
 		}
 
 		if (self->patternEnd) {
-			row = self->patterns[int(voice->step->pattern + self->patternPos)];
+			assert_op(voice->step->pattern + self->patternPos, <, DMPLAYER_MAX_PATTERNS);
+			row = &self->patterns[voice->step->pattern + self->patternPos];
 
 			if (row->note) {
 				if (row->effect != 74) {
 					voice->note = row->note;
-					if (row->sample) sample = voice->sample = self->samples[row->sample];
+					assert_op(row->sample, <, DMPLAYER_MAX_SAMPLES);
+					if (row->sample) sample = voice->sample = &self->samples[row->sample];
 				}
 				voice->val1 = row->effect < 64 ? 1 : row->effect - 62;
 				voice->val2 = row->param;
@@ -196,7 +200,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 	}
 
 	for (i = 0; i < self->numChannels; ++i) {
-		voice  = self->voices[i];
+		voice  = &self->voices[i];
 		sample = voice->sample;
 
 		if (self->numChannels == 4) {
@@ -216,7 +220,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 							assert_op(dst + 127, <, AMIGA_MAX_MEMORY);
 							for (j = 0; j < 127; ++j) {
 								value  = memory[dst];
-								value += memory[int(dst + 1)];
+								value += memory[dst + 1];
 								memory[dst++] = value >> 1;
 							}
 							break;
@@ -230,7 +234,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 							// FIXME assert on the idx mem access
 							for (j = 0; j < len; ++j) {
 								value  = memory[src1++];
-								value += memory[int(src2 + idx)];
+								value += memory[src2 + idx];
 								memory[dst++] = value >> 1;
 								idx = ++idx & 127;
 							}
@@ -316,7 +320,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 							assert_op(dst + 127, <, AMIGA_MAX_MEMORY);
 							for (j = 0; j < 126; ++j) {
 								value  = memory[dst++] * 3;
-								value += memory[int(dst + 1)];
+								value += memory[dst + 1];
 								memory[dst] = value >> 2;
 							}
 							break;
@@ -363,7 +367,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 							assert_op(dst + 127, <, AMIGA_MAX_MEMORY);
 							for (j = 0; j < 126; ++j) {
 								value  = memory[dst++];
-								value += memory[int(dst + 1)];
+								value += memory[dst + 1];
 								memory[dst] = value >> 1;
 							}
 							break;
@@ -382,7 +386,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 							assert_op(dst + 128, <, AMIGA_MAX_MEMORY);
 							for (j = 0; j < 127; ++j) {
 								value  = memory[dst];
-								value += memory[int(dst + 1)];
+								value += memory[dst + 1];
 								memory[dst++] = value >> 1;
 							}
 							dst = idx;
@@ -408,7 +412,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 				}
 			}
 		} else {
-			chan = (i < 3) ? voice->channel : self->mixChannel;
+			chan = (i < 3) ? voice->channel : &self->mixChannel;
 		}
 
 		if (voice->volumeCtr) {
@@ -477,11 +481,11 @@ void DMPlayer_process(struct DMPlayer* self) {
 		self->buffer1 = self->buffer2;
 		self->buffer2 = src1;
 
-		chan = self->super.amiga->channels[3];
+		chan = &self->super.amiga->channels[3];
 		chan->pointer = src1;
 
 		for (i = 3; i < 7; ++i) {
-			voice = self->voices[i];
+			voice = &self->voices[i];
 			voice->mixStep = 0;
 
 			if (voice->finalPeriod < 125) {
@@ -503,7 +507,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 
 			for (j = 3; j < 7; ++j) {
 				unsigned idxx = (voice->mixPtr + (voice->mixStep >> 16));
-				voice = self->voices[j];
+				voice = &self->voices[j];
 				assert_op(idxx, <, AMIGA_MAX_MEMORY);
 				src2 = (memory[idxx] & 255) + voice->mixVolume;
 				dst += self->volumes[src2];
@@ -529,9 +533,9 @@ void DMPlayer_process(struct DMPlayer* self) {
 			self->stepEnd    = 1;
 			self->trackPos  += 4;
 
-			if (self->trackPos == self->song1.length) {
-				self->trackPos = self->song1.loopStep;
-				self->super.amiga->complete = 1;
+			if (self->trackPos == self->song1->length) {
+				self->trackPos = self->song1->loopStep;
+				CoreMixer_set_complete(&self->super.amiga->super, 1);
 			}
 		}
 	} else {
@@ -540,7 +544,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 	}
 
 	for (i = 0; i < self->numChannels; ++i) {
-		voice = self->voices[i];
+		voice = &self->voices[i];
 		voice->mixPtr += voice->mixStep >> 16;
 
 		sample = voice->sample;
@@ -569,11 +573,12 @@ void DMPlayer_initialize(struct DMPlayer* self) {
 	int len = 0;
 	struct DMVoice *voice = 0;
 	
-	self->super->initialize();
+	//self->super->initialize();
+	CorePlayer_initialize(&self->super.super);
 
 	if (self->super.super.playSong > 7) self->super.super.playSong = 0;
 
-	self->song1  = self->songs[self->super.super.playSong];
+	self->song1  = &self->songs[self->super.super.playSong];
 	self->super.super.speed  = self->song1->speed & 0x0f;
 	self->super.super.speed |= self->super.super.speed << 4;
 	self->super.super.tick   = self->song1->speed;
@@ -586,12 +591,13 @@ void DMPlayer_initialize(struct DMPlayer* self) {
 	self->numChannels = 4;
 
 	for (; i < 7; ++i) {
-		voice = self->voices[i];
-		voice->initialize();
-		voice->sample = self->samples[0];
+		voice = &self->voices[i];
+		DMVoice_initialize(voice);
+		//voice->initialize();
+		voice->sample = &self->samples[0];
 
 		if (i < 4) {
-			chan = self->super.amiga->channels[i];
+			chan = &self->super.amiga->channels[i];
 			AmigaChannel_set_enabled(chan, 0);
 			chan->pointer = self->super.amiga->loopPtr;
 			chan->length  = 2;
@@ -604,13 +610,13 @@ void DMPlayer_initialize(struct DMPlayer* self) {
 
 	if (self->super.super.version == DIGITALMUG_V2) {
 		if ((self->super.super.playSong & 1) != 0) self->super.super.playSong--;
-		self->song2 = self->songs[int(self->super.super.playSong + 1)];
+		self->song2 = &self->songs[self->super.super.playSong + 1];
 
 		//self->mixChannel  = new AmigaChannel(7);
 		AmigaChannel_ctor(&self->mixChannel, 7);
 		self->numChannels = 7;
 
-		chan = self->super.amiga->channels[3];
+		chan = &self->super.amiga->channels[3];
 		chan->mute    = 0;
 		chan->pointer = self->buffer1;
 		chan->length  = 350;
@@ -629,7 +635,7 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 	int i = 0; 
 	char id[28];
 	//index:Vector.<int>;
-	int index[8] = 0;
+	int index[8] = {0};
 	int instr = 0; 
 	int j = 0; 
 	int len = 0; 
@@ -667,8 +673,8 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 	ByteArray_set_position(stream, 204);
 	self->super.super.lastSong = self->songs->length - 1;
 
-	for (i = 0; i < 8; ++i) {
-		song = self->songs[i];
+	for (i = 0; i < DMPLAYER_MAX_SONGS; ++i) {
+		song = &self->songs[i];
 		len  = index[i] << 2;
 
 		assert_op(len, <, DMSONG_MAX_TRACKS);
@@ -720,7 +726,7 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 	self->samples[0] = self->samples[1];
 
 	position = ByteArray_get_position(stream);
-	ByteArray_set_position(stream, 64;
+	ByteArray_set_position(stream, 64);
 	len = stream->readUnsignedInt(stream) << 7;
 	ByteArray_set_position(stream, position);
 	Amiga_store(self->super.amiga, stream, len, -1);
@@ -762,11 +768,11 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 		data = Amiga_store(self->super.amiga, stream, len, -1);
 		position = ByteArray_get_position(stream);
 
-		Amiga_memory_set_length(self->super.amiga->vector_count_memory + 350);
+		Amiga_memory_set_length(self->super.amiga, self->super.amiga->vector_count_memory + 350);
 		self->buffer1 = self->super.amiga->vector_count_memory;
-		Amiga_memory_set_length(self->super.amiga->vector_count_memory + 350);
+		Amiga_memory_set_length(self->super.amiga, self->super.amiga->vector_count_memory + 350);
 		self->buffer2 = self->super.amiga->vector_count_memory;
-		Amiga_memory_set_length(self->super.amiga->vector_count_memory + 350);
+		Amiga_memory_set_length(self->super.amiga, self->super.amiga->vector_count_memory + 350);
 		self->super.amiga->loopLen = 8;
 
 		//len = self->samples->length;
@@ -812,7 +818,7 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 }
 
 void tables(struct DMPlayer* self) {
-	var int i = 0;
+	int i = 0;
 	int idx = 0;
 	int j = 0; 
 	int pos = 0; 

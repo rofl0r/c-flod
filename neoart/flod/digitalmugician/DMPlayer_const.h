@@ -1,5 +1,5 @@
 /* this file is intended for inclusion in DMPlayer.c only */
-const unsigned short PERIODS[] = {
+static const unsigned short PERIODS[] = {
         3220,3040,2869,2708,2556,2412,2277,2149,2029,1915,1807,1706,
         1610,1520,1434,1354,1278,1206,1139,1075,1014, 957, 904, 853,
          805, 760, 717, 677, 639, 603, 569, 537, 507, 479, 452, 426,
