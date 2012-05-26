@@ -62,7 +62,13 @@ static const unsigned short PERIODS = {0,
 
 //override
 void S2Player_process(struct S2Player* self) {
-	var chan:AmigaChannel, instr:S2Instrument, row:SMRow, sample:S2Sample, int value; voice:S2Voice = voices[0];
+	struct AmigaChannel *chan = 0;
+	struct S2Instrument *instr = 0;
+	struct SMRow *row = 0;
+	struct S2Sample *sample = 0;
+	int value = 0; 
+	struct S2Voice *voice = &self->voices[0];
+	
 	arpeggioPos = ++arpeggioPos & 3;
 
 	if (++tick >= speed) {
@@ -355,7 +361,7 @@ void S2Player_process(struct S2Player* self) {
 
 //override
 void S2Player_initialize(struct S2Player* self) {
-	var voice:S2Voice = voices[0];
+	struct S2Voice *voice = &self->voices[0];
 	super->initialize();
 
 	speed      = speedDef;
@@ -376,10 +382,25 @@ void S2Player_initialize(struct S2Player* self) {
 
 //override
 void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
-	var int higher; i:int = 0, id:String, instr:S2Instrument, int j; int len; pointers:Vector.<int>, int position; int pos; row:SMRow, step:S2Step, sample:S2Sample, int sampleData; int value;
+	int higher = 0; 
+	int i = 0;
+	char id[32];
+	struct S2Instrument *instr = 0;
+	int j = 0;
+	int len = 0; 
+	//pointers:Vector.<int>;
+	int pointers[]; // FIXME
+	int position = 0; 
+	int pos = 0; 
+	struct SMRow *row = 0;
+	struct S2Step *step = 0;
+	struct S2Sample *sample = 0;
+	int sampleData = 0;
+	int value = 0;
+	
 	stream->position = 58;
-	id = stream->readMultiByte(28, ENCODING);
-	if (id != "SIDMON II - THE MIDI VERSION") return;
+	stream->readMultiByte(stream, id, 28);
+	if (!is_str(id, "SIDMON II - THE MIDI VERSION")) return;
 
 	stream->position = 2;
 	length   = stream->readUnsignedByte();
