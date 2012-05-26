@@ -398,19 +398,19 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	int sampleData = 0;
 	int value = 0;
 	
-	stream->position = 58;
+	ByteArray_set_position(stream, 58);
 	stream->readMultiByte(stream, id, 28);
 	if (!is_str(id, "SIDMON II - THE MIDI VERSION")) return;
 
-	stream->position = 2;
+	ByteArray_set_position(stream, 2);
 	self->length   = stream->readUnsignedByte();
 	self->speedDef = stream->readUnsignedByte();
 	self->samples  = new Vector.<S2Sample>(stream->readUnsignedShort() >> 6, true);
 
-	stream->position = 14;
+	ByteArray_set_position(stream, 14);
 	len = stream->readUnsignedInt();
 	self->tracks = new Vector.<S2Step>(len, true);
-	stream->position = 90;
+	ByteArray_set_position(stream, 90);
 
 	for (; i < len; ++i) {
 		step = new S2Step();
@@ -430,10 +430,10 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	}
 
 	position = stream->position;
-	stream->position = 26;
+	ByteArray_set_position(stream, 26);
 	len = stream->readUnsignedInt() >> 5;
-	instruments = new Vector.<S2Instrument>(++len, true);
-	stream->position = position;
+	self->instruments = new Vector.<S2Instrument>(++len, true);
+	ByteArray_set_position(stream, position);
 
 	self->instruments[0] = new S2Instrument();
 
@@ -467,26 +467,26 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	}
 
 	position = stream->position;
-	stream->position = 30;
+	ByteArray_set_position(stream, 30);
 	len = stream->readUnsignedInt();
-	waves = new Vector.<int>(len, true);
-	stream->position = position;
+	self->waves = new Vector.<int>(len, true);
+	ByteArray_set_position(stream, position);
 
 	for (i = 0; i < len; ++i) self->waves[i] = stream->readUnsignedByte();
 
 	position = stream->position;
-	stream->position = 34;
+	ByteArray_set_position(stream, 34);
 	len = stream->readUnsignedInt();
-	arpeggios = new Vector.<int>(len, true);
-	stream->position = position;
+	self->arpeggios = new Vector.<int>(len, true);
+	ByteArray_set_position(stream, position);
 
 	for (i = 0; i < len; ++i) self->arpeggios[i] = stream->readByte();
 
 	position = stream->position;
-	stream->position = 38;
+	ByteArray_set_position(stream, 38);
 	len = stream->readUnsignedInt();
 	vibratos = new Vector.<int>(len, true);
-	stream->position = position;
+	ByteArray_set_position(stream, position);
 
 	for (i = 0; i < len; ++i) self->vibratos[i] = stream->readByte();
 
@@ -521,10 +521,10 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	for (i = 0; i < len; ++i) pointers[i] = stream->readUnsignedShort();
 
 	position = stream->position;
-	stream->position = 50;
+	ByteArray_set_position(stream, 50);
 	len = stream->readUnsignedInt();
 	patterns = new Vector.<SMRow>();
-	stream->position = position;
+	ByteArray_set_position(stream, position);
 	j = 1;
 
 	for (i = 0; i < len; ++i) {
