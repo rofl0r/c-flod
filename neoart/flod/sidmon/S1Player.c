@@ -407,7 +407,7 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 			else if (j == 0x1466) ver = SIDMON_1444;
 			else ver = j;
 
-			position = j + stream->position - 6;
+			position = j + ByteArray_get_position(stream) - 6;
 			break;
 		}
 	}
@@ -556,7 +556,7 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 		stream->position = position + start;
 		data = stream->readUnsignedInt(stream);
 		totSamples = (data >> 5) + 15;
-		headers = stream->position;
+		headers = ByteArray_get_position(stream);
 		data += headers;
 	}
 
@@ -601,7 +601,7 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 			} else {
 				start = headers + ((sample->waveform - 16) << 5);
 				if (start >= stream->length) continue;
-				j = stream->position;
+				j = ByteArray_get_position(stream);
 
 				stream->position = start;
 				sample->super.pointer  = stream->readUnsignedInt(stream);
