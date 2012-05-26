@@ -267,8 +267,8 @@ void S1Player_process(struct S1Player* self) {
 		if (self->audPer != 0) AmigaChannel_set_period(chan, voice->period);
 		if (self->audLen != 0) chan->length  = self->audLen;
 
-		if (sample->super.volume) chan->volume = sample->super.volume;
-		else chan->volume = self->audVol >> 2;
+		if (sample->super.volume) AmigaChannel_set_volume(chan, sample->super.volume);
+		else AmigaChannel_set_volume(chan, self->audVol >> 2);
 
 		AmigaChannel_set_enabled(chan, 1);
 		voice = voice->next;
