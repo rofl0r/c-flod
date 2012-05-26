@@ -412,25 +412,25 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 		}
 	}
 	if (!position) return;
-	stream->position = position;
+	ByteArray_set_position(stream, position);
 
 	id = stream->readMultiByte(stream, 32, ENCODING);
 	if (id != " SID-MON BY R->v.VLIET  (c) 1988 ") return;
 
-	stream->position = position - 44;
+	ByteArray_set_position(stream, position - 44);
 	start = stream->readUnsignedInt(stream);
 
 	for (i = 1; i < 4; ++i)
 		self->tracksPtr[i] = (stream->readUnsignedInt(stream) - start) / 6;
 
-	stream->position = position - 8;
+	ByteArray_set_position(stream, position - 8);
 	start = stream->readUnsignedInt(stream);
 	len   = stream->readUnsignedInt(stream);
 	if (len < start) len = stream->length - position;
 
 	totPatterns = (len - start) >> 2;
 	self->patternsPtr = new Vector.<int>(totPatterns);
-	stream->position = position + start + 4;
+	ByteArray_set_position(stream, position + start + 4);
 
 	for (i = 1; i < totPatterns; ++i) {
 		start = stream->readUnsignedInt(stream) / 5;
@@ -445,13 +445,13 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 	self->patternsPtr->length = totPatterns;
 	self->patternsPtr->fixed  = true;
 
-	stream->position = position - 44;
+	ByteArray_set_position(stream, position - 44);
 	start = stream->readUnsignedInt(stream);
-	stream->position = position - 28;
+	ByteArray_set_position(stream, position - 28);
 	len = (stream->readUnsignedInt(stream) - start) / 6;
 
 	self->tracks = new Vector.<AmigaStep>(len, true);
-	stream->position = position + start;
+	ByteArray_set_position(stream, position + start);
 
 	for (i = 0; i < len; ++i) {
 		step = new AmigaStep();
@@ -463,7 +463,7 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 		self->tracks[i] = step;
 	}
 
-	stream->position = position - 24;
+	ByteArray_set_position(stream, position - 24);
 	start = stream->readUnsignedInt(stream);
 	totWaveforms = stream->readUnsignedInt(stream) - start;
 
@@ -471,13 +471,13 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 	self->super.amiga->store(stream, totWaveforms, position + start);
 	totWaveforms >>= 5;
 
-	stream->position = position - 16;
+	ByteArray_set_position(stream, position - 16);
 	start = stream->readUnsignedInt(stream);
 	len = (stream->readUnsignedInt(stream) - start) + 16;
 	j = (totWaveforms + 2) << 4;
 
 	self->waveLists = new Vector.<int>(len < j ? j : len, true);
-	stream->position = position + start;
+	ByteArray_set_position(stream, position + start);
 	i = 0;
 
 	while (i < j) {
@@ -491,8 +491,8 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 	for (i = 16; i < len; ++i)
 		self->waveLists[i] = stream->readUnsignedByte(stream);
 
-	stream->position = position - 20;
-	stream->position = position + stream->readUnsignedInt(stream);
+	ByteArray_set_position(stream, position - 20);
+	ByteArray_set_position(stream, position + stream->readUnsignedInt(stream));
 
 	self->mix1Source1 = stream->readUnsignedInt(stream);
 	self->mix2Source1 = stream->readUnsignedInt(stream);
@@ -514,21 +514,21 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 	if (self->mix2Dest > totWaveforms) self->mix2Speed = 0;
 	if (self->speedDef == 0) self->speedDef = 4;
 
-	stream->position = position - 28;
+	ByteArray_set_position(stream, position - 28);
 	j = stream->readUnsignedInt(stream);
 	totInstruments = (stream->readUnsignedInt(stream) - j) >> 5;
 	if (totInstruments > 63) totInstruments = 63;
 	len = totInstruments + 1;
 
-	stream->position = position - 4;
+	ByteArray_set_position(stream, position - 4);
 	start = stream->readUnsignedInt(stream);
 
 	if (start == 1) {
-		stream->position = 0x71c;
+		ByteArray_set_position(stream, 0x71c);
 		start = stream->readUnsignedShort(stream);
 
 		if (start != 0x4dfa) {
-			stream->position = 0x6fc;
+			ByteArray_set_position(stream, 0x6fc);
 			start = stream->readUnsignedShort(stream);
 
 			if (start != 0x4dfa) {
@@ -553,7 +553,7 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 	} else {
 		samples = new Vector.<S1Sample>(len, true);
 
-		stream->position = position + start;
+		ByteArray_set_position(stream, position + start);
 		data = stream->readUnsignedInt(stream);
 		totSamples = (data >> 5) + 15;
 		headers = ByteArray_get_position(stream);
@@ -562,7 +562,7 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 
 	sample = new S1Sample();
 	self->samples[0] = sample;
-	stream->position = position + j;
+	ByteArray_set_position(stream, position + j);
 
 	for (i = 1; i < len; ++i) {
 		sample = new S1Sample();
@@ -603,7 +603,7 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 				if (start >= stream->length) continue;
 				j = ByteArray_get_position(stream);
 
-				stream->position = start;
+				ByteArray_set_position(stream, start);
 				sample->super.pointer  = stream->readUnsignedInt(stream);
 				sample->super.loop     = stream->readUnsignedInt(stream);
 				sample->super.length   = stream->readUnsignedInt(stream);
@@ -629,7 +629,7 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 				if (sample->super.repeat < 6 || sample->super.loop == 0) sample->super.loopPtr = 0;
 				else sample->super.loopPtr = sample->super.pointer + sample->super.loop;
 
-				stream->position = j;
+				ByteArray_set_position(stream, j);
 			}
 		} else if (sample->waveform > totWaveforms) {
 			sample->waveform = 0;
@@ -637,11 +637,11 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 		self->samples[i] = sample;
 	}
 
-	stream->position = position - 12;
+	ByteArray_set_position(stream, position - 12);
 	start = stream->readUnsignedInt(stream);
 	len = (stream->readUnsignedInt(stream) - start) / 5;
 	self->patterns = new Vector.<SMRow>(len, true);
-	stream->position = position + start;
+	ByteArray_set_position(stream, position + start);
 
 	for (i = 0; i < len; ++i) {
 		row = new SMRow();
