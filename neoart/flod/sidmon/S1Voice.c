@@ -15,64 +15,46 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->sidmon {
-  import neoart.flod.core.*;
 
-  public final class S1Voice {
-    internal var
- int index;
-      next         : S1Voice,
-      channel      : AmigaChannel,
- int step;
- int row;
- int sample;
- int samplePtr;
- int sampleLen;
- int note;
- int noteTimer;
- int period;
- int volume;
- int bendTo;
- int bendSpeed;
- int arpeggioCtr;
- int envelopeCtr;
- int pitchCtr;
- int pitchFallCtr;
- int sustainCtr;
- int phaseTimer;
- int phaseSpeed;
- int wavePos;
- int waveList;
- int waveTimer;
- int waitCtr;
+#include "S1Voice.h"
+#include "../flod_internal.h"
 
-     void S1Voice( int index) {
-      self->index = index;
-    }
+void S1Voice_defaults(struct S1Voice* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
 
-    internal function initialize():void {
-      step         =  0;
-      row          =  0;
-      sample       =  0;
-      samplePtr    = -1;
-      sampleLen    =  0;
-      note         =  0;
-      noteTimer    =  0;
-      period       =  0x9999;
-      volume       =  0;
-      bendTo       =  0;
-      bendSpeed    =  0;
-      arpeggioCtr  =  0;
-      envelopeCtr  =  0;
-      pitchCtr     =  0;
-      pitchFallCtr =  0;
-      sustainCtr   =  0;
-      phaseTimer   =  0;
-      phaseSpeed   =  0;
-      wavePos      =  0;
-      waveList     =  0;
-      waveTimer    =  0;
-      waitCtr      =  0;
-    }
-  }
+void S1Voice_ctor(struct S1Voice* self, int index) {
+	CLASS_CTOR_DEF(S1Voice);
+	// original constructor code goes here
+	self->index = index;
+}
+
+struct S1Voice* S1Voice_new(void, int index) {
+	CLASS_NEW_BODY(S1Voice, index);
+}
+
+void S1Voice_initialize(struct S1Voice* self) {
+	self->step         =  0;
+	self->row          =  0;
+	self->sample       =  0;
+	self->samplePtr    = -1;
+	self->sampleLen    =  0;
+	self->note         =  0;
+	self->noteTimer    =  0;
+	self->period       =  0x9999;
+	self->volume       =  0;
+	self->bendTo       =  0;
+	self->bendSpeed    =  0;
+	self->arpeggioCtr  =  0;
+	self->envelopeCtr  =  0;
+	self->pitchCtr     =  0;
+	self->pitchFallCtr =  0;
+	self->sustainCtr   =  0;
+	self->phaseTimer   =  0;
+	self->phaseSpeed   =  0;
+	self->wavePos      =  0;
+	self->waveList     =  0;
+	self->waveTimer    =  0;
+	self->waitCtr      =  0;
 }
