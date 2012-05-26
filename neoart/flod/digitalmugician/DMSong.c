@@ -15,20 +15,21 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->digitalmugician {
-  import neoart.flod.core.*;
 
-  public final class DMSong {
-    internal var
-      title    : String,
- int speed;
- int length;
- int loop;
- int loopStep;
-      tracks   : Vector.<AmigaStep>;
+#include "DMSong.h"
+#include "../flod_internal.h"
 
-     void DMSong() {
-      tracks = new Vector.<AmigaStep>();
-    }
-  }
+void DMSong_defaults(struct DMSong* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+void DMSong_ctor(struct DMSong* self) {
+	CLASS_CTOR_DEF(DMSong);
+	// original constructor code goes here
+	//tracks = new Vector.<AmigaStep>();
+}
+
+struct DMSong* DMSong_new(void) {
+	CLASS_NEW_BODY(DMSong);
 }
