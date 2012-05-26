@@ -13,7 +13,11 @@
 // for a desktop player it shouldnt be a problem to set this to something
 // huge like 512 kb
 // maybe make this so the caller can provide a buffer.
-#define AMIGA_MAX_MEMORY_KB 92
+// 92 KB is sufficient for all whittaker, future composer and protracker tunes i tested
+// the digital mugician tunes by "Ramon" seem to be especially memory-hungry
+//#define AMIGA_MAX_MEMORY_KB 92
+#define AMIGA_MAX_MEMORY_KB 178
+
 #define AMIGA_MAX_MEMORY ((AMIGA_MAX_MEMORY_KB * 1024) / sizeof(char))
 
 // this is hardwired.

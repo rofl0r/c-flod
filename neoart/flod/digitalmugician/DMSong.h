@@ -3,7 +3,7 @@
 
 #include "../core/AmigaStep.h"
 
-#define DMSONG_MAX_TRACKS 16
+#define DMSONG_MAX_TRACKS 176
 
 /*
 inheritance

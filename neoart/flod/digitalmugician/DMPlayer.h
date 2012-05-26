@@ -9,8 +9,8 @@
 #include "DMVoice.h"
 
 
-#define DMPLAYER_MAX_PATTERNS 4
-#define DMPLAYER_MAX_SAMPLES 8
+#define DMPLAYER_MAX_PATTERNS 6464
+#define DMPLAYER_MAX_SAMPLES 43
 
 
 //fixed
