@@ -671,13 +671,15 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 	}
 
 	ByteArray_set_position(stream, 204);
-	self->super.super.lastSong = self->songs->length - 1;
+	self->super.super.lastSong = DMPLAYER_MAX_SONGS - 1;
+	
+	int lastsong_set = 0;
 
 	for (i = 0; i < DMPLAYER_MAX_SONGS; ++i) {
 		song = &self->songs[i];
 		len  = index[i] << 2;
 
-		assert_op(len, <, DMSONG_MAX_TRACKS);
+		assert_op(len, <=, DMSONG_MAX_TRACKS);
 		for (j = 0; j < len; ++j) {
 			//step = new AmigaStep();
 			step = &song->tracks[j];
@@ -687,15 +689,19 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 			//song->tracks[j] = step;
 		}
 		//song->tracks->fixed = true;
+		if(!lastsong_set && song->length <= 4 && song->tracks[0].pattern == 0) {
+			self->super.super.lastSong = i - 1;
+			lastsong_set = 1;
+		}
 	}
 
 	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 60);
 	len = stream->readUnsignedInt(stream);
 	
-	assert_op(len + 1, <=, DMPLAYER_MAX_SAMPLES);
 	//self->samples = new Vector.<DMSample>(++len, true);
 	len++;
+	assert_op(len, <=, DMPLAYER_MAX_SAMPLES);
 	
 	ByteArray_set_position(stream, position);
 
@@ -746,7 +752,6 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 
 	if (instr) instr = position;
 
-	assert_op(len, <, DMPLAYER_MAX_PATTERNS);
 	for (i = 0; i < len; ++i) {
 		//row = new AmigaRow();
 		row = &self->patterns[i];
