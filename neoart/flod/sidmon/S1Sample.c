@@ -15,27 +15,21 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->sidmon {
-  import neoart.flod.core.*;
 
-  public final class S1Sample extends AmigaSample {
-    internal var
- int waveform;
-      arpeggio     : Vector.<int>,
- int attackSpeed;
- int attackMax;
- int decaySpeed;
- int decayMin;
- int sustain;
- int releaseSpeed;
- int releaseMin;
- int phaseShift;
- int phaseSpeed;
- int finetune;
- int pitchFall;
+#include "S1Sample.h"
+#include "../flod_internal.h"
 
-     void S1Sample() {
-      arpeggio = new Vector.<int>(16, true);
-    }
-  }
+void S1Sample_defaults(struct S1Sample* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+void S1Sample_ctor(struct S1Sample* self) {
+	CLASS_CTOR_DEF(S1Sample);
+	// original constructor code goes here
+	//arpeggio = new Vector.<int>(16, true);
+}
+
+struct S1Sample* S1Sample_new(void) {
+	CLASS_NEW_BODY(S1Sample);
 }
