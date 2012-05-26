@@ -573,7 +573,7 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	pointers[j] = self->patterns->length;
 	self->patterns->fixed = true;
 
-	if ((stream->position & 1) != 0) stream->position++;
+	if ((stream->position & 1) != 0) ByteArray_set_position_rel(stream, +1);
 	self->super.amiga->store(stream, sampleData);
 	len = self->tracks.length;
 
