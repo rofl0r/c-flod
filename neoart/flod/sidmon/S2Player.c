@@ -45,6 +45,8 @@ void S2Player_ctor(struct S2Player* self, struct Amiga *amiga) {
 	self->super.super.loader = S2Player_loader;
 	self->super.super.process = S2Player_process;
 	self->super.super.initialize = S2Player_initialize;
+	
+	self->super.super.min_filesize = 86;
 }
 
 struct S2Player* S2Player_new(struct Amiga *amiga) {

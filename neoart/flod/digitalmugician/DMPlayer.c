@@ -51,6 +51,8 @@ void DMPlayer_ctor(struct DMPlayer* self, struct Amiga *amiga) {
 	self->super.super.loader = DMPlayer_loader;
 	self->super.super.initialize = DMPlayer_initialize;
 	
+	self->super.super.min_filesize = 204;
+	
 }
 
 struct DMPlayer* DMPlayer_new(struct Amiga *amiga) {
