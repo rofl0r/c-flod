@@ -231,7 +231,8 @@ void S2Player_process(struct S2Player* self) {
 			default:
 				break;
 		}
-		chan->volume = voice->volume >> 2;
+		
+		AmigaChannel_set_volume(chan, voice->volume >> 2);
 
 		if (instr->waveLen) {
 			if (voice->waveCtr == instr->waveDelay) {
@@ -304,7 +305,7 @@ void S2Player_process(struct S2Player* self) {
 				self->patternLen = row->super.param;
 				break;
 			case 0x7c:  //set volume
-				chan->volume  = row->super.param;
+				AmigaChannel_set_volume(chan, row->super.param);
 				voice->volume = row->super.param << 2;
 				if (voice->volume >= 255) voice->volume = 255;
 				break;
