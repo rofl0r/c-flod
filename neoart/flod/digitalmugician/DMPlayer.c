@@ -469,7 +469,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 				voice->finalPeriod += (~value + 1);
 			}
 		}
-		chan->period = voice->finalPeriod;
+		AmigaChannel_set_period(chan, voice->finalPeriod);
 	}
 
 	if (self->numChannels > 4) {
@@ -513,7 +513,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 			memory[src1++] = self->averages[dst];
 		}
 		chan->length = 350;
-		chan->period = self->mixPeriod;
+		AmigaChannel_set_period(chan, self->mixPeriod);
 		chan->volume = 64;
 	}
 
@@ -595,7 +595,7 @@ void DMPlayer_initialize(struct DMPlayer* self) {
 			AmigaChannel_set_enabled(chan, 0);
 			chan->pointer = self->super.amiga->loopPtr;
 			chan->length  = 2;
-			chan->period  = 124;
+			AmigaChannel_set_period(chan, 124);
 			chan->volume  = 0;
 
 			voice->channel = chan;
@@ -613,7 +613,7 @@ void DMPlayer_initialize(struct DMPlayer* self) {
 		chan->mute    = 0;
 		chan->pointer = self->buffer1;
 		chan->length  = 350;
-		chan->period  = self->mixPeriod;
+		AmigaChannel_set_period(chan, self->mixPeriod);
 		chan->volume  = 64;
 
 		len = self->buffer1 + 700;
