@@ -76,92 +76,92 @@ void S1Player_process(struct S1Player* self) {
 
 	while (voice) {
 		chan = voice->channel;
-		audPtr = -1;
-		audLen = audPer = audVol = 0;
+		self->audPtr = -1;
+		self->audLen = self->audPer = self->audVol = 0;
 
-		if (tick == 0) {
-			if (patternEnd) {
-				if (trackEnd) voice->step = tracksPtr[voice->index];
+		if (self->super.super.tick == 0) {
+			if (self->patternEnd) {
+				if (self->trackEnd) voice->step = self->tracksPtr[voice->index];
 				else voice->step++;
 
-				step = tracks[voice->step];
-				voice->row = patternsPtr[step->pattern];
-				if (doReset) voice->noteTimer = 0;
+				step = self->tracks[voice->step];
+				voice->row = self->patternsPtr[step->pattern];
+				if (self->doReset) voice->noteTimer = 0;
 			}
 
 			if (voice->noteTimer == 0) {
-				row = patterns[voice->row];
+				row = self->patterns[voice->row];
 
-				if (row->sample == 0) {
-					if (row->note) {
+				if (row->super.sample == 0) {
+					if (row->super.note) {
 						voice->noteTimer = row->speed;
 
 						if (voice->waitCtr) {
-							sample = samples[voice->sample];
-							audPtr = sample->pointer;
-							audLen = sample->length;
-							voice->samplePtr = sample->loopPtr;
-							voice->sampleLen = sample->repeat;
+							sample = self->samples[voice->sample];
+							self->audPtr = sample->super.pointer;
+							self->audLen = sample->super.length;
+							voice->samplePtr = sample->super.loopPtr;
+							voice->sampleLen = sample->super.repeat;
 							voice->waitCtr = 1;
 							chan->enabled  = 0;
 						}
 					}
 				} else {
-					sample = samples[row->sample];
+					sample = self->samples[row->super.sample];
 					if (voice->waitCtr) chan->enabled = voice->waitCtr = 0;
 
 					if (sample->waveform > 15) {
-						audPtr = sample->pointer;
-						audLen = sample->length;
-						voice->samplePtr = sample->loopPtr;
-						voice->sampleLen = sample->repeat;
+						self->audPtr = sample->super.pointer;
+						self->audLen = sample->super.length;
+						voice->samplePtr = sample->super.loopPtr;
+						voice->sampleLen = sample->super.repeat;
 						voice->waitCtr = 1;
 					} else {
 						voice->wavePos = 0;
 						voice->waveList = sample->waveform;
 						index = voice->waveList << 4;
-						audPtr = waveLists[index] << 5;
-						audLen = 32;
-						voice->waveTimer = waveLists[++index];
+						self->audPtr = self->waveLists[index] << 5;
+						self->audLen = 32;
+						voice->waveTimer = self->waveLists[++index];
 					}
 
 					voice->noteTimer   = row->speed;
-					voice->sample      = row->sample;
+					voice->sample      = row->super.sample;
 					voice->envelopeCtr = voice->pitchCtr = voice->pitchFallCtr = 0;
 				}
 
-				if (row->note) {
+				if (row->super.note) {
 					voice->noteTimer = row->speed;
 
-					if (row->note != 0xff) {
-						sample = samples[voice->sample];
-						step = tracks[voice->step];
+					if (row->super.note != 0xff) {
+						sample = self->samples[voice->sample];
+						step = self->tracks[voice->step];
 
-						voice->note = row->note + step->transpose;
-						voice->period = audPer = PERIODS[int(1 + sample->finetune + voice->note)];
+						voice->note = row->super.note + step->transpose;
+						voice->period = self->audPer = PERIODS[int(1 + sample->finetune + voice->note)];
 						voice->phaseSpeed = sample->phaseSpeed;
 
 						voice->bendSpeed   = voice->volume = 0;
 						voice->envelopeCtr = voice->pitchCtr = voice->pitchFallCtr = 0;
 
-						switch (row->effect) {
+						switch (row->super.effect) {
 							case 0:
-								if (row->param == 0) break;
-								sample->attackSpeed = row->param;
-								sample->attackMax   = row->param;
+								if (row->super.param == 0) break;
+								sample->attackSpeed = row->super.param;
+								sample->attackMax   = row->super.param;
 								voice->waveTimer    = 0;
 								break;
 							case 2:
-								self->speed = row->param;
+								self->super.super.speed = row->super.param;
 								voice->waveTimer = 0;
 								break;
 							case 3:
-								self->patternLen = row->param;
+								self->patternLen = row->super.param;
 								voice->waveTimer = 0;
 								break;
 							default:
-								voice->bendTo = row->effect + step->transpose;
-								voice->bendSpeed = row->param;
+								voice->bendTo = row->super.effect + step->transpose;
+								voice->bendSpeed = row->super.param;
 								break;
 						}
 					}
@@ -171,26 +171,26 @@ void S1Player_process(struct S1Player* self) {
 				voice->noteTimer--;
 			}
 		}
-		sample = samples[voice->sample];
-		audVol = voice->volume;
+		sample = self->samples[voice->sample];
+		self->audVol = voice->volume;
 
 		switch (voice->envelopeCtr) {
 			default:
 			case 8:
 				break;
 			case 0:   //attack
-				audVol += sample->attackSpeed;
+				self->audVol += sample->attackSpeed;
 
-				if (audVol > sample->attackMax) {
-					audVol = sample->attackMax;
+				if (self->audVol > sample->attackMax) {
+					self->audVol = sample->attackMax;
 					voice->envelopeCtr += 2;
 				}
 				break;
 			case 2:   //decay
-				audVol -= sample->decaySpeed;
+				self->audVol -= sample->decaySpeed;
 
-				if (audVol <= sample->decayMin || audVol < -256) {
-					audVol = sample->decayMin;
+				if (self->audVol <= sample->decayMin || self->audVol < -256) {
+					self->audVol = sample->decayMin;
 					voice->envelopeCtr += 2;
 					voice->sustainCtr = sample->sustain;
 				}
@@ -202,17 +202,17 @@ void S1Player_process(struct S1Player* self) {
 			case 6:   //release
 				self->audVol -= sample->releaseSpeed;
 
-				if (audVol <= sample->releaseMin || audVol < -256) {
-					audVol = sample->releaseMin;
+				if (self->audVol <= sample->releaseMin || self->audVol < -256) {
+					self->audVol = sample->releaseMin;
 					voice->envelopeCtr = 8;
 				}
 				break;
 		}
 
-		voice->volume = audVol;
+		voice->volume = self->audVol;
 		voice->arpeggioCtr = ++voice->arpeggioCtr & 15;
 		index = sample->finetune + sample->arpeggio[voice->arpeggioCtr] + voice->note;
-		voice->period = audPer = PERIODS[index];
+		voice->period = self->audPer = PERIODS[index];
 
 		if (voice->bendSpeed) {
 			value = PERIODS[int(sample->finetune + voice->bendTo)];
@@ -248,80 +248,80 @@ void S1Player_process(struct S1Player* self) {
 			} else {
 				if (voice->wavePos < 16) {
 					index = (voice->waveList << 4) + voice->wavePos;
-					value = waveLists[index++];
+					value = self->waveLists[index++];
 
 					if (value == 0xff) {
-						voice->wavePos = waveLists[index] & 254;
+						voice->wavePos = self->waveLists[index] & 254;
 					} else {
-						audPtr = value << 5;
-						voice->waveTimer = waveLists[index];
+						self->audPtr = value << 5;
+						voice->waveTimer = self->waveLists[index];
 						voice->wavePos += 2;
 					}
 				}
 			}
 		}
-		if (audPtr > -1) chan->pointer = audPtr;
-		if (audPer != 0) chan->period  = voice->period;
-		if (audLen != 0) chan->length  = audLen;
+		if (self->audPtr > -1) chan->pointer = self->audPtr;
+		if (self->audPer != 0) chan->period  = voice->period;
+		if (self->audLen != 0) chan->length  = self->audLen;
 
-		if (sample->volume) chan->volume = sample->volume;
-		else chan->volume = audVol >> 2;
+		if (sample->super.volume) chan->volume = sample->super.volume;
+		else chan->volume = self->audVol >> 2;
 
 		chan->enabled = 1;
 		voice = voice->next;
 	}
 
-	trackEnd = patternEnd = 0;
+	self->trackEnd = self->patternEnd = 0;
 
-	if (++tick > speed) {
-		tick = 0;
+	if (++(self->super.super.tick) > self->super.super.speed) {
+		self->super.super.tick = 0;
 
-		if (++patternPos == patternLen) {
-			patternPos = 0;
-			patternEnd = 1;
+		if (++(self->patternPos) == self->patternLen) {
+			self->patternPos = 0;
+			self->patternEnd = 1;
 
-			if (++trackPos == trackLen)
-			trackPos = trackEnd = amiga->complete = 1;
+			if (++(self->trackPos) == self->trackLen)
+			self->trackPos = self->trackEnd = self->super.amiga->complete = 1;
 		}
 	}
 
-	if (mix1Speed) {
-		if (mix1Ctr == 0) {
-			mix1Ctr = mix1Speed;
-			index = mix1Pos = ++mix1Pos & 31;
-			dst  = (mix1Dest    << 5) + 31;
-			src1 = (mix1Source1 << 5) + 31;
-			src2 =  mix1Source2 << 5;
+	if (self->mix1Speed) {
+		if (self->mix1Ctr == 0) {
+			self->mix1Ctr = self->mix1Speed;
+			index = self->mix1Pos = ++(self->mix1Pos) & 31;
+			dst  = (self->mix1Dest    << 5) + 31;
+			src1 = (self->mix1Source1 << 5) + 31;
+			src2 =  self->mix1Source2 << 5;
 
 			for (i = 31; i > -1; --i) {
 				memory[dst--] = (memory[src1--] + memory[int(src2 + index)]) >> 1;
 				index = --index & 31;
 			}
 		}
-		mix1Ctr--;
+		self->mix1Ctr--;
 	}
 
-	if (mix2Speed) {
-		if (mix2Ctr == 0) {
-			mix2Ctr = mix2Speed;
-			index = mix2Pos = ++mix2Pos & 31;
-			dst  = (mix2Dest    << 5) + 31;
-			src1 = (mix2Source1 << 5) + 31;
-			src2 =  mix2Source2 << 5;
+	if (self->mix2Speed) {
+		if (self->mix2Ctr == 0) {
+			self->mix2Ctr = self->mix2Speed;
+			index = self->mix2Pos = ++(self->mix2Pos) & 31;
+			dst  = (self->mix2Dest    << 5) + 31;
+			src1 = (self->mix2Source1 << 5) + 31;
+			src2 =  self->mix2Source2 << 5;
 
 			for (i = 31; i > -1; --i) {
 				memory[dst--] = (memory[src1--] + memory[int(src2 + index)]) >> 1;
 				index = --index & 31;
 			}
 		}
-		mix2Ctr--;
+		self->mix2Ctr--;
 	}
 
-	if (doFilter) {
-		index = mix1Pos + 32;
+	if (self->doFilter) {
+		index = self->mix1Pos + 32;
 		memory[index] = ~memory[index] + 1;
 	}
-	voice = voices[0];
+	voice = self->voices[0];
 
 	while (voice) {
 		chan = voice->channel;
@@ -345,26 +345,26 @@ void S1Player_initialize(struct S1Player* self) {
 	
 	super->initialize();
 
-	speed      =  speedDef;
-	tick       =  speedDef;
-	trackPos   =  1;
-	trackEnd   =  0;
-	patternPos = -1;
-	patternEnd =  0;
-	patternLen =  patternDef;
+	self->super.super.speed      =  self->speedDef;
+	self->super.super.tick       =  self->speedDef;
+	self->trackPos   =  1;
+	self->trackEnd   =  0;
+	self->patternPos = -1;
+	self->patternEnd =  0;
+	self->patternLen =  self->patternDef;
 
-	mix1Ctr = mix1Pos = 0;
-	mix2Ctr = mix2Pos = 0;
+	self->mix1Ctr = self->mix1Pos = 0;
+	self->mix2Ctr = self->mix2Pos = 0;
 
 	while (voice) {
 		voice->initialize();
-		chan = amiga->channels[voice->index];
+		chan = self->super.amiga->channels[voice->index];
 
 		voice->channel = chan;
-		voice->step    = tracksPtr[voice->index];
-		step = tracks[voice->step];
-		voice->row    = patternsPtr[step->pattern];
-		voice->sample = patterns[voice->row].sample;
+		voice->step    = self->tracksPtr[voice->index];
+		step = self->tracks[voice->step];
+		voice->row    = self->patternsPtr[step->pattern];
+		voice->sample = self->patterns[voice->row].super.sample;
 
 		chan->length  = 32;
 		chan->period  = voice->period;
@@ -421,7 +421,7 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 	start = stream->readUnsignedInt();
 
 	for (i = 1; i < 4; ++i)
-		tracksPtr[i] = (stream->readUnsignedInt() - start) / 6;
+		self->tracksPtr[i] = (stream->readUnsignedInt() - start) / 6;
 
 	stream->position = position - 8;
 	start = stream->readUnsignedInt();
@@ -429,7 +429,7 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 	if (len < start) len = stream->length - position;
 
 	totPatterns = (len - start) >> 2;
-	patternsPtr = new Vector.<int>(totPatterns);
+	self->patternsPtr = new Vector.<int>(totPatterns);
 	stream->position = position + start + 4;
 
 	for (i = 1; i < totPatterns; ++i) {
@@ -439,18 +439,18 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 			totPatterns = i;
 			break;
 		}
-		patternsPtr[i] = start;
+		self->patternsPtr[i] = start;
 	}
 
-	patternsPtr->length = totPatterns;
-	patternsPtr->fixed  = true;
+	self->patternsPtr->length = totPatterns;
+	self->patternsPtr->fixed  = true;
 
 	stream->position = position - 44;
 	start = stream->readUnsignedInt();
 	stream->position = position - 28;
 	len = (stream->readUnsignedInt() - start) / 6;
 
-	tracks = new Vector.<AmigaStep>(len, true);
+	self->tracks = new Vector.<AmigaStep>(len, true);
 	stream->position = position + start;
 
 	for (i = 0; i < len; ++i) {
@@ -460,15 +460,15 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 		stream->readByte();
 		step->transpose = stream->readByte();
 		if (step->transpose < -99 || step->transpose > 99) step->transpose = 0;
-		tracks[i] = step;
+		self->tracks[i] = step;
 	}
 
 	stream->position = position - 24;
 	start = stream->readUnsignedInt();
 	totWaveforms = stream->readUnsignedInt() - start;
 
-	amiga->memory->length = 32;
-	amiga->store(stream, totWaveforms, position + start);
+	self->super.amiga->memory->length = 32;
+	self->super.amiga->store(stream, totWaveforms, position + start);
 	totWaveforms >>= 5;
 
 	stream->position = position - 16;
@@ -476,43 +476,43 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 	len = (stream->readUnsignedInt() - start) + 16;
 	j = (totWaveforms + 2) << 4;
 
-	waveLists = new Vector.<int>(len < j ? j : len, true);
+	self->waveLists = new Vector.<int>(len < j ? j : len, true);
 	stream->position = position + start;
 	i = 0;
 
 	while (i < j) {
-		waveLists[i++] = i >> 4;
-		waveLists[i++] = 0xff;
-		waveLists[i++] = 0xff;
-		waveLists[i++] = 0x10;
+		self->waveLists[i++] = i >> 4;
+		self->waveLists[i++] = 0xff;
+		self->waveLists[i++] = 0xff;
+		self->waveLists[i++] = 0x10;
 		i += 12;
 	}
 
 	for (i = 16; i < len; ++i)
-		waveLists[i] = stream->readUnsignedByte();
+		self->waveLists[i] = stream->readUnsignedByte();
 
 	stream->position = position - 20;
 	stream->position = position + stream->readUnsignedInt();
 
-	mix1Source1 = stream->readUnsignedInt();
-	mix2Source1 = stream->readUnsignedInt();
-	mix1Source2 = stream->readUnsignedInt();
-	mix2Source2 = stream->readUnsignedInt();
-	mix1Dest    = stream->readUnsignedInt();
-	mix2Dest    = stream->readUnsignedInt();
-	patternDef  = stream->readUnsignedInt();
-	trackLen    = stream->readUnsignedInt();
-	speedDef    = stream->readUnsignedInt();
-	mix1Speed   = stream->readUnsignedInt();
-	mix2Speed   = stream->readUnsignedInt();
+	self->mix1Source1 = stream->readUnsignedInt();
+	self->mix2Source1 = stream->readUnsignedInt();
+	self->mix1Source2 = stream->readUnsignedInt();
+	self->mix2Source2 = stream->readUnsignedInt();
+	self->mix1Dest    = stream->readUnsignedInt();
+	self->mix2Dest    = stream->readUnsignedInt();
+	self->patternDef  = stream->readUnsignedInt();
+	self->trackLen    = stream->readUnsignedInt();
+	self->speedDef    = stream->readUnsignedInt();
+	self->mix1Speed   = stream->readUnsignedInt();
+	self->mix2Speed   = stream->readUnsignedInt();
 
-	if (mix1Source1 > totWaveforms) mix1Source1 = 0;
-	if (mix2Source1 > totWaveforms) mix2Source1 = 0;
-	if (mix1Source2 > totWaveforms) mix1Source2 = 0;
-	if (mix2Source2 > totWaveforms) mix2Source2 = 0;
-	if (mix1Dest > totWaveforms) mix1Speed = 0;
-	if (mix2Dest > totWaveforms) mix2Speed = 0;
-	if (speedDef == 0) speedDef = 4;
+	if (self->mix1Source1 > totWaveforms) self->mix1Source1 = 0;
+	if (self->mix2Source1 > totWaveforms) self->mix2Source1 = 0;
+	if (self->mix1Source2 > totWaveforms) self->mix1Source2 = 0;
+	if (self->mix2Source2 > totWaveforms) self->mix2Source2 = 0;
+	if (self->mix1Dest > totWaveforms) self->mix1Speed = 0;
+	if (self->mix2Dest > totWaveforms) self->mix2Speed = 0;
+	if (self->speedDef == 0) self->speedDef = 4;
 
 	stream->position = position - 28;
 	j = stream->readUnsignedInt();
@@ -532,23 +532,23 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 			start = stream->readUnsignedShort();
 
 			if (start != 0x4dfa) {
-				version = 0;
+				self->super.super.version = 0;
 				return;
 			}
 		}
 		stream->position += stream->readUnsignedShort();
-		samples = new Vector.<S1Sample>(len + 3, true);
+		self->samples = new Vector.<S1Sample>(len + 3, true);
 
 		for (i = 0; i < 3; ++i) {
 			sample = new S1Sample();
 			sample->waveform = 16 + i;
-			sample->length   = EMBEDDED[i];
-			sample->pointer  = amiga->store(stream, sample->length);
-			sample->loop     = sample->loopPtr = 0;
-			sample->repeat   = 4;
-			sample->volume   = 64;
-			samples[int(len + i)] = sample;
-			stream->position += sample->length;
+			sample->super.length   = EMBEDDED[i];
+			sample->super.pointer  = self->super.amiga->store(stream, sample->super.length);
+			sample->super.loop     = sample->super.loopPtr = 0;
+			sample->super.repeat   = 4;
+			sample->super.volume   = 64;
+			self->samples[int(len + i)] = sample;
+			stream->position += sample->super.length;
 		}
 	} else {
 		samples = new Vector.<S1Sample>(len, true);
@@ -561,7 +561,7 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 	}
 
 	sample = new S1Sample();
-	samples[0] = sample;
+	self->samples[0] = sample;
 	stream->position = position + j;
 
 	for (i = 1; i < len; ++i) {
@@ -604,68 +604,68 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 				j = stream->position;
 
 				stream->position = start;
-				sample->pointer  = stream->readUnsignedInt();
-				sample->loop     = stream->readUnsignedInt();
-				sample->length   = stream->readUnsignedInt();
-				sample->name     = stream->readMultiByte(20, ENCODING);
+				sample->super.pointer  = stream->readUnsignedInt();
+				sample->super.loop     = stream->readUnsignedInt();
+				sample->super.length   = stream->readUnsignedInt();
+				sample->super.name     = stream->readMultiByte(20, ENCODING);
 
-				if (sample->loop == 0      ||
-					sample->loop == 99999  ||
-					sample->loop == 199999 ||
-					sample->loop >= sample->length) {
+				if (sample->super.loop == 0      ||
+					sample->super.loop == 99999  ||
+					sample->super.loop == 199999 ||
+					sample->super.loop >= sample->super.length) {
 
-					sample->loop   = 0;
-					sample->repeat = ver == SIDMON_0FFA ? 2 : 4;
+					sample->super.loop   = 0;
+					sample->super.repeat = ver == SIDMON_0FFA ? 2 : 4;
 				} else {
-					sample->repeat = sample->length - sample->loop;
-					sample->loop  -= sample->pointer;
+					sample->super.repeat = sample->super.length - sample->super.loop;
+					sample->super.loop  -= sample->super.pointer;
 				}
 
-				sample->length -= sample->pointer;
-				if (sample->length < (sample->loop + sample->repeat))
-				sample->length = sample->loop + sample->repeat;
+				sample->super.length -= sample->super.pointer;
+				if (sample->super.length < (sample->super.loop + sample->super.repeat))
+				sample->super.length = sample->super.loop + sample->super.repeat;
 
-				sample->pointer = amiga->store(stream, sample->length, data + sample->pointer);
-				if (sample->repeat < 6 || sample->loop == 0) sample->loopPtr = 0;
-				else sample->loopPtr = sample->pointer + sample->loop;
+				sample->super.pointer = self->super.amiga->store(stream, sample->super.length, data + sample->pointer);
+				if (sample->super.repeat < 6 || sample->super.loop == 0) sample->super.loopPtr = 0;
+				else sample->super.loopPtr = sample->super.pointer + sample->super.loop;
 
 				stream->position = j;
 			}
 		} else if (sample->waveform > totWaveforms) {
 			sample->waveform = 0;
 		}
-		samples[i] = sample;
+		self->samples[i] = sample;
 	}
 
 	stream->position = position - 12;
 	start = stream->readUnsignedInt();
 	len = (stream->readUnsignedInt() - start) / 5;
-	patterns = new Vector.<SMRow>(len, true);
+	self->patterns = new Vector.<SMRow>(len, true);
 	stream->position = position + start;
 
 	for (i = 0; i < len; ++i) {
 		row = new SMRow();
-		row->note   = stream->readUnsignedByte();
-		row->sample = stream->readUnsignedByte();
-		row->effect = stream->readUnsignedByte();
-		row->param  = stream->readUnsignedByte();
+		row->super.note   = stream->readUnsignedByte();
+		row->super.sample = stream->readUnsignedByte();
+		row->super.effect = stream->readUnsignedByte();
+		row->super.param  = stream->readUnsignedByte();
 		row->speed  = stream->readUnsignedByte();
 
 		if (ver == SIDMON_1444) {
-			if (row->note > 0 && row->note < 255) row->note += 469;
-			if (row->effect > 0 && row->effect < 255) row->effect += 469;
-			if (row->sample > 59) row->sample = totInstruments + (row->sample - 60);
-		} else if (row->sample > totInstruments) {
-			row->sample = 0;
+			if (row->super.note > 0 && row->super.note < 255) row->super.note += 469;
+			if (row->super.effect > 0 && row->super.effect < 255) row->super.effect += 469;
+			if (row->super.sample > 59) row->super.sample = totInstruments + (row->super.sample - 60);
+		} else if (row->super.sample > totInstruments) {
+			row->super.sample = 0;
 		}
-		patterns[i] = row;
+		self->patterns[i] = row;
 	}
 
 	if (ver == SIDMON_1170 || ver == SIDMON_11C6 || ver == SIDMON_1444) {
-		if (ver == SIDMON_1170) mix1Speed = mix2Speed = 0;
-		doReset = doFilter = 0;
+		if (ver == SIDMON_1170) self->mix1Speed = self->mix2Speed = 0;
+		self->doReset = self->doFilter = 0;
 	} else {
-		doReset = doFilter = 1;
+		self->doReset = self->doFilter = 1;
 	}
-	version = 1;
+	self->super.super.version = 1;
 }
