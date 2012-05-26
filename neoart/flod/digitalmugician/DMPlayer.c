@@ -20,6 +20,8 @@
 #include "../flod_internal.h"
 #include "DMPlayer_const.h"
 
+static void tables(struct DMPlayer* self);
+
 void DMPlayer_defaults(struct DMPlayer* self) {
 	CLASS_DEF_INIT();
 	// static initializers go here
@@ -52,7 +54,7 @@ struct DMPlayer* DMPlayer_new(struct Amiga *amiga) {
 }
 
 //override
-void DMPlayer_process() {
+void DMPlayer_process(struct DMPlayer* self) {
 	struct AmigaChannel *chan = 0;
 	int dst = 0;
 	int i = 0; 
@@ -522,7 +524,7 @@ void DMPlayer_process() {
 }
 
 //override
-void DMPlayer_initialize() {
+void DMPlayer_initialize(struct DMPlayer* self) {
 	struct AmigaChannel *chan = 0;
 	int i = 0;
 	int len = 0;
@@ -581,7 +583,7 @@ void DMPlayer_initialize() {
 }
 
 //override
-void DMPlayer_loader(stream:ByteArray) {
+void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 	int data = 0; 
 	int i = 0; 
 	char id[28];
@@ -744,7 +746,7 @@ void DMPlayer_loader(stream:ByteArray) {
 	}
 }
 
-void tables() {
+void tables(struct DMPlayer* self) {
 	var int i = 0;
 	int idx = 0;
 	int j = 0; 
@@ -754,13 +756,13 @@ void tables() {
 	int v2 = 0; 
 	int vol = 128;
 
-	averages  = new Vector.<int>(1024, true);
-	volumes   = new Vector.<int>(16384, true);
-	mixPeriod = 203;
+	//averages  = new Vector.<int>(1024, true);
+	//volumes   = new Vector.<int>(16384, true);
+	self->mixPeriod = 203;
 
-	for (; i < 1024; ++i) {
+	for (; i < DMPLAYER_MAX_AVERAGES; ++i) {
 		if (vol > 127) vol -= 256;
-		averages[i] = vol;
+		self->averages[i] = vol;
 		if (i > 383 && i < 639) vol = ++vol & 255;
 	}
 
@@ -771,9 +773,9 @@ void tables() {
 		for (j = 0; j < 256; ++j) {
 			vol = ((v1 * step) / 63) + 128;
 			idx = pos + v2;
-			volumes[idx] = vol & 255;
+			self->volumes[idx] = vol & 255;
 
-			if (i != 0 && i != 63 && v2 >= 128) --volumes[idx];
+			if (i != 0 && i != 63 && v2 >= 128) --(self->volumes[idx]);
 			v1++;
 			v2 = ++v2 & 255;
 		}
