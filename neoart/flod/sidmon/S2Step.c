@@ -15,11 +15,20 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->sidmon {
-  import neoart.flod.core.*;
 
-  public final class S2Step extends AmigaStep {
-    internal var
- int soundTranspose;
-  }
+#include "S2Step.h"
+#include "../flod_internal.h"
+
+void S2Step_defaults(struct S2Step* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+void S2Step_ctor(struct S2Step* self) {
+	CLASS_CTOR_DEF(S2Step);
+	// original constructor code goes here
+}
+
+struct S2Step* S2Step_new(void) {
+	CLASS_NEW_BODY(S2Step);
 }
