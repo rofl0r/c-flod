@@ -466,7 +466,7 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 		ByteArray_set_position_rel(stream, + 9);
 	}
 
-	position = stream->position;
+	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 30);
 	len = stream->readUnsignedInt();
 	self->waves = new Vector.<int>(len, true);
