@@ -48,7 +48,7 @@ struct DMPlayer {
 	int arpeggios[DMPLAYER_MAX_ARPEGGIOS];
 	int averages[DMPLAYER_MAX_AVERAGES];
 	int volumes[DMPLAYER_MAX_VOLUMES];
-	struct AmigaChannel *mixChannel;
+	struct AmigaChannel mixChannel;
 	int mixPeriod;
 };
 

@@ -606,7 +606,8 @@ void DMPlayer_initialize(struct DMPlayer* self) {
 		if ((self->super.super.playSong & 1) != 0) self->super.super.playSong--;
 		self->song2 = self->songs[int(self->super.super.playSong + 1)];
 
-		self->mixChannel  = new AmigaChannel(7);
+		//self->mixChannel  = new AmigaChannel(7);
+		AmigaChannel_ctor(&self->mixChannel, 7);
 		self->numChannels = 7;
 
 		chan = self->super.amiga->channels[3];
@@ -667,13 +668,16 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 		song = self->songs[i];
 		len  = index[i] << 2;
 
+		assert_op(len, <, DMSONG_MAX_TRACKS);
 		for (j = 0; j < len; ++j) {
-			step = new AmigaStep();
+			//step = new AmigaStep();
+			step = &song->tracks[j];
+			AmigaStep_ctor(step);
 			step->pattern   = stream->readUnsignedByte() << 6;
 			step->transpose = stream->readByte();
-			song->tracks[j] = step;
+			//song->tracks[j] = step;
 		}
-		song->tracks->fixed = true;
+		//song->tracks->fixed = true;
 	}
 
 	position = ByteArray_get_position(stream);
@@ -733,6 +737,7 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 
 	if (instr) instr = position;
 
+	assert_op(len, <, DMPLAYER_MAX_PATTERNS);
 	for (i = 0; i < len; ++i) {
 		//row = new AmigaRow();
 		row = &self->patterns[i];
