@@ -366,7 +366,8 @@ void S2Player_process(struct S2Player* self) {
 //override
 void S2Player_initialize(struct S2Player* self) {
 	struct S2Voice *voice = &self->voices[0];
-	self->super->initialize();
+	CorePlayer_initialize(&self->super.super);
+	//self->super->initialize();
 
 	self->super.super.speed      = self->speedDef;
 	self->super.super.tick       = self->speedDef;
