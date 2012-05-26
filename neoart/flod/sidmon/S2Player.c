@@ -15,43 +15,53 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->sidmon {
-  import flash.utils.*;
-  import neoart.flod.core.*;
 
-  public final class S2Player extends AmigaPlayer {
-    private var
-      tracks      : Vector.<S2Step>,
-      patterns    : Vector.<SMRow>,
-      instruments : Vector.<S2Instrument>,
-      samples     : Vector.<S2Sample>,
-      arpeggios   : Vector.<int>,
-      vibratos    : Vector.<int>,
-      waves       : Vector.<int>,
- int length;
- int speedDef;
-      voices      : Vector.<S2Voice>,
- int trackPos;
- int patternPos;
- int patternLen;
-      arpeggioFx  : Vector.<int>,
- int arpeggioPos;
+#include "S2Player.h"
+#include "../flod_internal.h"
 
-     void S2Player(amiga:Amiga = null) {
-      super(amiga);
-      PERIODS->fixed = true;
+void S2Player_process(struct S2Player* self);
+void S2Player_initialize(struct S2Player* self);
+void S2Player_loader(struct S2Player* self, struct ByteArray *stream);
 
-      arpeggioFx = new Vector.<int>(4, true);
-      voices     = new Vector.<S2Voice>(4, true);
+void S2Player_defaults(struct S2Player* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
 
-      voices[0] = new S2Voice(0);
-      voices[0].next = voices[1] = new S2Voice(1);
-      voices[1].next = voices[2] = new S2Voice(2);
-      voices[2].next = voices[3] = new S2Voice(3);
-    }
+void S2Player_ctor(struct S2Player* self, struct Amiga *amiga) {
+	CLASS_CTOR_DEF(S2Player);
+	// original constructor code goes here
+	super(amiga);
+	PERIODS->fixed = true;
+
+	arpeggioFx = new Vector.<int>(4, true);
+	voices     = new Vector.<S2Voice>(4, true);
+
+	voices[0] = new S2Voice(0);
+	voices[0].next = voices[1] = new S2Voice(1);
+	voices[1].next = voices[2] = new S2Voice(2);
+	voices[2].next = voices[3] = new S2Voice(3);
+	
+	self->super.super.loader = S2Player_loader;
+	self->super.super.process = S2Player_process;
+	self->super.super.initialize = S2Player_initialize;
+}
+
+struct S2Player* S2Player_new(struct Amiga *amiga) {
+	CLASS_NEW_BODY(S2Player, amiga);
+}
+
+static const unsigned short PERIODS = {0,
+        5760,5424,5120,4832,4560,4304,4064,3840,3616,3424,3232,3048,
+        2880,2712,2560,2416,2280,2152,2032,1920,1808,1712,1616,1524,
+        1440,1356,1280,1208,1140,1076,1016, 960, 904, 856, 808, 762,
+         720, 678, 640, 604, 570, 538, 508, 480, 453, 428, 404, 381,
+         360, 339, 320, 302, 285, 269, 254, 240, 226, 214, 202, 190,
+         180, 170, 160, 151, 143, 135, 127, 120, 113, 107, 101,  95,
+};
 
 //override
-void process() {
+void S2Player_process(struct S2Player* self) {
       var chan:AmigaChannel, instr:S2Instrument, row:SMRow, sample:S2Sample, int value; voice:S2Voice = voices[0];
       arpeggioPos = ++arpeggioPos & 3;
 
@@ -339,7 +349,7 @@ void process() {
     }
 
 //override
-void initialize() {
+void S2Player_initialize(struct S2Player* self) {
       var voice:S2Voice = voices[0];
       super->initialize();
 
@@ -360,7 +370,7 @@ void initialize() {
     }
 
 //override
-void loader(stream:ByteArray) {
+void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
       var int higher; i:int = 0, id:String, instr:S2Instrument, int j; int len; pointers:Vector.<int>, int position; int pos; row:SMRow, step:S2Step, sample:S2Sample, int sampleData; int value;
       stream->position = 58;
       id = stream->readMultiByte(28, ENCODING);
@@ -548,15 +558,5 @@ void loader(stream:ByteArray) {
 
       length++;
       version = 2;
-    }
-
-    private const
-      PERIODS: Vector.<int> = Vector.<int>([0,
-        5760,5424,5120,4832,4560,4304,4064,3840,3616,3424,3232,3048,
-        2880,2712,2560,2416,2280,2152,2032,1920,1808,1712,1616,1524,
-        1440,1356,1280,1208,1140,1076,1016, 960, 904, 856, 808, 762,
-         720, 678, 640, 604, 570, 538, 508, 480, 453, 428, 404, 381,
-         360, 339, 320, 302, 285, 269, 254, 240, 226, 214, 202, 190,
-         180, 170, 160, 151, 143, 135, 127, 120, 113, 107, 101,  95]);
-  }
 }
+
