@@ -429,7 +429,7 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 		step->soundTranspose = stream->readByte();
 	}
 
-	position = stream->position;
+	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 26);
 	len = stream->readUnsignedInt() >> 5;
 	self->instruments = new Vector.<S2Instrument>(++len, true);
@@ -474,7 +474,7 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 
 	for (i = 0; i < len; ++i) self->waves[i] = stream->readUnsignedByte();
 
-	position = stream->position;
+	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 34);
 	len = stream->readUnsignedInt();
 	self->arpeggios = new Vector.<int>(len, true);
@@ -482,7 +482,7 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 
 	for (i = 0; i < len; ++i) self->arpeggios[i] = stream->readByte();
 
-	position = stream->position;
+	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 38);
 	len = stream->readUnsignedInt();
 	vibratos = new Vector.<int>(len, true);
@@ -520,7 +520,7 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 	pointers = new Vector.<int>(++higher, true);
 	for (i = 0; i < len; ++i) pointers[i] = stream->readUnsignedShort();
 
-	position = stream->position;
+	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 50);
 	len = stream->readUnsignedInt();
 	patterns = new Vector.<SMRow>();
@@ -568,12 +568,12 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 		}
 
 		self->patterns[pos++] = row;
-		if ((position + pointers[j]) == stream->position) pointers[j++] = pos;
+		if ((position + pointers[j]) == ByteArray_get_position(stream)) pointers[j++] = pos;
 	}
 	pointers[j] = self->patterns->length;
 	self->patterns->fixed = true;
-
-	if ((stream->position & 1) != 0) ByteArray_set_position_rel(stream, +1);
+	 
+	if ((ByteArray_get_position(stream) & 1) != 0) ByteArray_set_position_rel(stream, +1);
 	self->super.amiga->store(stream, sampleData);
 	len = self->tracks.length;
 
