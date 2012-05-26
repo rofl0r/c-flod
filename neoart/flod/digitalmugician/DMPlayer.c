@@ -639,7 +639,7 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 	struct DMSong *song = 0;
 	struct AmigaStep *step = 0;
 	
-	id = stream->readMultiByte(24, ENCODING);
+	id = stream->readMultiByte(stream, 24, ENCODING);
 
 	if (id == " MUGICIAN/SOFTEYES 1990 ") self->super.super.version = DIGITALMUG_V1;
 	else if (id == " MUGICIAN2/SOFTEYES 1990") self->super.super.version = DIGITALMUG_V2;
@@ -647,17 +647,17 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 
 	ByteArray_set_position(stream, 28);
 	//index = new Vector.<int>(8, true);
-	for (; i < ARRAY_SIZE(index); ++i) index[i] = stream->readUnsignedInt();
+	for (; i < ARRAY_SIZE(index); ++i) index[i] = stream->readUnsignedInt(stream);
 
 	ByteArray_set_position(stream, 76);
 
 	for (i = 0; i < 8; ++i) {
 		song = new DMSong();
-		song->loop     = stream->readUnsignedByte();
-		song->loopStep = stream->readUnsignedByte() << 2;
-		song->speed    = stream->readUnsignedByte();
-		song->length   = stream->readUnsignedByte() << 2;
-		song->title    = stream->readMultiByte(12, ENCODING);
+		song->loop     = stream->readUnsignedByte(stream);
+		song->loopStep = stream->readUnsignedByte(stream) << 2;
+		song->speed    = stream->readUnsignedByte(stream);
+		song->length   = stream->readUnsignedByte(stream) << 2;
+		song->title    = stream->readMultiByte(stream, 12, ENCODING);
 		self->songs[i] = song;
 	}
 
@@ -673,8 +673,8 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 			//step = new AmigaStep();
 			step = &song->tracks[j];
 			AmigaStep_ctor(step);
-			step->pattern   = stream->readUnsignedByte() << 6;
-			step->transpose = stream->readByte();
+			step->pattern   = stream->readUnsignedByte(stream) << 6;
+			step->transpose = stream->readByte(stream);
 			//song->tracks[j] = step;
 		}
 		//song->tracks->fixed = true;
@@ -682,7 +682,7 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 
 	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 60);
-	len = stream->readUnsignedInt();
+	len = stream->readUnsignedInt(stream);
 	
 	assert_op(len + 1, <=, DMPLAYER_MAX_SAMPLES);
 	//self->samples = new Vector.<DMSample>(++len, true);
@@ -695,22 +695,22 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 		DMSample_ctor(sample);
 		
 		//sample = new DMSample();
-		sample->wave        = stream->readUnsignedByte();
-		sample->waveLen     = stream->readUnsignedByte() << 1;
-		sample->super.volume= stream->readUnsignedByte();
-		sample->volumeSpeed = stream->readUnsignedByte();
-		sample->arpeggio    = stream->readUnsignedByte();
-		sample->pitch       = stream->readUnsignedByte();
-		sample->effectStep  = stream->readUnsignedByte();
-		sample->pitchDelay  = stream->readUnsignedByte();
-		sample->finetune    = stream->readUnsignedByte() << 6;
-		sample->pitchLoop   = stream->readUnsignedByte();
-		sample->pitchSpeed  = stream->readUnsignedByte();
-		sample->effect      = stream->readUnsignedByte();
-		sample->source1     = stream->readUnsignedByte();
-		sample->source2     = stream->readUnsignedByte();
-		sample->effectSpeed = stream->readUnsignedByte();
-		sample->volumeLoop  = stream->readUnsignedByte();
+		sample->wave        = stream->readUnsignedByte(stream);
+		sample->waveLen     = stream->readUnsignedByte(stream) << 1;
+		sample->super.volume= stream->readUnsignedByte(stream);
+		sample->volumeSpeed = stream->readUnsignedByte(stream);
+		sample->arpeggio    = stream->readUnsignedByte(stream);
+		sample->pitch       = stream->readUnsignedByte(stream);
+		sample->effectStep  = stream->readUnsignedByte(stream);
+		sample->pitchDelay  = stream->readUnsignedByte(stream);
+		sample->finetune    = stream->readUnsignedByte(stream) << 6;
+		sample->pitchLoop   = stream->readUnsignedByte(stream);
+		sample->pitchSpeed  = stream->readUnsignedByte(stream);
+		sample->effect      = stream->readUnsignedByte(stream);
+		sample->source1     = stream->readUnsignedByte(stream);
+		sample->source2     = stream->readUnsignedByte(stream);
+		sample->effectSpeed = stream->readUnsignedByte(stream);
+		sample->volumeLoop  = stream->readUnsignedByte(stream);
 		//self->samples[i] = sample;
 	}
 	// FIXME this assumes a pointer!
@@ -718,17 +718,17 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 
 	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 64;
-	len = stream->readUnsignedInt() << 7;
+	len = stream->readUnsignedInt(stream) << 7;
 	ByteArray_set_position(stream, position);
 	Amiga_store(self->super.amiga, stream, len, -1);
 	//self->super.amiga->store(stream, len);
 
 	position = ByteArray_get_position(stream);
 	ByteArray_set_position(stream, 68);
-	instr = stream->readUnsignedInt();
+	instr = stream->readUnsignedInt(stream);
 
 	ByteArray_set_position(stream, 26);
-	len = stream->readUnsignedShort() << 6;
+	len = stream->readUnsignedShort(stream) << 6;
 	
 	assert_op(len, <=, DMPLAYER_MAX_PATTERNS);
 	//patterns = new Vector.<AmigaRow>(len, true);
@@ -743,10 +743,10 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 		row = &self->patterns[i];
 		AmigaRow_ctor(row);
 		
-		row->note   = stream->readUnsignedByte();
-		row->sample = stream->readUnsignedByte() & 63;
-		row->effect = stream->readUnsignedByte();
-		row->param  = stream->readByte();
+		row->note   = stream->readUnsignedByte(stream);
+		row->sample = stream->readUnsignedByte(stream) & 63;
+		row->effect = stream->readUnsignedByte(stream);
+		row->param  = stream->readByte(stream);
 		//self->patterns[i] = row;
 	}
 
@@ -754,7 +754,7 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 	ByteArray_set_position(stream, 72);
 
 	if (instr) {
-		len = stream->readUnsignedInt();
+		len = stream->readUnsignedInt(stream);
 		ByteArray_set_position(stream, position);
 		data = Amiga_store(self->super.amiga, stream, len, -1);
 		position = ByteArray_get_position(stream);
@@ -774,10 +774,10 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 			if (sample->wave < 32) continue;
 			ByteArray_set_position(stream, instr + ((sample->wave - 32) << 5));
 
-			sample->super.pointer = stream->readUnsignedInt();
-			sample->super.length  = stream->readUnsignedInt() - sample->super.pointer;
-			sample->super.loop    = stream->readUnsignedInt();
-			sample->super.name    = stream->readMultiByte(12, ENCODING);
+			sample->super.pointer = stream->readUnsignedInt(stream);
+			sample->super.length  = stream->readUnsignedInt(stream) - sample->super.pointer;
+			sample->super.loop    = stream->readUnsignedInt(stream);
+			sample->super.name    = stream->readMultiByte(stream, 12, ENCODING);
 
 			if (sample->super.loop) {
 				sample->super.loop  -= sample->super.pointer;
@@ -795,15 +795,15 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 			if (!sample->super.loopPtr) sample->super.loopPtr = sample->super.pointer + sample->super.loop;
 		}
 	} else {
-		position += stream->readUnsignedInt();
+		position += stream->readUnsignedInt(stream);
 	}
 	ByteArray_set_position(stream, 24);
 
-	if (stream->readUnsignedShort() == 1) {
+	if (stream->readUnsignedShort(stream) == 1) {
 		ByteArray_set_position(stream, position);
 		len = ByteArray_get_length(stream) - ByteArray_get_position(stream);
 		if (len > 256) len = 256;
-		for (i = 0; i < len; ++i) self->arpeggios[i] = stream->readUnsignedByte();
+		for (i = 0; i < len; ++i) self->arpeggios[i] = stream->readUnsignedByte(stream);
 	}
 }
 
