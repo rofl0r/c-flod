@@ -2,27 +2,27 @@
 #define S2INSTRUMENT_H
 
 struct S2Instrument {
-	int wave;
-	int waveLen;
-	int waveDelay;
-	int waveSpeed;
-	int arpeggio;
-	int arpeggioLen;
-	int arpeggioDelay;
-	int arpeggioSpeed;
-	int vibrato;
-	int vibratoLen;
-	int vibratoDelay;
-	int vibratoSpeed;
-	int pitchBend;
-	int pitchBendDelay;
-	int attackMax;
-	int attackSpeed;
-	int decayMin;
-	int decaySpeed;
-	int sustain;
-	int releaseMin;
-	int releaseSpeed;
+	unsigned short wave;
+	unsigned short arpeggio;
+	unsigned short vibrato;
+	unsigned char waveLen;
+	unsigned char waveDelay;
+	unsigned char waveSpeed;
+	unsigned char arpeggioLen;
+	unsigned char arpeggioDelay;
+	unsigned char arpeggioSpeed;
+	unsigned char vibratoLen;
+	unsigned char vibratoDelay;
+	unsigned char vibratoSpeed;
+	signed char pitchBend;
+	unsigned char pitchBendDelay;
+	unsigned char attackMax;
+	unsigned char attackSpeed;
+	unsigned char decayMin;
+	unsigned char decaySpeed;
+	unsigned char sustain;
+	unsigned char releaseMin;
+	unsigned char releaseSpeed;
 };
 
 void S2Instrument_defaults(struct S2Instrument* self);

@@ -30,11 +30,11 @@ struct S2Player {
 	//samples     : Vector.<S2Sample>,
 	struct S2Sample samples[S2PLAYER_MAX_SAMPLES];
 	//arpeggios   : Vector.<int>,
-	int arpeggios[S2PLAYER_MAX_ARPEGGIOS];
+	signed char arpeggios[S2PLAYER_MAX_ARPEGGIOS];
 	//vibratos    : Vector.<int>,
-	int vibratos[S2PLAYER_MAX_VIBRATOS];
+	signed char vibratos[S2PLAYER_MAX_VIBRATOS];
 	//waves       : Vector.<int>,
-	int waves[S2PLAYER_MAX_WAVES];
+	unsigned char waves[S2PLAYER_MAX_WAVES];
 	int length;
 	int speedDef;
 	//voices      : Vector.<S2Voice>,

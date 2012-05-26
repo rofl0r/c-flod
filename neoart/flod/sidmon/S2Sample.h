@@ -8,12 +8,12 @@ struct S2Sample {
 	char sample_name[32];
 	int negStart;
 	int negLen;
-	int negSpeed;
-	int negDir;
-	int negOffset;
 	int negPos;
-	int negCtr;
 	int negToggle;
+	unsigned short negSpeed;
+	unsigned short negDir;
+	signed short negOffset;
+	unsigned short negCtr;
 };
 
 void S2Sample_defaults(struct S2Sample* self);

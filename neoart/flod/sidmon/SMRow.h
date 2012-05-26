@@ -5,7 +5,7 @@
 
 struct SMRow {
 	struct AmigaRow super;
-	int speed;
+	signed char speed;
 };
 
 void SMRow_defaults(struct SMRow* self);

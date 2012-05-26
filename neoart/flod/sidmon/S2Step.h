@@ -5,7 +5,7 @@
 
 struct S2Step {
 	struct AmigaStep super;
-	int soundTranspose;
+	signed char soundTranspose;
 };
 
 void S2Step_defaults(struct S2Step* self);
