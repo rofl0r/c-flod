@@ -15,18 +15,21 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->sidmon {
-  import neoart.flod.core.*;
 
-  public final class S2Sample extends AmigaSample {
-    internal var
- int negStart;
- int negLen;
- int negSpeed;
- int negDir;
- int negOffset;
- int negPos;
- int negCtr;
- int negToggle;
-  }
+#include "S2Sample.h"
+#include "../flod_internal.h"
+
+void S2Sample_defaults(struct S2Sample* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+void S2Sample_ctor(struct S2Sample* self) {
+	CLASS_CTOR_DEF(S2Sample);
+	// original constructor code goes here
+	AmigaSample_defaults(&self->super);
+}
+
+struct S2Sample* S2Sample_new(void) {
+	CLASS_NEW_BODY(S2Sample);
 }
