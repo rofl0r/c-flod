@@ -50,5 +50,6 @@ int Amiga_store(struct Amiga* self, struct ByteArray *stream, int len, int point
 void Amiga_initialize(struct Amiga* self);
 void Amiga_reset(struct Amiga* self);
 void Amiga_fast(struct Amiga* self);
+void Amiga_memory_set_length(struct Amiga *self, unsigned len);
 
 #endif

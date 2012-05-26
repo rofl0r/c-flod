@@ -73,7 +73,7 @@ void Amiga_set_volume(struct Amiga* self, int value) {
 	}
 }
 
-static void Amiga_memory_set_length(struct Amiga *self, unsigned len) {
+void Amiga_memory_set_length(struct Amiga *self, unsigned len) {
 	assert_op(len, <=, AMIGA_MAX_MEMORY);
 	self->vector_count_memory = len;
 }
