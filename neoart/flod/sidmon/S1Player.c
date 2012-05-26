@@ -393,7 +393,7 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 	int totWaveforms = 0; 
 	int ver = 0;
 
-	while (stream->bytesAvailable > 8) {
+	while (stream->bytesAvailable(stream) > 8) {
 		start = stream->readUnsignedShort(stream);
 		if (start != 0x41fa) continue;
 		j = stream->readUnsignedShort(stream);
