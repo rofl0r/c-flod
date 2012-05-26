@@ -64,7 +64,8 @@ void DMPlayer_process(struct DMPlayer* self) {
 	int i = 0; 
 	int idx = 0; 
 	int j = 0; 
-	int len = 0; 
+	int len = 0;
+	signed char *memory = self->super.amiga->memory;
 	//memory:Vector.<int> = amiga->memory;
 	int r = 0; 
 	struct AmigaRow *row = 0;
@@ -74,30 +75,30 @@ void DMPlayer_process(struct DMPlayer* self) {
 	int value = 0;
 	struct DMVoice *voice = 0;
 
-	for (i = 0; i < numChannels; ++i) {
-		voice = voices[i];
+	for (i = 0; i < self->numChannels; ++i) {
+		voice = self->voices[i];
 		sample = voice->sample;
 
-		if (i < 3 || numChannels == 4) {
+		if (i < 3 || self->numChannels == 4) {
 			chan = voice->channel;
-			if (stepEnd) voice->step = song1.tracks[int(trackPos + i)];
+			if (self->stepEnd) voice->step = self->song1->tracks[int(self->trackPos + i)];
 
 			if (sample->wave > 31) {
-				chan->pointer = sample->loopPtr;
-				chan->length  = sample->repeat;
+				chan->pointer = sample->super.loopPtr;
+				chan->length  = sample->super.repeat;
 			}
 		} else {
-			chan = mixChannel;
-			if (stepEnd) voice->step = song2.tracks[int(trackPos + (i - 3))];
+			chan = self->mixChannel;
+			if (self->stepEnd) voice->step = self->song2->tracks[int(self->trackPos + (i - 3))];
 		}
 
-		if (patternEnd) {
-			row = patterns[int(voice->step->pattern + patternPos)];
+		if (self->patternEnd) {
+			row = self->patterns[int(voice->step->pattern + self->patternPos)];
 
 			if (row->note) {
 				if (row->effect != 74) {
 					voice->note = row->note;
-					if (row->sample) sample = voice->sample = samples[row->sample];
+					if (row->sample) sample = voice->sample = self->samples[row->sample];
 				}
 				voice->val1 = row->effect < 64 ? 1 : row->effect - 62;
 				voice->val2 = row->param;
@@ -123,11 +124,11 @@ void DMPlayer_process(struct DMPlayer* self) {
 
 				if (voice->val1 != 12) {
 					if (sample->wave > 31) {
-						chan->pointer  = sample->pointer;
-						chan->length   = sample->length;
+						chan->pointer  = sample->super.pointer;
+						chan->length   = sample->super.length;
 						chan->enabled  = 0;
-						voice->mixPtr  = sample->pointer;
-						voice->mixEnd  = sample->pointer + sample->length;
+						voice->mixPtr  = sample->super.pointer;
+						voice->mixEnd  = sample->super.pointer + sample->super.length;
 						voice->mixMute = 0;
 					} else {
 						dst = sample->wave << 7;
@@ -135,7 +136,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 						chan->length  = sample->waveLen;
 						if (voice->val1 != 10) chan->enabled = 0;
 
-						if (numChannels == 4) {
+						if (self->numChannels == 4) {
 							if (sample->effect != 0 && voice->val1 != 2 && voice->val1 != 4) {
 								len  = dst + 128;
 								src1 = sample->source1 << 7;
@@ -165,19 +166,19 @@ void DMPlayer_process(struct DMPlayer* self) {
 				break;
 			case 5:   //pattern length
 				value = voice->val2;
-				if (value > 0 && value < 65) patternLen = value;
+				if (value > 0 && value < 65) self->patternLen = value;
 				break;
 			case 6:   //song speed
 				value  = voice->val2 & 15;
 				value |= value << 4;
 				if (voice->val2 == 0 || voice->val2 > 15) break;
-				speed = value;
+				self->super.super.speed = value;
 				break;
 			case 7:   //led filter on
-				amiga->filter->active = 1;
+				self->super.amiga->filter->active = 1;
 				break;
 			case 8:   //led filter off
-				amiga->filter->active = 0;
+				self->super.amiga->filter->active = 0;
 				break;
 			case 13:  //shuffle
 				voice->val1 = 0;
@@ -185,18 +186,18 @@ void DMPlayer_process(struct DMPlayer* self) {
 				if (value == 0) break;
 				value = voice->val2 & 0xf0;
 				if (value == 0) break;
-				speed = voice->val2;
+				self->super.super.speed = voice->val2;
 				break;
 			default:
 				break;
 		}
 	}
 
-	for (i = 0; i < numChannels; ++i) {
-		voice  = voices[i];
+	for (i = 0; i < self->numChannels; ++i) {
+		voice  = self->voices[i];
 		sample = voice->sample;
 
-		if (numChannels == 4) {
+		if (self->numChannels == 4) {
 			chan = voice->channel;
 
 			if (sample->wave < 32 && sample->effect && !sample->effectDone) {
@@ -388,7 +389,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 				voice->volumeStep = ++voice->volumeStep & 127;
 
 				if (voice->volumeStep || sample->volumeLoop) {
-					idx = voice->volumeStep + (sample->volume << 7);
+					idx = voice->volumeStep + (sample->super.volume << 7);
 					value = ~(memory[idx] + 129) + 1;
 
 					voice->volume = (value & 255) >> 2;
@@ -402,7 +403,7 @@ void DMPlayer_process(struct DMPlayer* self) {
 
 		if (sample->arpeggio) {
 			idx = voice->arpeggioStep + (sample->arpeggio << 5);
-			value += arpeggios[idx];
+			value += self->arpeggios[idx];
 			voice->arpeggioStep = ++voice->arpeggioStep & 31;
 		}
 
@@ -439,23 +440,23 @@ void DMPlayer_process(struct DMPlayer* self) {
 		chan->period = voice->finalPeriod;
 	}
 
-	if (numChannels > 4) {
-		src1 = buffer1;
-		buffer1 = buffer2;
-		buffer2 = src1;
+	if (self->numChannels > 4) {
+		src1 = self->buffer1;
+		self->buffer1 = self->buffer2;
+		self->buffer2 = src1;
 
-		chan = amiga->channels[3];
+		chan = self->super.amiga->channels[3];
 		chan->pointer = src1;
 
 		for (i = 3; i < 7; ++i) {
-			voice = voices[i];
+			voice = self->voices[i];
 			voice->mixStep = 0;
 
 			if (voice->finalPeriod < 125) {
 				voice->mixMute  = 1;
 				voice->mixSpeed = 0;
 			} else {
-				j = ((voice->finalPeriod << 8) / mixPeriod) & 65535;
+				j = ((voice->finalPeriod << 8) / self->mixPeriod) & 65535;
 				src2 = ((256 / j) & 255) << 8;
 				dst  = ((256 % j) << 8) & 16777215;
 				voice->mixSpeed = (src2 | ((dst / j) & 255)) << 8;
@@ -469,51 +470,51 @@ void DMPlayer_process(struct DMPlayer* self) {
 			dst = 0;
 
 			for (j = 3; j < 7; ++j) {
-				voice = voices[j];
+				voice = self->voices[j];
 				src2 = (memory[int(voice->mixPtr + (voice->mixStep >> 16))] & 255) + voice->mixVolume;
-				dst += volumes[src2];
+				dst += self->volumes[src2];
 				voice->mixStep += voice->mixSpeed;
 			}
 
-			memory[src1++] = averages[dst];
+			memory[src1++] = self->averages[dst];
 		}
 		chan->length = 350;
-		chan->period = mixPeriod;
+		chan->period = self->mixPeriod;
 		chan->volume = 64;
 	}
 
-	if (--tick == 0) {
-		tick = speed & 15;
-		speed  = (speed & 240) >> 4;
-		speed |= (tick << 4);
-		patternEnd = 1;
-		patternPos++;
+	if (--(self->super.super.tick) == 0) {
+		self->super.super.tick = self->super.super.speed & 15;
+		self->super.super.speed  = (self->super.super.speed & 240) >> 4;
+		self->super.super.speed |= (self->super.super.tick << 4);
+		self->patternEnd = 1;
+		self->patternPos++;
 
-		if (patternPos == 64 || patternPos == patternLen) {
-			patternPos = 0;
-			stepEnd    = 1;
-			trackPos  += 4;
+		if (self->patternPos == 64 || self->patternPos == self->patternLen) {
+			self->patternPos = 0;
+			self->stepEnd    = 1;
+			self->trackPos  += 4;
 
-			if (trackPos == song1.length) {
-				trackPos = song1.loopStep;
-				amiga->complete = 1;
+			if (self->trackPos == self->song1.length) {
+				self->trackPos = self->song1.loopStep;
+				self->super.amiga->complete = 1;
 			}
 		}
 	} else {
-		patternEnd = 0;
-		stepEnd = 0;
+		self->patternEnd = 0;
+		self->stepEnd = 0;
 	}
 
-	for (i = 0; i < numChannels; ++i) {
-		voice = voices[i];
+	for (i = 0; i < self->numChannels; ++i) {
+		voice = self->voices[i];
 		voice->mixPtr += voice->mixStep >> 16;
 
 		sample = voice->sample;
 		sample->effectDone = 0;
 
 		if (voice->mixPtr >= voice->mixEnd) {
-			if (sample->loop) {
-				voice->mixPtr -= sample->repeat;
+			if (sample->super.loop) {
+				voice->mixPtr -= sample->super.repeat;
 			} else {
 				voice->mixPtr  = 0;
 				voice->mixMute = 1;
@@ -534,31 +535,31 @@ void DMPlayer_initialize(struct DMPlayer* self) {
 	int len = 0;
 	struct DMVoice *voice = 0;
 	
-	super->initialize();
+	self->super->initialize();
 
-	if (playSong > 7) playSong = 0;
+	if (self->super.super.playSong > 7) self->super.super.playSong = 0;
 
-	song1  = songs[playSong];
-	speed  = song1.speed & 0x0f;
-	speed |= speed << 4;
-	tick   = song1.speed;
+	self->song1  = self->songs[self->super.super.playSong];
+	self->super.super.speed  = self->song1->speed & 0x0f;
+	self->super.super.speed |= self->super.super.speed << 4;
+	self->super.super.tick   = self->song1->speed;
 
-	trackPos    = 0;
-	patternPos  = 0;
-	patternLen  = 64;
-	patternEnd  = 1;
-	stepEnd     = 1;
-	numChannels = 4;
+	self->trackPos    = 0;
+	self->patternPos  = 0;
+	self->patternLen  = 64;
+	self->patternEnd  = 1;
+	self->stepEnd     = 1;
+	self->numChannels = 4;
 
 	for (; i < 7; ++i) {
-		voice = voices[i];
+		voice = self->voices[i];
 		voice->initialize();
-		voice->sample = samples[0];
+		voice->sample = self->samples[0];
 
 		if (i < 4) {
-			chan = amiga->channels[i];
+			chan = self->super.amiga->channels[i];
 			chan->enabled = 0;
-			chan->pointer = amiga->loopPtr;
+			chan->pointer = self->super.amiga->loopPtr;
 			chan->length  = 2;
 			chan->period  = 124;
 			chan->volume  = 0;
@@ -567,22 +568,22 @@ void DMPlayer_initialize(struct DMPlayer* self) {
 		}
 	}
 
-	if (version == DIGITALMUG_V2) {
-		if ((playSong & 1) != 0) playSong--;
-		song2 = songs[int(playSong + 1)];
+	if (self->super.super.version == DIGITALMUG_V2) {
+		if ((self->super.super.playSong & 1) != 0) self->super.super.playSong--;
+		self->song2 = self->songs[int(self->super.super.playSong + 1)];
 
-		mixChannel  = new AmigaChannel(7);
-		numChannels = 7;
+		self->mixChannel  = new AmigaChannel(7);
+		self->numChannels = 7;
 
-		chan = amiga->channels[3];
+		chan = self->super.amiga->channels[3];
 		chan->mute    = 0;
-		chan->pointer = buffer1;
+		chan->pointer = self->buffer1;
 		chan->length  = 350;
-		chan->period  = mixPeriod;
+		chan->period  = self->mixPeriod;
 		chan->volume  = 64;
 
-		len = buffer1 + 700;
-		for (i = buffer1; i < len; ++i) amiga->memory[i] = 0;
+		len = self->buffer1 + 700;
+		for (i = self->buffer1; i < len; ++i) self->super.amiga->memory[i] = 0;
 	}
 }
 
@@ -604,8 +605,8 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 	
 	id = stream->readMultiByte(24, ENCODING);
 
-	if (id == " MUGICIAN/SOFTEYES 1990 ") version = DIGITALMUG_V1;
-	else if (id == " MUGICIAN2/SOFTEYES 1990") version = DIGITALMUG_V2;
+	if (id == " MUGICIAN/SOFTEYES 1990 ") self->super.super.version = DIGITALMUG_V1;
+	else if (id == " MUGICIAN2/SOFTEYES 1990") self->super.super.version = DIGITALMUG_V2;
 	else return;
 
 	stream->position = 28;
@@ -621,14 +622,14 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 		song->speed    = stream->readUnsignedByte();
 		song->length   = stream->readUnsignedByte() << 2;
 		song->title    = stream->readMultiByte(12, ENCODING);
-		songs[i] = song;
+		self->songs[i] = song;
 	}
 
 	stream->position = 204;
-	lastSong = songs->length - 1;
+	self->super.super.lastSong = self->songs->length - 1;
 
 	for (i = 0; i < 8; ++i) {
-		song = songs[i];
+		song = self->songs[i];
 		len  = index[i] << 2;
 
 		for (j = 0; j < len; ++j) {
@@ -643,7 +644,7 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 	position = stream->position;
 	stream->position = 60;
 	len = stream->readUnsignedInt();
-	samples = new Vector.<DMSample>(++len, true);
+	self->samples = new Vector.<DMSample>(++len, true);
 	stream->position = position;
 
 	for (i = 1; i < len; ++i) {
@@ -664,15 +665,15 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 		sample->source2     = stream->readUnsignedByte();
 		sample->effectSpeed = stream->readUnsignedByte();
 		sample->volumeLoop  = stream->readUnsignedByte();
-		samples[i] = sample;
+		self->samples[i] = sample;
 	}
-	samples[0] = samples[1];
+	self->samples[0] = self->samples[1];
 
 	position = stream->position;
 	stream->position = 64;
 	len = stream->readUnsignedInt() << 7;
 	stream->position = position;
-	amiga->store(stream, len);
+	self->super.amiga->store(stream, len);
 
 	position = stream->position;
 	stream->position = 68;
@@ -691,7 +692,7 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 		row->sample = stream->readUnsignedByte() & 63;
 		row->effect = stream->readUnsignedByte();
 		row->param  = stream->readByte();
-		patterns[i] = row;
+		self->patterns[i] = row;
 	}
 
 	position = stream->position;
@@ -703,17 +704,17 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 		data = amiga->store(stream, len);
 		position = stream->position;
 
-		amiga->memory->length += 350;
-		buffer1 = amiga->memory->length;
-		amiga->memory->length += 350;
-		buffer2 = amiga->memory->length;
-		amiga->memory->length += 350;
-		amiga->loopLen = 8;
+		self->super.amiga->memory->length += 350;
+		self->buffer1 = self->super.amiga->memory->length;
+		self->super.amiga->memory->length += 350;
+		self->buffer2 = self->super.amiga->memory->length;
+		self->super.amiga->memory->length += 350;
+		self->super.amiga->loopLen = 8;
 
-		len = samples->length;
+		len = self->samples->length;
 
 		for (i = 1; i < len; ++i) {
-			sample = samples[i];
+			sample = self->samples[i];
 			if (sample->wave < 32) continue;
 			stream->position = instr + ((sample->wave - 32) << 5);
 
@@ -746,7 +747,7 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 		stream->position = position;
 		len = stream->length - stream->position;
 		if (len > 256) len = 256;
-		for (i = 0; i < len; ++i) arpeggios[i] = stream->readUnsignedByte();
+		for (i = 0; i < len; ++i) self->arpeggios[i] = stream->readUnsignedByte();
 	}
 }
 
