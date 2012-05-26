@@ -21,13 +21,16 @@ TRACKER_SRCS = $(sort $(wildcard neoart/flod/trackers/*.c))
 FASTTRACKER_SRCS = $(sort $(wildcard neoart/flod/fasttracker/*.c))
 WHITTAKER_SRCS = $(sort $(wildcard neoart/flod/whittaker/*.c))
 FUTURECOMPOSER_SRCS = $(sort $(wildcard neoart/flod/futurecomposer/*.c))
-ALL_PLAYER_SRCS = $(WHITTAKER_SRCS) $(FUTURECOMPOSER_SRCS) $(TRACKER_SRCS) $(FASTTRACKER_SRCS)
+DIGITALMUGICIAN_SRCS = $(sort $(wildcard neoart/flod/digitalmugician/*.c))
+ALL_PLAYER_SRCS = $(WHITTAKER_SRCS) $(FUTURECOMPOSER_SRCS) $(TRACKER_SRCS) \
+$(FASTTRACKER_SRCS) $(DIGITALMUGICIAN_SRCS)
 
 #FILELOADER_SRCS = neoart/flod/FileLoader.c
 #PLAYER_SRCS = demos/Demo5.c
 PLAYER_SRCS = $(sort $(wildcard player/*.c))
 
-SRCS = $(BACKEND_SRCS) $(FLASH_SRCS) $(CORE_SRCS) $(ALL_PLAYER_SRCS) $(FILELOADER_SRCS) $(PLAYER_SRCS)
+SRCS = $(BACKEND_SRCS) $(FLASH_SRCS) $(CORE_SRCS) $(ALL_PLAYER_SRCS) \
+$(FILELOADER_SRCS) $(PLAYER_SRCS)
 
 OBJS = $(SRCS:.c=.o)
 
