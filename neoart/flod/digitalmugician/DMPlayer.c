@@ -21,6 +21,9 @@
 #include "DMPlayer_const.h"
 
 static void tables(struct DMPlayer* self);
+void DMPlayer_process(struct DMPlayer* self);
+void DMPlayer_initialize(struct DMPlayer* self);
+void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream);
 
 void DMPlayer_defaults(struct DMPlayer* self) {
 	CLASS_DEF_INIT();
@@ -46,6 +49,11 @@ void DMPlayer_ctor(struct DMPlayer* self, struct Amiga *amiga) {
 	voices[5] = new DMVoice();
 	voices[6] = new DMVoice();
 	tables();
+	
+	//vtable
+	self->super.super.process = DMPlayer_process;
+	self->super.super.loader = DMPlayer_loader;
+	self->super.super.initialize = DMPlayer_initialize;
 	
 }
 
