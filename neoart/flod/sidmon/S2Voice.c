@@ -15,68 +15,49 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->sidmon {
-  import neoart.flod.core.*;
 
-  public final class S2Voice {
-    internal var
- int index;
-      next           : S2Voice,
-      channel        : AmigaChannel,
-      step           : S2Step,
-      row            : SMRow,
-      instr          : S2Instrument,
-      sample         : S2Sample,
- int enabled;
- int pattern;
- int instrument;
- int note;
- int period;
- int volume;
- int original;
- int adsrPos;
- int sustainCtr;
- int pitchBend;
- int pitchBendCtr;
- int noteSlideTo;
- int noteSlideSpeed;
- int waveCtr;
- int wavePos;
- int arpeggioCtr;
- int arpeggioPos;
- int vibratoCtr;
- int vibratoPos;
- int speed;
+#include "S2Voice.h"
+#include "../flod_internal.h"
 
-     void S2Voice( int index) {
-      self->index = index;
-    }
+void S2Voice_defaults(struct S2Voice* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
 
-    internal function initialize():void {
-      step           = null;
-      row            = null;
-      instr          = null;
-      sample         = null;
-      enabled        = 0;
-      pattern        = 0;
-      instrument     = 0;
-      note           = 0;
-      period         = 0;
-      volume         = 0;
-      original       = 0;
-      adsrPos        = 0;
-      sustainCtr     = 0;
-      pitchBend      = 0;
-      pitchBendCtr   = 0;
-      noteSlideTo    = 0;
-      noteSlideSpeed = 0;
-      waveCtr        = 0;
-      wavePos        = 0;
-      arpeggioCtr    = 0;
-      arpeggioPos    = 0;
-      vibratoCtr     = 0;
-      vibratoPos     = 0;
-      speed          = 0;
-    }
-  }
+void S2Voice_ctor(struct S2Voice* self, int index) {
+	CLASS_CTOR_DEF(S2Voice);
+	// original constructor code goes here
+	self->index = index;
+}
+
+struct S2Voice* S2Voice_new(int index) {
+	CLASS_NEW_BODY(S2Voice, index);
+}
+
+
+void S2Voice_initialize(struct S2Voice* self) {
+	self->step           = null;
+	self->row            = null;
+	self->instr          = null;
+	self->sample         = null;
+	self->enabled        = 0;
+	self->pattern        = 0;
+	self->instrument     = 0;
+	self->note           = 0;
+	self->period         = 0;
+	self->volume         = 0;
+	self->original       = 0;
+	self->adsrPos        = 0;
+	self->sustainCtr     = 0;
+	self->pitchBend      = 0;
+	self->pitchBendCtr   = 0;
+	self->noteSlideTo    = 0;
+	self->noteSlideSpeed = 0;
+	self->waveCtr        = 0;
+	self->wavePos        = 0;
+	self->arpeggioCtr    = 0;
+	self->arpeggioPos    = 0;
+	self->vibratoCtr     = 0;
+	self->vibratoPos     = 0;
+	self->speed          = 0;
 }
