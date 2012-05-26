@@ -15,61 +15,47 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->sidmon {
-  import flash.utils.*;
-  import neoart.flod.core.*;
 
-  public final class S1Player extends AmigaPlayer {
-    private var
-      tracksPtr   : Vector.<int>,
-      tracks      : Vector.<AmigaStep>,
-      patternsPtr : Vector.<int>,
-      patterns    : Vector.<SMRow>,
-      samples     : Vector.<S1Sample>,
-      waveLists   : Vector.<int>,
- int speedDef;
- int trackLen;
- int patternDef;
- int mix1Speed;
- int mix2Speed;
- int mix1Dest;
- int mix2Dest;
- int mix1Source1;
- int mix1Source2;
- int mix2Source1;
- int mix2Source2;
- int doFilter;
- int doReset;
-      voices      : Vector.<S1Voice>,
- int trackPos;
- int trackEnd;
- int patternPos;
- int patternEnd;
- int patternLen;
- int mix1Ctr;
- int mix2Ctr;
- int mix1Pos;
- int mix2Pos;
- int audPtr;
- int audLen;
- int audPer;
- int audVol;
+#include "S1Player.h"
+#include "S1Player_const.h"
+#include "../flod_internal.h"
 
-     void S1Player(amiga:Amiga = null) {
-      super(amiga);
-      PERIODS->fixed = true;
+void S1Player_loader(struct S1Player* self, struct ByteArray *stream);
+void S1Player_process(struct S1Player* self);
+void S1Player_initialize(struct S1Player* self);
 
-      tracksPtr = new Vector.<int>(4, true);
-      voices    = new Vector.<S1Voice>(4, true);
+void S1Player_defaults(struct S1Player* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
 
-      voices[0] = new S1Voice(0);
-      voices[0].next = voices[1] = new S1Voice(1);
-      voices[1].next = voices[2] = new S1Voice(2);
-      voices[2].next = voices[3] = new S1Voice(3);
-    }
+void S1Player_ctor(struct S1Player* self, struct Amiga *amiga) {
+	CLASS_CTOR_DEF(S1Player);
+	// original constructor code goes here
+	super(amiga);
+	PERIODS->fixed = true;
+
+	tracksPtr = new Vector.<int>(4, true);
+	voices    = new Vector.<S1Voice>(4, true);
+
+	voices[0] = new S1Voice(0);
+	voices[0].next = voices[1] = new S1Voice(1);
+	voices[1].next = voices[2] = new S1Voice(2);
+	voices[2].next = voices[3] = new S1Voice(3);
+	
+	//vtable
+	self->super.super.loader = S1Player_loader;
+	self->super.super.process = S1Player_process;
+	self->super.super.initialize = S1Player_initialize;
+	
+}
+
+struct S1Player* S1Player_new(struct Amiga *amiga) {
+	CLASS_NEW_BODY(S1Player, amiga);
+}
 
 //override
-void process() {
+void S1Player_process(struct S1Player* self) {
       var chan:AmigaChannel, int dst; int i; int index; memory:Vector.<int> = amiga->memory, row:SMRow, sample:S1Sample, int src1; int src2; step:AmigaStep, int value; voice:S1Voice = voices[0];
 
       while (voice) {
@@ -332,10 +318,10 @@ void process() {
         }
         voice = voice->next;
       }
-    }
+}
 
 //override
-void initialize() {
+void S1Player_initialize(struct S1Player* self) {
       var chan:AmigaChannel, step:AmigaStep, voice:S1Voice = voices[0];
       super->initialize();
 
@@ -366,10 +352,10 @@ void initialize() {
 
         voice = voice->next;
       }
-    }
+}
 
 //override
-void loader(stream:ByteArray) {
+void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
       var int data; int i; id:String, int j; int headers; int len; int position; row:SMRow, sample:S1Sample, int start; step:AmigaStep, int totInstruments; int totPatterns; int totSamples; int totWaveforms; int ver;
 
       while (stream->bytesAvailable > 8) {
@@ -647,67 +633,4 @@ void loader(stream:ByteArray) {
         doReset = doFilter = 1;
       }
       version = 1;
-    }
-
-    private const
-      SIDMON_0FFA = 0x0ffa,
-      SIDMON_1170 = 0x1170,
-      SIDMON_11C6 = 0x11c6,
-      SIDMON_11DC = 0x11dc,
-      SIDMON_11E0 = 0x11e0,
-      SIDMON_125A = 0x125a,
-      SIDMON_1444 = 0x1444,
-
-      EMBEDDED: Vector.<int> = Vector.<int>([1166, 408, 908]),
-
-      PERIODS: Vector.<int> = Vector.<int>([0,
-        5760,5424,5120,4832,4560,4304,4064,3840,3616,3424,3232,3048,
-        2880,2712,2560,2416,2280,2152,2032,1920,1808,1712,1616,1524,
-        1440,1356,1280,1208,1140,1076,1016, 960, 904, 856, 808, 762,
-         720, 678, 640, 604, 570, 538, 508, 480, 452, 428, 404, 381,
-         360, 339, 320, 302, 285, 269, 254, 240, 226, 214, 202, 190,
-         180, 170, 160, 151, 143, 135, 127,
-         0,0,0,0,0,0,0,
-        4028,3806,3584,3394,3204,3013,2855,2696,2538,2395,2268,2141,
-        2014,1903,1792,1697,1602,1507,1428,1348,1269,1198,1134,1071,
-        1007, 952, 896, 849, 801, 754, 714, 674, 635, 599, 567, 536,
-         504, 476, 448, 425, 401, 377, 357, 337, 310, 300, 284, 268,
-         252, 238, 224, 213, 201, 189, 179, 169, 159, 150, 142, 134,
-         0,0,0,0,0,0,0,
-        3993,3773,3552,3364,3175,2987,2830,2672,2515,2374,2248,2122,
-        1997,1887,1776,1682,1588,1494,1415,1336,1258,1187,1124,1061,
-         999, 944, 888, 841, 794, 747, 708, 668, 629, 594, 562, 531,
-         500, 472, 444, 421, 397, 374, 354, 334, 315, 297, 281, 266,
-         250, 236, 222, 211, 199, 187, 177, 167, 158, 149, 141, 133,
-         0,0,0,0,0,0,0,
-        3957,3739,3521,3334,3147,2960,2804,2648,2493,2353,2228,2103,
-        1979,1870,1761,1667,1574,1480,1402,1324,1247,1177,1114,1052,
-         990, 935, 881, 834, 787, 740, 701, 662, 624, 589, 557, 526,
-         495, 468, 441, 417, 394, 370, 351, 331, 312, 295, 279, 263,
-         248, 234, 221, 209, 197, 185, 176, 166, 156, 148, 140, 132,
-         0,0,0,0,0,0,0,
-        3921,3705,3489,3304,3119,2933,2779,2625,2470,2331,2208,2084,
-        1961,1853,1745,1652,1560,1467,1390,1313,1235,1166,1104,1042,
-         981, 927, 873, 826, 780, 734, 695, 657, 618, 583, 552, 521,
-         491, 464, 437, 413, 390, 367, 348, 329, 309, 292, 276, 261,
-         246, 232, 219, 207, 195, 184, 174, 165, 155, 146, 138, 131,
-         0,0,0,0,0,0,0,
-        3886,3671,3457,3274,3090,2907,2754,2601,2448,2310,2188,2065,
-        1943,1836,1729,1637,1545,1454,1377,1301,1224,1155,1094,1033,
-         972, 918, 865, 819, 773, 727, 689, 651, 612, 578, 547, 517,
-         486, 459, 433, 410, 387, 364, 345, 326, 306, 289, 274, 259,
-         243, 230, 217, 205, 194, 182, 173, 163, 153, 145, 137, 130,
-         0,0,0,0,0,0,0,
-        3851,3638,3426,3244,3062,2880,2729,2577,2426,2289,2168,2047,
-        1926,1819,1713,1622,1531,1440,1365,1289,1213,1145,1084,1024,
-         963, 910, 857, 811, 766, 720, 683, 645, 607, 573, 542, 512,
-         482, 455, 429, 406, 383, 360, 342, 323, 304, 287, 271, 256,
-         241, 228, 215, 203, 192, 180, 171, 162, 152, 144, 136, 128,
-        6848,6464,6096,5760,5424,5120,4832,4560,4304,4064,3840,3616,
-        3424,3232,3048,2880,2712,2560,2416,2280,2152,2032,1920,1808,
-        1712,1616,1524,1440,1356,1280,1208,1140,1076,1016, 960, 904,
-         856, 808, 762, 720, 678, 640, 604, 570, 538, 508, 480, 452,
-         428, 404, 381, 360, 339, 320, 302, 285, 269, 254, 240, 226,
-         214, 202, 190, 180, 170, 160, 151, 143, 135, 127]);
-  }
 }
