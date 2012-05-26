@@ -27,6 +27,7 @@ struct DMSample {
 	int source2;
 	int volumeLoop;
 	int volumeSpeed;
+	char sample_name[16];
 };
 
 void DMSample_defaults(struct DMSample* self);

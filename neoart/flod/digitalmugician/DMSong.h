@@ -11,13 +11,13 @@ object
 	-> DMSong
 */
 struct DMSong {
-	char *title;
 	int speed;
 	int length;
 	int loop;
 	int loopStep;
 	//tracks   : Vector.<AmigaStep>;
 	struct AmigaStep tracks[DMSONG_MAX_TRACKS];
+	char title[16];
 };
 
 void DMSong_defaults(struct DMSong* self);

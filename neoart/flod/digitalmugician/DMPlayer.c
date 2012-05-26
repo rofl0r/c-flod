@@ -639,10 +639,10 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 	struct DMSong *song = 0;
 	struct AmigaStep *step = 0;
 	
-	id = stream->readMultiByte(stream, 24, ENCODING);
+	stream->readMultiByte(stream, id, 24);
 
-	if (id == " MUGICIAN/SOFTEYES 1990 ") self->super.super.version = DIGITALMUG_V1;
-	else if (id == " MUGICIAN2/SOFTEYES 1990") self->super.super.version = DIGITALMUG_V2;
+	if (is_str(id, " MUGICIAN/SOFTEYES 1990 ")) self->super.super.version = DIGITALMUG_V1;
+	else if (is_str(id, " MUGICIAN2/SOFTEYES 1990")) self->super.super.version = DIGITALMUG_V2;
 	else return;
 
 	ByteArray_set_position(stream, 28);
@@ -651,14 +651,17 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 
 	ByteArray_set_position(stream, 76);
 
-	for (i = 0; i < 8; ++i) {
-		song = new DMSong();
+	for (i = 0; i < DMPLAYER_MAX_SONGS; ++i) {
+		//song = new DMSong();
+		song = &self->songs[i];
+		DMSong_ctor(song);
+		
 		song->loop     = stream->readUnsignedByte(stream);
 		song->loopStep = stream->readUnsignedByte(stream) << 2;
 		song->speed    = stream->readUnsignedByte(stream);
 		song->length   = stream->readUnsignedByte(stream) << 2;
-		song->title    = stream->readMultiByte(stream, 12, ENCODING);
-		self->songs[i] = song;
+		stream->readMultiByte(stream, song->title, 12);
+		//self->songs[i] = song;
 	}
 
 	ByteArray_set_position(stream, 204);
@@ -777,7 +780,8 @@ void DMPlayer_loader(struct DMPlayer* self, struct ByteArray *stream) {
 			sample->super.pointer = stream->readUnsignedInt(stream);
 			sample->super.length  = stream->readUnsignedInt(stream) - sample->super.pointer;
 			sample->super.loop    = stream->readUnsignedInt(stream);
-			sample->super.name    = stream->readMultiByte(stream, 12, ENCODING);
+			stream->readMultiByte(stream, sample->sample_name, 12);
+			sample->super.name    = sample->sample_name;
 
 			if (sample->super.loop) {
 				sample->super.loop  -= sample->super.pointer;
