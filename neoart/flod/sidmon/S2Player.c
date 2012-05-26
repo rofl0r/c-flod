@@ -566,7 +566,8 @@ void S2Player_loader(struct S2Player* self, struct ByteArray *stream) {
 		sample->negPos    = stream->readUnsignedInt(stream);
 		sample->negCtr    = stream->readUnsignedShort(stream);
 		ByteArray_set_position_rel(stream, + 6);
-		sample->super.name      = stream->readMultiByte(stream, 32, ENCODING);
+		stream->readMultiByte(stream, sample->sample_name, 32);
+		sample->super.name = sample->sample_name;
 
 		sample->super.pointer = position;
 		sample->super.loopPtr = position + sample->super.loop;

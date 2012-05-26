@@ -5,6 +5,7 @@
 
 struct S2Sample {
 	struct AmigaSample super;
+	char sample_name[32];
 	int negStart;
 	int negLen;
 	int negSpeed;
