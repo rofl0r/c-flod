@@ -15,54 +15,74 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->soundfx {
-  import flash.utils.*;
-  import neoart.flod.core.*;
 
-  public final class FXPlayer extends AmigaPlayer {
-    private var
-      track      : Vector.<int>,
-      patterns   : Vector.<AmigaRow>,
-      samples    : Vector.<AmigaSample>,
- int length;
-      voices     : Vector.<FXVoice>,
- int trackPos;
- int patternPos;
- int jumpFlag;
- int delphine;
+#include "FXPlayer.h"
+#include "../flod_internal.h"
 
-     void FXPlayer(amiga:Amiga = null) {
-      super(amiga);
-      PERIODS->fixed = true;
+void FXPlayer_set_force(struct FXPlayer* self, int value);
+void FXPlayer_set_ntsc(struct FXPlayer* self, int value);
+void FXPlayer_process(struct FXPlayer* self);
+void FXPlayer_initialize(struct FXPlayer* self);
+void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream);
 
-      track  = new Vector.<int>(128, true);
-      voices = new Vector.<FXVoice>(4, true);
+static const signed short PERIODS[] = {
+        1076,1016,960,906,856,808,762,720,678,640,604,570,
+         538, 508,480,453,428,404,381,360,339,320,302,285,
+         269, 254,240,226,214,202,190,180,170,160,151,143,
+         135, 127,120,113,113,113,113,113,113,113,113,113,
+         113, 113,113,113,113,113,113,113,113,113,113,113,
+         113, 113,113,113,113,113,-1,
+};
 
-      voices[0] = new FXVoice(0);
-      voices[0].next = voices[1] = new FXVoice(1);
-      voices[1].next = voices[2] = new FXVoice(2);
-      voices[2].next = voices[3] = new FXVoice(3);
-    }
+void FXPlayer_defaults(struct FXPlayer* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+void FXPlayer_ctor(struct FXPlayer* self, struct Amiga *amiga) {
+	CLASS_CTOR_DEF(FXPlayer);
+	// original constructor code goes here
+	super(amiga);
+
+	track  = new Vector.<int>(128, true);
+	voices = new Vector.<FXVoice>(4, true);
+
+	voices[0] = new FXVoice(0);
+	voices[0].next = voices[1] = new FXVoice(1);
+	voices[1].next = voices[2] = new FXVoice(2);
+	voices[2].next = voices[3] = new FXVoice(3);
+	
+	//vtable
+	self->super.super.loader = FXPlayer_loader;
+	self->super.super.process = FXPlayer_process;
+	self->super.super.initialize = FXPlayer_initialize;
+	self->super.super.set_force = FXPlayer_set_force;
+	self->super.super.set_ntsc = FXPlayer_set_ntsc;
+}
+
+struct FXPlayer* FXPlayer_new(struct Amiga *amiga) {
+	CLASS_NEW_BODY(FXPlayer, amiga);
+}
 
 //override
-void set force( int value) {
-      if (value < SOUNDFX_10)
-        value = SOUNDFX_10;
-      else if (value > SOUNDFX_20)
-        value = SOUNDFX_20;
+void FXPlayer_set_force(struct FXPlayer* self, int value) {
+	if (value < SOUNDFX_10)
+		value = SOUNDFX_10;
+	else if (value > SOUNDFX_20)
+		value = SOUNDFX_20;
 
-      version = value;
-    }
-
-//override
-void set ntsc( int value) {
-      super->ntsc = value;
-
-      amiga->samplesTick = int((tempo / 122) * (value ? 7.5152005551 : 7.58437970472));
-    }
+	version = value;
+}
 
 //override
-void process() {
+void FXPlayer_set_ntsc(struct FXPlayer* self, int value) {
+	super->ntsc = value;
+
+	amiga->samplesTick = int((tempo / 122) * (value ? 7.5152005551 : 7.58437970472));
+}
+
+//override
+void FXPlayer_process(struct FXPlayer* self) {
       var chan:AmigaChannel, int index; int period; row:AmigaRow, sample:AmigaSample, int value; voice:FXVoice = voices[0];
 
       if (!tick) {
@@ -267,10 +287,10 @@ void process() {
           }
         }
       }
-    }
+}
 
 //override
-void initialize() {
+void FXPlayer_initialize(struct FXPlayer* self) {
       var voice:FXVoice = voices[0];
       super->initialize();
       ntsc = standard;
@@ -286,10 +306,10 @@ void initialize() {
         voice->sample  = samples[0];
         voice = voice->next;
       }
-    }
+}
 
 //override
-void loader(stream:ByteArray) {
+void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
       var int higher; int i; id:String, int j; int len; int offset; row:AmigaRow, sample:AmigaSample, int size; int value;
       if (stream->length < 1686) return;
 
@@ -426,21 +446,4 @@ void loader(stream:ByteArray) {
           delphine = 1;
           break;
       }
-    }
-
-    public static const
-      SOUNDFX_10 = 1,
-      SOUNDFX_18 = 2,
-      SOUNDFX_19 = 3,
-      SOUNDFX_20 = 4;
-
-    private const
-      PERIODS: Vector.<int> = Vector.<int>([
-        1076,1016,960,906,856,808,762,720,678,640,604,570,
-         538, 508,480,453,428,404,381,360,339,320,302,285,
-         269, 254,240,226,214,202,190,180,170,160,151,143,
-         135, 127,120,113,113,113,113,113,113,113,113,113,
-         113, 113,113,113,113,113,113,113,113,113,113,113,
-         113, 113,113,113,113,113,-1]);
-  }
 }
