@@ -24,8 +24,10 @@ FUTURECOMPOSER_SRCS = $(sort $(wildcard neoart/flod/futurecomposer/*.c))
 DIGITALMUGICIAN_SRCS = $(sort $(wildcard neoart/flod/digitalmugician/*.c))
 SIDMON_SRCS = $(sort $(wildcard neoart/flod/sidmon/*.c))
 SOUNDFX_SRCS = $(sort $(wildcard neoart/flod/soundfx/*.c))
+BPSOUNDMON_SRCS = $(sort $(wildcard neoart/flod/soundmon/*.c))
 ALL_PLAYER_SRCS = $(WHITTAKER_SRCS) $(FUTURECOMPOSER_SRCS) $(TRACKER_SRCS) \
-$(FASTTRACKER_SRCS) $(DIGITALMUGICIAN_SRCS) $(SIDMON_SRCS) $(SOUNDFX_SRCS)
+$(FASTTRACKER_SRCS) $(DIGITALMUGICIAN_SRCS) $(SIDMON_SRCS) $(SOUNDFX_SRCS) \
+$(BPSOUNDMON_SRCS)
 
 #FILELOADER_SRCS = neoart/flod/FileLoader.c
 #PLAYER_SRCS = demos/Demo5.c
