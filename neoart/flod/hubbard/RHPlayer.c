@@ -162,7 +162,8 @@ void RHPlayer_process(struct RHPlayer* self) {
 
 					ByteArray_set_position(self->stream, self->periods + (voice->note << 1));
 					value = self->stream->readUnsignedShort(self->stream) * sample->relative;
-					chan->period = voice->period = (value >> 10);
+					voice->period = (value >> 10);
+					AmigaChannel_set_period(chan, voice->period);
 
 					chan->enabled = 1;
 					voice->busy = loop = 0;
@@ -174,8 +175,10 @@ void RHPlayer_process(struct RHPlayer* self) {
 				chan->enabled = 0;
 			}
 
-			if (voice->flags & 1)
-				chan->period = (voice->period += voice->portaSpeed);
+			if (voice->flags & 1) {
+				voice->period += voice->portaSpeed;
+				AmigaChannel_set_period(chan, voice->period);
+			}
 
 			if (sample->divider) {
 				ByteArray_set_position(self->stream, voice->vibratoPos);
@@ -188,7 +191,7 @@ void RHPlayer_process(struct RHPlayer* self) {
 
 				voice->vibratoPos = ByteArray_get_position(self->stream);
 				value = (voice->period / sample->divider) * value;
-				chan->period = voice->period + value;
+				AmigaChannel_set_period(chan, voice->period + value);
 			}
 		}
 
