@@ -15,33 +15,55 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->hubbard {
-  import flash.utils.*;
-  import neoart.flod.core.*;
 
-  public final class RHPlayer extends AmigaPlayer {
-    private var
-      songs    : Vector.<RHSong>,
-      samples  : Vector.<RHSample>,
-      song     : RHSong,
- int periods;
- int vibrato;
-      voices   : Vector.<RHVoice>,
-      stream   : ByteArray,
- int complete;
+#include "RHPlayer.h"
+#include "../flod_internal.h"
 
-     void RHPlayer(amiga:Amiga = null) {
-      super(amiga);
-      voices = new Vector.<RHVoice>(4, true);
+void RHPlayer_loader(struct RHPlayer* self, struct ByteArray *stream);
+void RHPlayer_initialize(struct RHPlayer* self);
+void RHPlayer_process(struct RHPlayer* self);
 
-      voices[3] = new RHVoice(3,8);
-      voices[3].next = voices[2] = new RHVoice(2,4);
-      voices[2].next = voices[1] = new RHVoice(1,2);
-      voices[1].next = voices[0] = new RHVoice(0,1);
-    }
+void RHPlayer_defaults(struct RHPlayer* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+void RHPlayer_ctor(struct RHPlayer* self, struct Amiga *amiga) {
+	CLASS_CTOR_DEF(RHPlayer);
+	// original constructor code goes here
+	//super(amiga);
+	AmigaPlayer_ctor(&self->super, amiga);
+	
+	/*voices = new Vector.<RHVoice>(4, true);
+	voices[3] = new RHVoice(3,8);
+	voices[3].next = voices[2] = new RHVoice(2,4);
+	voices[2].next = voices[1] = new RHVoice(1,2);
+	voices[1].next = voices[0] = new RHVoice(0,1); */
+	
+	unsigned i = RHPLAYER_MAX_VOICES;
+	while(1) {
+		RHVoice_ctor(&self->voices[i], i, 1 << i);
+		if(i) self->voices[i].next = &self->voices[i - 1];
+		else break;
+		i--;
+	}
+	
+	
+	//vtable
+	self->super.super.loader = RHPlayer_loader;
+	self->super.super.initialize = RHPlayer_initialize;
+	self->super.super.process = RHPlayer_process;
+	
+	self->super.super.min_filesize = 8;
+}
+
+struct RHPlayer* RHPlayer_new(struct Amiga *amiga) {
+	CLASS_NEW_BODY(RHPlayer, amiga);
+}
+
 
 //override
-void process() {
+void RHPlayer_process(struct RHPlayer* self) {
       var chan:AmigaChannel, int loop; sample:RHSample, int value; voice:RHVoice = voices[3];
 
       while (voice) {
@@ -188,10 +210,10 @@ void process() {
 
         voice = voice->next;
       }
-    }
+}
 
 //override
-void initialize() {
+void RHPlayer_initialize(struct RHPlayer* self) {
       var int i; int j; sample:RHSample, voice:RHVoice = voices[3];
       super->initialize();
 
@@ -219,10 +241,10 @@ void initialize() {
 
         voice = voice->next;
       }
-    }
+}
 
 //override
-void loader(stream:ByteArray) {
+void RHPlayer_loader(struct RHPlayer* self, struct ByteArray *stream) {
       var int i; int j; int len; int pos; sample:RHSample, int samplesData; int samplesHeaders; int samplesLen; song:RHSong, int songsHeaders; int wavesHeaders; int wavesPointers; int value;
       stream->position = 44;
 
@@ -408,6 +430,4 @@ void loader(stream:ByteArray) {
 
       self->stream = stream;
       version = 1;
-    }
-  }
 }
