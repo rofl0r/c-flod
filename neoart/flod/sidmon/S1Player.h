@@ -19,12 +19,12 @@ enum S1PlayerVersion {
 };
 
 
-#define S1PLAYER_MAX_PATTERNSPTR 4
-#define S1PLAYER_MAX_WAVELISTS 4
+#define S1PLAYER_MAX_PATTERNSPTR 173
+#define S1PLAYER_MAX_WAVELISTS 272
 
-#define S1PLAYER_MAX_TRACKS 4
-#define S1PLAYER_MAX_PATTERNS 4
-#define S1PLAYER_MAX_SAMPLES 4
+#define S1PLAYER_MAX_TRACKS 232
+#define S1PLAYER_MAX_PATTERNS 2529
+#define S1PLAYER_MAX_SAMPLES 64
 
 // fixed
 #define S1PLAYER_MAX_TRACKSPTR 4
@@ -75,5 +75,9 @@ struct S1Player {
 	int audPer;
 	int audVol;
 };
+
+void S1Player_defaults(struct S1Player* self);
+void S1Player_ctor(struct S1Player* self, struct Amiga *amiga);
+struct S1Player* S1Player_new(struct Amiga *amiga);
 
 #endif
