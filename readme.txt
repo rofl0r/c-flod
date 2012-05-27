@@ -14,6 +14,7 @@ currently done:
 - soundfx
 - sidmon 1,2
 - bp soundmon
+- rob hubbard (only v1)
 - pseudo barebone flashlib
 - libao and wave writer backends.
 
@@ -21,8 +22,7 @@ in my conversion i followed a pretty straight 1:1 approach,
 so that the number of bugs introduced is minimized and future enhancement 
 in flod can be backported easily.
 
-i am currently in the process of translating the remaining players 
-(rob hubbard etc).
+i am currently in the process of translating the remaining players.
 
 my goal is to remove any dynamically allocated memory so it could 
 be used with a fixed memory usage profile on low end hardware (gba, nds).
@@ -35,7 +35,7 @@ of buffers manually for the specific need.
 also, the code could probably be simplified a lot by removing some of the 
 classes and using direct memory writes etc.
 
---------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------
 
 Flod          version 4.1
 Flod JS       version 2.1
