@@ -64,7 +64,11 @@ struct RHPlayer* RHPlayer_new(struct Amiga *amiga) {
 
 //override
 void RHPlayer_process(struct RHPlayer* self) {
-	var chan:AmigaChannel, int loop; sample:RHSample, int value; voice:RHVoice = voices[3];
+	struct AmigaChannel *chan = 0;
+	int loop = 0;
+	struct RHSample *sample = 0;
+	int value = 0; 
+	struct RHVoice *voice = &self->voices[3];
 
 	while (voice) {
 		chan = voice->channel;
@@ -216,7 +220,11 @@ void RHPlayer_process(struct RHPlayer* self) {
 
 //override
 void RHPlayer_initialize(struct RHPlayer* self) {
-	var int i; int j; sample:RHSample, voice:RHVoice = voices[3];
+	int i = 0; 
+	int j = 0; 
+	struct RHSample *sample = 0;
+	struct RHVoice *voice = &self->voices[3];
+	
 	super->initialize();
 
 	song = songs[playSong];
@@ -247,7 +255,20 @@ void RHPlayer_initialize(struct RHPlayer* self) {
 
 //override
 void RHPlayer_loader(struct RHPlayer* self, struct ByteArray *stream) {
-	var int i; int j; int len; int pos; sample:RHSample, int samplesData; int samplesHeaders; int samplesLen; song:RHSong, int songsHeaders; int wavesHeaders; int wavesPointers; int value;
+	int i = 0; 
+	int j = 0; 
+	int len = 0; 
+	int pos = 0; 
+	struct RHSample *sample = 0;
+	int samplesData = 0; 
+	int samplesHeaders = 0; 
+	int samplesLen = 0; 
+	struct RHSong *song = 0;
+	int songsHeaders = 0; 
+	int wavesHeaders = 0; 
+	int wavesPointers = 0; 
+	int value = 0;
+	
 	stream->position = 44;
 
 	while (stream->position < 1024) {
