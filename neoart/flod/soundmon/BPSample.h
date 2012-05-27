@@ -30,6 +30,7 @@ struct BPSample {
 	int modLen;
 	int modDelay;
 	int modSpeed;
+	char sample_name[24];
 };
 
 void BPSample_defaults(struct BPSample* self);

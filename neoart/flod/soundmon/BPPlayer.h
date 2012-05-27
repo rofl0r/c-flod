@@ -42,6 +42,7 @@ struct BPPlayer {
 	int repeatCtr;
 	int arpeggioCtr;
 	int vibratoPos;
+	char title_buffer[26];
 };
 
 void BPPlayer_defaults(struct BPPlayer* self);

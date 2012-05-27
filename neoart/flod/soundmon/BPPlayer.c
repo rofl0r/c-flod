@@ -537,15 +537,15 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 	struct BPStep *step = 0;
 	int tables = 0;
 	
-	self->super.super.title = stream->readMultiByte(stream, 26, ENCODING);
+	self->super.super.title = self->title_buffer;
+	stream->readMultiByte(stream, self->title_buffer, 26);
 
-	id = stream->readMultiByte(stream, 4, ENCODING);
-	if (id == "BPSM") {
+	stream->readMultiByte(stream, id, 4);
+	if (is_str(id, "BPSM")) {
 		self->super.super.version = BPSOUNDMON_V1;
 	} else {
-		id = id->substr(0, 3);
-		if (id == "V.2") self->super.super.version = BPSOUNDMON_V2;
-		else if (id == "V.3") self->super.super.version = BPSOUNDMON_V3;
+		if (is_str(id, "V.2")) self->super.super.version = BPSOUNDMON_V2;
+		else if (is_str(id, "V.3")) self->super.super.version = BPSOUNDMON_V3;
 		else return;
 
 		ByteArray_set_position(stream, 29);
@@ -573,14 +573,14 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 			sample->lfoLen      = stream->readUnsignedShort(stream);
 
 			if (self->super.super.version < BPSOUNDMON_V3) {
-				stream->readByte();
+				stream->readByte(stream);
 				sample->lfoDelay  = stream->readUnsignedByte(stream);
 				sample->lfoSpeed  = stream->readUnsignedByte(stream);
 				sample->egControl = stream->readUnsignedByte(stream);
 				sample->egTable   = stream->readUnsignedByte(stream) << 6;
-				stream->readByte();
+				stream->readByte(stream);
 				sample->egLen     = stream->readUnsignedShort(stream);
-				stream->readByte();
+				stream->readByte(stream);
 				sample->egDelay   = stream->readUnsignedByte(stream);
 				sample->egSpeed   = stream->readUnsignedByte(stream);
 				sample->fxSpeed   = 1;
@@ -608,7 +608,9 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 		} else {
 			ByteArray_set_position_rel(stream, -1);
 			sample->synth  = 0;
-			sample->super.name   = stream->readMultiByte(stream, 24, ENCODING);
+			sample->super.name = sample->sample_name; 
+			stream->readMultiByte(stream, sample->sample_name, 24);
+			
 			sample->super.length = stream->readUnsignedShort(stream) << 1;
 
 			if (sample->super.length) {
