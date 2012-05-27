@@ -15,11 +15,21 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->soundmon {
-  import neoart.flod.core.*;
 
-  public final class BPStep extends AmigaStep {
-    internal var
- int soundTranspose;
-  }
+#include "BPStep.h"
+#include "../flod_internal.h"
+
+void BPStep_defaults(struct BPStep* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
 }
+
+void BPStep_ctor(struct BPStep* self) {
+	CLASS_CTOR_DEF(BPStep);
+	// original constructor code goes here
+}
+
+struct BPStep* BPStep_new(void) {
+	CLASS_NEW_BODY(BPStep);
+}
+
