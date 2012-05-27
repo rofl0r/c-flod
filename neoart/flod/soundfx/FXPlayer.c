@@ -367,12 +367,12 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 		} else
 			self->samples[i] = null;
 	}
-	stream->position += 20;
+	ByteArray_set_position_rel(stream, +20);
 
 	for (i = 1; i < len; ++i) {
 		sample = &self->samples[i];
 		if (sample == null) {
-			stream->position += 30;
+			ByteArray_set_position_rel(stream, +30);
 			continue;
 		}
 
@@ -385,7 +385,7 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 
 	ByteArray_set_position(stream, 530 + offset);
 	self->length = len = stream->readUnsignedByte(stream);
-	stream->position++;
+	ByteArray_set_position_rel(stream, +1);
 
 	for (i = 0; i < len; ++i) {
 		value = stream->readUnsignedByte(stream) << 8;
