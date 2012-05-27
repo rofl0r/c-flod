@@ -492,7 +492,7 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 
 	while (ByteArray_get_position(stream) < 16) {
 		value = stream->readUnsignedShort();
-		stream->position += 2;
+		ByteArray_set_position_rel(stream, + 2);
 		if (value != 0x4efa) return;                                            //jmp
 	}
 
@@ -500,15 +500,15 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 		value = stream->readUnsignedShort();
 
 		if (value == 0x123a) {                                                  //move->b $x,d1
-			stream->position += 2;
+			ByteArray_set_position_rel(stream, +2);
 			value = stream->readUnsignedShort();
 
 			if (value == 0xb001) {                                                //cmp->b d1,d0
-				stream->position -= 4;
+				ByteArray_set_position_rel(stream, -4);
 				dataPtr = (ByteArray_get_position(stream) + stream->readUnsignedShort()) - 0x895;
 			}
 		} else if (value == 0x214a) {                                           //move->l a2,(a0)
-			stream->position += 2;
+			ByteArray_set_position_rel(stream, +2);
 			value = stream->readUnsignedShort();
 
 			if (value == 0x47fa) {                                                //lea $x,a3
@@ -532,7 +532,7 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 
 		if (value) {
 			if ((value < ByteArray_get_position(stream)) || (value >= stream->length)) {
-				stream->position -= 4;
+				ByteArray_set_position_rel(stream, -4);
 				break;
 			}
 
@@ -546,7 +546,7 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 		sample->relative = stream->readUnsignedShort();
 
 		sample->vibratoDelay = stream->readUnsignedByte();
-		stream->position++;
+		ByteArray_set_position_rel(stream, +1);
 		sample->vibratoSpeed = stream->readUnsignedByte();
 		sample->vibratoDepth = stream->readUnsignedByte();
 		sample->envelopeVol  = stream->readUnsignedByte();
@@ -575,7 +575,7 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 		sample->blendCounter  = stream->readUnsignedByte();
 		sample->arpeggioLimit = stream->readUnsignedByte();
 
-		stream->position += 12;
+		ByteArray_set_position_rel(stream, +12);
 		self->samples->push(sample);
 		if (!stream->bytesAvailable) break;
 	}
