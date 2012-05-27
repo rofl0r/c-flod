@@ -87,14 +87,14 @@ void BPPlayer_process(struct BPPlayer* self) {
 	struct BPStep *step = 0;
 	struct BPVoice *voice = &self->voices[0];
 	
-	arpeggioCtr = --arpeggioCtr & 3;
-	vibratoPos  = ++vibratoPos  & 7;
+	self->arpeggioCtr = --(self->arpeggioCtr) & 3;
+	self->vibratoPos  = ++(self->vibratoPos)  & 7;
 
 	while (voice) {
 		chan = voice->channel;
 		voice->period += voice->autoSlide;
 
-		if (voice->vibrato) chan->period = voice->period + (VIBRATO[vibratoPos] / voice->vibrato);
+		if (voice->vibrato) chan->period = voice->period + (VIBRATO[self->vibratoPos] / voice->vibrato);
 		else chan->period = voice->period;
 
 		chan->pointer = voice->samplePtr;
@@ -103,9 +103,9 @@ void BPPlayer_process(struct BPPlayer* self) {
 		if (voice->arpeggio || voice->autoArpeggio) {
 			note = voice->note;
 
-			if (!arpeggioCtr)
+			if (!self->arpeggioCtr)
 			note += ((voice->arpeggio & 0xf0) >> 4) + ((voice->autoArpeggio & 0xf0) >> 4);
-			else if (arpeggioCtr == 1)
+			else if (self->arpeggioCtr == 1)
 			note += (voice->arpeggio & 0x0f) + (voice->autoArpeggio & 0x0f);
 
 			chan->period = voice->period = PERIODS[int(note + 35)];
@@ -116,7 +116,7 @@ void BPPlayer_process(struct BPPlayer* self) {
 			voice = voice->next;
 			continue;
 		}
-		sample = samples[voice->sample];
+		sample = self->samples[voice->sample];
 
 		if (voice->adsrControl) {
 			if (--voice->adsrCtr == 0) {
@@ -163,11 +163,11 @@ void BPPlayer_process(struct BPPlayer* self) {
 					if (voice->egValue < data) {
 						data -= voice->egValue;
 						len = dst - data;
-						for (; dst > len;) memory[--dst] = buffer[--src];
+						for (; dst > len;) memory[--dst] = self->buffer[--src];
 					} else {
 						data = voice->egValue - data;
 						len = dst + data;
-						for (; dst < len;) memory[dst++] = ~buffer[src++] + 1
+						for (; dst < len;) memory[dst++] = ~self->buffer[src++] + 1;
 					}
 				}
 
@@ -201,9 +201,9 @@ void BPPlayer_process(struct BPPlayer* self) {
 				data = sample->fxSpeed;
 
 				for (dst = voice->synthPtr; dst < len; ++dst) {
-					if (buffer[src] < memory[dst]) {
+					if (self->buffer[src] < memory[dst]) {
 						memory[dst] -= data;
-					} else if (buffer[src] > memory[dst]) {
+					} else if (self->buffer[src] > memory[dst]) {
 						memory[dst] += data;
 					}
 					src--;
@@ -216,9 +216,9 @@ void BPPlayer_process(struct BPPlayer* self) {
 				data = sample->fxSpeed;
 
 				for (dst = voice->synthPtr; dst < len; ++dst) {
-					if (buffer[src] < memory[dst]) {
+					if (self->buffer[src] < memory[dst]) {
 						memory[dst] -= data;
-					} else if (buffer[src] > memory[dst]) {
+					} else if (self->buffer[src] > memory[dst]) {
 						memory[dst] += data;
 					}
 					src++;
@@ -263,23 +263,23 @@ void BPPlayer_process(struct BPPlayer* self) {
 		voice = voice->next;
 	}
 
-	if (--tick == 0) {
-		tick = speed;
-		voice = voices[0];
+	if (--(self->super.super.tick) == 0) {
+		self->super.super.tick = self->super.super.speed;
+		voice = &self->voices[0];
 
 		while (voice) {
 			chan = voice->channel;
 			voice->enabled = 0;
 
-			step   = tracks[int((trackPos << 2) + voice->index)];
-			row    = patterns[int(patternPos + ((step->pattern - 1) << 4))];
+			step   = self->tracks[int((self->trackPos << 2) + voice->index)];
+			row    = self->patterns[int(self->patternPos + ((step->super.pattern - 1) << 4))];
 			note   = row->note;
 			option = row->effect;
 			data   = row->param;
 
 			if (note) {
 				voice->autoArpeggio = voice->autoSlide = voice->vibrato = 0;
-				if (option != 10 || (data & 0xf0) == 0) note += step->transpose;
+				if (option != 10 || (data & 0xf0) == 0) note += step->super.transpose;
 				voice->note = note;
 				voice->period = PERIODS[int(note + 35)];
 
@@ -304,14 +304,14 @@ void BPPlayer_process(struct BPPlayer* self) {
 					voice->volume = data;
 					voice->volumeDef = 0;
 
-					if (version < BPSOUNDMON_V3 || !voice->synth)
+					if (self->super.super.version < BPSOUNDMON_V3 || !voice->synth)
 						chan->volume = voice->volume;
 					break;
 				case 2:   //set speed
-					tick = speed = data;
+					self->super.super.tick = self->super.super.speed = data;
 					break;
 				case 3:   //set filter
-					amiga->filter->active = data;
+					self->super.amiga->filter->active = data;
 					break;
 				case 4:   //portamento up
 					voice->period -= data;
@@ -322,15 +322,15 @@ void BPPlayer_process(struct BPPlayer* self) {
 					voice->arpeggio = 0;
 					break;
 				case 6:   //set vibrato
-					if (version == BPSOUNDMON_V3) voice->vibrato = data;
-						else repeatCtr = data;
+					if (self->super.super.version == BPSOUNDMON_V3) voice->vibrato = data;
+						else self->repeatCtr = data;
 					break;
 				case 7:   //step jump
-					if (version == BPSOUNDMON_V3) {
-						nextPos = data;
-						jumpFlag = 1;
-					} else if (repeatCtr == 0) {
-						trackPos = data;
+					if (self->super.super.version == BPSOUNDMON_V3) {
+						self->nextPos = data;
+						self->jumpFlag = 1;
+					} else if (self->repeatCtr == 0) {
+						self->trackPos = data;
 					}
 					break;
 				case 8:   //set auto slide
@@ -338,7 +338,7 @@ void BPPlayer_process(struct BPPlayer* self) {
 					break;
 					case 9:   //set auto arpeggio
 					voice->autoArpeggio = data;
-					if (version == BPSOUNDMON_V3) {
+					if (self->super.super.version == BPSOUNDMON_V3) {
 						voice->adsrPtr = 0;
 						if (voice->adsrControl == 0) voice->adsrControl = 1;
 					}
@@ -366,18 +366,18 @@ void BPPlayer_process(struct BPPlayer* self) {
 			voice = voice->next;
 		}
 
-		if (jumpFlag) {
-			trackPos   = nextPos;
-			patternPos = jumpFlag = 0;
-		} else if (++patternPos == 16) {
-			patternPos = 0;
+		if (self->jumpFlag) {
+			self->trackPos   = self->nextPos;
+			self->patternPos = self->jumpFlag = 0;
+		} else if (++(self->patternPos) == 16) {
+			self->patternPos = 0;
 
-			if (++trackPos == length) {
-				trackPos = 0;
-				amiga->complete = 1;
+			if (++(self->trackPos) == self->length) {
+				self->trackPos = 0;
+				self->super.amiga->complete = 1;
 			}
 		}
-		voice = voices[0];
+		voice = &self->voices[0];
 
 		while (voice) {
 			chan = voice->channel;
@@ -390,12 +390,12 @@ void BPPlayer_process(struct BPPlayer* self) {
 			if (voice->synthPtr > -1) {
 				src = voice->index << 5;
 				len = voice->synthPtr + 32;
-				for (dst = voice->synthPtr; dst < len; ++dst) memory[dst] = buffer[src++];
+				for (dst = voice->synthPtr; dst < len; ++dst) memory[dst] = self->buffer[src++];
 				voice->synthPtr = -1;
 			}
 			voice = voice->next;
 		}
-		voice = voices[0];
+		voice = self->voices[0];
 
 		while (voice) {
 			if (voice->restart == 0 || voice->sample < 0) {
@@ -406,7 +406,7 @@ void BPPlayer_process(struct BPPlayer* self) {
 
 			chan->period = voice->period;
 			voice->restart = 0;
-			sample = samples[voice->sample];
+			sample = self->samples[voice->sample];
 
 			if (sample->synth) {
 				voice->synth   = 1;
@@ -425,45 +425,45 @@ void BPPlayer_process(struct BPPlayer* self) {
 				voice->fxControl   = sample->fxControl;
 				voice->modControl  = sample->modControl;
 
-				chan->pointer = voice->samplePtr = sample->pointer;
-				chan->length  = voice->sampleLen = sample->length;
+				chan->pointer = voice->samplePtr = sample->super.pointer;
+				chan->length  = voice->sampleLen = sample->super.length;
 
 				if (voice->adsrControl) {
 					data = (128 + memory[sample->adsrTable]) >> 2;
 
 					if (voice->volumeDef) {
-						voice->volume = sample->volume;
+						voice->volume = sample->super.volume;
 						voice->volumeDef = 0;
 					}
 
 					chan->volume = (data * voice->volume) >> 6;
 				} else {
-					chan->volume = voice->volumeDef ? sample->volume : voice->volume;
+					chan->volume = voice->volumeDef ? sample->super.volume : voice->volume;
 				}
 
 				if (voice->egControl || voice->fxControl || voice->modControl) {
-					voice->synthPtr = sample->pointer;
+					voice->synthPtr = sample->super.pointer;
 					dst = voice->index << 5;
 					len = voice->synthPtr + 32;
-					for (src = voice->synthPtr; src < len; ++src) buffer[dst++] = memory[src];
+					for (src = voice->synthPtr; src < len; ++src) self->buffer[dst++] = memory[src];
 				}
 			} else {
 				voice->synth = voice->lfoControl = 0;
 
-				if (sample->pointer < 0) {
-					voice->samplePtr = amiga->loopPtr;
+				if (sample->super.pointer < 0) {
+					voice->samplePtr = self->super.amiga->loopPtr;
 					voice->sampleLen = 2;
 				} else {
-					chan->pointer = sample->pointer;
-					chan->volume  = voice->volumeDef ? sample->volume : voice->volume;
+					chan->pointer = sample->super.pointer;
+					chan->volume  = voice->volumeDef ? sample->super.volume : voice->volume;
 
-					if (sample->repeat != 2) {
-						voice->samplePtr = sample->loopPtr;
-						chan->length = voice->sampleLen = sample->repeat;
+					if (sample->super.repeat != 2) {
+						voice->samplePtr = sample->super.loopPtr;
+						chan->length = voice->sampleLen = sample->super.repeat;
 					} else {
-						voice->samplePtr = amiga->loopPtr;
+						voice->samplePtr = self->super.amiga->loopPtr;
 						voice->sampleLen = 2;
-						chan->length = sample->length;
+						chan->length = sample->super.length;
 					}
 				}
 			}
@@ -478,24 +478,24 @@ void BPPlayer_initialize(struct BPPlayer* self) {
 	int i = 0;
 	struct BPVoice *voice = &self->voices[0];
 	
-	super->initialize();
+	self->super->initialize();
 
-	speed       = 6;
-	tick        = 1;
-	trackPos    = 0;
-	patternPos  = 0;
-	nextPos     = 0;
-	jumpFlag    = 0;
-	repeatCtr   = 0;
-	arpeggioCtr = 1;
-	vibratoPos  = 0;
+	self->super.super.speed       = 6;
+	self->super.super.tick        = 1;
+	self->trackPos    = 0;
+	self->patternPos  = 0;
+	self->nextPos     = 0;
+	self->jumpFlag    = 0;
+	self->repeatCtr   = 0;
+	self->arpeggioCtr = 1;
+	self->vibratoPos  = 0;
 
-	for (i = 0; i < 128; ++i) buffer[i] = 0;
+	for (i = 0; i < 128; ++i) self->buffer[i] = 0;
 
 	while (voice) {
 		voice->initialize();
-		voice->channel   = amiga->channels[voice->index];
-		voice->samplePtr = amiga->loopPtr;
+		voice->channel   = self->super.amiga->channels[voice->index];
+		voice->samplePtr = self->super.amiga->loopPtr;
 		voice = voice->next;
 	}
 }
@@ -513,7 +513,7 @@ void BPPlayer_reset(struct BPPlayer* self) {
 			len = voice->synthPtr + 32;
 
 			for (i = voice->synthPtr; i < len; ++i)
-			amiga->memory[i] = buffer[pos++];
+			self->super.amiga->memory[i] = self->buffer[pos++];
 		}
 
 		voice = voice->next;
@@ -531,22 +531,22 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 	struct BPStep *step = 0;
 	int tables = 0;
 	
-	title = stream->readMultiByte(26, ENCODING);
+	self->super.super.title = stream->readMultiByte(26, ENCODING);
 
 	id = stream->readMultiByte(4, ENCODING);
 	if (id == "BPSM") {
-		version = BPSOUNDMON_V1;
+		self->super.super.version = BPSOUNDMON_V1;
 	} else {
 		id = id->substr(0, 3);
-		if (id == "V.2") version = BPSOUNDMON_V2;
-		else if (id == "V.3") version = BPSOUNDMON_V3;
+		if (id == "V.2") self->super.super.version = BPSOUNDMON_V2;
+		else if (id == "V.3") self->super.super.version = BPSOUNDMON_V3;
 		else return;
 
 		stream->position = 29;
 		tables = stream->readUnsignedByte();
 	}
 
-	length = stream->readUnsignedShort();
+	self->length = stream->readUnsignedShort();
 
 	for (; ++i < 16;) {
 		sample = new BPSample();
@@ -554,8 +554,8 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 		if (stream->readUnsignedByte() == 0xff) {
 			sample->synth   = 1;
 			sample->table   = stream->readUnsignedByte();
-			sample->pointer = sample->table << 6;
-			sample->length  = stream->readUnsignedShort() << 1;
+			sample->super.pointer = sample->table << 6;
+			sample->super.length  = stream->readUnsignedShort() << 1;
 
 			sample->adsrControl = stream->readUnsignedByte();
 			sample->adsrTable   = stream->readUnsignedByte() << 6;
@@ -566,7 +566,7 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 			sample->lfoDepth    = stream->readUnsignedByte();
 			sample->lfoLen      = stream->readUnsignedShort();
 
-			if (version < BPSOUNDMON_V3) {
+			if (self->super.super.version < BPSOUNDMON_V3) {
 				stream->readByte();
 				sample->lfoDelay  = stream->readUnsignedByte();
 				sample->lfoSpeed  = stream->readUnsignedByte();
@@ -579,7 +579,7 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 				sample->egSpeed   = stream->readUnsignedByte();
 				sample->fxSpeed   = 1;
 				sample->modSpeed  = 1;
-				sample->volume    = stream->readUnsignedByte();
+				sample->super.volume    = stream->readUnsignedByte();
 				stream->position += 6;
 			} else {
 				sample->lfoDelay   = stream->readUnsignedByte();
@@ -596,41 +596,41 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 				sample->modTable   = stream->readUnsignedByte() << 6;
 				sample->modSpeed   = stream->readUnsignedByte();
 				sample->modDelay   = stream->readUnsignedByte();
-				sample->volume     = stream->readUnsignedByte();
+				sample->super.volume     = stream->readUnsignedByte();
 				sample->modLen     = stream->readUnsignedShort();
 			}
 		} else {
 			stream->position--;
 			sample->synth  = 0;
-			sample->name   = stream->readMultiByte(24, ENCODING);
-			sample->length = stream->readUnsignedShort() << 1;
+			sample->super.name   = stream->readMultiByte(24, ENCODING);
+			sample->super.length = stream->readUnsignedShort() << 1;
 
-			if (sample->length) {
-				sample->loop   = stream->readUnsignedShort();
-				sample->repeat = stream->readUnsignedShort() << 1;
-				sample->volume = stream->readUnsignedShort();
+			if (sample->super.length) {
+				sample->super.loop   = stream->readUnsignedShort();
+				sample->super.repeat = stream->readUnsignedShort() << 1;
+				sample->super.volume = stream->readUnsignedShort();
 
-				if ((sample->loop + sample->repeat) >= sample->length)
-				sample->repeat = sample->length - sample->loop;
+				if ((sample->super.loop + sample->super.repeat) >= sample->super.length)
+				sample->super.repeat = sample->super.length - sample->super.loop;
 			} else {
-				sample->pointer--;
-				sample->repeat = 2;
+				sample->super.pointer--;
+				sample->super.repeat = 2;
 				stream->position += 6;
 			}
 		}
-		samples[i] = sample;
+		self->samples[i] = sample;
 	}
 
-	len = length << 2;
+	len = self->length << 2;
 	tracks = new Vector.<BPStep>(len, true);
 
 	for (i = 0; i < len; ++i) {
 		step = new BPStep();
-		step->pattern = stream->readUnsignedShort();
+		step->super.pattern = stream->readUnsignedShort();
 		step->soundTranspose = stream->readByte();
-		step->transpose = stream->readByte();
-		if (step->pattern > higher) higher = step->pattern;
-		tracks[i] = step;
+		step->super.transpose = stream->readByte();
+		if (step->super.pattern > higher) higher = step->super.pattern;
+		self->tracks[i] = step;
 	}
 
 	len = higher << 4;
@@ -643,15 +643,15 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 		row->effect = row->sample & 0x0f;
 		row->sample = (row->sample & 0xf0) >> 4;
 		row->param  = stream->readByte();
-		patterns[i] = row;
+		self->patterns[i] = row;
 	}
 
-	amiga->store(stream, tables << 6);
+	self->amiga->store(stream, tables << 6);
 
 	for (i = 0; ++i < 16;) {
-		sample = samples[i];
-		if (sample->synth || !sample->length) continue;
-		sample->pointer = amiga->store(stream, sample->length);
-		sample->loopPtr = sample->pointer + sample->loop;
+		sample = self->samples[i];
+		if (sample->synth || !sample->super.length) continue;
+		sample->super.pointer = self->super.amiga->store(stream, sample->super.length);
+		sample->super.loopPtr = sample->super.pointer + sample->super.loop;
 	}
 }
