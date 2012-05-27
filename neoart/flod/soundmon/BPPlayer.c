@@ -548,7 +548,7 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 		else if (id == "V.3") self->super.super.version = BPSOUNDMON_V3;
 		else return;
 
-		stream->position = 29;
+		ByteArray_set_position(stream, 29);
 		tables = stream->readUnsignedByte(stream);
 	}
 
@@ -586,7 +586,7 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 				sample->fxSpeed   = 1;
 				sample->modSpeed  = 1;
 				sample->super.volume    = stream->readUnsignedByte(stream);
-				stream->position += 6;
+				ByteArray_set_position_rel(stream, +6);
 			} else {
 				sample->lfoDelay   = stream->readUnsignedByte(stream);
 				sample->lfoSpeed   = stream->readUnsignedByte(stream);
@@ -606,7 +606,7 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 				sample->modLen     = stream->readUnsignedShort(stream);
 			}
 		} else {
-			stream->position--;
+			ByteArray_set_position_rel(stream, -1);
 			sample->synth  = 0;
 			sample->super.name   = stream->readMultiByte(stream, 24, ENCODING);
 			sample->super.length = stream->readUnsignedShort(stream) << 1;
@@ -621,7 +621,7 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 			} else {
 				sample->super.pointer--;
 				sample->super.repeat = 2;
-				stream->position += 6;
+				ByteArray_set_position_rel(stream, +6);
 			}
 		}
 		self->samples[i] = sample;
