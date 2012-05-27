@@ -11,6 +11,8 @@ currently done:
 - pro tracker
 - fasttracker 2
 - digital mugician
+- soundfx
+- sidmon 1,2
 - pseudo barebone flashlib
 - libao and wave writer backends.
 
