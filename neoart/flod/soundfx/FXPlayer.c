@@ -293,7 +293,7 @@ void FXPlayer_process(struct FXPlayer* self) {
 
 			if (++(self->trackPos) == self->length) {
 				self->trackPos = 0;
-				self->super.amiga->complete = 1;
+				CoreMixer_set_complete(&self->super.amiga->super, 1);
 			}
 		}
 	}
@@ -303,8 +303,10 @@ void FXPlayer_process(struct FXPlayer* self) {
 void FXPlayer_initialize(struct FXPlayer* self) {
 	struct FXVoice *voice = &self->voices[0];
 	
-	self->super->initialize();
-	self->ntsc = standard;
+	CorePlayer_initialize(&self->super.super);
+	//self->super->initialize();
+	FXPlayer_set_ntsc(self->super.standard);
+	//self->ntsc = standard;
 
 	self->super.super.speed      = 6;
 	self->trackPos   = 0;
@@ -312,7 +314,7 @@ void FXPlayer_initialize(struct FXPlayer* self) {
 	self->jumpFlag   = 0;
 
 	while (voice) {
-		voice->initialize();
+		FXVoice_initialize(voice);
 		voice->channel = self->super.amiga->channels[voice->index];
 		voice->sample  = &self->samples[0];
 		voice = voice->next;
@@ -399,6 +401,7 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 	higher += 256;
 	patterns = new Vector.<AmigaRow>(higher, true);
 
+	//FIXME
 	len = self->samples->length;
 
 	for (i = 0; i < higher; ++i) {
@@ -426,7 +429,7 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 		if (row->sample >= len || self->samples[row->sample] == null) row->sample = 0;
 	}
 
-	self->super.amiga->store(stream, size);
+	Amiga_store(self->super.amiga, stream, size, -1);
 
 	for (i = 1; i < len; ++i) {
 		sample = self->samples[i];
@@ -435,15 +438,16 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 		if (sample->loop)
 			sample->loopPtr = sample->pointer + sample->loop;
 		else {
-			sample->loopPtr = self->super.amiga->memory->length;
+			sample->loopPtr = self->super.amiga->vector_count_memory;  //self->super.amiga->memory->length;
 			sample->repeat  = 2;
 		}
 		size = sample->pointer + 4;
+		assert_op(size, <=, AMIGA_MAX_MEMORY);
 		for (j = sample->pointer; j < size; ++j) self->super.amiga->memory[j] = 0;
 	}
 
 	sample = new AmigaSample();
-	sample->pointer = sample->loopPtr = self->super.amiga->memory->length;
+	sample->pointer = sample->loopPtr = self->super.amiga->vector_count_memory; //self->super.amiga->memory->length;
 	sample->length  = sample->repeat  = 2;
 	self->samples[0] = sample;
 
