@@ -16,7 +16,10 @@
 // 92 KB is sufficient for all whittaker, future composer and protracker tunes i tested
 // the digital mugician tunes by "Ramon" seem to be especially memory-hungry
 //#define AMIGA_MAX_MEMORY_KB 92
-#define AMIGA_MAX_MEMORY_KB 178
+// 178 is sufficient for all Sidmon, digital mugician songs
+//#define AMIGA_MAX_MEMORY_KB 178
+// soundfx modules by kerni need 197 kb, those by fredius dardi 286
+#define AMIGA_MAX_MEMORY_KB 286
 
 #define AMIGA_MAX_MEMORY ((AMIGA_MAX_MEMORY_KB * 1024) / sizeof(char))
 

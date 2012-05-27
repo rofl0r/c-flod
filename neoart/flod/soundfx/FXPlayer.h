@@ -15,8 +15,10 @@ enum FXPlayerVersion {
 	SOUNDFX_20 = 4,
 };
 
-#define FXPLAYER_MAX_ROWS 4
-#define FXPLAYER_MAX_SAMPLES 4
+/* only 2 tunes (pipes, amc-slideshow) use more than 14592 patterns 
+ * (and they seem to be identical) */
+#define FXPLAYER_MAX_PATTERNS 17664
+#define FXPLAYER_MAX_SAMPLES 32
 
 //fixed
 #define FXPLAYER_MAX_VOICES 4
@@ -27,7 +29,7 @@ struct FXPlayer {
 	//track      : Vector.<int>,
 	int track[FXPLAYER_MAX_TRACKS];
 	//patterns   : Vector.<AmigaRow>,
-	struct AmigaRow patterns[FXPLAYER_MAX_ROWS];
+	struct AmigaRow patterns[FXPLAYER_MAX_PATTERNS];
 	//samples    : Vector.<AmigaSample>,
 	struct AmigaSample samples[FXPLAYER_MAX_SAMPLES];
 	char sample_names[FXPLAYER_MAX_SAMPLES][22];
