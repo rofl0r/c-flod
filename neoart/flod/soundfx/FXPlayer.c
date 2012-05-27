@@ -133,7 +133,7 @@ void FXPlayer_process(struct FXPlayer* self) {
 				voice->stepSpeed  = 0;
 
 				voice->enabled = 1;
-				chan->enabled  = 0;
+				AmigaChannel_set_enabled(chan, 0);
 
 				switch (voice->period) {
 					case -2:
@@ -153,7 +153,7 @@ void FXPlayer_process(struct FXPlayer* self) {
 						break;
 				}
 
-				if (voice->enabled) chan->enabled = 1;
+				if (voice->enabled) AmigaChannel_set_enabled(chan, 1);
 				chan->pointer = sample->loopPtr;
 				chan->length  = sample->repeat;
 			}
