@@ -216,9 +216,11 @@ void RHPlayer_process(struct RHPlayer* self) {
 			}
 
 			unsigned idxx = sample->super.pointer + voice->synthPos;
-			//assert_op(idxx, <, AMIGA_MAX_MEMORY);
-			assert_op(idxx, <, self->super.amiga->vector_count_memory);
+			assert_op(idxx, <, AMIGA_MAX_MEMORY);
+			//assert_op(idxx, <, self->super.amiga->vector_count_memory);
 			self->super.amiga->memory[idxx] = value;
+			if(idxx >= self->super.amiga->vector_count_memory)
+				self->super.amiga->vector_count_memory = idxx + 1;
 		}
 
 		voice = voice->next;
@@ -241,7 +243,7 @@ void RHPlayer_initialize(struct RHPlayer* self) {
 	for (i = 0; i < self->samples_count; ++i) {
 		sample = &self->samples[i];
 
-		if (sample->wave) { // FIXME this check is invalid now
+		if (sample->got_wave) {
 			for (j = 0; j < sample->super.length; ++j) {
 				unsigned idxx = sample->super.pointer + j;
 				//assert_op(idxx, <, AMIGA_MAX_MEMORY);
@@ -352,7 +354,7 @@ void RHPlayer_loader(struct RHPlayer* self, struct ByteArray *stream) {
 	//samples = new Vector.<RHSample>();
 	samplesLen++;
 	self->samples_count = samplesLen;
-	assert_op(self->samples_count, <, RHPLAYER_MAX_SAMPLES);
+	assert_op(self->samples_count, <=, RHPLAYER_MAX_SAMPLES);
 
 	for (i = 0; i < samplesLen; ++i) {
 		//sample = new RHSample();
@@ -425,6 +427,7 @@ void RHPlayer_loader(struct RHPlayer* self, struct ByteArray *stream) {
 			Amiga_memory_set_length(self->super.amiga, self->super.amiga->vector_count_memory + sample->super.length);
 			//self->super.amiga->memory->length += sample->super.length;
 			//sample->wave = new Vector.<int>(sample->length, true);
+			sample->got_wave = 1;
 			assert_op(sample->super.length, <=, RHSAMPLE_MAX_WAVE);
 
 			for (j = 0; j < sample->super.length; ++j)
@@ -469,6 +472,10 @@ void RHPlayer_loader(struct RHPlayer* self, struct ByteArray *stream) {
 	self->super.super.lastSong = songs_count - 1;
 
 	//stream->length = samplesData; // FIXME: our ByteArray does not allow shrinking...
+	assert_op(samplesData, <=, stream->size);
+	stream->size = samplesData;
+	
+	
 	ByteArray_set_position(stream, 0x160);
 
 	while (ByteArray_get_position(stream) < 0x200) {

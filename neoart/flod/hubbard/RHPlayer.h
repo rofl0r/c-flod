@@ -7,8 +7,8 @@
 #include "RHVoice.h"
 #include "RHSample.h"
 
-#define RHPLAYER_MAX_SONGS 4
-#define RHPLAYER_MAX_SAMPLES 4
+#define RHPLAYER_MAX_SONGS 6
+#define RHPLAYER_MAX_SAMPLES 16
 
 //fixed
 #define RHPLAYER_MAX_VOICES 4
