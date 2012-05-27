@@ -83,367 +83,369 @@ void FXPlayer_set_ntsc(struct FXPlayer* self, int value) {
 
 //override
 void FXPlayer_process(struct FXPlayer* self) {
-      var chan:AmigaChannel, int index; int period; row:AmigaRow, sample:AmigaSample, int value; voice:FXVoice = voices[0];
+	var chan:AmigaChannel, int index; int period; row:AmigaRow, sample:AmigaSample, int value; voice:FXVoice = voices[0];
 
-      if (!tick) {
-        value = track[trackPos] + patternPos;
+	if (!tick) {
+		value = track[trackPos] + patternPos;
 
-        while (voice) {
-          chan = voice->channel;
-          voice->enabled = 0;
+		while (voice) {
+			chan = voice->channel;
+			voice->enabled = 0;
 
-          row = patterns[int(value + voice->index)];
-          voice->period = row->note;
-          voice->effect = row->effect;
-          voice->param  = row->param;
+			row = patterns[int(value + voice->index)];
+			voice->period = row->note;
+			voice->effect = row->effect;
+			voice->param  = row->param;
 
-          if (row->note == -3) {
-            voice->effect = 0;
-            voice = voice->next;
-            continue;
-          }
+			if (row->note == -3) {
+				voice->effect = 0;
+				voice = voice->next;
+				continue;
+			}
 
-          if (row->sample) {
-            sample = voice->sample = samples[row->sample];
-            voice->volume = sample->volume;
+			if (row->sample) {
+				sample = voice->sample = samples[row->sample];
+				voice->volume = sample->volume;
 
-            if (voice->effect == 5)
-              voice->volume += voice->param;
-            else if (voice->effect == 6)
-              voice->volume -= voice->param;
+				if (voice->effect == 5)
+				voice->volume += voice->param;
+				else if (voice->effect == 6)
+				voice->volume -= voice->param;
 
-            chan->volume = voice->volume;
-          } else {
-            sample = voice->sample;
-          }
+				chan->volume = voice->volume;
+			} else {
+				sample = voice->sample;
+			}
 
-          if (voice->period) {
-            voice->last = voice->period;
-            voice->slideSpeed = 0;
-            voice->stepSpeed  = 0;
+			if (voice->period) {
+				voice->last = voice->period;
+				voice->slideSpeed = 0;
+				voice->stepSpeed  = 0;
 
-            voice->enabled = 1;
-            chan->enabled  = 0;
+				voice->enabled = 1;
+				chan->enabled  = 0;
 
-            switch (voice->period) {
-              case -2:
-                chan->volume = 0;
-                break;
-              case -4:
-                self->jumpFlag = 1;
-                break;
-              case -5:
-                break;
-              default:
-                chan->pointer = sample->pointer;
-                chan->length  = sample->length;
+				switch (voice->period) {
+					case -2:
+						chan->volume = 0;
+						break;
+					case -4:
+						self->jumpFlag = 1;
+						break;
+					case -5:
+						break;
+					default:
+						chan->pointer = sample->pointer;
+						chan->length  = sample->length;
 
-                if (delphine) chan->period = voice->period << 1;
-                  else chan->period  = voice->period;
-                break;
-            }
+						if (delphine) chan->period = voice->period << 1;
+						else chan->period  = voice->period;
+						break;
+				}
 
-            if (voice->enabled) chan->enabled = 1;
-            chan->pointer = sample->loopPtr;
-            chan->length  = sample->repeat;
-          }
-          voice = voice->next;
-        }
-      } else {
-        while (voice) {
-          chan = voice->channel;
+				if (voice->enabled) chan->enabled = 1;
+				chan->pointer = sample->loopPtr;
+				chan->length  = sample->repeat;
+			}
+			voice = voice->next;
+		}
+	} else {
+		while (voice) {
+			chan = voice->channel;
 
-          if (version == SOUNDFX_18 && voice->period == -3) {
-            voice = voice->next;
-            continue;
-          }
+			if (version == SOUNDFX_18 && voice->period == -3) {
+				voice = voice->next;
+				continue;
+			}
 
-          if (voice->stepSpeed) {
-            voice->stepPeriod += voice->stepSpeed;
+			if (voice->stepSpeed) {
+				voice->stepPeriod += voice->stepSpeed;
 
-            if (voice->stepSpeed < 0) {
-              if (voice->stepPeriod < voice->stepWanted) {
-                voice->stepPeriod = voice->stepWanted;
-                if (version > SOUNDFX_18) voice->stepSpeed = 0;
-              }
-            } else {
-              if (voice->stepPeriod > voice->stepWanted) {
-                voice->stepPeriod = voice->stepWanted;
-                if (version > SOUNDFX_18) voice->stepSpeed = 0;
-              }
-            }
+				if (voice->stepSpeed < 0) {
+					if (voice->stepPeriod < voice->stepWanted) {
+						voice->stepPeriod = voice->stepWanted;
+						if (version > SOUNDFX_18) voice->stepSpeed = 0;
+					}
+				} else {
+					if (voice->stepPeriod > voice->stepWanted) {
+						voice->stepPeriod = voice->stepWanted;
+						if (version > SOUNDFX_18) voice->stepSpeed = 0;
+					}
+				}
 
-            if (version > SOUNDFX_18) voice->last = voice->stepPeriod;
-            chan->period = voice->stepPeriod;
-          } else {
-            if (voice->slideSpeed) {
-              value = voice->slideParam & 0x0f;
+				if (version > SOUNDFX_18) voice->last = voice->stepPeriod;
+				chan->period = voice->stepPeriod;
+			} else {
+				if (voice->slideSpeed) {
+					value = voice->slideParam & 0x0f;
 
-              if (value) {
-                if (++voice->slideCtr == value) {
-                  voice->slideCtr = 0;
-                  value = (voice->slideParam << 4) << 3;
+					if (value) {
+						if (++voice->slideCtr == value) {
+							voice->slideCtr = 0;
+							value = (voice->slideParam << 4) << 3;
 
-                  if (!voice->slideDir) {
-                    voice->slidePeriod += 8;
-                    chan->period = voice->slidePeriod;
-                    value += voice->slideSpeed;
-                    if (value == voice->slidePeriod) voice->slideDir = 1;
-                  } else {
-                    voice->slidePeriod -= 8;
-                    chan->period = voice->slidePeriod;
-                    value -= voice->slideSpeed;
-                    if (value == voice->slidePeriod) voice->slideDir = 0;
-                  }
-                } else {
-                  voice = voice->next;
-                  continue;
-                }
-              }
-            }
+							if (!voice->slideDir) {
+								voice->slidePeriod += 8;
+								chan->period = voice->slidePeriod;
+								value += voice->slideSpeed;
+								if (value == voice->slidePeriod) voice->slideDir = 1;
+							} else {
+								voice->slidePeriod -= 8;
+								chan->period = voice->slidePeriod;
+								value -= voice->slideSpeed;
+								if (value == voice->slidePeriod) voice->slideDir = 0;
+							}
+						} else {
+							voice = voice->next;
+							continue;
+						}
+					}
+				}
 
-            value = 0;
+				value = 0;
 
-            switch (voice->effect) {
-              case 0:
-                break;
-              case 1:   //arpeggio
-                value = tick % 3;
-                index = 0;
+				switch (voice->effect) {
+					case 0:
+						break;
+					case 1:   //arpeggio
+						value = tick % 3;
+						index = 0;
 
-                if (value == 2) {
-                  chan->period = voice->last;
-                  voice = voice->next;
-                  continue;
-                }
+						if (value == 2) {
+							chan->period = voice->last;
+							voice = voice->next;
+							continue;
+						}
 
-                if (value == 1) value = voice->param & 0x0f;
-                  else value = voice->param >> 4;
+						if (value == 1) value = voice->param & 0x0f;
+						else value = voice->param >> 4;
 
-                while (voice->last != PERIODS[index]) index++;
-                chan->period = PERIODS[int(index + value)];
-                break;
-              case 2:   //pitchbend
-                value = voice->param >> 4;
-                if (value) voice->period += value;
-                  else voice->period -= voice->param & 0x0f;
-                chan->period = voice->period;
-                break;
-              case 3:   //filter on
-                amiga->filter->active = 1;
-                break;
-              case 4:   //filter off
-                amiga->filter->active = 0;
-                break;
-              case 8:   //step down
-                value = -1;
-              case 7:   //step up
-                voice->stepSpeed  = voice->param & 0x0f;
-                voice->stepPeriod = version > SOUNDFX_18 ? voice->last : voice->period;
-                if (value < 0) voice->stepSpeed = -voice->stepSpeed;
-                index = 0;
+						while (voice->last != PERIODS[index]) index++;
+						chan->period = PERIODS[int(index + value)];
+						break;
+					case 2:   //pitchbend
+						value = voice->param >> 4;
+						if (value) voice->period += value;
+						else voice->period -= voice->param & 0x0f;
+						chan->period = voice->period;
+						break;
+					case 3:   //filter on
+						amiga->filter->active = 1;
+						break;
+					case 4:   //filter off
+						amiga->filter->active = 0;
+						break;
+					case 8:   //step down
+						value = -1;
+					case 7:   //step up
+						voice->stepSpeed  = voice->param & 0x0f;
+						voice->stepPeriod = version > SOUNDFX_18 ? voice->last : voice->period;
+						if (value < 0) voice->stepSpeed = -voice->stepSpeed;
+						index = 0;
 
-                while (true) {
-                  period = PERIODS[index];
-                  if (period == voice->stepPeriod) break;
-                  if (period < 0) {
-                    index = -1;
-                    break;
-                  } else
-                    index++;
-                }
+						while (true) {
+							period = PERIODS[index];
+							if (period == voice->stepPeriod) break;
+							if (period < 0) {
+								index = -1;
+								break;
+							} else
+								index++;
+						}
 
-                if (index > -1) {
-                  period = voice->param >> 4;
-                  if (value > -1) period = -period;
-                  index += period;
-                  if (index < 0) index = 0;
-                  voice->stepWanted = PERIODS[index];
-                } else
-                  voice->stepWanted = voice->period;
-                break;
-              case 9:   //auto slide
-                voice->slideSpeed = voice->slidePeriod = voice->period;
-                voice->slideParam = voice->param;
-                voice->slideDir = 0;
-                voice->slideCtr = 0;
-                break;
-            }
-          }
-          voice = voice->next;
-        }
-      }
+						if (index > -1) {
+							period = voice->param >> 4;
+							if (value > -1) period = -period;
+							index += period;
+							if (index < 0) index = 0;
+							voice->stepWanted = PERIODS[index];
+						} else
+							voice->stepWanted = voice->period;
+						break;
+					case 9:   //auto slide
+						voice->slideSpeed = voice->slidePeriod = voice->period;
+						voice->slideParam = voice->param;
+						voice->slideDir = 0;
+						voice->slideCtr = 0;
+						break;
+				}
+			}
+			voice = voice->next;
+		}
+	}
 
-      if (++tick == speed) {
-        tick = 0;
-        patternPos += 4;
+	if (++tick == speed) {
+		tick = 0;
+		patternPos += 4;
 
-        if (patternPos == 256 || jumpFlag) {
-          patternPos = jumpFlag = 0;
+		if (patternPos == 256 || jumpFlag) {
+			patternPos = jumpFlag = 0;
 
-          if (++trackPos == length) {
-            trackPos = 0;
-            amiga->complete = 1;
-          }
-        }
-      }
+			if (++trackPos == length) {
+				trackPos = 0;
+				amiga->complete = 1;
+			}
+		}
+	}
 }
 
 //override
 void FXPlayer_initialize(struct FXPlayer* self) {
-      var voice:FXVoice = voices[0];
-      super->initialize();
-      ntsc = standard;
+	var voice:FXVoice = voices[0];
+	super->initialize();
+	ntsc = standard;
 
-      speed      = 6;
-      trackPos   = 0;
-      patternPos = 0;
-      jumpFlag   = 0;
+	speed      = 6;
+	trackPos   = 0;
+	patternPos = 0;
+	jumpFlag   = 0;
 
-      while (voice) {
-        voice->initialize();
-        voice->channel = amiga->channels[voice->index];
-        voice->sample  = samples[0];
-        voice = voice->next;
-      }
+	while (voice) {
+		voice->initialize();
+		voice->channel = amiga->channels[voice->index];
+		voice->sample  = samples[0];
+		voice = voice->next;
+	}
 }
 
 //override
 void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
-      var int higher; int i; id:String, int j; int len; int offset; row:AmigaRow, sample:AmigaSample, int size; int value;
-      if (stream->length < 1686) return;
+	var int higher; int i; id:String, int j; int len; int offset; row:AmigaRow, sample:AmigaSample, int size; int value;
+	if (stream->length < 1686) return;
 
-      stream->position = 60;
-      id = stream->readMultiByte(4, ENCODING);
+	stream->position = 60;
+	id = stream->readMultiByte(4, ENCODING);
 
-      if (id != "SONG") {
-        stream->position = 124;
-        id = stream->readMultiByte(4, ENCODING);
-        if (id != "SO31") return;
-        if (stream->length < 2350) return;
+	if (id != "SONG") {
+		stream->position = 124;
+		id = stream->readMultiByte(4, ENCODING);
+		if (id != "SO31") return;
+		if (stream->length < 2350) return;
 
-        offset = 544;
-        len = 32;
-        version = SOUNDFX_20;
-      } else {
-        offset = 0;
-        len = 16;
-        version = SOUNDFX_10;
-      }
+		offset = 544;
+		len = 32;
+		version = SOUNDFX_20;
+	} else {
+		offset = 0;
+		len = 16;
+		version = SOUNDFX_10;
+	}
 
-      samples = new Vector.<AmigaSample>(len, true);
-      tempo = stream->readUnsignedShort();
-      stream->position = 0;
+	samples = new Vector.<AmigaSample>(len, true);
+	tempo = stream->readUnsignedShort();
+	stream->position = 0;
 
-      for (i = 1; i < len; ++i) {
-        value = stream->readUnsignedInt();
+	for (i = 1; i < len; ++i) {
+		value = stream->readUnsignedInt();
 
-        if (value) {
-          sample = new AmigaSample();
-          sample->pointer = size;
-          size += value;
-          samples[i] = sample;
-        } else
-          samples[i] = null;
-      }
-      stream->position += 20;
+		if (value) {
+			sample = new AmigaSample();
+			sample->pointer = size;
+			size += value;
+			samples[i] = sample;
+		} else
+			samples[i] = null;
+	}
+	stream->position += 20;
 
-      for (i = 1; i < len; ++i) {
-        sample = samples[i];
-        if (sample == null) {
-          stream->position += 30;
-          continue;
-        }
+	for (i = 1; i < len; ++i) {
+		sample = samples[i];
+		if (sample == null) {
+			stream->position += 30;
+			continue;
+		}
 
-        sample->name   = stream->readMultiByte(22, ENCODING);
-        sample->length = stream->readUnsignedShort() << 1;
-        sample->volume = stream->readUnsignedShort();
-        sample->loop   = stream->readUnsignedShort();
-        sample->repeat = stream->readUnsignedShort() << 1;
-      }
+		sample->name   = stream->readMultiByte(22, ENCODING);
+		sample->length = stream->readUnsignedShort() << 1;
+		sample->volume = stream->readUnsignedShort();
+		sample->loop   = stream->readUnsignedShort();
+		sample->repeat = stream->readUnsignedShort() << 1;
+	}
 
-      stream->position = 530 + offset;
-      length = len = stream->readUnsignedByte();
-      stream->position++;
+	stream->position = 530 + offset;
+	length = len = stream->readUnsignedByte();
+	stream->position++;
 
-      for (i = 0; i < len; ++i) {
-        value = stream->readUnsignedByte() << 8;
-        track[i] = value;
-        if (value > higher) higher = value;
-      }
+	for (i = 0; i < len; ++i) {
+		value = stream->readUnsignedByte() << 8;
+		track[i] = value;
+		if (value > higher) higher = value;
+	}
 
-      if (offset) offset += 4;
-      stream->position = 660 + offset;
-      higher += 256;
-      patterns = new Vector.<AmigaRow>(higher, true);
+	if (offset) offset += 4;
+	stream->position = 660 + offset;
+	higher += 256;
+	patterns = new Vector.<AmigaRow>(higher, true);
 
-      len = samples->length;
+	len = samples->length;
 
-      for (i = 0; i < higher; ++i) {
-        row = new AmigaRow();
-        row->note   = stream->readShort();
-        value      = stream->readUnsignedByte();
-        row->param  = stream->readUnsignedByte();
-        row->effect = value & 0x0f;
-        row->sample = value >> 4;
+	for (i = 0; i < higher; ++i) {
+		row = new AmigaRow();
+		row->note   = stream->readShort();
+		value      = stream->readUnsignedByte();
+		row->param  = stream->readUnsignedByte();
+		row->effect = value & 0x0f;
+		row->sample = value >> 4;
 
-        patterns[i] = row;
+		patterns[i] = row;
 
-        if (version == SOUNDFX_20) {
-          if (row->note & 0x1000) {
-            row->sample += 16;
-            if (row->note > 0) row->note &= 0xefff;
-          }
-        } else {
-          if (row->effect == 9 || row->note > 856)
-            version = SOUNDFX_18;
+		if (version == SOUNDFX_20) {
+			if (row->note & 0x1000) {
+			row->sample += 16;
+			if (row->note > 0) row->note &= 0xefff;
+			}
+		} else {
+			if (row->effect == 9 || row->note > 856)
+			version = SOUNDFX_18;
 
-          if (row->note < -3)
-            version = SOUNDFX_19;
-        }
-        if (row->sample >= len || samples[row->sample] == null) row->sample = 0;
-      }
+			if (row->note < -3)
+			version = SOUNDFX_19;
+		}
+		if (row->sample >= len || samples[row->sample] == null) row->sample = 0;
+	}
 
-      amiga->store(stream, size);
+	amiga->store(stream, size);
 
-      for (i = 1; i < len; ++i) {
-        sample = samples[i];
-        if (sample == null) continue;
+	for (i = 1; i < len; ++i) {
+		sample = samples[i];
+		if (sample == null) continue;
 
-        if (sample->loop)
-          sample->loopPtr = sample->pointer + sample->loop;
-        else {
-          sample->loopPtr = amiga->memory->length;
-          sample->repeat  = 2;
-        }
-        size = sample->pointer + 4;
-        for (j = sample->pointer; j < size; ++j) amiga->memory[j] = 0;
-      }
+		if (sample->loop)
+			sample->loopPtr = sample->pointer + sample->loop;
+		else {
+			sample->loopPtr = amiga->memory->length;
+			sample->repeat  = 2;
+		}
+		size = sample->pointer + 4;
+		for (j = sample->pointer; j < size; ++j) amiga->memory[j] = 0;
+	}
 
-      sample = new AmigaSample();
-      sample->pointer = sample->loopPtr = amiga->memory->length;
-      sample->length  = sample->repeat  = 2;
-      samples[0] = sample;
+	sample = new AmigaSample();
+	sample->pointer = sample->loopPtr = amiga->memory->length;
+	sample->length  = sample->repeat  = 2;
+	samples[0] = sample;
 
-      stream->position = higher = delphine = 0;
-      for (i = 0; i < 265; ++i) higher += stream->readUnsignedShort();
+	stream->position = higher = delphine = 0;
+	for (i = 0; i < 265; ++i) higher += stream->readUnsignedShort();
 
-      switch (higher) {
-        case 172662:
-        case 1391423:
-        case 1458300:
-        case 1706977:
-        case 1920077:
-        case 1920694:
-        case 1677853:
-        case 1931956:
-        case 1926836:
-        case 1385071:
-        case 1720635:
-        case 1714491:
-        case 1731874:
-        case 1437490:
-          delphine = 1;
-          break;
-      }
+	switch (higher) {
+		case 172662:
+		case 1391423:
+		case 1458300:
+		case 1706977:
+		case 1920077:
+		case 1920694:
+		case 1677853:
+		case 1931956:
+		case 1926836:
+		case 1385071:
+		case 1720635:
+		case 1714491:
+		case 1731874:
+		case 1437490:
+			delphine = 1;
+			break;
+		default:
+			break;
+	}
 }
