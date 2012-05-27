@@ -332,7 +332,7 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 	int size = 0; 
 	int value = 0;
 	
-	if (stream->length < 1686) return;
+	if (ByteArray_get_length(stream) < 1686) return;
 
 	ByteArray_set_position(stream, 60);
 	id = stream->readMultiByte(stream, 4, ENCODING);
@@ -341,7 +341,7 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 		ByteArray_set_position(stream, 124);
 		id = stream->readMultiByte(stream, 4, ENCODING);
 		if (id != "SO31") return;
-		if (stream->length < 2350) return;
+		if (ByteArray_get_length(stream) < 2350) return;
 
 		offset = 544;
 		len = 32;
