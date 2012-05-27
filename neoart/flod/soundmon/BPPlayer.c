@@ -73,7 +73,20 @@ struct BPPlayer* BPPlayer_new(struct Amiga *amiga) {
 
 //override
 void BPPlayer_process(struct BPPlayer* self) {
-	var chan:AmigaChannel, int data; int dst; int instr; int len; memory:Vector.<int> = amiga->memory, int note; int option; row:AmigaRow, sample:BPSample, int src; step:BPStep, voice:BPVoice = voices[0];
+	struct AmigaChannel *chan = 0;
+	int data = 0;
+	int dst = 0;
+	int instr = 0;
+	int len = 0;
+	signed char *memory = self->super.amiga->memory;
+	int note = 0;
+	int option = 0;
+	struct AmigaRow *row = 0;
+	struct BPSample *sample = 0;
+	int src = 0;
+	struct BPStep *step = 0;
+	struct BPVoice *voice = &self->voices[0];
+	
 	arpeggioCtr = --arpeggioCtr & 3;
 	vibratoPos  = ++vibratoPos  & 7;
 
@@ -462,7 +475,9 @@ void BPPlayer_process(struct BPPlayer* self) {
 
 //override
 void BPPlayer_initialize(struct BPPlayer* self) {
-	var int i; voice:BPVoice = voices[0];
+	int i = 0;
+	struct BPVoice *voice = &self->voices[0];
+	
 	super->initialize();
 
 	speed       = 6;
@@ -487,7 +502,10 @@ void BPPlayer_initialize(struct BPPlayer* self) {
 
 //override
 void BPPlayer_reset(struct BPPlayer* self) {
-	var int i; int len; int pos; voice:BPVoice = voices[0];
+	int i = 0; 
+	int len = 0; 
+	int pos = 0; 
+	struct BPVoice *voice = &self->voices[0];
 
 	while (voice) {
 		if (voice->synthPtr > -1) {
@@ -504,7 +522,15 @@ void BPPlayer_reset(struct BPPlayer* self) {
 
 //override
 void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
-	var int higher; i:int = 0, id:String, int len; row:AmigaRow, sample:BPSample, step:BPStep, int tables;
+	int higher = 0; 
+	int i = 0;
+	char id[4];
+	int len = 0; 
+	struct AmigaRow *row = 0;
+	struct BPSample *sample = 0;
+	struct BPStep *step = 0;
+	int tables = 0;
+	
 	title = stream->readMultiByte(26, ENCODING);
 
 	id = stream->readMultiByte(4, ENCODING);
