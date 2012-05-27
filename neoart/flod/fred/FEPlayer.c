@@ -15,32 +15,66 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->fred {
-  import flash.utils.*;
-  import neoart.flod.core.*;
 
-  public final class FEPlayer extends AmigaPlayer {
-    private var
-      songs    : Vector.<FESong>,
-      samples  : Vector.<FESample>,
-      patterns : ByteArray,
-      song     : FESong,
-      voices   : Vector.<FEVoice>,
- int complete;
- int sampFlag;
+#include "FEPlayer.h"
+#include "../flod_internal.h"
 
-     void FEPlayer(amiga:Amiga = null) {
-      super(amiga);
-      voices = new Vector.<FEVoice>(4, true);
+static const unsigned short PERIODS[] = {
+        8192,7728,7296,6888,6504,6136,5792,5464,5160,
+        4872,4600,4336,4096,3864,3648,3444,3252,3068,
+        2896,2732,2580,2436,2300,2168,2048,1932,1824,
+        1722,1626,1534,1448,1366,1290,1218,1150,1084,
+        1024, 966, 912, 861, 813, 767, 724, 683, 645,
+         609, 575, 542, 512, 483, 456, 430, 406, 383,
+         362, 341, 322, 304, 287, 271, 256, 241, 228,
+         215, 203, 191, 181, 170, 161, 152, 143, 135,
+};
 
-      voices[3] = new FEVoice(3,8);
-      voices[3].next = voices[2] = new FEVoice(2,4);
-      voices[2].next = voices[1] = new FEVoice(1,2);
-      voices[1].next = voices[0] = new FEVoice(0,1);
-    }
+void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream);
+void FEPlayer_process(struct FEPlayer* self);
+void FEPlayer_initialize(struct FEPlayer* self);
+
+void FEPlayer_defaults(struct FEPlayer* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+void FEPlayer_ctor(struct FEPlayer* self, struct Amiga* amiga) {
+	CLASS_CTOR_DEF(FEPlayer);
+	// original constructor code goes here
+	//super(amiga);
+	AmigaPlayer_ctor(&self->super, amiga);
+	
+	//voices = new Vector.<FEVoice>(4, true);
+
+	/*voices[3] = new FEVoice(3,8);
+	voices[3].next = voices[2] = new FEVoice(2,4);
+	voices[2].next = voices[1] = new FEVoice(1,2);
+	voices[1].next = voices[0] = new FEVoice(0,1); */
+	
+	unsigned i = FEPLAYER_MAX_VOICES;
+	while(1) {
+		FEVoice_ctor(&self->voices[i], i, 1 << i);
+		if(i) self->voices[i].next = &self->voices[i - 1];
+		else break;
+		i--;
+	}	
+	
+	//vtable
+	self->super.super.loader = FEPlayer_loader;
+	self->super.super.process = FEPlayer_process;
+	self->super.super.initialize = FEPlayer_initialize;
+	
+	self->super.super.min_filesize = 2830;
+	
+}
+
+struct FEPlayer* FEPlayer_new(struct Amiga* amiga) {
+	CLASS_NEW_BODY(FEPlayer, amiga);
+}
 
 //override
-void process() {
+void FEPlayer_process(struct FEPlayer* self) {
       var chan:AmigaChannel, int i; int j; int len; int loop; int pos; sample:FESample, int value; voice:FEVoice = voices[3];
 
       while (voice) {
@@ -401,10 +435,10 @@ void process() {
 
         voice = voice->next;
       }
-    }
+}
 
 //override
-void initialize() {
+void FEPlayer_initialize(struct FEPlayer* self) {
       var int i; int len; voice:FEVoice = voices[3];
       super->initialize();
 
@@ -424,10 +458,10 @@ void initialize() {
 
         voice = voice->next;
       }
-    }
+}
 
 //override
-void loader(stream:ByteArray) {
+void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
       var int basePtr; int dataPtr; int i; int j; int len; int pos; int ptr; sample:FESample, int size; song:FESong, int tracksLen; int value;
 
       while (stream->position < 16) {
@@ -586,17 +620,5 @@ void loader(stream:ByteArray) {
 
       stream->clear();
       stream = null;
-    }
-
-    private const
-      PERIODS : Vector.<int> = Vector.<int>([
-        8192,7728,7296,6888,6504,6136,5792,5464,5160,
-        4872,4600,4336,4096,3864,3648,3444,3252,3068,
-        2896,2732,2580,2436,2300,2168,2048,1932,1824,
-        1722,1626,1534,1448,1366,1290,1218,1150,1084,
-        1024, 966, 912, 861, 813, 767, 724, 683, 645,
-         609, 575, 542, 512, 483, 456, 430, 406, 383,
-         362, 341, 322, 304, 287, 271, 256, 241, 228,
-         215, 203, 191, 181, 170, 161, 152, 143, 135]);
-  }
 }
+
