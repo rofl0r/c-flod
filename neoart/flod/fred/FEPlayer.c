@@ -226,7 +226,7 @@ void FEPlayer_process(struct FEPlayer* self) {
 						voice->sustainTime = sample->sustainTime;
 
 						chan->length  = sample->length;
-						chan->period  = voice->period;
+						AmigaChannel_set_period(chan, voice->period);
 						AmigaChannel_set_volume(chan, 0);
 						AmigaChannel_set_enabled(chan, 1);
 
@@ -300,7 +300,7 @@ void FEPlayer_process(struct FEPlayer* self) {
 			}
 		}
 
-		chan->period = voice->period;
+		AmigaChannel_set_period(chan, voice->period);
 
 		switch (voice->envelopePos) {
 			case 4: break;
