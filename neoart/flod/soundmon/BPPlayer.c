@@ -375,7 +375,7 @@ void BPPlayer_process(struct BPPlayer* self) {
 
 			if (++(self->trackPos) == self->length) {
 				self->trackPos = 0;
-				self->super.amiga->complete = 1;
+				CoreMixer_set_complete(&self->super.amiga->super, 1);
 			}
 		}
 		voice = &self->voices[0];
@@ -483,7 +483,8 @@ void BPPlayer_initialize(struct BPPlayer* self) {
 	int i = 0;
 	struct BPVoice *voice = &self->voices[0];
 	
-	self->super->initialize();
+	CorePlayer_initialize(&self->super.super);
+	//self->super->initialize();
 
 	self->super.super.speed       = 6;
 	self->super.super.tick        = 1;
@@ -498,7 +499,7 @@ void BPPlayer_initialize(struct BPPlayer* self) {
 	for (i = 0; i < 128; ++i) self->buffer[i] = 0;
 
 	while (voice) {
-		voice->initialize();
+		BPVoice_initialize(voice);
 		voice->channel   = self->super.amiga->channels[voice->index];
 		voice->samplePtr = self->super.amiga->loopPtr;
 		voice = voice->next;
@@ -651,12 +652,12 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 		self->patterns[i] = row;
 	}
 
-	self->amiga->store(stream, tables << 6);
+	Amiga_store(self->super.amiga, stream, tables << 6, -1);
 
 	for (i = 0; ++i < 16;) {
 		sample = self->samples[i];
 		if (sample->synth || !sample->super.length) continue;
-		sample->super.pointer = self->super.amiga->store(stream, sample->super.length);
+		sample->super.pointer = Amiga_store(self->super.amiga, stream, sample->super.length, -1);
 		sample->super.loopPtr = sample->super.pointer + sample->super.loop;
 	}
 }
