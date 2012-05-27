@@ -17,6 +17,7 @@ struct RHPlayer {
 	struct AmigaPlayer super;
 	struct RHSong songs[RHPLAYER_MAX_SONGS];//    : Vector.<RHSong>,
 	struct RHSample samples[RHPLAYER_MAX_SAMPLES];//  : Vector.<RHSample>,
+	unsigned samples_count;
 	struct RHSong *song;
 	int periods;
 	int vibrato;

@@ -1,6 +1,7 @@
 #ifndef RHSONG_H
 #define RHSONG_H
 
+//fixed
 #define RHSONG_MAX_TRACKS 4
 
 struct RHSong {

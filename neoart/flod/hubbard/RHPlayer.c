@@ -141,7 +141,8 @@ void RHPlayer_process(struct RHPlayer* self) {
 						case -128:
 							value = self->stream->readByte(self->stream);
 							if (value < 0) value = 0;
-							voice->sample = sample = self->samples[value];
+							assert_op(value, <, RHPLAYER_MAX_SAMPLES);
+							voice->sample = sample = &self->samples[value];
 							voice->vibratoPtr = self->vibrato + sample->vibrato;
 							voice->vibratoPos = voice->vibratoPtr;
 							break;
@@ -214,7 +215,10 @@ void RHPlayer_process(struct RHPlayer* self) {
 				}
 			}
 
-			self->super.amiga->memory[int(sample->super.pointer + voice->synthPos)] = value;
+			unsigned idxx = sample->super.pointer + voice->synthPos;
+			//assert_op(idxx, <, AMIGA_MAX_MEMORY);
+			assert_op(idxx, <, self->super.amiga->vector_count_memory);
+			self->super.amiga->memory[idxx] = value;
 		}
 
 		voice = voice->next;
@@ -231,21 +235,25 @@ void RHPlayer_initialize(struct RHPlayer* self) {
 	CorePlayer_initialize(&self->super.super);
 	//self->super->initialize();
 
-	self->song = self->songs[self->super.super.playSong];
+	self->song = &self->songs[self->super.super.playSong];
 	self->complete = 15;
 
-	for (i = 0; i < self->samples->length; ++i) {
-		sample = self->samples[i];
+	for (i = 0; i < self->samples_count; ++i) {
+		sample = &self->samples[i];
 
-		if (sample->wave) {
-			for (j = 0; j < sample->super.length; ++j)
-				self->super.amiga->memory[int(sample->super.pointer + j)] = sample->wave[j];
+		if (sample->wave) { // FIXME this check is invalid now
+			for (j = 0; j < sample->super.length; ++j) {
+				unsigned idxx = sample->super.pointer + j;
+				//assert_op(idxx, <, AMIGA_MAX_MEMORY);
+				assert_op(idxx, <, self->super.amiga->vector_count_memory);
+				self->super.amiga->memory[idxx] = sample->wave[j];
+			}
 		}
 	}
 
 	while (voice) {
 		RHVoice_initialize(voice);
-		voice->channel = self->super.amiga->channels[voice->index];
+		voice->channel = &self->super.amiga->channels[voice->index];
 
 		voice->trackPtr = self->song->tracks[voice->index];
 		voice->trackPos = 4;
@@ -340,21 +348,27 @@ void RHPlayer_loader(struct RHPlayer* self, struct ByteArray *stream) {
 	if (!samplesHeaders || !samplesData || !samplesLen || !songsHeaders) return;
 
 	ByteArray_set_position(stream, samplesData);
-	samples = new Vector.<RHSample>();
+	self->samples_count = 0;
+	//samples = new Vector.<RHSample>();
 	samplesLen++;
+	self->samples_count = samplesLen;
+	assert_op(self->samples_count, <, RHPLAYER_MAX_SAMPLES);
 
 	for (i = 0; i < samplesLen; ++i) {
-		sample = new RHSample();
+		//sample = new RHSample();
+		sample = &self->samples[i];
+		RHSample_ctor(sample);
+		
 		sample->super.length   = stream->readUnsignedInt(stream);
 		sample->relative = 3579545 / stream->readUnsignedShort(stream);
-		sample->super.pointer  = self->super.amiga->store(stream, sample->super.length);
-		self->samples[i] = sample;
+		sample->super.pointer  = Amiga_store(self->super.amiga, stream, sample->super.length, -1);
+		//self->samples[i] = sample;
 	}
 
 	ByteArray_set_position(stream, samplesHeaders);
 
 	for (i = 0; i < samplesLen; ++i) {
-		sample = self->samples[i];
+		sample = &self->samples[i];
 		ByteArray_set_position_rel(stream, +4);
 		sample->super.loopPtr = stream->readInt(stream);
 		ByteArray_set_position_rel(stream, +6);
@@ -376,12 +390,21 @@ void RHPlayer_loader(struct RHPlayer* self, struct ByteArray *stream) {
 		self->super.super.variant = 1;
 
 		if (i >= samplesLen) {
-			for (j = samplesLen; j < i; ++j)
-				self->samples[j] = new RHSample();
+			self->samples_count = i;
+			assert_op(i, <=, RHPLAYER_MAX_SAMPLES);
+			for (j = samplesLen; j < i; ++j) {
+				//self->samples[j] = new RHSample();
+				RHSample_ctor(&self->samples[j]);
+			}
 		}
-
+		
+		assert_op(len, <=, RHPLAYER_MAX_SAMPLES);
 		for (; i < len; ++i) {
-			sample = new RHSample();
+			//sample = new RHSample();
+			if(i + 1 > self->samples_count) self->samples_count = i + 1;
+			sample = &self->samples[i];
+			RHSample_ctor(sample);
+			
 			ByteArray_set_position_rel(stream, +4);
 			sample->super.loopPtr   = stream->readInt(stream);
 			sample->super.length    = stream->readUnsignedShort(stream);
@@ -398,45 +421,54 @@ void RHPlayer_loader(struct RHPlayer* self, struct ByteArray *stream) {
 			ByteArray_set_position(stream, wavesPointers);
 			ByteArray_set_position(stream, stream->readInt(stream));
 
-			sample->super.pointer = self->super.amiga->memory->length;
-			self->super.amiga->memory->length += sample->super.length;
-			sample->wave = new Vector.<int>(sample->length, true);
+			sample->super.pointer = self->super.amiga->vector_count_memory;
+			Amiga_memory_set_length(self->super.amiga, self->super.amiga->vector_count_memory + sample->super.length);
+			//self->super.amiga->memory->length += sample->super.length;
+			//sample->wave = new Vector.<int>(sample->length, true);
+			assert_op(sample->super.length, <=, RHSAMPLE_MAX_WAVE);
 
 			for (j = 0; j < sample->super.length; ++j)
 			sample->wave[j] = stream->readByte(stream);
 
-			self->samples[i] = sample;
+			//self->samples[i] = sample;
 			wavesPointers += 4;
 			ByteArray_set_position(stream, pos);
 		}
 	}
 
-	self->samples->fixed = true;
+	//self->samples->fixed = true;
 
 	ByteArray_set_position(stream, songsHeaders);
-	self->songs = new Vector.<RHSong>();
+	unsigned songs_count = 0;
+	//self->songs = new Vector.<RHSong>();
 	value = 65536;
 
 	while (1) {
-		song = new RHSong();
+		assert_op(songs_count, <, RHPLAYER_MAX_SONGS);
+		song = &self->songs[songs_count];
+		RHSong_ctor(song);
+		
+		//song = new RHSong();
 		ByteArray_set_position_rel(stream, +1);
-		song->tracks = new Vector.<int>(4, true);
+		//song->tracks = new Vector.<int>(4, true);
 		song->speed = stream->readUnsignedByte(stream);
 
-		for (i = 0; i < 4; ++i) {
+		for (i = 0; i < RHSONG_MAX_TRACKS; ++i) {
 			j = stream->readUnsignedInt(stream);
 			if (j < value) value = j;
 			song->tracks[i] = j;
 		}
 
-		self->songs->push(song);
+		//self->songs->push(song);
+		songs_count++;
 		if ((value - ByteArray_get_position(stream)) < 18) break;
 	}
 
-	self->songs->fixed = true;
-	self->super.super.lastSong = self->songs->length - 1;
+	//self->songs->fixed = true;
+	//self->super.super.lastSong = self->songs->length - 1;
+	self->super.super.lastSong = songs_count - 1;
 
-	stream->length = samplesData;
+	//stream->length = samplesData; // FIXME: our ByteArray does not allow shrinking...
 	ByteArray_set_position(stream, 0x160);
 
 	while (ByteArray_get_position(stream) < 0x200) {
