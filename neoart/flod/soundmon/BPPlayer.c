@@ -537,9 +537,9 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 	struct BPStep *step = 0;
 	int tables = 0;
 	
-	self->super.super.title = stream->readMultiByte(26, ENCODING);
+	self->super.super.title = stream->readMultiByte(stream, 26, ENCODING);
 
-	id = stream->readMultiByte(4, ENCODING);
+	id = stream->readMultiByte(stream, 4, ENCODING);
 	if (id == "BPSM") {
 		self->super.super.version = BPSOUNDMON_V1;
 	} else {
@@ -549,72 +549,72 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 		else return;
 
 		stream->position = 29;
-		tables = stream->readUnsignedByte();
+		tables = stream->readUnsignedByte(stream);
 	}
 
-	self->length = stream->readUnsignedShort();
+	self->length = stream->readUnsignedShort(stream);
 
 	for (; ++i < 16;) {
 		sample = new BPSample();
 
-		if (stream->readUnsignedByte() == 0xff) {
+		if (stream->readUnsignedByte(stream) == 0xff) {
 			sample->synth   = 1;
-			sample->table   = stream->readUnsignedByte();
+			sample->table   = stream->readUnsignedByte(stream);
 			sample->super.pointer = sample->table << 6;
-			sample->super.length  = stream->readUnsignedShort() << 1;
+			sample->super.length  = stream->readUnsignedShort(stream) << 1;
 
-			sample->adsrControl = stream->readUnsignedByte();
-			sample->adsrTable   = stream->readUnsignedByte() << 6;
-			sample->adsrLen     = stream->readUnsignedShort();
-			sample->adsrSpeed   = stream->readUnsignedByte();
-			sample->lfoControl  = stream->readUnsignedByte();
-			sample->lfoTable    = stream->readUnsignedByte() << 6;
-			sample->lfoDepth    = stream->readUnsignedByte();
-			sample->lfoLen      = stream->readUnsignedShort();
+			sample->adsrControl = stream->readUnsignedByte(stream);
+			sample->adsrTable   = stream->readUnsignedByte(stream) << 6;
+			sample->adsrLen     = stream->readUnsignedShort(stream);
+			sample->adsrSpeed   = stream->readUnsignedByte(stream);
+			sample->lfoControl  = stream->readUnsignedByte(stream);
+			sample->lfoTable    = stream->readUnsignedByte(stream) << 6;
+			sample->lfoDepth    = stream->readUnsignedByte(stream);
+			sample->lfoLen      = stream->readUnsignedShort(stream);
 
 			if (self->super.super.version < BPSOUNDMON_V3) {
 				stream->readByte();
-				sample->lfoDelay  = stream->readUnsignedByte();
-				sample->lfoSpeed  = stream->readUnsignedByte();
-				sample->egControl = stream->readUnsignedByte();
-				sample->egTable   = stream->readUnsignedByte() << 6;
+				sample->lfoDelay  = stream->readUnsignedByte(stream);
+				sample->lfoSpeed  = stream->readUnsignedByte(stream);
+				sample->egControl = stream->readUnsignedByte(stream);
+				sample->egTable   = stream->readUnsignedByte(stream) << 6;
 				stream->readByte();
-				sample->egLen     = stream->readUnsignedShort();
+				sample->egLen     = stream->readUnsignedShort(stream);
 				stream->readByte();
-				sample->egDelay   = stream->readUnsignedByte();
-				sample->egSpeed   = stream->readUnsignedByte();
+				sample->egDelay   = stream->readUnsignedByte(stream);
+				sample->egSpeed   = stream->readUnsignedByte(stream);
 				sample->fxSpeed   = 1;
 				sample->modSpeed  = 1;
-				sample->super.volume    = stream->readUnsignedByte();
+				sample->super.volume    = stream->readUnsignedByte(stream);
 				stream->position += 6;
 			} else {
-				sample->lfoDelay   = stream->readUnsignedByte();
-				sample->lfoSpeed   = stream->readUnsignedByte();
-				sample->egControl  = stream->readUnsignedByte();
-				sample->egTable    = stream->readUnsignedByte() << 6;
-				sample->egLen      = stream->readUnsignedShort();
-				sample->egDelay    = stream->readUnsignedByte();
-				sample->egSpeed    = stream->readUnsignedByte();
-				sample->fxControl  = stream->readUnsignedByte();
-				sample->fxSpeed    = stream->readUnsignedByte();
-				sample->fxDelay    = stream->readUnsignedByte();
-				sample->modControl = stream->readUnsignedByte();
-				sample->modTable   = stream->readUnsignedByte() << 6;
-				sample->modSpeed   = stream->readUnsignedByte();
-				sample->modDelay   = stream->readUnsignedByte();
-				sample->super.volume     = stream->readUnsignedByte();
-				sample->modLen     = stream->readUnsignedShort();
+				sample->lfoDelay   = stream->readUnsignedByte(stream);
+				sample->lfoSpeed   = stream->readUnsignedByte(stream);
+				sample->egControl  = stream->readUnsignedByte(stream);
+				sample->egTable    = stream->readUnsignedByte(stream) << 6;
+				sample->egLen      = stream->readUnsignedShort(stream);
+				sample->egDelay    = stream->readUnsignedByte(stream);
+				sample->egSpeed    = stream->readUnsignedByte(stream);
+				sample->fxControl  = stream->readUnsignedByte(stream);
+				sample->fxSpeed    = stream->readUnsignedByte(stream);
+				sample->fxDelay    = stream->readUnsignedByte(stream);
+				sample->modControl = stream->readUnsignedByte(stream);
+				sample->modTable   = stream->readUnsignedByte(stream) << 6;
+				sample->modSpeed   = stream->readUnsignedByte(stream);
+				sample->modDelay   = stream->readUnsignedByte(stream);
+				sample->super.volume     = stream->readUnsignedByte(stream);
+				sample->modLen     = stream->readUnsignedShort(stream);
 			}
 		} else {
 			stream->position--;
 			sample->synth  = 0;
-			sample->super.name   = stream->readMultiByte(24, ENCODING);
-			sample->super.length = stream->readUnsignedShort() << 1;
+			sample->super.name   = stream->readMultiByte(stream, 24, ENCODING);
+			sample->super.length = stream->readUnsignedShort(stream) << 1;
 
 			if (sample->super.length) {
-				sample->super.loop   = stream->readUnsignedShort();
-				sample->super.repeat = stream->readUnsignedShort() << 1;
-				sample->super.volume = stream->readUnsignedShort();
+				sample->super.loop   = stream->readUnsignedShort(stream);
+				sample->super.repeat = stream->readUnsignedShort(stream) << 1;
+				sample->super.volume = stream->readUnsignedShort(stream);
 
 				if ((sample->super.loop + sample->super.repeat) >= sample->super.length)
 				sample->super.repeat = sample->super.length - sample->super.loop;
@@ -632,9 +632,9 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 
 	for (i = 0; i < len; ++i) {
 		step = new BPStep();
-		step->super.pattern = stream->readUnsignedShort();
-		step->soundTranspose = stream->readByte();
-		step->super.transpose = stream->readByte();
+		step->super.pattern = stream->readUnsignedShort(stream);
+		step->soundTranspose = stream->readByte(stream);
+		step->super.transpose = stream->readByte(stream);
 		if (step->super.pattern > higher) higher = step->super.pattern;
 		self->tracks[i] = step;
 	}
@@ -644,11 +644,11 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 
 	for (i = 0; i < len; ++i) {
 		row = new AmigaRow();
-		row->note   = stream->readByte();
-		row->sample = stream->readUnsignedByte();
+		row->note   = stream->readByte(stream);
+		row->sample = stream->readUnsignedByte(stream);
 		row->effect = row->sample & 0x0f;
 		row->sample = (row->sample & 0xf0) >> 4;
-		row->param  = stream->readByte();
+		row->param  = stream->readByte(stream);
 		self->patterns[i] = row;
 	}
 
