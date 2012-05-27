@@ -122,7 +122,7 @@ void FXPlayer_process(struct FXPlayer* self) {
 				else if (voice->effect == 6)
 				voice->volume -= voice->param;
 
-				chan->volume = voice->volume;
+				AmigaChannel_set_volume(chan, voice->volume);
 			} else {
 				sample = voice->sample;
 			}
@@ -137,7 +137,7 @@ void FXPlayer_process(struct FXPlayer* self) {
 
 				switch (voice->period) {
 					case -2:
-						chan->volume = 0;
+						AmigaChannel_set_volume(chan, 0);
 						break;
 					case -4:
 						self->jumpFlag = 1;
