@@ -148,8 +148,8 @@ void FXPlayer_process(struct FXPlayer* self) {
 						chan->pointer = sample->pointer;
 						chan->length  = sample->length;
 
-						if (self->delphine) chan->period = voice->period << 1;
-						else chan->period  = voice->period;
+						if (self->delphine) AmigaChannel_set_period(chan, voice->period << 1);
+						else AmigaChannel_set_period(chan, voice->period);
 						break;
 				}
 
@@ -184,7 +184,7 @@ void FXPlayer_process(struct FXPlayer* self) {
 				}
 
 				if (self->super.super.version > SOUNDFX_18) voice->last = voice->stepPeriod;
-				chan->period = voice->stepPeriod;
+				AmigaChannel_set_period(chan, voice->stepPeriod);
 			} else {
 				if (voice->slideSpeed) {
 					value = voice->slideParam & 0x0f;
@@ -196,12 +196,12 @@ void FXPlayer_process(struct FXPlayer* self) {
 
 							if (!voice->slideDir) {
 								voice->slidePeriod += 8;
-								chan->period = voice->slidePeriod;
+								AmigaChannel_set_period(chan, voice->slidePeriod);
 								value += voice->slideSpeed;
 								if (value == voice->slidePeriod) voice->slideDir = 1;
 							} else {
 								voice->slidePeriod -= 8;
-								chan->period = voice->slidePeriod;
+								AmigaChannel_set_period(chan, voice->slidePeriod);
 								value -= voice->slideSpeed;
 								if (value == voice->slidePeriod) voice->slideDir = 0;
 							}
@@ -222,7 +222,7 @@ void FXPlayer_process(struct FXPlayer* self) {
 						index = 0;
 
 						if (value == 2) {
-							chan->period = voice->last;
+							AmigaChannel_set_period(chan, voice->last);
 							voice = voice->next;
 							continue;
 						}
@@ -231,13 +231,13 @@ void FXPlayer_process(struct FXPlayer* self) {
 						else value = voice->param >> 4;
 
 						while (voice->last != PERIODS[index]) index++;
-						chan->period = PERIODS[int(index + value)];
+						AmigaChannel_set_period(chan, PERIODS[int(index + value)]);
 						break;
 					case 2:   //pitchbend
 						value = voice->param >> 4;
 						if (value) voice->period += value;
 						else voice->period -= voice->param & 0x0f;
-						chan->period = voice->period;
+						AmigaChannel_set_period(chan, voice->period);
 						break;
 					case 3:   //filter on
 						self->super.amiga->filter->active = 1;
