@@ -8,8 +8,12 @@
 #include "BPStep.h"
 #include "BPSample.h"
 
-#define BPPLAYER_MAX_TRACKS 4
-#define BPPLAYER_MAX_PATTERNS 4
+// 1168 tracks seem to be sufficient for all songs execpt Allister_Brimble/slightly_magic.bp
+// and alien_breed_-_menu*
+// FIXME the tune Allister_Brimble/projectx_-_level_2-2.bp seems to have some 
+// audible artifacts (but maybe thats intentional)
+#define BPPLAYER_MAX_TRACKS 1988
+#define BPPLAYER_MAX_PATTERNS 3984
 
 //fixed
 #define BPPLAYER_MAX_SAMPLES 16
