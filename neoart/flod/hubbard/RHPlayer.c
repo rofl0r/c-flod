@@ -92,27 +92,27 @@ void RHPlayer_process(struct RHPlayer* self) {
 			loop = 1;
 
 			while (loop) {
-				value = self->stream->readByte();
+				value = self->stream->readByte(self->stream);
 
 				if (value < 0) {
 					switch (value) {
 						case -121:
-							if (self->super.super.variant == 3) voice->volume = self->stream->readUnsignedByte();
+							if (self->super.super.variant == 3) voice->volume = self->stream->readUnsignedByte(self->stream);
 							break;
 						case -122:
-							if (self->super.super.variant == 4) voice->volume = self->stream->readUnsignedByte();
+							if (self->super.super.variant == 4) voice->volume = self->stream->readUnsignedByte(self->stream);
 							break;
 						case -123:
 							if (self->super.super.variant > 1) self->super.amiga->complete = 1;
 							break;
 						case -124:
 							ByteArray_set_position(self->stream, voice->trackPtr + voice->trackPos);
-							value = self->stream->readUnsignedInt();
+							value = self->stream->readUnsignedInt(self->stream);
 							voice->trackPos += 4;
 
 							if (!value) {
 								ByteArray_set_position(self->stream, voice->trackPtr);
-								value = self->stream->readUnsignedInt();
+								value = self->stream->readUnsignedInt(self->stream);
 								voice->trackPos = 4;
 
 								if (!self->super.super.loopSong) {
@@ -127,7 +127,7 @@ void RHPlayer_process(struct RHPlayer* self) {
 							if (self->super.super.variant == 4) voice->flags |= 4;
 							break;
 						case -126:
-							voice->tick = self->song->speed * self->stream->readByte();
+							voice->tick = self->song->speed * self->stream->readByte(self->stream);
 							voice->patternPos = ByteArray_get_position(self->stream);
 
 							chan->pointer = self->super.amiga->loopPtr;
@@ -135,11 +135,11 @@ void RHPlayer_process(struct RHPlayer* self) {
 							loop = 0;
 							break;
 						case -127:
-							voice->portaSpeed = self->stream->readByte();
+							voice->portaSpeed = self->stream->readByte(self->stream);
 							voice->flags |= 1;
 							break;
 						case -128:
-							value = self->stream->readByte();
+							value = self->stream->readByte(self->stream);
 							if (value < 0) value = 0;
 							voice->sample = sample = self->samples[value];
 							voice->vibratoPtr = self->vibrato + sample->vibrato;
@@ -150,7 +150,7 @@ void RHPlayer_process(struct RHPlayer* self) {
 					}
 				} else {
 					voice->tick = self->song->speed * value;
-					voice->note = self->stream->readByte();
+					voice->note = self->stream->readByte(self->stream);
 					voice->patternPos = ByteArray_get_position(self->stream);
 
 					voice->synthPos = sample->loPos;
@@ -161,7 +161,7 @@ void RHPlayer_process(struct RHPlayer* self) {
 					chan->volume  = (voice->volume) ? voice->volume : sample->super.volume;
 
 					ByteArray_set_position(self->stream, self->periods + (voice->note << 1));
-					value = self->stream->readUnsignedShort() * sample->relative;
+					value = self->stream->readUnsignedShort(self->stream) * sample->relative;
 					chan->period = voice->period = (value >> 10);
 
 					chan->enabled = 1;
@@ -179,11 +179,11 @@ void RHPlayer_process(struct RHPlayer* self) {
 
 			if (sample->divider) {
 				ByteArray_set_position(self->stream, voice->vibratoPos);
-				value = self->stream->readByte();
+				value = self->stream->readByte(self->stream);
 
 				if (value == -124) {
 					ByteArray_set_position(self->stream, voice->vibratoPtr);
-					value = self->stream->readByte();
+					value = self->stream->readByte(self->stream);
 				}
 
 				voice->vibratoPos = ByteArray_get_position(self->stream);
@@ -247,7 +247,7 @@ void RHPlayer_initialize(struct RHPlayer* self) {
 		voice->trackPos = 4;
 
 		ByteArray_set_position(self->stream, voice->trackPtr);
-		voice->patternPos = self->stream->readUnsignedInt();
+		voice->patternPos = self->stream->readUnsignedInt(self->stream);
 
 		voice = voice->next;
 	}
@@ -272,17 +272,17 @@ void RHPlayer_loader(struct RHPlayer* self, struct ByteArray *stream) {
 	ByteArray_set_position(stream, 44);
 
 	while (ByteArray_get_position(stream) < 1024) {
-		value = stream->readUnsignedShort();
+		value = stream->readUnsignedShort(stream);
 
 		if (value == 0x7e10 || value == 0x7e20) {                               //moveq #16,d7 || moveq #32,d7
-			value = stream->readUnsignedShort();
+			value = stream->readUnsignedShort(stream);
 
 			if (value == 0x41fa) {                                                //lea $x,a0
-				i = ByteArray_get_position(stream) + stream->readUnsignedShort();
-				value = stream->readUnsignedShort();
+				i = ByteArray_get_position(stream) + stream->readUnsignedShort(stream);
+				value = stream->readUnsignedShort(stream);
 
 				if (value == 0xd1fc) {                                              //adda->l
-					samplesData = i + stream->readUnsignedInt();
+					samplesData = i + stream->readUnsignedInt(stream);
 					self->super.amiga->loopLen = 64;
 					ByteArray_set_position_rel(stream, +2);
 				} else {
@@ -290,44 +290,44 @@ void RHPlayer_loader(struct RHPlayer* self, struct ByteArray *stream) {
 					self->super.amiga->loopLen = 512;
 				}
 
-				samplesHeaders = ByteArray_get_position(stream) + stream->readUnsignedShort();
-				value = stream->readUnsignedByte();
-				if (value == 0x72) samplesLen = stream->readUnsignedByte();           //moveq #x,d1
+				samplesHeaders = ByteArray_get_position(stream) + stream->readUnsignedShort(stream);
+				value = stream->readUnsignedByte(stream);
+				if (value == 0x72) samplesLen = stream->readUnsignedByte(stream);           //moveq #x,d1
 			}
 		} else if (value == 0x51c9) {                                           //dbf d1,x
 			ByteArray_set_position_rel(stream, +2);
-			value = stream->readUnsignedShort();
+			value = stream->readUnsignedShort(stream);
 
 			if (value == 0x45fa) {                                                //lea $x,a2
-				wavesPointers = ByteArray_get_position(stream) + stream->readUnsignedShort();
+				wavesPointers = ByteArray_get_position(stream) + stream->readUnsignedShort(stream);
 				ByteArray_set_position_rel(stream, +2);
 
 				while (1) {
-					value = stream->readUnsignedShort();
+					value = stream->readUnsignedShort(stream);
 
 					if (value == 0x4bfa) {                                            //lea $x,a5
-						wavesHeaders = ByteArray_get_position(stream) + stream->readUnsignedShort();
+						wavesHeaders = ByteArray_get_position(stream) + stream->readUnsignedShort(stream);
 						break;
 					}
 				}
 			}
 		} else if (value == 0xc0fc) {                                           //mulu->w #x,d0
 			ByteArray_set_position_rel(stream, +2);
-			value = stream->readUnsignedShort();
+			value = stream->readUnsignedShort(stream);
 
 			if (value == 0x41eb)                                                  //lea $x(a3),a0
-				songsHeaders = stream->readUnsignedShort();
+				songsHeaders = stream->readUnsignedShort(stream);
 		} else if (value == 0x346d) {                                           //movea->w x(a5),a2
 			ByteArray_set_position_rel(stream, +2);
-			value = stream->readUnsignedShort();
+			value = stream->readUnsignedShort(stream);
 
 			if (value == 0x49fa)                                                  //lea $x,a4
-			self->vibrato = ByteArray_get_position(stream) + stream->readUnsignedShort();
+			self->vibrato = ByteArray_get_position(stream) + stream->readUnsignedShort(stream);
 		} else if (value == 0x4240) {                                           //clr->w d0
-			value = stream->readUnsignedShort();
+			value = stream->readUnsignedShort(stream);
 
 			if (value == 0x45fa) {                                                //lea $x,a2
-				self->periods = ByteArray_get_position(stream) + stream->readUnsignedShort();
+				self->periods = ByteArray_get_position(stream) + stream->readUnsignedShort(stream);
 				break;
 			}
 		}
@@ -341,8 +341,8 @@ void RHPlayer_loader(struct RHPlayer* self, struct ByteArray *stream) {
 
 	for (i = 0; i < samplesLen; ++i) {
 		sample = new RHSample();
-		sample->super.length   = stream->readUnsignedInt();
-		sample->relative = 3579545 / stream->readUnsignedShort();
+		sample->super.length   = stream->readUnsignedInt(stream);
+		sample->relative = 3579545 / stream->readUnsignedShort(stream);
 		sample->super.pointer  = self->super.amiga->store(stream, sample->super.length);
 		self->samples[i] = sample;
 	}
@@ -352,15 +352,15 @@ void RHPlayer_loader(struct RHPlayer* self, struct ByteArray *stream) {
 	for (i = 0; i < samplesLen; ++i) {
 		sample = self->samples[i];
 		ByteArray_set_position_rel(stream, +4);
-		sample->super.loopPtr = stream->readInt();
+		sample->super.loopPtr = stream->readInt(stream);
 		ByteArray_set_position_rel(stream, +6);
-		sample->super.volume = stream->readUnsignedShort();
+		sample->super.volume = stream->readUnsignedShort(stream);
 
 		if (wavesHeaders) {
-			sample->divider = stream->readUnsignedShort();
-			sample->vibrato = stream->readUnsignedShort();
-			sample->hiPos   = stream->readUnsignedShort();
-			sample->loPos   = stream->readUnsignedShort();
+			sample->divider = stream->readUnsignedShort(stream);
+			sample->vibrato = stream->readUnsignedShort(stream);
+			sample->hiPos   = stream->readUnsignedShort(stream);
+			sample->loPos   = stream->readUnsignedShort(stream);
 			ByteArray_set_position_rel(stream, +8);
 		}
 	}
@@ -379,27 +379,27 @@ void RHPlayer_loader(struct RHPlayer* self, struct ByteArray *stream) {
 		for (; i < len; ++i) {
 			sample = new RHSample();
 			ByteArray_set_position_rel(stream, +4);
-			sample->super.loopPtr   = stream->readInt();
-			sample->super.length    = stream->readUnsignedShort();
-			sample->relative  = stream->readUnsignedShort();
+			sample->super.loopPtr   = stream->readInt(stream);
+			sample->super.length    = stream->readUnsignedShort(stream);
+			sample->relative  = stream->readUnsignedShort(stream);
 
 			ByteArray_set_position_rel(stream, +2);
-			sample->super.volume  = stream->readUnsignedShort();
-			sample->divider = stream->readUnsignedShort();
-			sample->vibrato = stream->readUnsignedShort();
-			sample->hiPos   = stream->readUnsignedShort();
-			sample->loPos   = stream->readUnsignedShort();
+			sample->super.volume  = stream->readUnsignedShort(stream);
+			sample->divider = stream->readUnsignedShort(stream);
+			sample->vibrato = stream->readUnsignedShort(stream);
+			sample->hiPos   = stream->readUnsignedShort(stream);
+			sample->loPos   = stream->readUnsignedShort(stream);
 
 			pos = ByteArray_get_position(stream);
 			ByteArray_set_position(stream, wavesPointers);
-			ByteArray_set_position(stream, stream->readInt());
+			ByteArray_set_position(stream, stream->readInt(stream));
 
 			sample->super.pointer = self->super.amiga->memory->length;
 			self->super.amiga->memory->length += sample->super.length;
 			sample->wave = new Vector.<int>(sample->length, true);
 
 			for (j = 0; j < sample->super.length; ++j)
-			sample->wave[j] = stream->readByte();
+			sample->wave[j] = stream->readByte(stream);
 
 			self->samples[i] = sample;
 			wavesPointers += 4;
@@ -417,10 +417,10 @@ void RHPlayer_loader(struct RHPlayer* self, struct ByteArray *stream) {
 		song = new RHSong();
 		ByteArray_set_position_rel(stream, +1);
 		song->tracks = new Vector.<int>(4, true);
-		song->speed = stream->readUnsignedByte();
+		song->speed = stream->readUnsignedByte(stream);
 
 		for (i = 0; i < 4; ++i) {
-			j = stream->readUnsignedInt();
+			j = stream->readUnsignedInt(stream);
 			if (j < value) value = j;
 			song->tracks[i] = j;
 		}
@@ -436,10 +436,10 @@ void RHPlayer_loader(struct RHPlayer* self, struct ByteArray *stream) {
 	ByteArray_set_position(stream, 0x160);
 
 	while (ByteArray_get_position(stream) < 0x200) {
-		value = stream->readUnsignedShort();
+		value = stream->readUnsignedShort(stream);
 
 		if (value == 0xb03c) {                                                  //cmp->b #x,d0
-			value = stream->readUnsignedShort();
+			value = stream->readUnsignedShort(stream);
 
 			if (value == 0x0085) {                                                //-123
 				self->super.super.variant = 2;
