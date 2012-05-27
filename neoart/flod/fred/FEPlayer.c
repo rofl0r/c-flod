@@ -110,26 +110,26 @@ void FEPlayer_process(struct FEPlayer* self) {
 				loop = 2;
 
 				while (loop > 1) {
-					value = self->patterns->readByte();
+					value = self->patterns->readByte(self->patterns);
 
 					if (value < 0) {
 						switch (value) {
 							case -125:
-								voice->sample = sample = self->samples[self->patterns->readUnsignedByte()];
+								voice->sample = sample = self->samples[self->patterns->readUnsignedByte(self->patterns)];
 								self->sampFlag = 1;
 								voice->patternPos = ByteArray_get_position(self->patterns);
 								break;
 							case -126:
-								self->super.super.speed = self->patterns->readUnsignedByte();
+								self->super.super.speed = self->patterns->readUnsignedByte(self->patterns);
 								voice->patternPos = ByteArray_get_position(self->patterns);
 								break;
 							case -127:
 								value = (sample) ? sample->relative : 428;
-								voice->portaSpeed = self->patterns->readUnsignedByte() * self->super.super.speed;
-								voice->portaNote  = self->patterns->readUnsignedByte();
+								voice->portaSpeed = self->patterns->readUnsignedByte(self->patterns) * self->super.super.speed;
+								voice->portaNote  = self->patterns->readUnsignedByte(self->patterns);
 								voice->portaLimit = (PERIODS[voice->portaNote] * value) >> 10;
 								voice->portamento = 0;
-								voice->portaDelay = self->patterns->readUnsignedByte() * self->super.super.speed;
+								voice->portaDelay = self->patterns->readUnsignedByte(self->patterns) * self->super.super.speed;
 								voice->portaFlag  = 1;
 								voice->patternPos = ByteArray_get_position(self->patterns);
 								break;
@@ -491,28 +491,28 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 	int value = 0;
 
 	while (ByteArray_get_position(stream) < 16) {
-		value = stream->readUnsignedShort();
+		value = stream->readUnsignedShort(stream);
 		ByteArray_set_position_rel(stream, + 2);
 		if (value != 0x4efa) return;                                            //jmp
 	}
 
 	while (ByteArray_get_position(stream) < 1024) {
-		value = stream->readUnsignedShort();
+		value = stream->readUnsignedShort(stream);
 
 		if (value == 0x123a) {                                                  //move->b $x,d1
 			ByteArray_set_position_rel(stream, +2);
-			value = stream->readUnsignedShort();
+			value = stream->readUnsignedShort(stream);
 
 			if (value == 0xb001) {                                                //cmp->b d1,d0
 				ByteArray_set_position_rel(stream, -4);
-				dataPtr = (ByteArray_get_position(stream) + stream->readUnsignedShort()) - 0x895;
+				dataPtr = (ByteArray_get_position(stream) + stream->readUnsignedShort(stream)) - 0x895;
 			}
 		} else if (value == 0x214a) {                                           //move->l a2,(a0)
 			ByteArray_set_position_rel(stream, +2);
-			value = stream->readUnsignedShort();
+			value = stream->readUnsignedShort(stream);
 
 			if (value == 0x47fa) {                                                //lea $x,a3
-				basePtr = ByteArray_get_position(stream) + stream->readShort();
+				basePtr = ByteArray_get_position(stream) + stream->readShort(stream);
 				self->super.super.version = 1;
 				break;
 			}
@@ -522,13 +522,13 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 	if (!self->super.super.version) return;
 
 	ByteArray_set_position(stream, dataPtr + 0x8a2);
-	pos = stream->readUnsignedInt();
+	pos = stream->readUnsignedInt(stream);
 	ByteArray_set_position(stream, basePtr + pos);
 	samples = new Vector.<FESample>();
 	pos = 0x7fffffff;
 
 	while (pos > ByteArray_get_position(stream)) {
-		value = stream->readUnsignedInt();
+		value = stream->readUnsignedInt(stream);
 
 		if (value) {
 			if ((value < ByteArray_get_position(stream)) || (value >= ByteArray_get_length(stream))) {
@@ -541,43 +541,43 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 
 		sample = new FESample();
 		sample->pointer  = value;
-		sample->loopPtr  = stream->readShort();
-		sample->length   = stream->readUnsignedShort() << 1;
-		sample->relative = stream->readUnsignedShort();
+		sample->loopPtr  = stream->readShort(stream);
+		sample->length   = stream->readUnsignedShort(stream) << 1;
+		sample->relative = stream->readUnsignedShort(stream);
 
-		sample->vibratoDelay = stream->readUnsignedByte();
+		sample->vibratoDelay = stream->readUnsignedByte(stream);
 		ByteArray_set_position_rel(stream, +1);
-		sample->vibratoSpeed = stream->readUnsignedByte();
-		sample->vibratoDepth = stream->readUnsignedByte();
-		sample->envelopeVol  = stream->readUnsignedByte();
-		sample->attackSpeed  = stream->readUnsignedByte();
-		sample->attackVol    = stream->readUnsignedByte();
-		sample->decaySpeed   = stream->readUnsignedByte();
-		sample->decayVol     = stream->readUnsignedByte();
-		sample->sustainTime  = stream->readUnsignedByte();
-		sample->releaseSpeed = stream->readUnsignedByte();
-		sample->releaseVol   = stream->readUnsignedByte();
+		sample->vibratoSpeed = stream->readUnsignedByte(stream);
+		sample->vibratoDepth = stream->readUnsignedByte(stream);
+		sample->envelopeVol  = stream->readUnsignedByte(stream);
+		sample->attackSpeed  = stream->readUnsignedByte(stream);
+		sample->attackVol    = stream->readUnsignedByte(stream);
+		sample->decaySpeed   = stream->readUnsignedByte(stream);
+		sample->decayVol     = stream->readUnsignedByte(stream);
+		sample->sustainTime  = stream->readUnsignedByte(stream);
+		sample->releaseSpeed = stream->readUnsignedByte(stream);
+		sample->releaseVol   = stream->readUnsignedByte(stream);
 
-		for (i = 0; i < 16; ++i) sample->arpeggio[i] = stream->readByte();
+		for (i = 0; i < 16; ++i) sample->arpeggio[i] = stream->readByte(stream);
 
 		sample->arpeggioSpeed = stream->readUnsignedByte();
-		sample->type          = stream->readByte();
-		sample->pulseRateNeg  = stream->readByte();
-		sample->pulseRatePos  = stream->readUnsignedByte();
-		sample->pulseSpeed    = stream->readUnsignedByte();
-		sample->pulsePosL     = stream->readUnsignedByte();
-		sample->pulsePosH     = stream->readUnsignedByte();
-		sample->pulseDelay    = stream->readUnsignedByte();
-		sample->synchro       = stream->readUnsignedByte();
-		sample->blendRate     = stream->readUnsignedByte();
-		sample->blendDelay    = stream->readUnsignedByte();
-		sample->pulseCounter  = stream->readUnsignedByte();
-		sample->blendCounter  = stream->readUnsignedByte();
-		sample->arpeggioLimit = stream->readUnsignedByte();
+		sample->type          = stream->readByte(stream);
+		sample->pulseRateNeg  = stream->readByte(stream);
+		sample->pulseRatePos  = stream->readUnsignedByte(stream);
+		sample->pulseSpeed    = stream->readUnsignedByte(stream);
+		sample->pulsePosL     = stream->readUnsignedByte(stream);
+		sample->pulsePosH     = stream->readUnsignedByte(stream);
+		sample->pulseDelay    = stream->readUnsignedByte(stream);
+		sample->synchro       = stream->readUnsignedByte(stream);
+		sample->blendRate     = stream->readUnsignedByte(stream);
+		sample->blendDelay    = stream->readUnsignedByte(stream);
+		sample->pulseCounter  = stream->readUnsignedByte(stream);
+		sample->blendCounter  = stream->readUnsignedByte(stream);
+		sample->arpeggioLimit = stream->readUnsignedByte(stream);
 
 		ByteArray_set_position_rel(stream, +12);
 		self->samples->push(sample);
-		if (!stream->bytesAvailable) break;
+		if (!stream->bytesAvailable(stream)) break;
 	}
 
 	self->samples->fixed = true;
@@ -603,14 +603,14 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 
 	self->patterns = new ByteArray();
 	ByteArray_set_position(stream, dataPtr + 0x8a2);
-	len = stream->readUnsignedInt();
-	pos = stream->readUnsignedInt();
+	len = stream->readUnsignedInt(stream);
+	pos = stream->readUnsignedInt(stream);
 	ByteArray_set_position(stream, basePtr + pos);
 	stream->readBytes(self->patterns, 0, (len - pos));
 	pos += basePtr;
 
 	ByteArray_set_position(stream, dataPtr + 0x895);
-	self->super.super.lastSong = len = stream->readUnsignedByte();
+	self->super.super.lastSong = len = stream->readUnsignedByte(stream);
 
 	songs = new Vector.<FESong>(++len, true);
 	basePtr = dataPtr + 0xb0e;
@@ -622,10 +622,10 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 
 		for (j = 0; j < 4; ++j) {
 			ByteArray_set_position(stream, basePtr + pos);
-			value = stream->readUnsignedShort();
+			value = stream->readUnsignedShort(stream);
 
 			if (j == 3 && (i == (len - 1))) size = tracksLen;
-			else size = stream->readUnsignedShort();
+			else size = stream->readUnsignedShort(stream);
 
 			size = (size - value) >> 1;
 			if (size > song->length) song->length = size;
@@ -634,13 +634,13 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 			ByteArray_set_position(stream, basePtr + value);
 
 			for (ptr = 0; ptr < size; ++ptr)
-				song->tracks[j][ptr] = stream->readUnsignedShort();
+				song->tracks[j][ptr] = stream->readUnsignedShort(stream);
 
 			pos += 2;
 		}
 
 		ByteArray_set_position(stream, dataPtr + 0x897 + i);
-		song->speed = stream->readUnsignedByte();
+		song->speed = stream->readUnsignedByte(stream);
 		self->songs[i] = song;
 	}
 
