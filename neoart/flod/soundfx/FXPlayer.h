@@ -15,15 +15,17 @@ enum FXPlayerVersion {
 	SOUNDFX_20 = 4,
 };
 
-#define FXPLAYER_MAX_TRACKS 4
 #define FXPLAYER_MAX_ROWS 4
 #define FXPLAYER_MAX_SAMPLES 4
+
+//fixed
 #define FXPLAYER_MAX_VOICES 4
+#define FXPLAYER_MAX_TRACKS 128
 
 struct FXPlayer {
 	struct AmigaPlayer super;
 	//track      : Vector.<int>,
-	int tracks[FXPLAYER_MAX_TRACKS];
+	int track[FXPLAYER_MAX_TRACKS];
 	//patterns   : Vector.<AmigaRow>,
 	struct AmigaRow patterns[FXPLAYER_MAX_ROWS];
 	//samples    : Vector.<AmigaSample>,

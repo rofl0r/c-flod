@@ -42,22 +42,26 @@ void FXPlayer_defaults(struct FXPlayer* self) {
 void FXPlayer_ctor(struct FXPlayer* self, struct Amiga *amiga) {
 	CLASS_CTOR_DEF(FXPlayer);
 	// original constructor code goes here
-	super(amiga);
+	AmigaPlayer_ctor(&self->super, amiga);
+	//super(amiga);
 
-	track  = new Vector.<int>(128, true);
-	voices = new Vector.<FXVoice>(4, true);
-
-	voices[0] = new FXVoice(0);
-	voices[0].next = voices[1] = new FXVoice(1);
-	voices[1].next = voices[2] = new FXVoice(2);
-	voices[2].next = voices[3] = new FXVoice(3);
+	//track  = new Vector.<int>(128, true);
+	//voices = new Vector.<FXVoice>(4, true);
 	
+	unsigned i = 0;
+	for(; i < FXPLAYER_MAX_VOICES; i++) {
+		FXVoice_ctor(&self->voices[i]);
+		if(i) self->voices[i - 1].next = &self->voices[i];
+	}
+
 	//vtable
 	self->super.super.loader = FXPlayer_loader;
 	self->super.super.process = FXPlayer_process;
 	self->super.super.initialize = FXPlayer_initialize;
 	self->super.super.set_force = FXPlayer_set_force;
 	self->super.super.set_ntsc = FXPlayer_set_ntsc;
+	
+	self->super.super.min_filesize = 1685;
 }
 
 struct FXPlayer* FXPlayer_new(struct Amiga *amiga) {
