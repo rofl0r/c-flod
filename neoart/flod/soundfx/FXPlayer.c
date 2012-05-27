@@ -335,11 +335,11 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 	if (stream->length < 1686) return;
 
 	stream->position = 60;
-	id = stream->readMultiByte(4, ENCODING);
+	id = stream->readMultiByte(stream, 4, ENCODING);
 
 	if (id != "SONG") {
 		stream->position = 124;
-		id = stream->readMultiByte(4, ENCODING);
+		id = stream->readMultiByte(stream, 4, ENCODING);
 		if (id != "SO31") return;
 		if (stream->length < 2350) return;
 
@@ -353,11 +353,11 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 	}
 
 	self->samples = new Vector.<AmigaSample>(len, true);
-	self->super.super.tempo = stream->readUnsignedShort();
+	self->super.super.tempo = stream->readUnsignedShort(stream);
 	stream->position = 0;
 
 	for (i = 1; i < len; ++i) {
-		value = stream->readUnsignedInt();
+		value = stream->readUnsignedInt(stream);
 
 		if (value) {
 			sample = new AmigaSample();
@@ -377,18 +377,18 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 		}
 
 		sample->name   = stream->readMultiByte(22, ENCODING);
-		sample->length = stream->readUnsignedShort() << 1;
-		sample->volume = stream->readUnsignedShort();
-		sample->loop   = stream->readUnsignedShort();
-		sample->repeat = stream->readUnsignedShort() << 1;
+		sample->length = stream->readUnsignedShort(stream) << 1;
+		sample->volume = stream->readUnsignedShort(stream);
+		sample->loop   = stream->readUnsignedShort(stream);
+		sample->repeat = stream->readUnsignedShort(stream) << 1;
 	}
 
 	stream->position = 530 + offset;
-	self->length = len = stream->readUnsignedByte();
+	self->length = len = stream->readUnsignedByte(stream);
 	stream->position++;
 
 	for (i = 0; i < len; ++i) {
-		value = stream->readUnsignedByte() << 8;
+		value = stream->readUnsignedByte(stream) << 8;
 		self->track[i] = value;
 		if (value > higher) higher = value;
 	}
@@ -402,9 +402,9 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 
 	for (i = 0; i < higher; ++i) {
 		row = new AmigaRow();
-		row->note   = stream->readShort();
-		value      = stream->readUnsignedByte();
-		row->param  = stream->readUnsignedByte();
+		row->note   = stream->readShort(stream);
+		value      = stream->readUnsignedByte(stream);
+		row->param  = stream->readUnsignedByte(stream);
 		row->effect = value & 0x0f;
 		row->sample = value >> 4;
 
@@ -447,7 +447,7 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 	self->samples[0] = sample;
 
 	stream->position = higher = self->delphine = 0;
-	for (i = 0; i < 265; ++i) higher += stream->readUnsignedShort();
+	for (i = 0; i < 265; ++i) higher += stream->readUnsignedShort(stream);
 
 	switch (higher) {
 		case 172662:
