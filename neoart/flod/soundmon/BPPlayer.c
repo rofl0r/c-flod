@@ -15,43 +15,64 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->soundmon {
-  import flash.utils.*;
-  import neoart.flod.core.*;
 
-  public final class BPPlayer extends AmigaPlayer {
-    private var
-      tracks      : Vector.<BPStep>,
-      patterns    : Vector.<AmigaRow>,
-      samples     : Vector.<BPSample>,
- int length;
-      buffer      : Vector.<int>,
-      voices      : Vector.<BPVoice>,
- int trackPos;
- int patternPos;
- int nextPos;
- int jumpFlag;
- int repeatCtr;
- int arpeggioCtr;
- int vibratoPos;
+#include "BPPlayer.h"
+#include "../flod_internal.h"
 
-     void BPPlayer(amiga:Amiga = null) {
-      super(amiga);
-      PERIODS->fixed = true;
-      VIBRATO->fixed = true;
+void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream);
+void BPPlayer_reset(struct BPPlayer* self);
+void BPPlayer_initialize(struct BPPlayer* self);
+void BPPlayer_process(struct BPPlayer* self);
 
-      buffer  = new Vector.<int>(128, true);
-      samples = new Vector.<BPSample>(16, true);
-      voices  = new Vector.<BPVoice>(4, true);
+static const unsigned short PERIODS[] = {
+        6848,6464,6080,5760,5440,5120,4832,4576,4320,4064,3840,3616,
+        3424,3232,3040,2880,2720,2560,2416,2288,2160,2032,1920,1808,
+        1712,1616,1520,1440,1360,1280,1208,1144,1080,1016, 960, 904,
+         856, 808, 760, 720, 680, 640, 604, 572, 540, 508, 480, 452,
+         428, 404, 380, 360, 340, 320, 302, 286, 270, 254, 240, 226,
+         214, 202, 190, 180, 170, 160, 151, 143, 135, 127, 120, 113,
+         107, 101,  95,  90,  85,  80,  76,  72,  68,  64,  60,  57,
+};
 
-      voices[0] = new BPVoice(0);
-      voices[0].next = voices[1] = new BPVoice(1);
-      voices[1].next = voices[2] = new BPVoice(2);
-      voices[2].next = voices[3] = new BPVoice(3);
-    }
+static const signed short VIBRATO[] = {0,64,128,64,0,-64,-128,-64,};
+
+void BPPlayer_defaults(struct BPPlayer* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+void BPPlayer_ctor(struct BPPlayer* self, struct Amiga *amiga) {
+	CLASS_CTOR_DEF(BPPlayer);
+	// original constructor code goes here
+	//super(amiga);
+	AmigaPlayer_ctor(&self->super, amiga);
+
+	//buffer  = new Vector.<int>(128, true);
+	//samples = new Vector.<BPSample>(16, true);
+	//voices  = new Vector.<BPVoice>(4, true);
+	
+	unsigned i = 0;
+	for(; i < BPPLAYER_MAX_VOICES; i++) {
+		BPVoice_ctor(&self->voices[i], i);
+		if(i) self->voices[i - 1].next = &self->voices[i];
+	}
+	
+	//vtable
+	self->super.super.process = BPPlayer_process;
+	self->super.super.loader = BPPlayer_loader;
+	self->super.super.initialize = BPPlayer_initialize;
+	self->super.super.reset = BPPlayer_reset;
+	
+	self->super.super.min_filesize = 30;
+	
+}
+
+struct BPPlayer* BPPlayer_new(struct Amiga *amiga) {
+	CLASS_NEW_BODY(BPPlayer, amiga);
+}
 
 //override
-void process() {
+void BPPlayer_process(struct BPPlayer* self) {
       var chan:AmigaChannel, int data; int dst; int instr; int len; memory:Vector.<int> = amiga->memory, int note; int option; row:AmigaRow, sample:BPSample, int src; step:BPStep, voice:BPVoice = voices[0];
       arpeggioCtr = --arpeggioCtr & 3;
       vibratoPos  = ++vibratoPos  & 7;
@@ -434,10 +455,10 @@ void process() {
           voice = voice->next;
         }
       }
-    }
+}
 
 //override
-void initialize() {
+void BPPlayer_initialize(struct BPPlayer* self) {
       var int i; voice:BPVoice = voices[0];
       super->initialize();
 
@@ -462,7 +483,7 @@ void initialize() {
     }
 
 //override
-void reset() {
+void BPPlayer_reset(struct BPPlayer* self) {
       var int i; int len; int pos; voice:BPVoice = voices[0];
 
       while (voice) {
@@ -479,7 +500,7 @@ void reset() {
     }
 
 //override
-void loader(stream:ByteArray) {
+void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
       var int higher; i:int = 0, id:String, int len; row:AmigaRow, sample:BPSample, step:BPStep, int tables;
       title = stream->readMultiByte(26, ENCODING);
 
@@ -604,23 +625,4 @@ void loader(stream:ByteArray) {
         sample->pointer = amiga->store(stream, sample->length);
         sample->loopPtr = sample->pointer + sample->loop;
       }
-    }
-
-    public static const
-      BPSOUNDMON_V1 = 1,
-      BPSOUNDMON_V2 = 2,
-      BPSOUNDMON_V3 = 3;
-
-    private const
-      PERIODS: Vector.<int> = Vector.<int>([
-        6848,6464,6080,5760,5440,5120,4832,4576,4320,4064,3840,3616,
-        3424,3232,3040,2880,2720,2560,2416,2288,2160,2032,1920,1808,
-        1712,1616,1520,1440,1360,1280,1208,1144,1080,1016, 960, 904,
-         856, 808, 760, 720, 680, 640, 604, 572, 540, 508, 480, 452,
-         428, 404, 380, 360, 340, 320, 302, 286, 270, 254, 240, 226,
-         214, 202, 190, 180, 170, 160, 151, 143, 135, 127, 120, 113,
-         107, 101,  95,  90,  85,  80,  76,  72,  68,  64,  60,  57]),
-
-      VIBRATO: Vector.<int> = Vector.<int>([0,64,128,64,0,-64,-128,-64]);
-  }
 }
