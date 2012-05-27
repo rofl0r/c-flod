@@ -22,7 +22,7 @@ FASTTRACKER_SRCS = $(sort $(wildcard neoart/flod/fasttracker/*.c))
 WHITTAKER_SRCS = $(sort $(wildcard neoart/flod/whittaker/*.c))
 FUTURECOMPOSER_SRCS = $(sort $(wildcard neoart/flod/futurecomposer/*.c))
 DIGITALMUGICIAN_SRCS = $(sort $(wildcard neoart/flod/digitalmugician/*.c))
-SIDMON_SRCS = neoart/flod/sidmon/SMRow.c $(sort $(wildcard neoart/flod/sidmon/S2*.c))
+SIDMON_SRCS = $(sort $(wildcard neoart/flod/sidmon/*.c))
 ALL_PLAYER_SRCS = $(WHITTAKER_SRCS) $(FUTURECOMPOSER_SRCS) $(TRACKER_SRCS) \
 $(FASTTRACKER_SRCS) $(DIGITALMUGICIAN_SRCS) $(SIDMON_SRCS)
 
