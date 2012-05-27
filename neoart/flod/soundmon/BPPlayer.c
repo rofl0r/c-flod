@@ -555,7 +555,9 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 	self->length = stream->readUnsignedShort(stream);
 
 	for (; ++i < 16;) {
-		sample = new BPSample();
+		//sample = new BPSample();
+		sample = &self->samples[i];
+		BPSample_ctor(sample);
 
 		if (stream->readUnsignedByte(stream) == 0xff) {
 			sample->synth   = 1;
@@ -626,32 +628,40 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 				ByteArray_set_position_rel(stream, +6);
 			}
 		}
-		self->samples[i] = sample;
+		//self->samples[i] = sample;
 	}
 
 	len = self->length << 2;
-	tracks = new Vector.<BPStep>(len, true);
+	assert_op(len, <=, BPPLAYER_MAX_TRACKS);
+	//tracks = new Vector.<BPStep>(len, true);
 
 	for (i = 0; i < len; ++i) {
-		step = new BPStep();
+		//step = new BPStep();
+		step = &self->tracks[i];
+		BPStep_ctor(step);
+		
 		step->super.pattern = stream->readUnsignedShort(stream);
 		step->soundTranspose = stream->readByte(stream);
 		step->super.transpose = stream->readByte(stream);
 		if (step->super.pattern > higher) higher = step->super.pattern;
-		self->tracks[i] = step;
+		//self->tracks[i] = step;
 	}
 
 	len = higher << 4;
-	patterns = new Vector.<AmigaRow>(len, true);
+	assert_op(len, <=, BPPLAYER_MAX_PATTERNS);
+	//patterns = new Vector.<AmigaRow>(len, true);
 
 	for (i = 0; i < len; ++i) {
-		row = new AmigaRow();
+		//row = new AmigaRow();
+		row = &self->patterns[i];
+		AmigaRow_ctor(row);
+		
 		row->note   = stream->readByte(stream);
 		row->sample = stream->readUnsignedByte(stream);
 		row->effect = row->sample & 0x0f;
 		row->sample = (row->sample & 0xf0) >> 4;
 		row->param  = stream->readByte(stream);
-		self->patterns[i] = row;
+		//self->patterns[i] = row;
 	}
 
 	Amiga_store(self->super.amiga, stream, tables << 6, -1);
