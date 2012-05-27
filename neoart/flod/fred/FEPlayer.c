@@ -90,7 +90,7 @@ void FEPlayer_process(struct FEPlayer* self) {
 		loop = 0;
 
 		do {
-			self->patterns->position = voice->patternPos;
+			ByteArray_set_position(self->patterns, voice->patternPos);
 			sample = voice->sample;
 			self->sampFlag = 0;
 
@@ -521,9 +521,9 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 
 	if (!self->super.super.version) return;
 
-	stream->position = dataPtr + 0x8a2;
+	ByteArray_set_position(stream, dataPtr + 0x8a2);
 	pos = stream->readUnsignedInt();
-	stream->position = basePtr + pos;
+	ByteArray_set_position(stream, basePtr + pos);
 	samples = new Vector.<FESample>();
 	pos = 0x7fffffff;
 
@@ -602,14 +602,14 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 	}
 
 	self->patterns = new ByteArray();
-	stream->position = dataPtr + 0x8a2;
+	ByteArray_set_position(stream, dataPtr + 0x8a2);
 	len = stream->readUnsignedInt();
 	pos = stream->readUnsignedInt();
-	stream->position = basePtr + pos;
+	ByteArray_set_position(stream, basePtr + pos);
 	stream->readBytes(self->patterns, 0, (len - pos));
 	pos += basePtr;
 
-	stream->position = dataPtr + 0x895;
+	ByteArray_set_position(stream, dataPtr + 0x895);
 	self->super.super.lastSong = len = stream->readUnsignedByte();
 
 	songs = new Vector.<FESong>(++len, true);
@@ -621,7 +621,7 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 		song = new FESong();
 
 		for (j = 0; j < 4; ++j) {
-			stream->position = basePtr + pos;
+			ByteArray_set_position(stream, basePtr + pos);
 			value = stream->readUnsignedShort();
 
 			if (j == 3 && (i == (len - 1))) size = tracksLen;
@@ -631,7 +631,7 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 			if (size > song->length) song->length = size;
 
 			song->tracks[j] = new Vector.<int>(size, true);
-			stream->position = basePtr + value;
+			ByteArray_set_position(stream, basePtr + value);
 
 			for (ptr = 0; ptr < size; ++ptr)
 				song->tracks[j][ptr] = stream->readUnsignedShort();
@@ -639,7 +639,7 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 			pos += 2;
 		}
 
-		stream->position = dataPtr + 0x897 + i;
+		ByteArray_set_position(stream, dataPtr + 0x897 + i);
 		song->speed = stream->readUnsignedByte();
 		self->songs[i] = song;
 	}
