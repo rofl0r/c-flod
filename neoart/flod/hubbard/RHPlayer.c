@@ -158,7 +158,7 @@ void RHPlayer_process(struct RHPlayer* self) {
 
 					chan->pointer = sample->super.pointer;
 					chan->length  = sample->super.length;
-					chan->volume  = (voice->volume) ? voice->volume : sample->super.volume;
+					AmigaChannel_set_volume(chan, (voice->volume) ? voice->volume : sample->super.volume);
 
 					ByteArray_set_position(self->stream, self->periods + (voice->note << 1));
 					value = self->stream->readUnsignedShort(self->stream) * sample->relative;
