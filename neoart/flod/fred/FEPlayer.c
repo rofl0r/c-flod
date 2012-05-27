@@ -134,7 +134,7 @@ void FEPlayer_process(struct FEPlayer* self) {
 								voice->patternPos = ByteArray_get_position(self->patterns);
 								break;
 							case -124:
-								chan->enabled = 0;
+								AmigaChannel_set_enabled(chan, 0);
 								voice->tick = self->super.super.speed;
 								voice->busy = 1;
 								voice->patternPos = ByteArray_get_position(self->patterns);
@@ -228,7 +228,7 @@ void FEPlayer_process(struct FEPlayer* self) {
 						chan->length  = sample->length;
 						chan->period  = voice->period;
 						chan->volume  = 0;
-						chan->enabled = 1;
+						AmigaChannel_set_enabled(chan, 1);
 
 						if (voice->portaFlag) {
 							if (!voice->portamento) {
@@ -241,11 +241,11 @@ void FEPlayer_process(struct FEPlayer* self) {
 				}
 			} else if (voice->tick == 1) {
 				value = (self->patterns[voice->patternPos] - 160) & 255;
-				if (value > 127) chan->enabled = 0;
+				if (value > 127) AmigaChannel_set_enabled(chan, 0);
 			}
 		} while (loop > 0);
 
-		if (!chan->enabled) {
+		if (!AmigaChannel_get_enabled(chan)) {
 			voice = voice->next;
 			continue;
 		}
