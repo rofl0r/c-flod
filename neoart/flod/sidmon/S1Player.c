@@ -41,7 +41,7 @@ void S1Player_ctor(struct S1Player* self, struct Amiga *amiga) {
 	
 	unsigned i = 0;
 	for(; i < S1PLAYER_MAX_VOICES; i++) {
-		S1Voice_ctor(&self->voices[i]);
+		S1Voice_ctor(&self->voices[i], i);
 		if(i) self->voices[i - 1].next = &self->voices[i];
 	}
 
@@ -72,7 +72,7 @@ void S1Player_process(struct S1Player* self) {
 	int src2 = 0; 
 	struct AmigaStep *step = 0;
 	int value = 0; 
-	struct S1Voice *voice = self->voices[0];
+	struct S1Voice *voice = &self->voices[0];
 
 	while (voice) {
 		chan = voice->channel;
@@ -84,20 +84,24 @@ void S1Player_process(struct S1Player* self) {
 				if (self->trackEnd) voice->step = self->tracksPtr[voice->index];
 				else voice->step++;
 
-				step = self->tracks[voice->step];
+				assert_op(voice->step, <, S1PLAYER_MAX_TRACKS);
+				step = &self->tracks[voice->step];
+				assert_op(step->pattern, <, S1PLAYER_MAX_PATTERNSPTR);
 				voice->row = self->patternsPtr[step->pattern];
 				if (self->doReset) voice->noteTimer = 0;
 			}
 
 			if (voice->noteTimer == 0) {
-				row = self->patterns[voice->row];
+				assert_op(voice->row, <, S1PLAYER_MAX_PATTERNS);
+				row = &self->patterns[voice->row];
 
 				if (row->super.sample == 0) {
 					if (row->super.note) {
 						voice->noteTimer = row->speed;
 
 						if (voice->waitCtr) {
-							sample = self->samples[voice->sample];
+							assert_op(voice->sample, <, S1PLAYER_MAX_SAMPLES);
+							sample = &self->samples[voice->sample];
 							self->audPtr = sample->super.pointer;
 							self->audLen = sample->super.length;
 							voice->samplePtr = sample->super.loopPtr;
@@ -107,7 +111,8 @@ void S1Player_process(struct S1Player* self) {
 						}
 					}
 				} else {
-					sample = self->samples[row->super.sample];
+					assert_op(row->super.sample, <, S1PLAYER_MAX_SAMPLES);
+					sample = &self->samples[row->super.sample];
 					if (voice->waitCtr) {
 						voice->waitCtr = 0;
 						AmigaChannel_set_enabled(chan, 0);
@@ -123,6 +128,7 @@ void S1Player_process(struct S1Player* self) {
 						voice->wavePos = 0;
 						voice->waveList = sample->waveform;
 						index = voice->waveList << 4;
+						assert_op(index + 1, <, S1PLAYER_MAX_WAVELISTS);
 						self->audPtr = self->waveLists[index] << 5;
 						self->audLen = 32;
 						voice->waveTimer = self->waveLists[++index];
@@ -137,11 +143,16 @@ void S1Player_process(struct S1Player* self) {
 					voice->noteTimer = row->speed;
 
 					if (row->super.note != 0xff) {
-						sample = self->samples[voice->sample];
-						step = self->tracks[voice->step];
+						assert_op(voice->sample, <, S1PLAYER_MAX_SAMPLES);
+						sample = &self->samples[voice->sample];
+						assert_op(voice->step, <, S1PLAYER_MAX_TRACKS);
+						step = &self->tracks[voice->step];
 
 						voice->note = row->super.note + step->transpose;
-						voice->period = self->audPer = PERIODS[int(1 + sample->finetune + voice->note)];
+						unsigned idxx = 1 + sample->finetune + voice->note;
+						assert_op(idxx, <, ARRAY_SIZE(PERIODS));
+						
+						voice->period = self->audPer = PERIODS[idxx];
 						voice->phaseSpeed = sample->phaseSpeed;
 
 						voice->bendSpeed   = voice->volume = 0;
@@ -174,7 +185,9 @@ void S1Player_process(struct S1Player* self) {
 				voice->noteTimer--;
 			}
 		}
-		sample = self->samples[voice->sample];
+		
+		assert_op(voice->sample, <, S1PLAYER_MAX_SAMPLES);
+		sample = &self->samples[voice->sample];
 		self->audVol = voice->volume;
 
 		switch (voice->envelopeCtr) {
@@ -218,7 +231,9 @@ void S1Player_process(struct S1Player* self) {
 		voice->period = self->audPer = PERIODS[index];
 
 		if (voice->bendSpeed) {
-			value = PERIODS[int(sample->finetune + voice->bendTo)];
+			unsigned idxx = sample->finetune + voice->bendTo;
+			assert_op(idxx, <, ARRAY_SIZE(PERIODS));
+			value = PERIODS[idxx];
 			index = ~voice->bendSpeed + 1;
 			if (index < -128) index &= 255;
 			voice->pitchCtr += index;
@@ -299,7 +314,9 @@ void S1Player_process(struct S1Player* self) {
 			src2 =  self->mix1Source2 << 5;
 
 			for (i = 31; i > -1; --i) {
-				memory[dst--] = (memory[src1--] + memory[int(src2 + index)]) >> 1;
+				unsigned idxx = src2 + index;
+				assert_op(idxx, <, AMIGA_MAX_MEMORY);
+				memory[dst--] = (memory[src1--] + memory[idxx]) >> 1;
 				index = --index & 31;
 			}
 		}
@@ -315,7 +332,9 @@ void S1Player_process(struct S1Player* self) {
 			src2 =  self->mix2Source2 << 5;
 
 			for (i = 31; i > -1; --i) {
-				memory[dst--] = (memory[src1--] + memory[int(src2 + index)]) >> 1;
+				unsigned idxx = src2 + index;
+				assert_op(idxx, <, AMIGA_MAX_MEMORY);
+				memory[dst--] = (memory[src1--] + memory[idxx]) >> 1;
 				index = --index & 31;
 			}
 		}
@@ -324,9 +343,10 @@ void S1Player_process(struct S1Player* self) {
 
 	if (self->doFilter) {
 		index = self->mix1Pos + 32;
+		assert_op(index, <, AMIGA_MAX_MEMORY);		
 		memory[index] = ~memory[index] + 1;
 	}
-	voice = self->voices[0];
+	voice = &self->voices[0];
 
 	while (voice) {
 		chan = voice->channel;
@@ -365,12 +385,20 @@ void S1Player_initialize(struct S1Player* self) {
 	while (voice) {
 		S1Voice_initialize(voice);
 		//voice->initialize();
-		chan = self->super.amiga->channels[voice->index];
+		assert_op(voice->index, <, AMIGA_MAX_CHANNELS);
+		chan = &self->super.amiga->channels[voice->index];
 
 		voice->channel = chan;
+		assert_op(voice->index, <, S1PLAYER_MAX_TRACKSPTR);
 		voice->step    = self->tracksPtr[voice->index];
-		step = self->tracks[voice->step];
+		
+		assert_op(voice->step, <, S1PLAYER_MAX_TRACKS);
+		step = &self->tracks[voice->step];
+		
+		assert_op(step->pattern, <, S1PLAYER_MAX_PATTERNSPTR);
 		voice->row    = self->patternsPtr[step->pattern];
+		
+		assert_op(voice->row, <, S1PLAYER_MAX_PATTERNS);
 		voice->sample = self->patterns[voice->row].super.sample;
 
 		chan->length  = 32;
@@ -422,7 +450,9 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 	ByteArray_set_position(stream, position);
 
 	stream->readMultiByte(stream, id, 32);
-	if (!is_str(id, " SID-MON BY R->v.VLIET  (c) 1988 ")) return;
+	if (!is_str(id, " SID-MON BY R.v.VLIET  (c) 1988 ") &&
+	    !is_str(id, " Ripped with SCX Ripper") && 
+	    !is_str(id, " Ripped with SidmRipper")) return;
 
 	ByteArray_set_position(stream, position - 44);
 	start = stream->readUnsignedInt(stream);
@@ -452,8 +482,8 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 		self->patternsPtr[i] = start;
 	}
 
-	self->patternsPtr->length = totPatterns;
-	self->patternsPtr->fixed  = true;
+	//self->patternsPtr->length = totPatterns;
+	//self->patternsPtr->fixed  = true;
 
 	ByteArray_set_position(stream, position - 44);
 	start = stream->readUnsignedInt(stream);
@@ -480,7 +510,8 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 	start = stream->readUnsignedInt(stream);
 	totWaveforms = stream->readUnsignedInt(stream) - start;
 
-	self->super.amiga->memory->length = 32;
+	//self->super.amiga->memory->length = 32;
+	Amiga_memory_set_length(self->super.amiga, 32);
 	Amiga_store(self->super.amiga, stream, totWaveforms, position + start);
 	totWaveforms >>= 5;
 

@@ -1,6 +1,6 @@
 static const unsigned short EMBEDDED[] = {1166, 408, 908,};
 
-static const unsigned short PERIODS = {
+static const unsigned short PERIODS[] = {
 	0,
         5760,5424,5120,4832,4560,4304,4064,3840,3616,3424,3232,3048,
         2880,2712,2560,2416,2280,2152,2032,1920,1808,1712,1616,1524,
