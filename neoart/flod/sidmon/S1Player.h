@@ -19,34 +19,34 @@ enum S1PlayerVersion {
 };
 
 
-#define S1PLAYER_PATTERNSPTR_MAX 4
-#define S1PLAYER_WAVELISTS_MAX 4
+#define S1PLAYER_MAX_PATTERNSPTR 4
+#define S1PLAYER_MAX_WAVELISTS 4
 
-#define S1PLAYER_TRACKS_MAX 4
-#define S1PLAYER_PATTERNS_MAX 4
-#define S1PLAYER_SAMPLES_MAX 4
+#define S1PLAYER_MAX_TRACKS 4
+#define S1PLAYER_MAX_PATTERNS 4
+#define S1PLAYER_MAX_SAMPLES 4
 
 // fixed
-#define S1PLAYER_TRACKSPTR_MAX 4
-#define S1PLAYER_VOICES_MAX 4
+#define S1PLAYER_MAX_TRACKSPTR 4
+#define S1PLAYER_MAX_VOICES 4
 
 struct S1Player {
 	struct AmigaPlayer super;
 	//tracksPtr   : Vector.<int>,
-	int tracksPtr[S1PLAYER_TRACKSPTR_MAX];
+	int tracksPtr[S1PLAYER_MAX_TRACKSPTR];
 	//patternsPtr : Vector.<int>,
-	int patternsPtr[S1PLAYER_PATTERNSPTR_MAX];
+	int patternsPtr[S1PLAYER_MAX_PATTERNSPTR];
 	//waveLists   : Vector.<int>,
-	int waveLists[S1PLAYER_WAVELISTS_MAX];
+	int waveLists[S1PLAYER_MAX_WAVELISTS];
 	
 	//tracks      : Vector.<AmigaStep>,
-	struct AmigaStep tracks[S1PLAYER_TRACKS_MAX];
+	struct AmigaStep tracks[S1PLAYER_MAX_TRACKS];
 	//patterns    : Vector.<SMRow>,
-	struct SMRow patterns[S1PLAYER_PATTERNS_MAX];
+	struct SMRow patterns[S1PLAYER_MAX_PATTERNS];
 	//samples     : Vector.<S1Sample>,
-	struct S1Sample samples[S1PLAYER_SAMPLES_MAX];
+	struct S1Sample samples[S1PLAYER_MAX_SAMPLES];
 	//voices      : Vector.<S1Voice>,
-	struct S1Voice voices[S1PLAYER_VOICES_MAX];
+	struct S1Voice voices[S1PLAYER_MAX_VOICES];
 	
 	int speedDef;
 	int trackLen;

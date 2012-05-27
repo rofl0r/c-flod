@@ -40,7 +40,7 @@ void S1Player_ctor(struct S1Player* self, struct Amiga *amiga) {
 	//voices    = new Vector.<S1Voice>(4, true);
 	
 	unsigned i = 0;
-	for(; i < S1PLAYER_VOICES_MAX; i++) {
+	for(; i < S1PLAYER_MAX_VOICES; i++) {
 		S1Voice_ctor(&self->voices[i]);
 		if(i) self->voices[i - 1].next = &self->voices[i];
 	}
@@ -436,7 +436,10 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 	if (len < start) len = ByteArray_get_length(stream) - position;
 
 	totPatterns = (len - start) >> 2;
-	self->patternsPtr = new Vector.<int>(totPatterns);
+	
+	assert_op(totPatterns, <=, S1PLAYER_MAX_PATTERNSPTR);
+	
+	//self->patternsPtr = new Vector.<int>(totPatterns);
 	ByteArray_set_position(stream, position + start + 4);
 
 	for (i = 1; i < totPatterns; ++i) {
@@ -457,17 +460,20 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 	ByteArray_set_position(stream, position - 28);
 	len = (stream->readUnsignedInt(stream) - start) / 6;
 
-	self->tracks = new Vector.<AmigaStep>(len, true);
+	//self->tracks = new Vector.<AmigaStep>(len, true);
+	assert_op(len, <=, S1PLAYER_MAX_TRACKS);
 	ByteArray_set_position(stream, position + start);
 
 	for (i = 0; i < len; ++i) {
-		step = new AmigaStep();
+		//step = new AmigaStep();
+		step = &self->tracks[i];
+		AmigaStep_ctor(step);
 		step->pattern = stream->readUnsignedInt(stream);
 		if (step->pattern >= totPatterns) step->pattern = 0;
 		stream->readByte(stream);
 		step->transpose = stream->readByte(stream);
 		if (step->transpose < -99 || step->transpose > 99) step->transpose = 0;
-		self->tracks[i] = step;
+		// self->tracks[i] = step;
 	}
 
 	ByteArray_set_position(stream, position - 24);
@@ -482,19 +488,25 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 	start = stream->readUnsignedInt(stream);
 	len = (stream->readUnsignedInt(stream) - start) + 16;
 	j = (totWaveforms + 2) << 4;
+	
+	unsigned waveLists_len = len < j ? j : len;
+	assert_op(waveLists_len, <=, S1PLAYER_MAX_WAVELISTS);
 
-	self->waveLists = new Vector.<int>(len < j ? j : len, true);
+	//self->waveLists = new Vector.<int>(len < j ? j : len, true);
 	ByteArray_set_position(stream, position + start);
 	i = 0;
 
+	assert_op(j + (j % 4), <=, S1PLAYER_MAX_WAVELISTS);
 	while (i < j) {
-		self->waveLists[i++] = i >> 4;
+		self->waveLists[i] = (i + 1) >> 4;
+		i++;
 		self->waveLists[i++] = 0xff;
 		self->waveLists[i++] = 0xff;
 		self->waveLists[i++] = 0x10;
 		i += 12;
 	}
 
+	assert_op(len, <=, S1PLAYER_MAX_WAVELISTS);
 	for (i = 16; i < len; ++i)
 		self->waveLists[i] = stream->readUnsignedByte(stream);
 
@@ -544,21 +556,26 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 			}
 		}
 		ByteArray_set_position_rel(stream, stream->readUnsignedShort(stream));
-		self->samples = new Vector.<S1Sample>(len + 3, true);
+		assert_op(len + 3, <=, S1PLAYER_MAX_SAMPLES);
+		//self->samples = new Vector.<S1Sample>(len + 3, true);
 
 		for (i = 0; i < 3; ++i) {
-			sample = new S1Sample();
+			//sample = new S1Sample();
+			sample = &self->samples[len + i];
+			S1Sample_ctor(sample);
+			
 			sample->waveform = 16 + i;
 			sample->super.length   = EMBEDDED[i];
 			sample->super.pointer  = Amiga_store(self->super.amiga, stream, sample->super.length, -1);
 			sample->super.loop     = sample->super.loopPtr = 0;
 			sample->super.repeat   = 4;
 			sample->super.volume   = 64;
-			self->samples[int(len + i)] = sample;
+			//self->samples[int(len + i)] = sample;
 			ByteArray_set_position_rel(stream, sample->super.length);
 		}
 	} else {
-		samples = new Vector.<S1Sample>(len, true);
+		//samples = new Vector.<S1Sample>(len, true);
+		assert_op(len, <=, S1PLAYER_MAX_SAMPLES);
 
 		ByteArray_set_position(stream, position + start);
 		data = stream->readUnsignedInt(stream);
@@ -567,12 +584,17 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 		data += headers;
 	}
 
-	sample = new S1Sample();
-	self->samples[0] = sample;
+	//sample = new S1Sample();
+	//self->samples[0] = sample;
+	S1Sample_ctor(&self->samples[0]);
+	
 	ByteArray_set_position(stream, position + j);
 
 	for (i = 1; i < len; ++i) {
-		sample = new S1Sample();
+		//sample = new S1Sample();
+		sample = &self->samples[i];
+		S1Sample_ctor(sample);
+		
 		sample->waveform = stream->readUnsignedInt(stream);
 		for (j = 0; j < 16; ++j) sample->arpeggio[j] = stream->readUnsignedByte(stream);
 
@@ -607,6 +629,9 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 				sample->waveform = 0;
 			} else {
 				start = headers + ((sample->waveform - 16) << 5);
+				//FIXME examine if this needs samples[i] to be cleared
+				// the original code malloc'd a S1Sample at loop start, but doesnt
+				// assign it to the array in this case here.
 				if (start >= ByteArray_get_length(stream)) continue;
 				j = ByteArray_get_position(stream);
 
@@ -642,17 +667,24 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 		} else if (sample->waveform > totWaveforms) {
 			sample->waveform = 0;
 		}
-		self->samples[i] = sample;
+		//self->samples[i] = sample;
 	}
 
 	ByteArray_set_position(stream, position - 12);
 	start = stream->readUnsignedInt(stream);
 	len = (stream->readUnsignedInt(stream) - start) / 5;
-	self->patterns = new Vector.<SMRow>(len, true);
+	
+	assert_op(len, <=, S1PLAYER_MAX_PATTERNS);
+	
+	//self->patterns = new Vector.<SMRow>(len, true);
+	
 	ByteArray_set_position(stream, position + start);
 
 	for (i = 0; i < len; ++i) {
-		row = new SMRow();
+		//row = new SMRow();
+		row = &self->patterns[i];
+		SMRow_ctor(row);
+		
 		row->super.note   = stream->readUnsignedByte(stream);
 		row->super.sample = stream->readUnsignedByte(stream);
 		row->super.effect = stream->readUnsignedByte(stream);
@@ -666,7 +698,7 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 		} else if (row->super.sample > totInstruments) {
 			row->super.sample = 0;
 		}
-		self->patterns[i] = row;
+		//self->patterns[i] = row;
 	}
 
 	if (ver == SIDMON_1170 || ver == SIDMON_11C6 || ver == SIDMON_1444) {
