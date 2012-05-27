@@ -15,81 +15,56 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->soundmon {
-  import neoart.flod.core.*;
 
-  public final class BPVoice {
-    internal var
- int index;
-      next         : BPVoice,
-      channel      : AmigaChannel,
- int enabled;
- int restart;
- int note;
- int period;
- int sample;
- int samplePtr;
- int sampleLen;
- int synth;
- int synthPtr;
- int arpeggio;
- int autoArpeggio;
- int autoSlide;
- int vibrato;
- int volume;
- int volumeDef;
- int adsrControl;
- int adsrPtr;
- int adsrCtr;
- int lfoControl;
- int lfoPtr;
- int lfoCtr;
- int egControl;
- int egPtr;
- int egCtr;
- int egValue;
- int fxControl;
- int fxCtr;
- int modControl;
- int modPtr;
- int modCtr;
+#include "BPVoice.h"
+#include "../flod_internal.h"
 
-     void BPVoice( int index) {
-      self->index = index;
-    }
+void BPVoice_defaults(struct BPVoice* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
 
-    internal function initialize():void {
-      channel      =  null,
-      enabled      =  0;
-      restart      =  0;
-      note         =  0;
-      period       =  0;
-      sample       =  0;
-      samplePtr    =  0;
-      sampleLen    =  2;
-      synth        =  0;
-      synthPtr     = -1;
-      arpeggio     =  0;
-      autoArpeggio =  0;
-      autoSlide    =  0;
-      vibrato      =  0;
-      volume       =  0;
-      volumeDef    =  0;
-      adsrControl  =  0;
-      adsrPtr      =  0;
-      adsrCtr      =  0;
-      lfoControl   =  0;
-      lfoPtr       =  0;
-      lfoCtr       =  0;
-      egControl    =  0;
-      egPtr        =  0;
-      egCtr        =  0;
-      egValue      =  0;
-      fxControl    =  0;
-      fxCtr        =  0;
-      modControl   =  0;
-      modPtr       =  0;
-      modCtr       =  0;
-    } 
-  }
+void BPVoice_ctor(struct BPVoice* self, int index) {
+	CLASS_CTOR_DEF(BPVoice);
+	// original constructor code goes here
+	self->index = index;
+}
+
+struct BPVoice* BPVoice_new(int index) {
+	CLASS_NEW_BODY(BPVoice, index);
+}
+
+
+void BPVoice_initialize(struct BPVoice* self) {
+	self->channel      =  null,
+	self->enabled      =  0;
+	self->restart      =  0;
+	self->note         =  0;
+	self->period       =  0;
+	self->sample       =  0;
+	self->samplePtr    =  0;
+	self->sampleLen    =  2;
+	self->synth        =  0;
+	self->synthPtr     = -1;
+	self->arpeggio     =  0;
+	self->autoArpeggio =  0;
+	self->autoSlide    =  0;
+	self->vibrato      =  0;
+	self->volume       =  0;
+	self->volumeDef    =  0;
+	self->adsrControl  =  0;
+	self->adsrPtr      =  0;
+	self->adsrCtr      =  0;
+	self->lfoControl   =  0;
+	self->lfoPtr       =  0;
+	self->lfoCtr       =  0;
+	self->egControl    =  0;
+	self->egPtr        =  0;
+	self->egCtr        =  0;
+	self->egValue      =  0;
+	self->fxControl    =  0;
+	self->fxCtr        =  0;
+	self->modControl   =  0;
+	self->modPtr       =  0;
+	self->modCtr       =  0;
 }
