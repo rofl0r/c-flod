@@ -471,7 +471,7 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 	totWaveforms = stream->readUnsignedInt(stream) - start;
 
 	self->super.amiga->memory->length = 32;
-	self->super.amiga->store(stream, totWaveforms, position + start);
+	Amiga_store(self->super.amiga, stream, totWaveforms, position + start);
 	totWaveforms >>= 5;
 
 	ByteArray_set_position(stream, position - 16);
@@ -546,7 +546,7 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 			sample = new S1Sample();
 			sample->waveform = 16 + i;
 			sample->super.length   = EMBEDDED[i];
-			sample->super.pointer  = self->super.amiga->store(stream, sample->super.length);
+			sample->super.pointer  = Amiga_store(self->super.amiga, stream, sample->super.length, -1);
 			sample->super.loop     = sample->super.loopPtr = 0;
 			sample->super.repeat   = 4;
 			sample->super.volume   = 64;
@@ -628,7 +628,7 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 				if (sample->super.length < (sample->super.loop + sample->super.repeat))
 				sample->super.length = sample->super.loop + sample->super.repeat;
 
-				sample->super.pointer = self->super.amiga->store(stream, sample->super.length, data + sample->pointer);
+				sample->super.pointer = Amiga_store(self->super.amiga, stream, sample->super.length, data + sample->super.pointer);
 				if (sample->super.repeat < 6 || sample->super.loop == 0) sample->super.loopPtr = 0;
 				else sample->super.loopPtr = sample->super.pointer + sample->super.loop;
 
