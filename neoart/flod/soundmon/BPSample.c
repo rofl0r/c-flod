@@ -15,35 +15,20 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->soundmon {
-  import neoart.flod.core.*;
 
-  public final class BPSample extends AmigaSample {
-    internal var
- int synth;
- int table;
- int adsrControl;
- int adsrTable;
- int adsrLen;
- int adsrSpeed;
- int lfoControl;
- int lfoTable;
- int lfoDepth;
- int lfoLen;
- int lfoDelay;
- int lfoSpeed;
- int egControl;
- int egTable;
- int egLen;
- int egDelay;
- int egSpeed;
- int fxControl;
- int fxDelay;
- int fxSpeed;
- int modControl;
- int modTable;
- int modLen;
- int modDelay;
- int modSpeed;
-  }
+#include "BPSample.h"
+#include "../flod_internal.h"
+
+void BPSample_defaults(struct BPSample* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+void BPSample_ctor(struct BPSample* self) {
+	CLASS_CTOR_DEF(BPSample);
+	// original constructor code goes here
+}
+
+struct BPSample* BPSample_new(void) {
+	CLASS_NEW_BODY(BPSample);
 }
