@@ -165,14 +165,14 @@ void RHPlayer_process(struct RHPlayer* self) {
 					voice->period = (value >> 10);
 					AmigaChannel_set_period(chan, voice->period);
 
-					chan->enabled = 1;
+					AmigaChannel_set_enabled(chan, 1);
 					voice->busy = loop = 0;
 				}
 			}
 		} else {
 			if (voice->tick == 1) {
 				if (self->super.super.variant != 4 || !(voice->flags & 4))
-				chan->enabled = 0;
+				AmigaChannel_set_enabled(chan, 0);
 			}
 
 			if (voice->flags & 1) {
