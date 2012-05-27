@@ -22,6 +22,7 @@ struct S1Sample {
 	int finetune;
 	int pitchFall;
 	int arpeggio[S1SAMPLE_MAX_ARPEGGIOS];
+	char sample_name[20];
 };
 
 void S1Sample_defaults(struct S1Sample* self);

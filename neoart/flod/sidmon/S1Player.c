@@ -283,8 +283,10 @@ void S1Player_process(struct S1Player* self) {
 			self->patternPos = 0;
 			self->patternEnd = 1;
 
-			if (++(self->trackPos) == self->trackLen)
-			self->trackPos = self->trackEnd = self->super.amiga->complete = 1;
+			if (++(self->trackPos) == self->trackLen) {
+				self->trackPos = self->trackEnd = 1;
+				CoreMixer_set_complete(&self->super.amiga->super, 1);
+			}
 		}
 	}
 
@@ -346,7 +348,8 @@ void S1Player_initialize(struct S1Player* self) {
 	struct AmigaStep *step = 0;
 	struct S1Voice *voice = &self->voices[0];
 	
-	super->initialize();
+	//super->initialize();
+	CorePlayer_initialize(&self->super.super);
 
 	self->super.super.speed      =  self->speedDef;
 	self->super.super.tick       =  self->speedDef;
@@ -360,7 +363,8 @@ void S1Player_initialize(struct S1Player* self) {
 	self->mix2Ctr = self->mix2Pos = 0;
 
 	while (voice) {
-		voice->initialize();
+		S1Voice_initialize(voice);
+		//voice->initialize();
 		chan = self->super.amiga->channels[voice->index];
 
 		voice->channel = chan;
@@ -417,8 +421,8 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 	if (!position) return;
 	ByteArray_set_position(stream, position);
 
-	id = stream->readMultiByte(stream, 32, ENCODING);
-	if (id != " SID-MON BY R->v.VLIET  (c) 1988 ") return;
+	stream->readMultiByte(stream, id, 32);
+	if (!is_str(id, " SID-MON BY R->v.VLIET  (c) 1988 ")) return;
 
 	ByteArray_set_position(stream, position - 44);
 	start = stream->readUnsignedInt(stream);
@@ -610,7 +614,8 @@ void S1Player_loader(struct S1Player* self, struct ByteArray *stream) {
 				sample->super.pointer  = stream->readUnsignedInt(stream);
 				sample->super.loop     = stream->readUnsignedInt(stream);
 				sample->super.length   = stream->readUnsignedInt(stream);
-				sample->super.name     = stream->readMultiByte(stream, 20, ENCODING);
+				stream->readMultiByte(stream, sample->sample_name, 20);
+				sample->super.name     = sample->sample_name;
 
 				if (sample->super.loop == 0      ||
 					sample->super.loop == 99999  ||
