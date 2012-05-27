@@ -13,6 +13,7 @@ currently done:
 - digital mugician
 - soundfx
 - sidmon 1,2
+- bp soundmon
 - pseudo barebone flashlib
 - libao and wave writer backends.
 
