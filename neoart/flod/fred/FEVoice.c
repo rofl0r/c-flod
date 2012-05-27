@@ -1,106 +1,57 @@
-/*
-  Flod 4.1
-  2012/04/30
-  Christian Corti
-  Neoart Costa Rica
+#include "FEVoice.h"
+#include "../flod_internal.h"
 
-  Last Update: Flod 4.0 - 2012/02/16
+void FEVoice_defaults(struct FEVoice* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
 
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+void FEVoice_ctor(struct FEVoice* self, int index, int bitFlag) {
+	CLASS_CTOR_DEF(FEVoice);
+	// original constructor code goes here
+	self->index = index;
+	self->bitFlag = bitFlag;
+}
 
-  This work is licensed under the Creative Commons Attribution-Noncommercial-Share Alike 3.0 Unported License.
-  To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
-  Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
-*/
-package neoart->flod->fred {
-  import neoart.flod.core.*;
+struct FEVoice* FEVoice_new(int index, int bitFlag) {
+	CLASS_NEW_BODY(FEVoice, index, bitFlag);
+}
 
-  public final class FEVoice {
-    internal var
- int index;
- int bitFlag;
-      next          : FEVoice,
-      channel       : AmigaChannel,
-      sample        : FESample,
- int trackPos;
- int patternPos;
- int tick;
- int busy;
- int synth;
- int note;
- int period;
- int volume;
- int envelopePos;
- int sustainTime;
- int arpeggioPos;
- int arpeggioSpeed;
- int portamento;
- int portaCounter;
- int portaDelay;
- int portaFlag;
- int portaLimit;
- int portaNote;
- int portaPeriod;
- int portaSpeed;
- int vibrato;
- int vibratoDelay;
- int vibratoDepth;
- int vibratoFlag;
- int vibratoSpeed;
- int pulseCounter;
- int pulseDelay;
- int pulseDir;
- int pulsePos;
- int pulseSpeed;
- int blendCounter;
- int blendDelay;
- int blendDir;
- int blendPos;
 
-     void FEVoice( int index; int bitFlag) {
-      self->index = index;
-      self->bitFlag = bitFlag;
-    }
-
-    internal function initialize():void {
-      channel       = null;
-      sample        = null;
-      trackPos      = 0;
-      patternPos    = 0;
-      tick          = 1;
-      busy          = 1;
-      note          = 0;
-      period        = 0;
-      volume        = 0;
-      envelopePos   = 0;
-      sustainTime   = 0;
-      arpeggioPos   = 0;
-      arpeggioSpeed = 0;
-      portamento    = 0;
-      portaCounter  = 0;
-      portaDelay    = 0;
-      portaFlag     = 0;
-      portaLimit    = 0;
-      portaNote     = 0;
-      portaPeriod   = 0;
-      portaSpeed    = 0;
-      vibrato       = 0;
-      vibratoDelay  = 0;
-      vibratoDepth  = 0;
-      vibratoFlag   = 0;
-      vibratoSpeed  = 0;
-      pulseCounter  = 0;
-      pulseDelay    = 0;
-      pulseDir      = 0;
-      pulsePos      = 0;
-      pulseSpeed    = 0;
-      blendCounter  = 0;
-      blendDelay    = 0;
-      blendDir      = 0;
-      blendPos      = 0;
-    }
-  }
+void FEVoice_initialize(struct FEVoice* self) {
+	self->channel       = null;
+	self->sample        = null;
+	self->trackPos      = 0;
+	self->patternPos    = 0;
+	self->tick          = 1;
+	self->busy          = 1;
+	self->note          = 0;
+	self->period        = 0;
+	self->volume        = 0;
+	self->envelopePos   = 0;
+	self->sustainTime   = 0;
+	self->arpeggioPos   = 0;
+	self->arpeggioSpeed = 0;
+	self->portamento    = 0;
+	self->portaCounter  = 0;
+	self->portaDelay    = 0;
+	self->portaFlag     = 0;
+	self->portaLimit    = 0;
+	self->portaNote     = 0;
+	self->portaPeriod   = 0;
+	self->portaSpeed    = 0;
+	self->vibrato       = 0;
+	self->vibratoDelay  = 0;
+	self->vibratoDepth  = 0;
+	self->vibratoFlag   = 0;
+	self->vibratoSpeed  = 0;
+	self->pulseCounter  = 0;
+	self->pulseDelay    = 0;
+	self->pulseDir      = 0;
+	self->pulsePos      = 0;
+	self->pulseSpeed    = 0;
+	self->blendCounter  = 0;
+	self->blendDelay    = 0;
+	self->blendDir      = 0;
+	self->blendPos      = 0;
 }
