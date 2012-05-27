@@ -94,8 +94,8 @@ void BPPlayer_process(struct BPPlayer* self) {
 		chan = voice->channel;
 		voice->period += voice->autoSlide;
 
-		if (voice->vibrato) chan->period = voice->period + (VIBRATO[self->vibratoPos] / voice->vibrato);
-		else chan->period = voice->period;
+		if (voice->vibrato) AmigaChannel_set_period(chan, voice->period + (VIBRATO[self->vibratoPos] / voice->vibrato));
+		else AmigaChannel_set_period(chan, voice->period);
 
 		chan->pointer = voice->samplePtr;
 		chan->length  = voice->sampleLen;
@@ -107,8 +107,9 @@ void BPPlayer_process(struct BPPlayer* self) {
 			note += ((voice->arpeggio & 0xf0) >> 4) + ((voice->autoArpeggio & 0xf0) >> 4);
 			else if (self->arpeggioCtr == 1)
 			note += (voice->arpeggio & 0x0f) + (voice->autoArpeggio & 0x0f);
-
-			chan->period = voice->period = PERIODS[int(note + 35)];
+			
+			voice->period = PERIODS[int(note + 35)];
+			AmigaChannel_set_period(chan, voice->period);
 			voice->restart = 0;
 		}
 
@@ -122,7 +123,7 @@ void BPPlayer_process(struct BPPlayer* self) {
 			if (--voice->adsrCtr == 0) {
 				voice->adsrCtr = sample->adsrSpeed;
 				data = (128 + memory[int(sample->adsrTable + voice->adsrPtr)]) >> 2;
-				chan->volume = (data * voice->volume) >> 6;
+				AmigaChannel_set_volume(chan, (data * voice->volume) >> 6);
 
 				if (++voice->adsrPtr == sample->adsrLen) {
 					voice->adsrPtr = 0;
@@ -136,7 +137,7 @@ void BPPlayer_process(struct BPPlayer* self) {
 				voice->lfoCtr = sample->lfoSpeed;
 				data = memory[int(sample->lfoTable + voice->lfoPtr)];
 				if (sample->lfoDepth) data = (data / sample->lfoDepth) >> 0;
-				chan->period = voice->period + data;
+				AmigaChannel_set_period(chan, voice->period + data);
 
 				if (++voice->lfoPtr == sample->lfoLen) {
 					voice->lfoPtr = 0;
@@ -305,7 +306,7 @@ void BPPlayer_process(struct BPPlayer* self) {
 					voice->volumeDef = 0;
 
 					if (self->super.super.version < BPSOUNDMON_V3 || !voice->synth)
-						chan->volume = voice->volume;
+						AmigaChannel_set_volume(chan, voice->volume);
 					break;
 				case 2:   //set speed
 					self->super.super.tick = self->super.super.speed = data;
@@ -381,7 +382,10 @@ void BPPlayer_process(struct BPPlayer* self) {
 
 		while (voice) {
 			chan = voice->channel;
-			if (voice->enabled) chan->enabled = voice->enabled = 0;
+			if (voice->enabled) {
+				voice->enabled = 0;
+				AmigaChannel_set_enabled(chan, 0);
+			}
 			if (voice->restart == 0) {
 				voice = voice->next;
 				continue;
@@ -404,7 +408,7 @@ void BPPlayer_process(struct BPPlayer* self) {
 			}
 			chan = voice->channel;
 
-			chan->period = voice->period;
+			AmigaChannel_set_period(chan, voice->period);
 			voice->restart = 0;
 			sample = self->samples[voice->sample];
 
@@ -436,9 +440,9 @@ void BPPlayer_process(struct BPPlayer* self) {
 						voice->volumeDef = 0;
 					}
 
-					chan->volume = (data * voice->volume) >> 6;
+					AmigaChannel_set_volume(chan, (data * voice->volume) >> 6);
 				} else {
-					chan->volume = voice->volumeDef ? sample->super.volume : voice->volume;
+					AmigaChannel_set_volume(chan, voice->volumeDef ? sample->super.volume : voice->volume);
 				}
 
 				if (voice->egControl || voice->fxControl || voice->modControl) {
@@ -455,7 +459,7 @@ void BPPlayer_process(struct BPPlayer* self) {
 					voice->sampleLen = 2;
 				} else {
 					chan->pointer = sample->super.pointer;
-					chan->volume  = voice->volumeDef ? sample->super.volume : voice->volume;
+					AmigaChannel_set_volume(chan, voice->volumeDef ? sample->super.volume : voice->volume);
 
 					if (sample->super.repeat != 2) {
 						voice->samplePtr = sample->super.loopPtr;
@@ -467,7 +471,8 @@ void BPPlayer_process(struct BPPlayer* self) {
 					}
 				}
 			}
-			chan->enabled = voice->enabled = 1;
+			voice->enabled = 1;
+			AmigaChannel_set_enabled(chan, 1);
 			voice = voice->next;
 		}
 	}
