@@ -227,7 +227,7 @@ void FEPlayer_process(struct FEPlayer* self) {
 
 						chan->length  = sample->length;
 						chan->period  = voice->period;
-						chan->volume  = 0;
+						AmigaChannel_set_volume(chan, 0);
 						AmigaChannel_set_enabled(chan, 1);
 
 						if (voice->portaFlag) {
@@ -345,7 +345,7 @@ void FEPlayer_process(struct FEPlayer* self) {
 		value *= voice->volume;
 		value >>= 8;
 		value >>= 1;
-		chan->volume = value;
+		AmigaChannel_set_volume(chan, value);
 
 		if (sample->type == 1) {
 			if (voice->pulseDelay) {
