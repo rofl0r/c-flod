@@ -15,6 +15,7 @@
 #include "../neoart/flod/sidmon/S1Player.h"
 #include "../neoart/flod/sidmon/S2Player.h"
 #include "../neoart/flod/soundfx/FXPlayer.h"
+#include "../neoart/flod/soundmon/BPPlayer.h"
 
 #include "keyboard.h"
 
@@ -57,6 +58,7 @@ enum PlayerType {
 	P_A_SM1,
 	P_A_SM2,
 	P_A_FX,
+	P_A_BP,
 	P_A_PT,
 	P_A_ST,
 	P_MAX
@@ -78,6 +80,7 @@ static const char player_hardware[] = {
 	[P_A_SM1] = HT_AMIGA,
 	[P_A_SM2] = HT_AMIGA,
 	[P_A_FX] = HT_AMIGA,
+	[P_A_BP] = HT_AMIGA,
 };
 
 static const char *player_name[] = {
@@ -89,7 +92,8 @@ static const char *player_name[] = {
 	[P_A_DM]  = "Digital Mugician",
 	[P_A_SM1] = "Sidmon 1",
 	[P_A_SM2] = "Sidmon 2",
-	[P_A_FX] = "SoundFX",
+	[P_A_FX]  = "SoundFX",
+	[P_A_BP]  = "BP Soundmon",
 };
 
 typedef void (*player_ctor_func) (struct CorePlayer*, struct CoreMixer*);
@@ -104,7 +108,8 @@ static const player_ctor_func player_ctors[] = {
 	[P_S_FT2] = (player_ctor_func) F2Player_ctor,
 	[P_A_SM1] = (player_ctor_func) S1Player_ctor,
 	[P_A_SM2] = (player_ctor_func) S2Player_ctor,
-	[P_A_FX] = (player_ctor_func) FXPlayer_ctor,
+	[P_A_FX]  = (player_ctor_func) FXPlayer_ctor,
+	[P_A_BP]  = (player_ctor_func) BPPlayer_ctor,
 };
 
 static const hardware_ctor_func hardware_ctors[] = {
@@ -154,6 +159,7 @@ static union {
 	struct S1Player s1;
 	struct S2Player s2;
 	struct FXPlayer fx;
+	struct BPPlayer bp;
 } player;
 
 static union {
