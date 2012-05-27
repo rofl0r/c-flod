@@ -58,7 +58,7 @@ void FEPlayer_ctor(struct FEPlayer* self, struct Amiga* amiga) {
 		if(i) self->voices[i].next = &self->voices[i - 1];
 		else break;
 		i--;
-	}	
+	}
 	
 	//vtable
 	self->super.super.loader = FEPlayer_loader;
@@ -90,16 +90,16 @@ void FEPlayer_process(struct FEPlayer* self) {
 		loop = 0;
 
 		do {
-			patterns->position = voice->patternPos;
+			self->patterns->position = voice->patternPos;
 			sample = voice->sample;
-			sampFlag = 0;
+			self->sampFlag = 0;
 
 			if (!voice->busy) {
 				voice->busy = 1;
 
 				if (sample->loopPtr == 0) {
-					chan->pointer = amiga->loopPtr;
-					chan->length  = amiga->loopLen;
+					chan->pointer = self->super.amiga->loopPtr;
+					chan->length  = self->super.amiga->loopLen;
 				} else if (sample->loopPtr > 0) {
 					chan->pointer = (sample->type) ? voice->synth : sample->pointer + sample->loopPtr;
 					chan->length  = sample->length - sample->loopPtr;
@@ -110,50 +110,50 @@ void FEPlayer_process(struct FEPlayer* self) {
 				loop = 2;
 
 				while (loop > 1) {
-					value = patterns->readByte();
+					value = self->patterns->readByte();
 
 					if (value < 0) {
 						switch (value) {
 							case -125:
-								voice->sample = sample = samples[patterns->readUnsignedByte()];
-								sampFlag = 1;
-								voice->patternPos = patterns->position;
+								voice->sample = sample = self->samples[self->patterns->readUnsignedByte()];
+								self->sampFlag = 1;
+								voice->patternPos = self->patterns->position;
 								break;
 							case -126:
-								speed = patterns->readUnsignedByte();
-								voice->patternPos = patterns->position;
+								self->super.super.speed = self->patterns->readUnsignedByte();
+								voice->patternPos = self->patterns->position;
 								break;
 							case -127:
 								value = (sample) ? sample->relative : 428;
-								voice->portaSpeed = patterns->readUnsignedByte() * speed;
-								voice->portaNote  = patterns->readUnsignedByte();
+								voice->portaSpeed = self->patterns->readUnsignedByte() * self->super.super.speed;
+								voice->portaNote  = self->patterns->readUnsignedByte();
 								voice->portaLimit = (PERIODS[voice->portaNote] * value) >> 10;
 								voice->portamento = 0;
-								voice->portaDelay = patterns->readUnsignedByte() * speed;
+								voice->portaDelay = self->patterns->readUnsignedByte() * self->super.super.speed;
 								voice->portaFlag  = 1;
-								voice->patternPos = patterns->position;
+								voice->patternPos = self->patterns->position;
 								break;
 							case -124:
 								chan->enabled = 0;
-								voice->tick = speed;
+								voice->tick = self->super.super.speed;
 								voice->busy = 1;
-								voice->patternPos = patterns->position;
+								voice->patternPos = self->patterns->position;
 								loop = 0;
 								break;
 							case -128:
 								voice->trackPos++;
 
 								while (1) {
-									value = song->tracks[voice->index][voice->trackPos];
+									value = self->song->tracks[voice->index][voice->trackPos];
 
 									if (value == 65535) {
-										amiga->complete = 1;
+										self->super.amiga->complete = 1;
 									} else if (value > 32767) {
 										voice->trackPos = (value ^ 32768) >> 1;
 
-										if (!loopSong) {
-											complete &= ~(voice->bitFlag);
-											if (!complete) amiga->complete = 1;
+										if (!self->super.super.loopSong) {
+											self->complete &= ~(voice->bitFlag);
+											if (!self->complete) self->super.amiga->complete = 1;
 										}
 									} else {
 										voice->patternPos = value;
@@ -164,14 +164,14 @@ void FEPlayer_process(struct FEPlayer* self) {
 								}
 								break;
 							default:
-								voice->tick = speed * -value;
-								voice->patternPos = patterns->position;
+								voice->tick =self->super.super.speed * -value;
+								voice->patternPos = self->patterns->position;
 								loop = 0;
 								break;
 						}
 					} else {
 						loop = 0;
-						voice->patternPos = patterns->position;
+						voice->patternPos = self->patterns->position;
 
 						voice->note = value;
 						voice->arpeggioPos =  0;
@@ -184,7 +184,7 @@ void FEPlayer_process(struct FEPlayer* self) {
 						voice->vibratoDepth  = sample->vibratoDepth;
 
 						if (sample->type == 1) {
-							if (sampFlag || (sample->synchro & 2)) {
+							if (self->sampFlag || (sample->synchro & 2)) {
 								voice->pulseCounter = sample->pulseCounter;
 								voice->pulseDelay = sample->pulseDelay;
 								voice->pulseDir = 0;
@@ -193,9 +193,9 @@ void FEPlayer_process(struct FEPlayer* self) {
 
 								i = voice->synth;
 								len = i + sample->pulsePosL;
-								for (; i < len; ++i) amiga->memory[i] = sample->pulseRateNeg;
+								for (; i < len; ++i) self->super.amiga->memory[i] = sample->pulseRateNeg;
 								len += (sample->length - sample->pulsePosL);
-								for (; i < len; ++i) amiga->memory[i] = sample->pulseRatePos;
+								for (; i < len; ++i) self->super.amiga->memory[i] = sample->pulseRatePos;
 							}
 
 							chan->pointer = voice->synth;
@@ -209,7 +209,7 @@ void FEPlayer_process(struct FEPlayer* self) {
 							i = sample->pointer;
 							j = voice->synth;
 							len = i + 31;
-							for (; i < len; ++i) amiga->memory[j++] = amiga->memory[i];
+							for (; i < len; ++i) self->super.amiga->memory[j++] = self->super.amiga->memory[i];
 
 							chan->pointer = voice->synth;
 							
@@ -217,7 +217,7 @@ void FEPlayer_process(struct FEPlayer* self) {
 							chan->pointer = sample->pointer;
 						}
 
-						voice->tick = speed;
+						voice->tick = self->super.super.speed;
 						voice->busy = 0;
 						voice->period = (PERIODS[voice->note] * sample->relative) >> 10;
 
@@ -240,7 +240,7 @@ void FEPlayer_process(struct FEPlayer* self) {
 					}
 				}
 			} else if (voice->tick == 1) {
-				value = (patterns[voice->patternPos] - 160) & 255;
+				value = (self->patterns[voice->patternPos] - 160) & 255;
 				if (value > 127) chan->enabled = 0;
 			}
 		} while (loop > 0);
@@ -402,10 +402,10 @@ void FEPlayer_process(struct FEPlayer* self) {
 						pos = voice->synth + voice->pulsePos;
 
 						if (loop == 1) {
-							amiga->memory[pos] = sample->pulseRatePos;
+							self->super.amiga->memory[pos] = sample->pulseRatePos;
 							voice->pulsePos--;
 						} else {
-							amiga->memory[pos] = sample->pulseRateNeg;
+							self->super.amiga->memory[pos] = sample->pulseRateNeg;
 							voice->pulsePos++;
 						}
 					}
@@ -438,8 +438,8 @@ void FEPlayer_process(struct FEPlayer* self) {
 					pos = len + 1;
 
 					for (; i < len; ++i) {
-						value = (voice->blendPos * amiga->memory[pos++]) >> sample->blendRate;
-						amiga->memory[pos++] = value + amiga->memory[i];
+						value = (voice->blendPos * self->super.amiga->memory[pos++]) >> sample->blendRate;
+						self->super.amiga->memory[pos++] = value + self->super.amiga->memory[i];
 					}
 				}
 			}
@@ -455,21 +455,21 @@ void FEPlayer_initialize(struct FEPlayer* self) {
 	int len = 0; 
 	struct FEVoice *voice = &self->voices[3];
 	
-	super->initialize();
+	self->super->initialize();
 
-	song  = songs[playSong];
-	speed = song->speed;
+	self->song  = self->songs[self->super.super.playSong];
+	self->super.super.speed = self->song->speed;
 
-	complete = 15;
+	self->complete = 15;
 
 	while (voice) {
 		voice->initialize();
-		voice->channel = amiga->channels[voice->index];
-		voice->patternPos = song->tracks[voice->index][0];
+		voice->channel = self->super.amiga->channels[voice->index];
+		voice->patternPos = self->song->tracks[voice->index][0];
 
 		i = voice->synth;
 		len = i + 64;
-		for (; i < len; ++i) amiga->memory[i] = 0;
+		for (; i < len; ++i) self->super.amiga->memory[i] = 0;
 
 		voice = voice->next;
 	}
@@ -513,13 +513,13 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 
 			if (value == 0x47fa) {                                                //lea $x,a3
 				basePtr = stream->position + stream->readShort();
-				version = 1;
+				self->super.super.version = 1;
 				break;
 			}
 		}
 	}
 
-	if (!version) return;
+	if (!self->super.super.version) return;
 
 	stream->position = dataPtr + 0x8a2;
 	pos = stream->readUnsignedInt();
@@ -576,41 +576,41 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 		sample->arpeggioLimit = stream->readUnsignedByte();
 
 		stream->position += 12;
-		samples->push(sample);
+		self->samples->push(sample);
 		if (!stream->bytesAvailable) break;
 	}
 
-	samples->fixed = true;
+	self->samples->fixed = true;
 
 	if (pos != 0x7fffffff) {
-		amiga->store(stream, stream->length - pos);
-		len = samples->length;
+		self->super.amiga->store(stream, stream->length - pos);
+		len = self->samples->length;
 
 		for (i = 0; i < len; ++i) {
-			sample = samples[i];
+			sample = self->samples[i];
 			if (sample->pointer) sample->pointer -= (basePtr + pos);
 		}
 	}
 
-	pos = amiga->memory->length;
-	amiga->memory->length += 256;
-	amiga->loopLen = 100;
+	pos = self->super.amiga->memory->length;
+	self->super.amiga->memory->length += 256;
+	self->super.amiga->loopLen = 100;
 
 	for (i = 0; i < 4; ++i) {
-		voices[i].synth = pos;
+		self->voices[i].synth = pos;
 		pos += 64;
 	}
 
-	patterns = new ByteArray();
+	self->patterns = new ByteArray();
 	stream->position = dataPtr + 0x8a2;
 	len = stream->readUnsignedInt();
 	pos = stream->readUnsignedInt();
 	stream->position = basePtr + pos;
-	stream->readBytes(patterns, 0, (len - pos));
+	stream->readBytes(self->patterns, 0, (len - pos));
 	pos += basePtr;
 
 	stream->position = dataPtr + 0x895;
-	lastSong = len = stream->readUnsignedByte();
+	self->super.super.lastSong = len = stream->readUnsignedByte();
 
 	songs = new Vector.<FESong>(++len, true);
 	basePtr = dataPtr + 0xb0e;
@@ -641,7 +641,7 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 
 		stream->position = dataPtr + 0x897 + i;
 		song->speed = stream->readUnsignedByte();
-		songs[i] = song;
+		self->songs[i] = song;
 	}
 
 	stream->clear();
