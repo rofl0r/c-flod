@@ -12,6 +12,7 @@
 #include "../neoart/flod/whittaker/DWPlayer.h"
 #include "../neoart/flod/futurecomposer/FCPlayer.h"
 #include "../neoart/flod/digitalmugician/DMPlayer.h"
+#include "../neoart/flod/sidmon/S1Player.h"
 #include "../neoart/flod/sidmon/S2Player.h"
 
 #include "keyboard.h"
@@ -52,6 +53,7 @@ enum PlayerType {
 	P_A_DW,
 	P_A_FC,
 	P_A_DM,
+	P_A_SM1,
 	P_A_SM2,
 	P_A_PT,
 	P_A_ST,
@@ -71,6 +73,7 @@ static const char player_hardware[] = {
 	[P_A_FC]  = HT_AMIGA,
 	[P_A_ST]  = HT_AMIGA,
 	[P_A_DM]  = HT_AMIGA,
+	[P_A_SM1] = HT_AMIGA,
 	[P_A_SM2] = HT_AMIGA,
 };
 
@@ -81,6 +84,7 @@ static const char *player_name[] = {
 	[P_A_FC]  = "Future Composer",
 	[P_A_ST]  = "SoundTracker",
 	[P_A_DM]  = "Digital Mugician",
+	[P_A_SM1] = "Sidmon 1",
 	[P_A_SM2] = "Sidmon 2",
 };
 
@@ -94,6 +98,7 @@ static const player_ctor_func player_ctors[] = {
 	[P_A_DW]  = (player_ctor_func) DWPlayer_ctor,
 	[P_A_DM]  = (player_ctor_func) DMPlayer_ctor,
 	[P_S_FT2] = (player_ctor_func) F2Player_ctor,
+	[P_A_SM1] = (player_ctor_func) S1Player_ctor,
 	[P_A_SM2] = (player_ctor_func) S2Player_ctor,
 };
 
@@ -141,6 +146,7 @@ static union {
 	struct FCPlayer fc;
 	struct DWPlayer dw;
 	struct DMPlayer dm;
+	struct S1Player s1;
 	struct S2Player s2;
 } player;
 
