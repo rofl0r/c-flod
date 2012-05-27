@@ -193,9 +193,13 @@ void FEPlayer_process(struct FEPlayer* self) {
 
 								i = voice->synth;
 								len = i + sample->pulsePosL;
+								assert_op(len, <=, AMIGA_MAX_MEMORY);
 								for (; i < len; ++i) self->super.amiga->memory[i] = sample->pulseRateNeg;
 								len += (sample->length - sample->pulsePosL);
+								assert_op(len, <=, AMIGA_MAX_MEMORY);
 								for (; i < len; ++i) self->super.amiga->memory[i] = sample->pulseRatePos;
+								if(len > self->super.amiga->vector_count_memory)
+									self->super.amiga->vector_count_memory = len;
 							}
 
 							chan->pointer = voice->synth;
@@ -209,8 +213,14 @@ void FEPlayer_process(struct FEPlayer* self) {
 							i = sample->pointer;
 							j = voice->synth;
 							len = i + 31;
+							assert_op(len, <=, AMIGA_MAX_MEMORY);
+							assert_op(j + 31, <=, AMIGA_MAX_MEMORY);
 							for (; i < len; ++i) self->super.amiga->memory[j++] = self->super.amiga->memory[i];
-
+							if(len > self->super.amiga->vector_count_memory)
+								self->super.amiga->vector_count_memory = len;
+							if(j > self->super.amiga->vector_count_memory)
+								self->super.amiga->vector_count_memory = j;
+								
 							chan->pointer = voice->synth;
 							
 						} else {
@@ -400,6 +410,9 @@ void FEPlayer_process(struct FEPlayer* self) {
 						}
 
 						pos = voice->synth + voice->pulsePos;
+						assert_op(pos, <, AMIGA_MAX_MEMORY);
+						if(pos >= self->super.amiga->vector_count_memory)
+							self->super.amiga->vector_count_memory = pos + 1;
 
 						if (loop == 1) {
 							self->super.amiga->memory[pos] = sample->pulseRatePos;
@@ -436,11 +449,20 @@ void FEPlayer_process(struct FEPlayer* self) {
 					j = voice->synth;
 					len = i + 31;
 					pos = len + 1;
-
+					
+					assert_op(len, <=, AMIGA_MAX_MEMORY);
+					if(len > self->super.amiga->vector_count_memory)
+						self->super.amiga->vector_count_memory = len;
+					unsigned posmax = pos + ((len - i) * 2); // FIXME check if thats correct
+					assert_op(posmax, <=, AMIGA_MAX_MEMORY);
+					
 					for (; i < len; ++i) {
 						value = (voice->blendPos * self->super.amiga->memory[pos++]) >> sample->blendRate;
 						self->super.amiga->memory[pos++] = value + self->super.amiga->memory[i];
 					}
+					assert_op(pos, <=, AMIGA_MAX_MEMORY);
+					if(pos > self->super.amiga->vector_count_memory)
+						self->super.amiga->vector_count_memory = pos;
 				}
 			}
 		}
@@ -469,7 +491,10 @@ void FEPlayer_initialize(struct FEPlayer* self) {
 
 		i = voice->synth;
 		len = i + 64;
+		assert_op(len, <=, AMIGA_MAX_MEMORY);
 		for (; i < len; ++i) self->super.amiga->memory[i] = 0;
+		if(len > self->super.amiga->vector_count_memory)
+			self->super.amiga->vector_count_memory = len;
 
 		voice = voice->next;
 	}
@@ -592,8 +617,9 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 		}
 	}
 
-	pos = self->super.amiga->memory->length;
-	self->super.amiga->memory->length += 256;
+	pos = self->super.amiga->vector_count_memory; //self->super.amiga->memory->length;
+	Amiga_memory_set_length(self->super.amiga, self->super.amiga->vector_count_memory + 256);
+	//self->super.amiga->memory->length += 256;
 	self->super.amiga->loopLen = 100;
 
 	for (i = 0; i < 4; ++i) {
