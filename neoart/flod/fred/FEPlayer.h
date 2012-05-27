@@ -9,6 +9,8 @@
 
 #define FEPLAYER_MAX_SONGS 4
 #define FEPLAYER_MAX_SAMPLES 4
+#define FEPLAYER_PATTERNS_MEMORY_MAX 256
+
 //fixed
 #define FEPLAYER_MAX_VOICES 4
 
@@ -20,6 +22,8 @@ struct FEPlayer {
 	struct FESample samples[FEPLAYER_MAX_SAMPLES];
 	//patterns : ByteArray,
 	struct ByteArray *patterns;
+	struct ByteArray patterns_buf;
+	char patterns_memory[FEPLAYER_PATTERNS_MEMORY_MAX];
 	struct FESong *song;
 	//voices   : Vector.<FEVoice>,
 	struct FEVoice voices[FEPLAYER_MAX_VOICES];

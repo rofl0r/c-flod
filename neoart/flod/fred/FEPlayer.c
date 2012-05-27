@@ -627,12 +627,21 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 		pos += 64;
 	}
 
-	self->patterns = new ByteArray();
+	//self->patterns = new ByteArray();
+	self->patterns = &self->patterns_buf;
+	ByteArray_ctor(self->patterns);
+	//FIXME endian ?
+	ByteArray_open_mem(self->patterns, self->patterns_memory, FEPLAYER_PATTERNS_MEMORY_MAX);
+	
 	ByteArray_set_position(stream, dataPtr + 0x8a2);
 	len = stream->readUnsignedInt(stream);
 	pos = stream->readUnsignedInt(stream);
 	ByteArray_set_position(stream, basePtr + pos);
+	
+	assert_op((len - pos), <=, FEPLAYER_PATTERNS_MEMORY_MAX);
+	
 	stream->readBytes(self->patterns, 0, (len - pos));
+	
 	pos += basePtr;
 
 	ByteArray_set_position(stream, dataPtr + 0x895);
