@@ -50,7 +50,7 @@ void FXPlayer_ctor(struct FXPlayer* self, struct Amiga *amiga) {
 	
 	unsigned i = 0;
 	for(; i < FXPLAYER_MAX_VOICES; i++) {
-		FXVoice_ctor(&self->voices[i]);
+		FXVoice_ctor(&self->voices[i], i);
 		if(i) self->voices[i - 1].next = &self->voices[i];
 	}
 
@@ -80,7 +80,8 @@ void FXPlayer_set_force(struct FXPlayer* self, int value) {
 
 //override
 void FXPlayer_set_ntsc(struct FXPlayer* self, int value) {
-	self->super->ntsc = value;
+	AmigaPlayer_set_ntsc(&self->super, value);
+	//self->super->ntsc = value;
 
 	// FIXME : check whether this is supposed to do float math
 	self->super.amiga->super.samplesTick = (self->super.super.tempo / 122) * (value ? 7.5152005551 : 7.58437970472);
@@ -104,9 +105,9 @@ void FXPlayer_process(struct FXPlayer* self) {
 			voice->enabled = 0;
 			
 			unsigned idxx = value + voice->index;
-			assert_op(idx, <, FXPLAYER_MAX_PATTERNS);
+			assert_op(idxx, <, FXPLAYER_MAX_PATTERNS);
 
-			row = self->patterns[idxx];
+			row = &self->patterns[idxx];
 			voice->period = row->note;
 			voice->effect = row->effect;
 			voice->param  = row->param;
@@ -119,7 +120,7 @@ void FXPlayer_process(struct FXPlayer* self) {
 
 			if (row->sample) {
 				assert_op(row->sample, <, FXPLAYER_MAX_SAMPLES);
-				sample = voice->sample = self->samples[row->sample];
+				sample = voice->sample = &self->samples[row->sample];
 				voice->volume = sample->volume;
 
 				if (voice->effect == 5)
@@ -260,7 +261,7 @@ void FXPlayer_process(struct FXPlayer* self) {
 						index = 0;
 
 						while (true) {
-							assert_op(index, <, ARRAY_SIZE(periods));
+							assert_op(index, <, ARRAY_SIZE(PERIODS));
 							period = PERIODS[index];
 							if (period == voice->stepPeriod) break;
 							if (period < 0) {
@@ -313,7 +314,7 @@ void FXPlayer_initialize(struct FXPlayer* self) {
 	
 	CorePlayer_initialize(&self->super.super);
 	//self->super->initialize();
-	FXPlayer_set_ntsc(self->super.standard);
+	FXPlayer_set_ntsc(self, self->super.standard);
 	//self->ntsc = standard;
 
 	self->super.super.speed      = 6;
@@ -323,7 +324,7 @@ void FXPlayer_initialize(struct FXPlayer* self) {
 
 	while (voice) {
 		FXVoice_initialize(voice);
-		voice->channel = self->super.amiga->channels[voice->index];
+		voice->channel = &self->super.amiga->channels[voice->index];
 		voice->sample  = &self->samples[0];
 		voice = voice->next;
 	}
