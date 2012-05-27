@@ -33,7 +33,7 @@ struct S1Voice {
 
 void S1Voice_defaults(struct S1Voice* self);
 void S1Voice_ctor(struct S1Voice* self, int index);
-struct S1Voice* S1Voice_new(void, int index);
+struct S1Voice* S1Voice_new(int index);
 
 void S1Voice_initialize(struct S1Voice* self);
 

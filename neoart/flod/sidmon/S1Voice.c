@@ -30,7 +30,7 @@ void S1Voice_ctor(struct S1Voice* self, int index) {
 	self->index = index;
 }
 
-struct S1Voice* S1Voice_new(void, int index) {
+struct S1Voice* S1Voice_new(int index) {
 	CLASS_NEW_BODY(S1Voice, index);
 }
 
