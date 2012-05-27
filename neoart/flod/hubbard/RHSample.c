@@ -15,16 +15,20 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->hubbard {
-  import neoart.flod.core.*;
 
-  public final class RHSample extends AmigaSample {
-    internal var
- int relative;
- int divider;
- int vibrato;
- int hiPos;
- int loPos;
-      wave     : Vector.<int>;
-  }
+#include "RHSample.h"
+#include "../flod_internal.h"
+
+void RHSample_defaults(struct RHSample* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+void RHSample_ctor(struct RHSample* self) {
+	CLASS_CTOR_DEF(RHSample);
+	// original constructor code goes here
+}
+
+struct RHSample* RHSample_new(void) {
+	CLASS_NEW_BODY(RHSample);
 }
