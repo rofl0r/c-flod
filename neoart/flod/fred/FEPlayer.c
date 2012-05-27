@@ -531,7 +531,7 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 		value = stream->readUnsignedInt();
 
 		if (value) {
-			if ((value < ByteArray_get_position(stream)) || (value >= stream->length)) {
+			if ((value < ByteArray_get_position(stream)) || (value >= ByteArray_get_length(stream))) {
 				ByteArray_set_position_rel(stream, -4);
 				break;
 			}
@@ -583,7 +583,7 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 	self->samples->fixed = true;
 
 	if (pos != 0x7fffffff) {
-		self->super.amiga->store(stream, stream->length - pos);
+		self->super.amiga->store(stream, ByteArray_get_length(stream) - pos);
 		len = self->samples->length;
 
 		for (i = 0; i < len; ++i) {
