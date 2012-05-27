@@ -117,11 +117,11 @@ void FEPlayer_process(struct FEPlayer* self) {
 							case -125:
 								voice->sample = sample = self->samples[self->patterns->readUnsignedByte()];
 								self->sampFlag = 1;
-								voice->patternPos = self->patterns->position;
+								voice->patternPos = ByteArray_get_position(self->patterns);
 								break;
 							case -126:
 								self->super.super.speed = self->patterns->readUnsignedByte();
-								voice->patternPos = self->patterns->position;
+								voice->patternPos = ByteArray_get_position(self->patterns);
 								break;
 							case -127:
 								value = (sample) ? sample->relative : 428;
@@ -131,13 +131,13 @@ void FEPlayer_process(struct FEPlayer* self) {
 								voice->portamento = 0;
 								voice->portaDelay = self->patterns->readUnsignedByte() * self->super.super.speed;
 								voice->portaFlag  = 1;
-								voice->patternPos = self->patterns->position;
+								voice->patternPos = ByteArray_get_position(self->patterns);
 								break;
 							case -124:
 								chan->enabled = 0;
 								voice->tick = self->super.super.speed;
 								voice->busy = 1;
-								voice->patternPos = self->patterns->position;
+								voice->patternPos = ByteArray_get_position(self->patterns);
 								loop = 0;
 								break;
 							case -128:
@@ -165,13 +165,13 @@ void FEPlayer_process(struct FEPlayer* self) {
 								break;
 							default:
 								voice->tick =self->super.super.speed * -value;
-								voice->patternPos = self->patterns->position;
+								voice->patternPos = ByteArray_get_position(self->patterns);
 								loop = 0;
 								break;
 						}
 					} else {
 						loop = 0;
-						voice->patternPos = self->patterns->position;
+						voice->patternPos = ByteArray_get_position(self->patterns);
 
 						voice->note = value;
 						voice->arpeggioPos =  0;
@@ -490,13 +490,13 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 	int tracksLen = 0;
 	int value = 0;
 
-	while (stream->position < 16) {
+	while (ByteArray_get_position(stream) < 16) {
 		value = stream->readUnsignedShort();
 		stream->position += 2;
 		if (value != 0x4efa) return;                                            //jmp
 	}
 
-	while (stream->position < 1024) {
+	while (ByteArray_get_position(stream) < 1024) {
 		value = stream->readUnsignedShort();
 
 		if (value == 0x123a) {                                                  //move->b $x,d1
@@ -505,14 +505,14 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 
 			if (value == 0xb001) {                                                //cmp->b d1,d0
 				stream->position -= 4;
-				dataPtr = (stream->position + stream->readUnsignedShort()) - 0x895;
+				dataPtr = (ByteArray_get_position(stream) + stream->readUnsignedShort()) - 0x895;
 			}
 		} else if (value == 0x214a) {                                           //move->l a2,(a0)
 			stream->position += 2;
 			value = stream->readUnsignedShort();
 
 			if (value == 0x47fa) {                                                //lea $x,a3
-				basePtr = stream->position + stream->readShort();
+				basePtr = ByteArray_get_position(stream) + stream->readShort();
 				self->super.super.version = 1;
 				break;
 			}
@@ -527,11 +527,11 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 	samples = new Vector.<FESample>();
 	pos = 0x7fffffff;
 
-	while (pos > stream->position) {
+	while (pos > ByteArray_get_position(stream)) {
 		value = stream->readUnsignedInt();
 
 		if (value) {
-			if ((value < stream->position) || (value >= stream->length)) {
+			if ((value < ByteArray_get_position(stream)) || (value >= stream->length)) {
 				stream->position -= 4;
 				break;
 			}
