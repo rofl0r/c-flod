@@ -82,7 +82,8 @@ void FXPlayer_set_force(struct FXPlayer* self, int value) {
 void FXPlayer_set_ntsc(struct FXPlayer* self, int value) {
 	self->super->ntsc = value;
 
-	self->super.amiga->super.samplesTick = int((self->super.super.tempo / 122) * (value ? 7.5152005551 : 7.58437970472));
+	// FIXME : check whether this is supposed to do float math
+	self->super.amiga->super.samplesTick = (self->super.super.tempo / 122) * (value ? 7.5152005551 : 7.58437970472);
 }
 
 //override
@@ -101,8 +102,11 @@ void FXPlayer_process(struct FXPlayer* self) {
 		while (voice) {
 			chan = voice->channel;
 			voice->enabled = 0;
+			
+			unsigned idxx = value + voice->index;
+			assert_op(idx, <, FXPLAYER_MAX_PATTERNS);
 
-			row = self->patterns[int(value + voice->index)];
+			row = self->patterns[idxx];
 			voice->period = row->note;
 			voice->effect = row->effect;
 			voice->param  = row->param;
@@ -114,6 +118,7 @@ void FXPlayer_process(struct FXPlayer* self) {
 			}
 
 			if (row->sample) {
+				assert_op(row->sample, <, FXPLAYER_MAX_SAMPLES);
 				sample = voice->sample = self->samples[row->sample];
 				voice->volume = sample->volume;
 
@@ -230,8 +235,9 @@ void FXPlayer_process(struct FXPlayer* self) {
 						if (value == 1) value = voice->param & 0x0f;
 						else value = voice->param >> 4;
 
-						while (voice->last != PERIODS[index]) index++;
-						AmigaChannel_set_period(chan, PERIODS[int(index + value)]);
+						while (index < ARRAY_SIZE(PERIODS) && voice->last != PERIODS[index]) index++;
+						assert_op(index + value, <, ARRAY_SIZE(PERIODS));
+						AmigaChannel_set_period(chan, PERIODS[index + value]);
 						break;
 					case 2:   //pitchbend
 						value = voice->param >> 4;
@@ -254,6 +260,7 @@ void FXPlayer_process(struct FXPlayer* self) {
 						index = 0;
 
 						while (true) {
+							assert_op(index, <, ARRAY_SIZE(periods));
 							period = PERIODS[index];
 							if (period == voice->stepPeriod) break;
 							if (period < 0) {
@@ -268,6 +275,7 @@ void FXPlayer_process(struct FXPlayer* self) {
 							if (value > -1) period = -period;
 							index += period;
 							if (index < 0) index = 0;
+							assert_op(index, <, ARRAY_SIZE(PERIODS));
 							voice->stepWanted = PERIODS[index];
 						} else
 							voice->stepWanted = voice->period;
@@ -354,7 +362,9 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 		self->super.super.version = SOUNDFX_10;
 	}
 
-	self->samples = new Vector.<AmigaSample>(len, true);
+	unsigned samples_count = len;
+	assert_op(len, <=, FXPLAYER_MAX_SAMPLES);
+	//self->samples = new Vector.<AmigaSample>(len, true);
 	self->super.super.tempo = stream->readUnsignedShort(stream);
 	ByteArray_set_position(stream, 0);
 
@@ -362,22 +372,27 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 		value = stream->readUnsignedInt(stream);
 
 		if (value) {
-			sample = new AmigaSample();
+			//sample = new AmigaSample();
+			sample = &self->samples[i];
+			AmigaSample_ctor(sample);
+			
 			sample->pointer = size;
 			size += value;
-			self->samples[i] = sample;
-		} else
-			self->samples[i] = null;
+			//self->samples[i] = sample;
+		} else {
+			//self->samples[i] = null;
+		}
 	}
 	ByteArray_set_position_rel(stream, +20);
 
 	for (i = 1; i < len; ++i) {
 		sample = &self->samples[i];
+		/*
 		if (sample == null) {
 			ByteArray_set_position_rel(stream, +30);
 			continue;
 		}
-		
+		*/
 		stream->readMultiByte(stream, self->sample_names[i], 22);
 		sample->name   = self->sample_names[i];
 		sample->length = stream->readUnsignedShort(stream) << 1;
@@ -399,25 +414,29 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 	if (offset) offset += 4;
 	ByteArray_set_position(stream, 660 + offset);
 	higher += 256;
-	patterns = new Vector.<AmigaRow>(higher, true);
+	assert_op(higher, <=, FXPLAYER_MAX_PATTERNS);
+	//patterns = new Vector.<AmigaRow>(higher, true);
 
-	//FIXME
-	len = self->samples->length;
+	//len = self->samples->length;
+	len = samples_count;
 
 	for (i = 0; i < higher; ++i) {
-		row = new AmigaRow();
+		//row = new AmigaRow();
+		row = &self->patterns[i];
+		AmigaRow_ctor(row);
+		
 		row->note   = stream->readShort(stream);
 		value      = stream->readUnsignedByte(stream);
 		row->param  = stream->readUnsignedByte(stream);
 		row->effect = value & 0x0f;
 		row->sample = value >> 4;
 
-		self->patterns[i] = row;
+		//self->patterns[i] = row;
 
 		if (self->super.super.version == SOUNDFX_20) {
 			if (row->note & 0x1000) {
-			row->sample += 16;
-			if (row->note > 0) row->note &= 0xefff;
+				row->sample += 16;
+				if (row->note > 0) row->note &= 0xefff;
 			}
 		} else {
 			if (row->effect == 9 || row->note > 856)
@@ -426,14 +445,16 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 			if (row->note < -3)
 			self->super.super.version = SOUNDFX_19;
 		}
-		if (row->sample >= len || self->samples[row->sample] == null) row->sample = 0;
+		//if (row->sample >= len || self->samples[row->sample] == null) row->sample = 0;
+		if (row->sample >= len) row->sample = 0;
 	}
 
 	Amiga_store(self->super.amiga, stream, size, -1);
 
+	assert_op(len, <=, FXPLAYER_MAX_SAMPLES);
 	for (i = 1; i < len; ++i) {
-		sample = self->samples[i];
-		if (sample == null) continue;
+		sample = &self->samples[i];
+		//if (sample == null) continue; // FIXME this check is non-working with by-value buffers
 
 		if (sample->loop)
 			sample->loopPtr = sample->pointer + sample->loop;
@@ -446,10 +467,13 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 		for (j = sample->pointer; j < size; ++j) self->super.amiga->memory[j] = 0;
 	}
 
-	sample = new AmigaSample();
+	//sample = new AmigaSample();
+	sample = &self->samples[0];
+	AmigaSample_ctor(sample);
+	
 	sample->pointer = sample->loopPtr = self->super.amiga->vector_count_memory; //self->super.amiga->memory->length;
 	sample->length  = sample->repeat  = 2;
-	self->samples[0] = sample;
+	//self->samples[0] = sample;
 
 	ByteArray_set_position(stream, 0);
 	higher = self->delphine = 0;
