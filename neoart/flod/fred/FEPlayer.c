@@ -583,7 +583,7 @@ void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
 	self->samples->fixed = true;
 
 	if (pos != 0x7fffffff) {
-		self->super.amiga->store(stream, ByteArray_get_length(stream) - pos);
+		Amiga_store(self->super.amiga, stream, ByteArray_get_length(stream) - pos, -1);
 		len = self->samples->length;
 
 		for (i = 0; i < len; ++i) {
