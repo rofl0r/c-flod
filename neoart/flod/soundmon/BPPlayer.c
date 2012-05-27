@@ -73,556 +73,559 @@ struct BPPlayer* BPPlayer_new(struct Amiga *amiga) {
 
 //override
 void BPPlayer_process(struct BPPlayer* self) {
-      var chan:AmigaChannel, int data; int dst; int instr; int len; memory:Vector.<int> = amiga->memory, int note; int option; row:AmigaRow, sample:BPSample, int src; step:BPStep, voice:BPVoice = voices[0];
-      arpeggioCtr = --arpeggioCtr & 3;
-      vibratoPos  = ++vibratoPos  & 7;
+	var chan:AmigaChannel, int data; int dst; int instr; int len; memory:Vector.<int> = amiga->memory, int note; int option; row:AmigaRow, sample:BPSample, int src; step:BPStep, voice:BPVoice = voices[0];
+	arpeggioCtr = --arpeggioCtr & 3;
+	vibratoPos  = ++vibratoPos  & 7;
 
-      while (voice) {
-        chan = voice->channel;
-        voice->period += voice->autoSlide;
+	while (voice) {
+		chan = voice->channel;
+		voice->period += voice->autoSlide;
 
-        if (voice->vibrato) chan->period = voice->period + (VIBRATO[vibratoPos] / voice->vibrato);
-          else chan->period = voice->period;
+		if (voice->vibrato) chan->period = voice->period + (VIBRATO[vibratoPos] / voice->vibrato);
+		else chan->period = voice->period;
 
-        chan->pointer = voice->samplePtr;
-        chan->length  = voice->sampleLen;
+		chan->pointer = voice->samplePtr;
+		chan->length  = voice->sampleLen;
 
-        if (voice->arpeggio || voice->autoArpeggio) {
-          note = voice->note;
+		if (voice->arpeggio || voice->autoArpeggio) {
+			note = voice->note;
 
-          if (!arpeggioCtr)
-            note += ((voice->arpeggio & 0xf0) >> 4) + ((voice->autoArpeggio & 0xf0) >> 4);
-          else if (arpeggioCtr == 1)
-            note += (voice->arpeggio & 0x0f) + (voice->autoArpeggio & 0x0f);
+			if (!arpeggioCtr)
+			note += ((voice->arpeggio & 0xf0) >> 4) + ((voice->autoArpeggio & 0xf0) >> 4);
+			else if (arpeggioCtr == 1)
+			note += (voice->arpeggio & 0x0f) + (voice->autoArpeggio & 0x0f);
 
-          chan->period = voice->period = PERIODS[int(note + 35)];
-          voice->restart = 0;
-        }
+			chan->period = voice->period = PERIODS[int(note + 35)];
+			voice->restart = 0;
+		}
 
-        if (!voice->synth || voice->sample < 0) {
-          voice = voice->next;
-          continue;
-        }
-        sample = samples[voice->sample];
+		if (!voice->synth || voice->sample < 0) {
+			voice = voice->next;
+			continue;
+		}
+		sample = samples[voice->sample];
 
-        if (voice->adsrControl) {
-          if (--voice->adsrCtr == 0) {
-            voice->adsrCtr = sample->adsrSpeed;
-            data = (128 + memory[int(sample->adsrTable + voice->adsrPtr)]) >> 2;
-            chan->volume = (data * voice->volume) >> 6;
+		if (voice->adsrControl) {
+			if (--voice->adsrCtr == 0) {
+				voice->adsrCtr = sample->adsrSpeed;
+				data = (128 + memory[int(sample->adsrTable + voice->adsrPtr)]) >> 2;
+				chan->volume = (data * voice->volume) >> 6;
 
-            if (++voice->adsrPtr == sample->adsrLen) {
-              voice->adsrPtr = 0;
-              if (voice->adsrControl == 1) voice->adsrControl = 0;
-            }
-          }
-        }
+				if (++voice->adsrPtr == sample->adsrLen) {
+					voice->adsrPtr = 0;
+					if (voice->adsrControl == 1) voice->adsrControl = 0;
+				}
+			}
+		}
 
-        if (voice->lfoControl) {
-          if (--voice->lfoCtr == 0) {
-            voice->lfoCtr = sample->lfoSpeed;
-            data = memory[int(sample->lfoTable + voice->lfoPtr)];
-            if (sample->lfoDepth) data = (data / sample->lfoDepth) >> 0;
-            chan->period = voice->period + data;
+		if (voice->lfoControl) {
+			if (--voice->lfoCtr == 0) {
+				voice->lfoCtr = sample->lfoSpeed;
+				data = memory[int(sample->lfoTable + voice->lfoPtr)];
+				if (sample->lfoDepth) data = (data / sample->lfoDepth) >> 0;
+				chan->period = voice->period + data;
 
-            if (++voice->lfoPtr == sample->lfoLen) {
-              voice->lfoPtr = 0;
-              if (voice->lfoControl == 1) voice->lfoControl = 0;
-            }
-          }
-        }
+				if (++voice->lfoPtr == sample->lfoLen) {
+					voice->lfoPtr = 0;
+					if (voice->lfoControl == 1) voice->lfoControl = 0;
+				}
+			}
+		}
 
-        if (voice->synthPtr < 0) {
-          voice = voice->next;
-          continue;
-        }
+		if (voice->synthPtr < 0) {
+			voice = voice->next;
+			continue;
+		}
 
-        if (voice->egControl) {
-          if (--voice->egCtr == 0) {
-            voice->egCtr = sample->egSpeed;
-            data = voice->egValue;
-            voice->egValue = (128 + memory[int(sample->egTable + voice->egPtr)]) >> 3;
+		if (voice->egControl) {
+			if (--voice->egCtr == 0) {
+				voice->egCtr = sample->egSpeed;
+				data = voice->egValue;
+				voice->egValue = (128 + memory[int(sample->egTable + voice->egPtr)]) >> 3;
 
-            if (voice->egValue != data) {
-              src = (voice->index << 5) + data;
-              dst = voice->synthPtr + data;
+				if (voice->egValue != data) {
+					src = (voice->index << 5) + data;
+					dst = voice->synthPtr + data;
 
-              if (voice->egValue < data) {
-                data -= voice->egValue;
-                len = dst - data;
-                for (; dst > len;) memory[--dst] = buffer[--src];
-              } else {
-                data = voice->egValue - data;
-                len = dst + data;
-                for (; dst < len;) memory[dst++] = ~buffer[src++] + 1
-              }
-            }
+					if (voice->egValue < data) {
+						data -= voice->egValue;
+						len = dst - data;
+						for (; dst > len;) memory[--dst] = buffer[--src];
+					} else {
+						data = voice->egValue - data;
+						len = dst + data;
+						for (; dst < len;) memory[dst++] = ~buffer[src++] + 1
+					}
+				}
 
-            if (++voice->egPtr == sample->egLen) {
-              voice->egPtr = 0;
-              if (voice->egControl == 1) voice->egControl = 0;
-            }
-          }
-        }
+				if (++voice->egPtr == sample->egLen) {
+					voice->egPtr = 0;
+					if (voice->egControl == 1) voice->egControl = 0;
+				}
+			}
+		}
 
-        switch (voice->fxControl) {
-          case 0:
-            break;
-          case 1:   //averaging
-            if (--voice->fxCtr == 0) {
-              voice->fxCtr = sample->fxSpeed;
-              dst = voice->synthPtr;
-              len = voice->synthPtr + 32;
-              data = dst > 0 ? memory[int(dst - 1)] : 0;
+		switch (voice->fxControl) {
+			default:
+			case 0:
+				break;
+			case 1:   //averaging
+				if (--voice->fxCtr == 0) {
+					voice->fxCtr = sample->fxSpeed;
+					dst = voice->synthPtr;
+					len = voice->synthPtr + 32;
+					data = dst > 0 ? memory[int(dst - 1)] : 0;
 
-              for (; dst < len;) {
-                data = (data + memory[int(dst + 1)]) >> 1;
-                memory[dst++] = data;
-              }
-            }
-            break;
-          case 2:   //inversion
-            src = (voice->index << 5) + 31;
-            len = voice->synthPtr + 32;
-            data = sample->fxSpeed;
+					for (; dst < len;) {
+						data = (data + memory[int(dst + 1)]) >> 1;
+						memory[dst++] = data;
+					}
+				}
+				break;
+			case 2:   //inversion
+				src = (voice->index << 5) + 31;
+				len = voice->synthPtr + 32;
+				data = sample->fxSpeed;
 
-            for (dst = voice->synthPtr; dst < len; ++dst) {
-              if (buffer[src] < memory[dst]) {
-                memory[dst] -= data;
-              } else if (buffer[src] > memory[dst]) {
-                memory[dst] += data;
-              }
-              src--;
-            }
-            break;
-          case 3:   //backward inversion
-          case 5:   //backward transform
-            src = voice->index << 5;
-            len = voice->synthPtr + 32;
-            data = sample->fxSpeed;
+				for (dst = voice->synthPtr; dst < len; ++dst) {
+					if (buffer[src] < memory[dst]) {
+						memory[dst] -= data;
+					} else if (buffer[src] > memory[dst]) {
+						memory[dst] += data;
+					}
+					src--;
+				}
+				break;
+			case 3:   //backward inversion
+			case 5:   //backward transform
+				src = voice->index << 5;
+				len = voice->synthPtr + 32;
+				data = sample->fxSpeed;
 
-            for (dst = voice->synthPtr; dst < len; ++dst) {
-              if (buffer[src] < memory[dst]) {
-                memory[dst] -= data;
-              } else if (buffer[src] > memory[dst]) {
-                memory[dst] += data;
-              }
-              src++;
-            }
-            break;
-          case 4:   //transform
-            src = voice->synthPtr + 64;
-            len = voice->synthPtr + 32;
-            data = sample->fxSpeed;
+				for (dst = voice->synthPtr; dst < len; ++dst) {
+					if (buffer[src] < memory[dst]) {
+						memory[dst] -= data;
+					} else if (buffer[src] > memory[dst]) {
+						memory[dst] += data;
+					}
+					src++;
+				}
+				break;
+			case 4:   //transform
+				src = voice->synthPtr + 64;
+				len = voice->synthPtr + 32;
+				data = sample->fxSpeed;
 
-            for (dst = voice->synthPtr; dst < len; ++dst) {
-              if (memory[src] < memory[dst]) {
-                memory[dst] -= data;
-              } else if (memory[src] > memory[dst]) {
-                memory[dst] += data;
-              }
-              src++;
-            }
-            break;
-          case 6:   //wave change
-            if (--voice->fxCtr == 0) {
-              voice->fxControl = 0;
-              voice->fxCtr = 1;
-              src = voice->synthPtr + 64;
-              len = voice->synthPtr + 32;
-              for (dst = voice->synthPtr; dst < len; ++dst) memory[dst] = memory[src++];
-            }
-            break;
-        }
+				for (dst = voice->synthPtr; dst < len; ++dst) {
+					if (memory[src] < memory[dst]) {
+						memory[dst] -= data;
+					} else if (memory[src] > memory[dst]) {
+						memory[dst] += data;
+					}
+					src++;
+				}
+				break;
+			case 6:   //wave change
+				if (--voice->fxCtr == 0) {
+					voice->fxControl = 0;
+					voice->fxCtr = 1;
+					src = voice->synthPtr + 64;
+					len = voice->synthPtr + 32;
+					for (dst = voice->synthPtr; dst < len; ++dst) memory[dst] = memory[src++];
+				}
+				break;
+		}
 
-        if (voice->modControl) {
-          if (--voice->modCtr == 0) {
-            voice->modCtr = sample->modSpeed;
-            memory[voice->synthPtr + 32] = memory[int(sample->modTable + voice->modPtr)];
+		if (voice->modControl) {
+			if (--voice->modCtr == 0) {
+				voice->modCtr = sample->modSpeed;
+				memory[voice->synthPtr + 32] = memory[int(sample->modTable + voice->modPtr)];
 
-            if (++voice->modPtr == sample->modLen) {
-              voice->modPtr = 0;
-              if (voice->modControl == 1) voice->modControl = 0;
-            }
-          }
-        }
-        voice = voice->next;
-      }
+				if (++voice->modPtr == sample->modLen) {
+					voice->modPtr = 0;
+					if (voice->modControl == 1) voice->modControl = 0;
+				}
+			}
+		}
+		voice = voice->next;
+	}
 
-      if (--tick == 0) {
-        tick = speed;
-        voice = voices[0];
+	if (--tick == 0) {
+		tick = speed;
+		voice = voices[0];
 
-        while (voice) {
-          chan = voice->channel;
-          voice->enabled = 0;
+		while (voice) {
+			chan = voice->channel;
+			voice->enabled = 0;
 
-          step   = tracks[int((trackPos << 2) + voice->index)];
-          row    = patterns[int(patternPos + ((step->pattern - 1) << 4))];
-          note   = row->note;
-          option = row->effect;
-          data   = row->param;
+			step   = tracks[int((trackPos << 2) + voice->index)];
+			row    = patterns[int(patternPos + ((step->pattern - 1) << 4))];
+			note   = row->note;
+			option = row->effect;
+			data   = row->param;
 
-          if (note) {
-            voice->autoArpeggio = voice->autoSlide = voice->vibrato = 0;
-            if (option != 10 || (data & 0xf0) == 0) note += step->transpose;
-            voice->note = note;
-            voice->period = PERIODS[int(note + 35)];
+			if (note) {
+				voice->autoArpeggio = voice->autoSlide = voice->vibrato = 0;
+				if (option != 10 || (data & 0xf0) == 0) note += step->transpose;
+				voice->note = note;
+				voice->period = PERIODS[int(note + 35)];
 
-            if (option < 13) voice->restart = voice->volumeDef = 1;
-              else voice->restart = 0;
+				if (option < 13) voice->restart = voice->volumeDef = 1;
+				else voice->restart = 0;
 
-            instr = row->sample;
-            if (instr == 0) instr = voice->sample;
-            if (option != 10 || (data & 0x0f) == 0) instr += step->soundTranspose;
+				instr = row->sample;
+				if (instr == 0) instr = voice->sample;
+				if (option != 10 || (data & 0x0f) == 0) instr += step->soundTranspose;
 
-            if (option < 13 && (!voice->synth || (voice->sample != instr))) {
-              voice->sample = instr;
-              voice->enabled = 1;
-            }
-          }
+				if (option < 13 && (!voice->synth || (voice->sample != instr))) {
+					voice->sample = instr;
+					voice->enabled = 1;
+				}
+			}
 
-          switch (option) {
-            case 0:   //arpeggio once
-              voice->arpeggio = data;
-              break;
-            case 1:   //set volume
-              voice->volume = data;
-              voice->volumeDef = 0;
+			switch (option) {
+				case 0:   //arpeggio once
+					voice->arpeggio = data;
+					break;
+				case 1:   //set volume
+					voice->volume = data;
+					voice->volumeDef = 0;
 
-              if (version < BPSOUNDMON_V3 || !voice->synth)
-                chan->volume = voice->volume;
-              break;
-            case 2:   //set speed
-              tick = speed = data;
-              break;
-            case 3:   //set filter
-              amiga->filter->active = data;
-              break;
-            case 4:   //portamento up
-              voice->period -= data;
-              voice->arpeggio = 0;
-              break;
-            case 5:   //portamento down
-              voice->period += data;
-              voice->arpeggio = 0;
-              break;
-            case 6:   //set vibrato
-              if (version == BPSOUNDMON_V3) voice->vibrato = data;
-                else repeatCtr = data;
-              break;
-            case 7:   //step jump
-              if (version == BPSOUNDMON_V3) {
-                nextPos = data;
-                jumpFlag = 1;
-              } else if (repeatCtr == 0) {
-                trackPos = data;
-              }
-              break;
-            case 8:   //set auto slide
-              voice->autoSlide = data;
-              break;
-            case 9:   //set auto arpeggio
-              voice->autoArpeggio = data;
-              if (version == BPSOUNDMON_V3) {
-                voice->adsrPtr = 0;
-                if (voice->adsrControl == 0) voice->adsrControl = 1;
-              }
-              break;
-            case 11:  //change effect
-              voice->fxControl = data;
-              break;
-            case 13:  //change inversion
-              voice->autoArpeggio = data;
-              voice->fxControl ^= 1;
-              voice->adsrPtr = 0;
-              if (voice->adsrControl == 0) voice->adsrControl = 1;
-              break;
-            case 14:  //no eg reset
-              voice->autoArpeggio = data;
-              voice->adsrPtr = 0;
-              if (voice->adsrControl == 0) voice->adsrControl = 1;
-              break;
-            case 15:  //no eg and no adsr reset
-              voice->autoArpeggio = data;
-              break;
-          }
-          voice = voice->next;
-        }
+					if (version < BPSOUNDMON_V3 || !voice->synth)
+						chan->volume = voice->volume;
+					break;
+				case 2:   //set speed
+					tick = speed = data;
+					break;
+				case 3:   //set filter
+					amiga->filter->active = data;
+					break;
+				case 4:   //portamento up
+					voice->period -= data;
+					voice->arpeggio = 0;
+					break;
+				case 5:   //portamento down
+					voice->period += data;
+					voice->arpeggio = 0;
+					break;
+				case 6:   //set vibrato
+					if (version == BPSOUNDMON_V3) voice->vibrato = data;
+						else repeatCtr = data;
+					break;
+				case 7:   //step jump
+					if (version == BPSOUNDMON_V3) {
+						nextPos = data;
+						jumpFlag = 1;
+					} else if (repeatCtr == 0) {
+						trackPos = data;
+					}
+					break;
+				case 8:   //set auto slide
+					voice->autoSlide = data;
+					break;
+					case 9:   //set auto arpeggio
+					voice->autoArpeggio = data;
+					if (version == BPSOUNDMON_V3) {
+						voice->adsrPtr = 0;
+						if (voice->adsrControl == 0) voice->adsrControl = 1;
+					}
+					break;
+				case 11:  //change effect
+					voice->fxControl = data;
+					break;
+				case 13:  //change inversion
+					voice->autoArpeggio = data;
+					voice->fxControl ^= 1;
+					voice->adsrPtr = 0;
+					if (voice->adsrControl == 0) voice->adsrControl = 1;
+					break;
+				case 14:  //no eg reset
+					voice->autoArpeggio = data;
+					voice->adsrPtr = 0;
+					if (voice->adsrControl == 0) voice->adsrControl = 1;
+					break;
+				case 15:  //no eg and no adsr reset
+					voice->autoArpeggio = data;
+					break;
+				default:
+					break;
+			}
+			voice = voice->next;
+		}
 
-        if (jumpFlag) {
-          trackPos   = nextPos;
-          patternPos = jumpFlag = 0;
-        } else if (++patternPos == 16) {
-          patternPos = 0;
+		if (jumpFlag) {
+			trackPos   = nextPos;
+			patternPos = jumpFlag = 0;
+		} else if (++patternPos == 16) {
+			patternPos = 0;
 
-          if (++trackPos == length) {
-            trackPos = 0;
-            amiga->complete = 1;
-          }
-        }
-        voice = voices[0];
+			if (++trackPos == length) {
+				trackPos = 0;
+				amiga->complete = 1;
+			}
+		}
+		voice = voices[0];
 
-        while (voice) {
-          chan = voice->channel;
-          if (voice->enabled) chan->enabled = voice->enabled = 0;
-          if (voice->restart == 0) {
-            voice = voice->next;
-            continue;
-          }
+		while (voice) {
+			chan = voice->channel;
+			if (voice->enabled) chan->enabled = voice->enabled = 0;
+			if (voice->restart == 0) {
+				voice = voice->next;
+				continue;
+			}
 
-          if (voice->synthPtr > -1) {
-            src = voice->index << 5;
-            len = voice->synthPtr + 32;
-            for (dst = voice->synthPtr; dst < len; ++dst) memory[dst] = buffer[src++];
-            voice->synthPtr = -1;
-          }
-          voice = voice->next;
-        }
-        voice = voices[0];
+			if (voice->synthPtr > -1) {
+				src = voice->index << 5;
+				len = voice->synthPtr + 32;
+				for (dst = voice->synthPtr; dst < len; ++dst) memory[dst] = buffer[src++];
+				voice->synthPtr = -1;
+			}
+			voice = voice->next;
+		}
+		voice = voices[0];
 
-        while (voice) {
-          if (voice->restart == 0 || voice->sample < 0) {
-            voice = voice->next;
-            continue;
-          }
-          chan = voice->channel;
+		while (voice) {
+			if (voice->restart == 0 || voice->sample < 0) {
+				voice = voice->next;
+				continue;
+			}
+			chan = voice->channel;
 
-          chan->period = voice->period;
-          voice->restart = 0;
-          sample = samples[voice->sample];
+			chan->period = voice->period;
+			voice->restart = 0;
+			sample = samples[voice->sample];
 
-          if (sample->synth) {
-            voice->synth   = 1;
-            voice->egValue = 0;
-            voice->adsrPtr = voice->lfoPtr = voice->egPtr = voice->modPtr = 0;
+			if (sample->synth) {
+				voice->synth   = 1;
+				voice->egValue = 0;
+				voice->adsrPtr = voice->lfoPtr = voice->egPtr = voice->modPtr = 0;
 
-            voice->adsrCtr = 1;
-            voice->lfoCtr  = sample->lfoDelay + 1;
-            voice->egCtr   = sample->egDelay  + 1;
-            voice->fxCtr   = sample->fxDelay  + 1;
-            voice->modCtr  = sample->modDelay + 1;
+				voice->adsrCtr = 1;
+				voice->lfoCtr  = sample->lfoDelay + 1;
+				voice->egCtr   = sample->egDelay  + 1;
+				voice->fxCtr   = sample->fxDelay  + 1;
+				voice->modCtr  = sample->modDelay + 1;
 
-            voice->adsrControl = sample->adsrControl;
-            voice->lfoControl  = sample->lfoControl;
-            voice->egControl   = sample->egControl;
-            voice->fxControl   = sample->fxControl;
-            voice->modControl  = sample->modControl;
+				voice->adsrControl = sample->adsrControl;
+				voice->lfoControl  = sample->lfoControl;
+				voice->egControl   = sample->egControl;
+				voice->fxControl   = sample->fxControl;
+				voice->modControl  = sample->modControl;
 
-            chan->pointer = voice->samplePtr = sample->pointer;
-            chan->length  = voice->sampleLen = sample->length;
+				chan->pointer = voice->samplePtr = sample->pointer;
+				chan->length  = voice->sampleLen = sample->length;
 
-            if (voice->adsrControl) {
-              data = (128 + memory[sample->adsrTable]) >> 2;
+				if (voice->adsrControl) {
+					data = (128 + memory[sample->adsrTable]) >> 2;
 
-              if (voice->volumeDef) {
-                voice->volume = sample->volume;
-                voice->volumeDef = 0;
-              }
+					if (voice->volumeDef) {
+						voice->volume = sample->volume;
+						voice->volumeDef = 0;
+					}
 
-              chan->volume = (data * voice->volume) >> 6;
-            } else {
-              chan->volume = voice->volumeDef ? sample->volume : voice->volume;
-            }
+					chan->volume = (data * voice->volume) >> 6;
+				} else {
+					chan->volume = voice->volumeDef ? sample->volume : voice->volume;
+				}
 
-            if (voice->egControl || voice->fxControl || voice->modControl) {
-              voice->synthPtr = sample->pointer;
-              dst = voice->index << 5;
-              len = voice->synthPtr + 32;
-              for (src = voice->synthPtr; src < len; ++src) buffer[dst++] = memory[src];
-            }
-          } else {
-            voice->synth = voice->lfoControl = 0;
+				if (voice->egControl || voice->fxControl || voice->modControl) {
+					voice->synthPtr = sample->pointer;
+					dst = voice->index << 5;
+					len = voice->synthPtr + 32;
+					for (src = voice->synthPtr; src < len; ++src) buffer[dst++] = memory[src];
+				}
+			} else {
+				voice->synth = voice->lfoControl = 0;
 
-            if (sample->pointer < 0) {
-              voice->samplePtr = amiga->loopPtr;
-              voice->sampleLen = 2;
-            } else {
-              chan->pointer = sample->pointer;
-              chan->volume  = voice->volumeDef ? sample->volume : voice->volume;
+				if (sample->pointer < 0) {
+					voice->samplePtr = amiga->loopPtr;
+					voice->sampleLen = 2;
+				} else {
+					chan->pointer = sample->pointer;
+					chan->volume  = voice->volumeDef ? sample->volume : voice->volume;
 
-              if (sample->repeat != 2) {
-                voice->samplePtr = sample->loopPtr;
-                chan->length = voice->sampleLen = sample->repeat;
-              } else {
-                voice->samplePtr = amiga->loopPtr;
-                voice->sampleLen = 2;
-                chan->length = sample->length;
-              }
-            }
-          }
-          chan->enabled = voice->enabled = 1;
-          voice = voice->next;
-        }
-      }
+					if (sample->repeat != 2) {
+						voice->samplePtr = sample->loopPtr;
+						chan->length = voice->sampleLen = sample->repeat;
+					} else {
+						voice->samplePtr = amiga->loopPtr;
+						voice->sampleLen = 2;
+						chan->length = sample->length;
+					}
+				}
+			}
+			chan->enabled = voice->enabled = 1;
+			voice = voice->next;
+		}
+	}
 }
 
 //override
 void BPPlayer_initialize(struct BPPlayer* self) {
-      var int i; voice:BPVoice = voices[0];
-      super->initialize();
+	var int i; voice:BPVoice = voices[0];
+	super->initialize();
 
-      speed       = 6;
-      tick        = 1;
-      trackPos    = 0;
-      patternPos  = 0;
-      nextPos     = 0;
-      jumpFlag    = 0;
-      repeatCtr   = 0;
-      arpeggioCtr = 1;
-      vibratoPos  = 0;
+	speed       = 6;
+	tick        = 1;
+	trackPos    = 0;
+	patternPos  = 0;
+	nextPos     = 0;
+	jumpFlag    = 0;
+	repeatCtr   = 0;
+	arpeggioCtr = 1;
+	vibratoPos  = 0;
 
-      for (i = 0; i < 128; ++i) buffer[i] = 0;
+	for (i = 0; i < 128; ++i) buffer[i] = 0;
 
-      while (voice) {
-        voice->initialize();
-        voice->channel   = amiga->channels[voice->index];
-        voice->samplePtr = amiga->loopPtr;
-        voice = voice->next;
-      }
-    }
+	while (voice) {
+		voice->initialize();
+		voice->channel   = amiga->channels[voice->index];
+		voice->samplePtr = amiga->loopPtr;
+		voice = voice->next;
+	}
+}
 
 //override
 void BPPlayer_reset(struct BPPlayer* self) {
-      var int i; int len; int pos; voice:BPVoice = voices[0];
+	var int i; int len; int pos; voice:BPVoice = voices[0];
 
-      while (voice) {
-        if (voice->synthPtr > -1) {
-          pos = voice->index << 5;
-          len = voice->synthPtr + 32;
+	while (voice) {
+		if (voice->synthPtr > -1) {
+			pos = voice->index << 5;
+			len = voice->synthPtr + 32;
 
-          for (i = voice->synthPtr; i < len; ++i)
-            amiga->memory[i] = buffer[pos++];
-        }
+			for (i = voice->synthPtr; i < len; ++i)
+			amiga->memory[i] = buffer[pos++];
+		}
 
-        voice = voice->next;
-      }
-    }
+		voice = voice->next;
+	}
+}
 
 //override
 void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
-      var int higher; i:int = 0, id:String, int len; row:AmigaRow, sample:BPSample, step:BPStep, int tables;
-      title = stream->readMultiByte(26, ENCODING);
+	var int higher; i:int = 0, id:String, int len; row:AmigaRow, sample:BPSample, step:BPStep, int tables;
+	title = stream->readMultiByte(26, ENCODING);
 
-      id = stream->readMultiByte(4, ENCODING);
-      if (id == "BPSM") {
-        version = BPSOUNDMON_V1;
-      } else {
-        id = id->substr(0, 3);
-        if (id == "V.2") version = BPSOUNDMON_V2;
-          else if (id == "V.3") version = BPSOUNDMON_V3;
-            else return;
+	id = stream->readMultiByte(4, ENCODING);
+	if (id == "BPSM") {
+		version = BPSOUNDMON_V1;
+	} else {
+		id = id->substr(0, 3);
+		if (id == "V.2") version = BPSOUNDMON_V2;
+		else if (id == "V.3") version = BPSOUNDMON_V3;
+		else return;
 
-        stream->position = 29;
-        tables = stream->readUnsignedByte();
-      }
+		stream->position = 29;
+		tables = stream->readUnsignedByte();
+	}
 
-      length = stream->readUnsignedShort();
+	length = stream->readUnsignedShort();
 
-      for (; ++i < 16;) {
-        sample = new BPSample();
+	for (; ++i < 16;) {
+		sample = new BPSample();
 
-        if (stream->readUnsignedByte() == 0xff) {
-          sample->synth   = 1;
-          sample->table   = stream->readUnsignedByte();
-          sample->pointer = sample->table << 6;
-          sample->length  = stream->readUnsignedShort() << 1;
+		if (stream->readUnsignedByte() == 0xff) {
+			sample->synth   = 1;
+			sample->table   = stream->readUnsignedByte();
+			sample->pointer = sample->table << 6;
+			sample->length  = stream->readUnsignedShort() << 1;
 
-          sample->adsrControl = stream->readUnsignedByte();
-          sample->adsrTable   = stream->readUnsignedByte() << 6;
-          sample->adsrLen     = stream->readUnsignedShort();
-          sample->adsrSpeed   = stream->readUnsignedByte();
-          sample->lfoControl  = stream->readUnsignedByte();
-          sample->lfoTable    = stream->readUnsignedByte() << 6;
-          sample->lfoDepth    = stream->readUnsignedByte();
-          sample->lfoLen      = stream->readUnsignedShort();
+			sample->adsrControl = stream->readUnsignedByte();
+			sample->adsrTable   = stream->readUnsignedByte() << 6;
+			sample->adsrLen     = stream->readUnsignedShort();
+			sample->adsrSpeed   = stream->readUnsignedByte();
+			sample->lfoControl  = stream->readUnsignedByte();
+			sample->lfoTable    = stream->readUnsignedByte() << 6;
+			sample->lfoDepth    = stream->readUnsignedByte();
+			sample->lfoLen      = stream->readUnsignedShort();
 
-          if (version < BPSOUNDMON_V3) {
-            stream->readByte();
-            sample->lfoDelay  = stream->readUnsignedByte();
-            sample->lfoSpeed  = stream->readUnsignedByte();
-            sample->egControl = stream->readUnsignedByte();
-            sample->egTable   = stream->readUnsignedByte() << 6;
-            stream->readByte();
-            sample->egLen     = stream->readUnsignedShort();
-            stream->readByte();
-            sample->egDelay   = stream->readUnsignedByte();
-            sample->egSpeed   = stream->readUnsignedByte();
-            sample->fxSpeed   = 1;
-            sample->modSpeed  = 1;
-            sample->volume    = stream->readUnsignedByte();
-            stream->position += 6;
-          } else {
-            sample->lfoDelay   = stream->readUnsignedByte();
-            sample->lfoSpeed   = stream->readUnsignedByte();
-            sample->egControl  = stream->readUnsignedByte();
-            sample->egTable    = stream->readUnsignedByte() << 6;
-            sample->egLen      = stream->readUnsignedShort();
-            sample->egDelay    = stream->readUnsignedByte();
-            sample->egSpeed    = stream->readUnsignedByte();
-            sample->fxControl  = stream->readUnsignedByte();
-            sample->fxSpeed    = stream->readUnsignedByte();
-            sample->fxDelay    = stream->readUnsignedByte();
-            sample->modControl = stream->readUnsignedByte();
-            sample->modTable   = stream->readUnsignedByte() << 6;
-            sample->modSpeed   = stream->readUnsignedByte();
-            sample->modDelay   = stream->readUnsignedByte();
-            sample->volume     = stream->readUnsignedByte();
-            sample->modLen     = stream->readUnsignedShort();
-          }
-        } else {
-          stream->position--;
-          sample->synth  = 0;
-          sample->name   = stream->readMultiByte(24, ENCODING);
-          sample->length = stream->readUnsignedShort() << 1;
+			if (version < BPSOUNDMON_V3) {
+				stream->readByte();
+				sample->lfoDelay  = stream->readUnsignedByte();
+				sample->lfoSpeed  = stream->readUnsignedByte();
+				sample->egControl = stream->readUnsignedByte();
+				sample->egTable   = stream->readUnsignedByte() << 6;
+				stream->readByte();
+				sample->egLen     = stream->readUnsignedShort();
+				stream->readByte();
+				sample->egDelay   = stream->readUnsignedByte();
+				sample->egSpeed   = stream->readUnsignedByte();
+				sample->fxSpeed   = 1;
+				sample->modSpeed  = 1;
+				sample->volume    = stream->readUnsignedByte();
+				stream->position += 6;
+			} else {
+				sample->lfoDelay   = stream->readUnsignedByte();
+				sample->lfoSpeed   = stream->readUnsignedByte();
+				sample->egControl  = stream->readUnsignedByte();
+				sample->egTable    = stream->readUnsignedByte() << 6;
+				sample->egLen      = stream->readUnsignedShort();
+				sample->egDelay    = stream->readUnsignedByte();
+				sample->egSpeed    = stream->readUnsignedByte();
+				sample->fxControl  = stream->readUnsignedByte();
+				sample->fxSpeed    = stream->readUnsignedByte();
+				sample->fxDelay    = stream->readUnsignedByte();
+				sample->modControl = stream->readUnsignedByte();
+				sample->modTable   = stream->readUnsignedByte() << 6;
+				sample->modSpeed   = stream->readUnsignedByte();
+				sample->modDelay   = stream->readUnsignedByte();
+				sample->volume     = stream->readUnsignedByte();
+				sample->modLen     = stream->readUnsignedShort();
+			}
+		} else {
+			stream->position--;
+			sample->synth  = 0;
+			sample->name   = stream->readMultiByte(24, ENCODING);
+			sample->length = stream->readUnsignedShort() << 1;
 
-          if (sample->length) {
-            sample->loop   = stream->readUnsignedShort();
-            sample->repeat = stream->readUnsignedShort() << 1;
-            sample->volume = stream->readUnsignedShort();
+			if (sample->length) {
+				sample->loop   = stream->readUnsignedShort();
+				sample->repeat = stream->readUnsignedShort() << 1;
+				sample->volume = stream->readUnsignedShort();
 
-            if ((sample->loop + sample->repeat) >= sample->length)
-              sample->repeat = sample->length - sample->loop;
-          } else {
-            sample->pointer--;
-            sample->repeat = 2;
-            stream->position += 6;
-          }
-        }
-        samples[i] = sample;
-      }
+				if ((sample->loop + sample->repeat) >= sample->length)
+				sample->repeat = sample->length - sample->loop;
+			} else {
+				sample->pointer--;
+				sample->repeat = 2;
+				stream->position += 6;
+			}
+		}
+		samples[i] = sample;
+	}
 
-      len = length << 2;
-      tracks = new Vector.<BPStep>(len, true);
+	len = length << 2;
+	tracks = new Vector.<BPStep>(len, true);
 
-      for (i = 0; i < len; ++i) {
-        step = new BPStep();
-        step->pattern = stream->readUnsignedShort();
-        step->soundTranspose = stream->readByte();
-        step->transpose = stream->readByte();
-        if (step->pattern > higher) higher = step->pattern;
-        tracks[i] = step;
-      }
+	for (i = 0; i < len; ++i) {
+		step = new BPStep();
+		step->pattern = stream->readUnsignedShort();
+		step->soundTranspose = stream->readByte();
+		step->transpose = stream->readByte();
+		if (step->pattern > higher) higher = step->pattern;
+		tracks[i] = step;
+	}
 
-      len = higher << 4;
-      patterns = new Vector.<AmigaRow>(len, true);
+	len = higher << 4;
+	patterns = new Vector.<AmigaRow>(len, true);
 
-      for (i = 0; i < len; ++i) {
-        row = new AmigaRow();
-        row->note   = stream->readByte();
-        row->sample = stream->readUnsignedByte();
-        row->effect = row->sample & 0x0f;
-        row->sample = (row->sample & 0xf0) >> 4;
-        row->param  = stream->readByte();
-        patterns[i] = row;
-      }
+	for (i = 0; i < len; ++i) {
+		row = new AmigaRow();
+		row->note   = stream->readByte();
+		row->sample = stream->readUnsignedByte();
+		row->effect = row->sample & 0x0f;
+		row->sample = (row->sample & 0xf0) >> 4;
+		row->param  = stream->readByte();
+		patterns[i] = row;
+	}
 
-      amiga->store(stream, tables << 6);
+	amiga->store(stream, tables << 6);
 
-      for (i = 0; ++i < 16;) {
-        sample = samples[i];
-        if (sample->synth || !sample->length) continue;
-        sample->pointer = amiga->store(stream, sample->length);
-        sample->loopPtr = sample->pointer + sample->loop;
-      }
+	for (i = 0; ++i < 16;) {
+		sample = samples[i];
+		if (sample->synth || !sample->length) continue;
+		sample->pointer = amiga->store(stream, sample->length);
+		sample->loopPtr = sample->pointer + sample->loop;
+	}
 }
