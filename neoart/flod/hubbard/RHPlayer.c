@@ -228,7 +228,8 @@ void RHPlayer_initialize(struct RHPlayer* self) {
 	struct RHSample *sample = 0;
 	struct RHVoice *voice = &self->voices[3];
 	
-	self->super->initialize();
+	CorePlayer_initialize(&self->super.super);
+	//self->super->initialize();
 
 	self->song = self->songs[self->super.super.playSong];
 	self->complete = 15;
@@ -243,7 +244,7 @@ void RHPlayer_initialize(struct RHPlayer* self) {
 	}
 
 	while (voice) {
-		voice->initialize();
+		RHVoice_initialize(voice);
 		voice->channel = self->super.amiga->channels[voice->index];
 
 		voice->trackPtr = self->song->tracks[voice->index];
