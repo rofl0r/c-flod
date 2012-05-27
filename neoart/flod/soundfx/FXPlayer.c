@@ -334,11 +334,11 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 	
 	if (stream->length < 1686) return;
 
-	stream->position = 60;
+	ByteArray_set_position(stream, 60);
 	id = stream->readMultiByte(stream, 4, ENCODING);
 
 	if (id != "SONG") {
-		stream->position = 124;
+		ByteArray_set_position(stream, 124);
 		id = stream->readMultiByte(stream, 4, ENCODING);
 		if (id != "SO31") return;
 		if (stream->length < 2350) return;
@@ -354,7 +354,7 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 
 	self->samples = new Vector.<AmigaSample>(len, true);
 	self->super.super.tempo = stream->readUnsignedShort(stream);
-	stream->position = 0;
+	ByteArray_set_position(stream, 0);
 
 	for (i = 1; i < len; ++i) {
 		value = stream->readUnsignedInt(stream);
@@ -383,7 +383,7 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 		sample->repeat = stream->readUnsignedShort(stream) << 1;
 	}
 
-	stream->position = 530 + offset;
+	ByteArray_set_position(stream, 530 + offset);
 	self->length = len = stream->readUnsignedByte(stream);
 	stream->position++;
 
@@ -394,7 +394,7 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 	}
 
 	if (offset) offset += 4;
-	stream->position = 660 + offset;
+	ByteArray_set_position(stream, 660 + offset);
 	higher += 256;
 	patterns = new Vector.<AmigaRow>(higher, true);
 
@@ -446,7 +446,9 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 	sample->length  = sample->repeat  = 2;
 	self->samples[0] = sample;
 
-	stream->position = higher = self->delphine = 0;
+	ByteArray_set_position(stream, 0);
+	higher = self->delphine = 0;
+	
 	for (i = 0; i < 265; ++i) higher += stream->readUnsignedShort(stream);
 
 	switch (higher) {
