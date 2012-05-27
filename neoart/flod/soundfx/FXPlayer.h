@@ -30,6 +30,7 @@ struct FXPlayer {
 	struct AmigaRow patterns[FXPLAYER_MAX_ROWS];
 	//samples    : Vector.<AmigaSample>,
 	struct AmigaSample samples[FXPLAYER_MAX_SAMPLES];
+	char sample_names[FXPLAYER_MAX_SAMPLES][22];
 	int length;
 	//voices     : Vector.<FXVoice>,
 	struct FXVoice voices[FXPLAYER_MAX_VOICES];

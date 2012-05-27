@@ -335,12 +335,12 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 	if (ByteArray_get_length(stream) < 1686) return;
 
 	ByteArray_set_position(stream, 60);
-	id = stream->readMultiByte(stream, 4, ENCODING);
+	stream->readMultiByte(stream, id, 4);
 
-	if (id != "SONG") {
+	if (!is_str(id, "SONG")) {
 		ByteArray_set_position(stream, 124);
-		id = stream->readMultiByte(stream, 4, ENCODING);
-		if (id != "SO31") return;
+		stream->readMultiByte(stream, id, 4);
+		if (!is_str(id, "SO31")) return;
 		if (ByteArray_get_length(stream) < 2350) return;
 
 		offset = 544;
@@ -375,8 +375,9 @@ void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
 			ByteArray_set_position_rel(stream, +30);
 			continue;
 		}
-
-		sample->name   = stream->readMultiByte(22, ENCODING);
+		
+		stream->readMultiByte(stream, self->sample_names[i], 22);
+		sample->name   = self->sample_names[i];
 		sample->length = stream->readUnsignedShort(stream) << 1;
 		sample->volume = stream->readUnsignedShort(stream);
 		sample->loop   = stream->readUnsignedShort(stream);
