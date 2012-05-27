@@ -108,7 +108,9 @@ void BPPlayer_process(struct BPPlayer* self) {
 			else if (self->arpeggioCtr == 1)
 			note += (voice->arpeggio & 0x0f) + (voice->autoArpeggio & 0x0f);
 			
-			voice->period = PERIODS[int(note + 35)];
+			unsigned idxx = note + 35;
+			assert_op(idxx, <, ARRAY_SIZE(PERIODS));
+			voice->period = PERIODS[idxx];
 			AmigaChannel_set_period(chan, voice->period);
 			voice->restart = 0;
 		}
@@ -117,12 +119,15 @@ void BPPlayer_process(struct BPPlayer* self) {
 			voice = voice->next;
 			continue;
 		}
-		sample = self->samples[voice->sample];
+		assert_op(voice->sample, <, BPPLAYER_MAX_SAMPLES);
+		sample = &self->samples[voice->sample];
 
 		if (voice->adsrControl) {
 			if (--voice->adsrCtr == 0) {
 				voice->adsrCtr = sample->adsrSpeed;
-				data = (128 + memory[int(sample->adsrTable + voice->adsrPtr)]) >> 2;
+				unsigned idxx = sample->adsrTable + voice->adsrPtr;
+				assert_op(idxx, <, AMIGA_MAX_MEMORY);
+				data = (128 + memory[idxx]) >> 2;
 				AmigaChannel_set_volume(chan, (data * voice->volume) >> 6);
 
 				if (++voice->adsrPtr == sample->adsrLen) {
@@ -135,7 +140,9 @@ void BPPlayer_process(struct BPPlayer* self) {
 		if (voice->lfoControl) {
 			if (--voice->lfoCtr == 0) {
 				voice->lfoCtr = sample->lfoSpeed;
-				data = memory[int(sample->lfoTable + voice->lfoPtr)];
+				unsigned idxx = sample->lfoTable + voice->lfoPtr;
+				assert_op(idxx, <, AMIGA_MAX_MEMORY);
+				data = memory[idxx];
 				if (sample->lfoDepth) data = (data / sample->lfoDepth) >> 0;
 				AmigaChannel_set_period(chan, voice->period + data);
 
@@ -155,7 +162,9 @@ void BPPlayer_process(struct BPPlayer* self) {
 			if (--voice->egCtr == 0) {
 				voice->egCtr = sample->egSpeed;
 				data = voice->egValue;
-				voice->egValue = (128 + memory[int(sample->egTable + voice->egPtr)]) >> 3;
+				unsigned idxx = sample->egTable + voice->egPtr;
+				assert_op(idxx, <, AMIGA_MAX_MEMORY);
+				voice->egValue = (128 + memory[idxx]) >> 3;
 
 				if (voice->egValue != data) {
 					src = (voice->index << 5) + data;
@@ -164,10 +173,14 @@ void BPPlayer_process(struct BPPlayer* self) {
 					if (voice->egValue < data) {
 						data -= voice->egValue;
 						len = dst - data;
+						assert_op(dst, <=, AMIGA_MAX_MEMORY);
+						assert_op(src, <=, BPPLAYER_MAX_BUFFER);
 						for (; dst > len;) memory[--dst] = self->buffer[--src];
 					} else {
 						data = voice->egValue - data;
 						len = dst + data;
+						assert_op(len, <, AMIGA_MAX_MEMORY);
+						assert_op(len, <, BPPLAYER_MAX_BUFFER);
 						for (; dst < len;) memory[dst++] = ~self->buffer[src++] + 1;
 					}
 				}
@@ -188,10 +201,12 @@ void BPPlayer_process(struct BPPlayer* self) {
 					voice->fxCtr = sample->fxSpeed;
 					dst = voice->synthPtr;
 					len = voice->synthPtr + 32;
-					data = dst > 0 ? memory[int(dst - 1)] : 0;
-
+					assert_op(dst - 1, <, AMIGA_MAX_MEMORY);
+					data = dst > 0 ? memory[dst - 1] : 0;
+					
+					assert_op(len + 1, <, AMIGA_MAX_MEMORY);
 					for (; dst < len;) {
-						data = (data + memory[int(dst + 1)]) >> 1;
+						data = (data + memory[dst + 1]) >> 1;
 						memory[dst++] = data;
 					}
 				}
@@ -253,7 +268,9 @@ void BPPlayer_process(struct BPPlayer* self) {
 		if (voice->modControl) {
 			if (--voice->modCtr == 0) {
 				voice->modCtr = sample->modSpeed;
-				memory[voice->synthPtr + 32] = memory[int(sample->modTable + voice->modPtr)];
+				unsigned idxx = sample->modTable + voice->modPtr;
+				assert_op(idxx, <, AMIGA_MAX_MEMORY);
+				memory[voice->synthPtr + 32] = memory[idxx];
 
 				if (++voice->modPtr == sample->modLen) {
 					voice->modPtr = 0;
@@ -271,9 +288,15 @@ void BPPlayer_process(struct BPPlayer* self) {
 		while (voice) {
 			chan = voice->channel;
 			voice->enabled = 0;
+			
+			unsigned idxx = (self->trackPos << 2) + voice->index;
+			assert_op(idxx, <, BPPLAYER_MAX_TRACKS);
 
-			step   = self->tracks[int((self->trackPos << 2) + voice->index)];
-			row    = self->patterns[int(self->patternPos + ((step->super.pattern - 1) << 4))];
+			step   = &self->tracks[idxx];
+			idxx = self->patternPos + ((step->super.pattern - 1) << 4);
+			assert_op(idxx, <, BPPLAYER_MAX_PATTERNS);
+			
+			row    = &self->patterns[idxx];
 			note   = row->note;
 			option = row->effect;
 			data   = row->param;
@@ -282,7 +305,9 @@ void BPPlayer_process(struct BPPlayer* self) {
 				voice->autoArpeggio = voice->autoSlide = voice->vibrato = 0;
 				if (option != 10 || (data & 0xf0) == 0) note += step->super.transpose;
 				voice->note = note;
-				voice->period = PERIODS[int(note + 35)];
+				idxx = note + 35;
+				assert_op(idxx, <, ARRAY_SIZE(PERIODS));
+				voice->period = PERIODS[idxx];
 
 				if (option < 13) voice->restart = voice->volumeDef = 1;
 				else voice->restart = 0;
@@ -399,7 +424,7 @@ void BPPlayer_process(struct BPPlayer* self) {
 			}
 			voice = voice->next;
 		}
-		voice = self->voices[0];
+		voice = &self->voices[0];
 
 		while (voice) {
 			if (voice->restart == 0 || voice->sample < 0) {
@@ -410,7 +435,8 @@ void BPPlayer_process(struct BPPlayer* self) {
 
 			AmigaChannel_set_period(chan, voice->period);
 			voice->restart = 0;
-			sample = self->samples[voice->sample];
+			assert_op(voice->sample, <, BPPLAYER_MAX_SAMPLES);
+			sample = &self->samples[voice->sample];
 
 			if (sample->synth) {
 				voice->synth   = 1;
@@ -500,7 +526,7 @@ void BPPlayer_initialize(struct BPPlayer* self) {
 
 	while (voice) {
 		BPVoice_initialize(voice);
-		voice->channel   = self->super.amiga->channels[voice->index];
+		voice->channel   = &self->super.amiga->channels[voice->index];
 		voice->samplePtr = self->super.amiga->loopPtr;
 		voice = voice->next;
 	}
@@ -667,7 +693,7 @@ void BPPlayer_loader(struct BPPlayer* self, struct ByteArray *stream) {
 	Amiga_store(self->super.amiga, stream, tables << 6, -1);
 
 	for (i = 0; ++i < 16;) {
-		sample = self->samples[i];
+		sample = &self->samples[i];
 		if (sample->synth || !sample->super.length) continue;
 		sample->super.pointer = Amiga_store(self->super.amiga, stream, sample->super.length, -1);
 		sample->super.loopPtr = sample->super.pointer + sample->super.loop;
