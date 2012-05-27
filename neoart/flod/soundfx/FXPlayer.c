@@ -83,7 +83,13 @@ void FXPlayer_set_ntsc(struct FXPlayer* self, int value) {
 
 //override
 void FXPlayer_process(struct FXPlayer* self) {
-	var chan:AmigaChannel, int index; int period; row:AmigaRow, sample:AmigaSample, int value; voice:FXVoice = voices[0];
+	struct AmigaChannel *chan = 0;
+	int index = 0; 
+	int period = 0; 
+	struct AmigaRow *row = 0;
+	struct AmigaSample *sample = 0;
+	int value = 0; 
+	struct FXVoice *voice = &self->voices[0];
 
 	if (!tick) {
 		value = track[trackPos] + patternPos;
@@ -291,7 +297,8 @@ void FXPlayer_process(struct FXPlayer* self) {
 
 //override
 void FXPlayer_initialize(struct FXPlayer* self) {
-	var voice:FXVoice = voices[0];
+	struct FXVoice *voice = &self->voices[0];
+	
 	super->initialize();
 	ntsc = standard;
 
@@ -310,7 +317,17 @@ void FXPlayer_initialize(struct FXPlayer* self) {
 
 //override
 void FXPlayer_loader(struct FXPlayer* self, struct ByteArray *stream) {
-	var int higher; int i; id:String, int j; int len; int offset; row:AmigaRow, sample:AmigaSample, int size; int value;
+	int higher = 0; 
+	int i = 0; 
+	char id[4];
+	int j = 0; 
+	int len = 0; 
+	int offset = 0; 
+	struct AmigaRow *row = 0;
+	struct AmigaSample *sample = 0;
+	int size = 0; 
+	int value = 0;
+	
 	if (stream->length < 1686) return;
 
 	stream->position = 60;
