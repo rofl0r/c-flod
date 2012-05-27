@@ -103,7 +103,7 @@ void RHPlayer_process(struct RHPlayer* self) {
 							if (self->super.super.variant == 4) voice->volume = self->stream->readUnsignedByte(self->stream);
 							break;
 						case -123:
-							if (self->super.super.variant > 1) self->super.amiga->complete = 1;
+							if (self->super.super.variant > 1) CoreMixer_set_complete(&self->super.amiga->super, 1);
 							break;
 						case -124:
 							ByteArray_set_position(self->stream, voice->trackPtr + voice->trackPos);
@@ -117,7 +117,7 @@ void RHPlayer_process(struct RHPlayer* self) {
 
 								if (!self->super.super.loopSong) {
 									self->complete &= ~(voice->bitFlag);
-									if (!self->complete) self->super.amiga->complete = 1;
+									if (!self->complete) CoreMixer_set_complete(&self->super.amiga->super, 1);
 								}
 							}
 
