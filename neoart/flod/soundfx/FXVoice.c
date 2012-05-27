@@ -15,51 +15,41 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->soundfx {
-  import neoart.flod.core.*;
 
-  public final class FXVoice {
-    internal var
- int index;
-      next        : FXVoice,
-      channel     : AmigaChannel,
-      sample      : AmigaSample,
- int enabled;
- int period;
- int effect;
- int param;
- int volume;
- int last;
- int slideCtr;
- int slideDir;
- int slideParam;
- int slidePeriod;
- int slideSpeed;
- int stepPeriod;
- int stepSpeed;
- int stepWanted;
+#include "FXVoice.h"
+#include "../flod_internal.h"
 
-     void FXVoice( int index) {
-      self->index = index;
-    }
+void FXVoice_defaults(struct FXVoice* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
 
-    internal function initialize():void {
-      channel     = null;
-      sample      = null;
-      enabled     = 0;
-      period      = 0;
-      effect      = 0;
-      param       = 0;
-      volume      = 0;
-      last        = 0;
-      slideCtr    = 0;
-      slideDir    = 0;
-      slideParam  = 0;
-      slidePeriod = 0;
-      slideSpeed  = 0;
-      stepPeriod  = 0;
-      stepSpeed   = 0;
-      stepWanted  = 0;
-    }
-  }
+void FXVoice_ctor(struct FXVoice* self, int index) {
+	CLASS_CTOR_DEF(FXVoice);
+	// original constructor code goes here
+	self->index = index;
+}
+
+struct FXVoice* FXVoice_new(int index) {
+	CLASS_NEW_BODY(FXVoice, index);
+}
+
+
+void FXVoice_initialize(struct FXVoice* self) {
+	self->channel     = null;
+	self->sample      = null;
+	self->enabled     = 0;
+	self->period      = 0;
+	self->effect      = 0;
+	self->param       = 0;
+	self->volume      = 0;
+	self->last        = 0;
+	self->slideCtr    = 0;
+	self->slideDir    = 0;
+	self->slideParam  = 0;
+	self->slidePeriod = 0;
+	self->slideSpeed  = 0;
+	self->stepPeriod  = 0;
+	self->stepSpeed   = 0;
+	self->stepWanted  = 0;
 }
