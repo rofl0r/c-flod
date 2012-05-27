@@ -75,7 +75,15 @@ struct FEPlayer* FEPlayer_new(struct Amiga* amiga) {
 
 //override
 void FEPlayer_process(struct FEPlayer* self) {
-	var chan:AmigaChannel, int i; int j; int len; int loop; int pos; sample:FESample, int value; voice:FEVoice = voices[3];
+	struct AmigaChannel *chan = 0;
+	int i = 0;
+	int j = 0;
+	int len = 0;
+	int loop = 0;
+	int pos = 0;
+	struct FESample *sample = 0;
+	int value = 0;
+	struct FEVoice *voice = &self->voices[3];
 
 	while (voice) {
 		chan = voice->channel;
@@ -443,7 +451,10 @@ void FEPlayer_process(struct FEPlayer* self) {
 
 //override
 void FEPlayer_initialize(struct FEPlayer* self) {
-	var int i; int len; voice:FEVoice = voices[3];
+	int i = 0; 
+	int len = 0; 
+	struct FEVoice *voice = &self->voices[3];
+	
 	super->initialize();
 
 	song  = songs[playSong];
@@ -466,7 +477,18 @@ void FEPlayer_initialize(struct FEPlayer* self) {
 
 //override
 void FEPlayer_loader(struct FEPlayer* self, struct ByteArray *stream) {
-	var int basePtr; int dataPtr; int i; int j; int len; int pos; int ptr; sample:FESample, int size; song:FESong, int tracksLen; int value;
+	int basePtr = 0;
+	int dataPtr = 0;
+	int i = 0;
+	int j = 0;
+	int len = 0;
+	int pos = 0;
+	int ptr = 0;
+	struct FESample *sample = 0;
+	int size = 0; 
+	struct FESong *song = 0;
+	int tracksLen = 0;
+	int value = 0;
 
 	while (stream->position < 16) {
 		value = stream->readUnsignedShort();
