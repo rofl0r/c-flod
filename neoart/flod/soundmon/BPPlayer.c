@@ -180,7 +180,7 @@ void BPPlayer_process(struct BPPlayer* self) {
 						data = voice->egValue - data;
 						len = dst + data;
 						assert_op(len, <, AMIGA_MAX_MEMORY);
-						assert_op(len, <, BPPLAYER_MAX_BUFFER);
+						assert_op(src + (len - dst), <, BPPLAYER_MAX_BUFFER);
 						for (; dst < len;) memory[dst++] = ~self->buffer[src++] + 1;
 					}
 				}
@@ -201,7 +201,8 @@ void BPPlayer_process(struct BPPlayer* self) {
 					voice->fxCtr = sample->fxSpeed;
 					dst = voice->synthPtr;
 					len = voice->synthPtr + 32;
-					assert_op(dst - 1, <, AMIGA_MAX_MEMORY);
+
+					assert_op(dst, <=, AMIGA_MAX_MEMORY);
 					data = dst > 0 ? memory[dst - 1] : 0;
 					
 					assert_op(len + 1, <, AMIGA_MAX_MEMORY);
