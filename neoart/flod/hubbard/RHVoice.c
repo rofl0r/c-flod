@@ -1,65 +1,37 @@
-/*
-  Flod 4.1
-  2012/04/30
-  Christian Corti
-  Neoart Costa Rica
+#include "RHVoice.h"
+#include "../flod_internal.h"
 
-  Last Update: Flod 4.0 - 2012/02/12
+void RHVoice_defaults(struct RHVoice* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
 
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+void RHVoice_ctor(struct RHVoice* self, int index, int bitFlag) {
+	CLASS_CTOR_DEF(RHVoice);
+	// original constructor code goes here
+	self->index = index;
+	self->bitFlag = bitFlag;
+}
 
-  This work is licensed under the Creative Commons Attribution-Noncommercial-Share Alike 3.0 Unported License.
-  To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
-  Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
-*/
-package neoart->flod->hubbard {
-  import neoart.flod.core.*;
+struct RHVoice* RHVoice_new(int index, int bitFlag) {
+	CLASS_NEW_BODY(RHVoice, index, bitFlag);
+}
 
-  public final class RHVoice {
-    internal var
- int index;
- int bitFlag;
-      next       : RHVoice,
-      channel    : AmigaChannel,
-      sample     : RHSample,
- int trackPtr;
- int trackPos;
- int patternPos;
- int tick;
- int busy;
- int flags;
- int note;
- int period;
- int volume;
- int portaSpeed;
- int vibratoPtr;
- int vibratoPos;
- int synthPos;
 
-     void RHVoice( int index; int bitFlag) {
-      self->index = index;
-      self->bitFlag = bitFlag;
-    }
-
-    internal function initialize():void {
-      channel    = null;
-      sample     = null;
-      trackPtr   = 0;
-      trackPos   = 0;
-      patternPos = 0;
-      tick       = 1;
-      busy       = 1;
-      flags      = 0;
-      note       = 0;
-      period     = 0;
-      volume     = 0;
-      portaSpeed = 0;
-      vibratoPtr = 0;
-      vibratoPos = 0;
-      synthPos   = 0;
-    }
-  }
+void RHVoice_initialize(struct RHVoice* self) {
+	self->channel    = null;
+	self->sample     = null;
+	self->trackPtr   = 0;
+	self->trackPos   = 0;
+	self->patternPos = 0;
+	self->tick       = 1;
+	self->busy       = 1;
+	self->flags      = 0;
+	self->note       = 0;
+	self->period     = 0;
+	self->volume     = 0;
+	self->portaSpeed = 0;
+	self->vibratoPtr = 0;
+	self->vibratoPos = 0;
+	self->synthPos   = 0;
 }
