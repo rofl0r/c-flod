@@ -638,8 +638,8 @@ void JHPlayer_process(struct JHPlayer* self) {
 			value = voice->volume;
 		}
 
-		chan->period = period;
-		chan->volume = value;
+		AmigaChannel_set_period(chan, period);
+		AmigaChannel_set_volume(chan, value);
 
 		if (voice->enabled) {
 			AmigaChannel_set_enabled(chan, 1);
