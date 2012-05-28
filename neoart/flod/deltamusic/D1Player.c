@@ -405,19 +405,19 @@ void D1Player_loader(struct D1Player* self, struct ByteArray *stream) {
 	len = self->pointers[3] + (data[3] >> 1) - 1;
 	tracks = new Vector.<AmigaStep>(len, true);
 	index = position + data[1] - 2;
-	stream->position = position;
+	ByteArray_set_position(stream, position);
 	j = 1;
 
 	for (i = 0; i < len; ++i) {
 		step  = new AmigaStep();
 		value = stream->readUnsignedShort();
 
-		if (value == 0xffff || stream->position == index) {
+		if (value == 0xffff || ByteArray_get_position(stream) == index) {
 			step->pattern   = -1;
 			step->transpose = stream->readUnsignedShort();
 			index += data[j++];
 		} else {
-			stream->position--;
+			ByteArray_set_position_rel(stream, -1);
 			step->pattern   = ((value >> 2) & 0x3fc0) >> 2;
 			step->transpose = stream->readByte();
 		}
