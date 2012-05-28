@@ -697,9 +697,22 @@ void JHPlayer_loader(struct JHPlayer* self, struct ByteArray *stream) {
 	int songsData = 0; 
 	int tracks = 0; 
 	int value = 0;
+	char test[4];
 
 	self->base = self->periods = 0;
-	self->coso = int(stream->readMultiByte(stream, 4, ENCODING) == "COSO");
+	
+	ByteArray_set_position(stream, 0);
+	
+	stream->readMultiByte(stream, test, 4);
+	if(is_str(test, "COSO")) self->coso = 1;
+	else {
+		ByteArray_set_position(stream, 0);
+		value = stream->readUnsignedShort();
+		if (value == 0x6000 || value == 0x6002 || value == 0x600e || value == 0x6016) ;
+		else return;
+	}
+	//self->coso = int(stream->readMultiByte(stream, 4, ENCODING) == "COSO");
+	value = 0;
 
 	if (self->coso) {
 		for (i = 0; i < 7; ++i) value += stream->readInt(stream);
@@ -829,7 +842,10 @@ void JHPlayer_loader(struct JHPlayer* self, struct ByteArray *stream) {
 		sample = &self->samples[i];
 		AmigaSample_ctor(sample);
 		
-		if (!self->coso) sample->name = stream->readMultiByte(stream, 18, ENCODING);
+		if (!self->coso) {
+			stream->readMultiByte(stream, self->sample_names[i], 18);
+			sample->name = self->sample_names[i];
+		}
 
 		sample->pointer = stream->readUnsignedInt(stream);
 		sample->length  = stream->readUnsignedShort(stream) << 1;

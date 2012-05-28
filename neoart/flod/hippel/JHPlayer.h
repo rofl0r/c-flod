@@ -17,6 +17,7 @@ struct JHPlayer {
 	struct AmigaPlayer super;
 	struct JHSong songs[JHPLAYER_MAX_SONGS];//       : Vector.<JHSong>,
 	struct AmigaSample samples[JHPLAYER_MAX_SAMPLES];//     : Vector.<AmigaSample>,
+	char sample_names[JHPLAYER_MAX_SAMPLES][18];
 	struct ByteArray *stream;
 	int base;
 	int patterns;
