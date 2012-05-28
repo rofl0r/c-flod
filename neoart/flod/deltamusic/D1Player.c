@@ -63,7 +63,13 @@ struct D1Player* D1Player_new(struct Amiga *amiga) {
 
 //override
 void D1Player_process(struct D1Player* self) {
-	var int adsr; chan:AmigaChannel, int loop; row:AmigaRow, sample:D1Sample, int value; voice:D1Voice = voices[0];
+	int adsr = 0; 
+	struct AmigaChannel *chan = 0;
+	int loop = 0; 
+	struct AmigaRow *row = 0;
+	struct D1Sample *sample = 0;
+	int value = 0; 
+	struct D1Voice *voice = &self->voices[0];
 
 	while (voice) {
 		chan = voice->channel;
@@ -354,30 +360,45 @@ void D1Player_process(struct D1Player* self) {
 
 //override
 void D1Player_initialize(struct D1Player* self) {
-	var voice:D1Voice = voices[0];
-	super->initialize();
-
-	speed = 6;
+	struct D1Voice *voice = &self->voices[0];
+	
+	CorePlayer_initialize(&self->super.super);
+	
+	self->super.super.speed = 6;
 
 	while (voice) {
-		voice->initialize();
-		voice->channel = amiga->channels[voice->index];
-		voice->sample  = samples[20];
+		D1Voice_initialize(voice);
+		voice->channel = self->super.amiga->channels[voice->index];
+		voice->sample  = &self->samples[20];
 		voice = voice->next;
 	}
 }
 
+//fixed
+#define D1PLAYER_MAX_STACKDATA 25
 //override
 void D1Player_loader(struct D1Player* self, struct ByteArray *stream) {
-	var data:Vector.<int>, int i; id:String, int index; int j; int len; int position; row:AmigaRow, sample:D1Sample, step:AmigaStep, int value;
+	//data:Vector.<int>, 
+	int data[D1PLAYER_MAX_STACKDATA];
+	int i = 0;
+	char id[4];
+	int index = 0;
+	int j = 0;
+	int len = 0;
+	int position = 0; 
+	struct AmigaRow *row = 0;
+	struct D1Sample *sample = 0;
+	struct AmigaStep *step = 0;
+	int value = 0;
+	
 	id = stream->readMultiByte(4, ENCODING);
 	if (id != "ALL ") return;
 
 	position = 104;
-	data = new Vector.<int>(25 ,true);
+	//data = new Vector.<int>(25 ,true);
 	for (i = 0; i < 25; ++i) data[i] = stream->readUnsignedInt();
 
-	pointers = new Vector.<int>(4, true);
+	//pointers = new Vector.<int>(4, true);
 	for (i = 1; i < 4; ++i)
 		pointers[i] = pointers[j] + (data[j++] >> 1) - 1;
 

@@ -8,13 +8,13 @@
 #include "../core/AmigaStep.h"
 #include "../core/AmigaPlayer.h"
 
-#define D1PLAYER_MAX_POINTERS 4
 #define D1PLAYER_MAX_PATTERNS 4
 #define D1PLAYER_MAX_TRACKS 4
 
 //fixed
 #define D1PLAYER_MAX_SAMPLES 21
 #define D1PLAYER_MAX_VOICES 4
+#define D1PLAYER_MAX_POINTERS 4
 
 struct D1Player {
 	struct AmigaPlayer super;
