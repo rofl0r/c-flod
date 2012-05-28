@@ -21,6 +21,7 @@
 #include "../neoart/flod/hippel/JHPlayer.h"
 
 #include "keyboard.h"
+#include <signal.h>
 
 enum KeyboardCommand {
 	KC_NONE,
@@ -51,6 +52,11 @@ int check_keyboard(void) {
 		}
 	}
 	return KC_NONE;
+}
+
+void trap_handler(int signum) {
+	close_keyboard();
+	_exit(1);
 }
 
 enum PlayerType {
@@ -257,6 +263,7 @@ play:
 	hardware.core.wave = &wave;
 	
 	init_keyboard();
+	signal(SIGTRAP, trap_handler);
 	
 play_song:
 	player.core.initialize(&player.core);
