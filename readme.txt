@@ -15,6 +15,7 @@ currently done:
 - sidmon 1,2
 - bp soundmon
 - rob hubbard (only v1)
+- "fred editor" player
 - pseudo barebone flashlib
 - libao and wave writer backends.
 
