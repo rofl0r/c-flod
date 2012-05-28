@@ -16,7 +16,10 @@ enum Soundtracker_Format {
 
 #define STPLAYER_MAX_TRACKS 128
 #define STPLAYER_MAX_SAMPLES 16
-#define STPLAYER_MAX_PATTERNS (3840 + 256)
+// all tunes but Federal_Intelligent_Gamesoft1.mod work with the below buffersize
+//#define STPLAYER_MAX_PATTERNS (3840 + 256)
+#define STPLAYER_MAX_PATTERNS 8448
+
 
 // fixed
 #define STPLAYER_MAX_VOICES 4
