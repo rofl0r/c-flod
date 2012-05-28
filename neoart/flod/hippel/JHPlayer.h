@@ -7,8 +7,10 @@
 #include "JHSong.h"
 #include "JHVoice.h"
 
-#define JHPLAYER_MAX_SONGS 4
-#define JHPLAYER_MAX_SAMPLES 4
+// there is only one tune that needs 17 songs: the_seven_gates_of_jambala__ingame_2_.hip
+// all others work with 8
+#define JHPLAYER_MAX_SONGS 17
+#define JHPLAYER_MAX_SAMPLES 52
 
 //fixed
 #define JHPLAYER_MAX_VOICES 4
