@@ -8,8 +8,12 @@
 #include "../core/AmigaStep.h"
 #include "../core/AmigaPlayer.h"
 
-#define D1PLAYER_MAX_PATTERNS 4
-#define D1PLAYER_MAX_TRACKS 4
+#define D1PLAYER_MAX_PATTERNS 560
+#define D1PLAYER_MAX_TRACKS 292
+//crusaders2.dm is *very* hungry
+// those are the values to make it work. all others are fine with the above values.
+//#define D1PLAYER_MAX_TRACKS 1884
+//#define D1PLAYER_MAX_PATTERNS 1664
 
 //fixed
 #define D1PLAYER_MAX_SAMPLES 21
