@@ -15,38 +15,62 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->hippel {
-  import flash.utils.*;
-  import neoart.flod.core.*;
 
-  public final class JHPlayer extends AmigaPlayer {
-    private var
-      songs       : Vector.<JHSong>,
-      samples     : Vector.<AmigaSample>,
-      stream      : ByteArray,
- int base;
- int patterns;
- int patternLen;
- int periods;
- int frqseqs;
- int volseqs;
- int samplesData;
-      song        : JHSong,
-      voices      : Vector.<JHVoice>,
- int coso;
+#include "JHPlayer.h"
+#include "../flod_internal.h"
 
-     void JHPlayer(amiga:Amiga = null) {
-      super(amiga);
-      voices = new Vector.<JHVoice>(4, true);
+static const unsigned short PERIODS[] = {
+        1712,1616,1524,1440,1356,1280,1208,1140,1076,1016,
+         960, 906, 856, 808, 762, 720, 678, 640, 604, 570,
+         538, 508, 480, 453, 428, 404, 381, 360, 339, 320,
+         302, 285, 269, 254, 240, 226, 214, 202, 190, 180,
+         170, 160, 151, 143, 135, 127, 120, 113, 113, 113,
+         113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+        3424,3232,3048,2880,2712,2560,2416,2280,2152,2032,
+        1920,1812,6848,6464,6096,5760,5424,5120,4832,4560,
+        4304,4064,3840,3624,
+};
 
-      voices[0] = new JHVoice(0);
-      voices[0].next = voices[1] = new JHVoice(1);
-      voices[1].next = voices[2] = new JHVoice(2);
-      voices[2].next = voices[3] = new JHVoice(3);
-    }
+void JHPlayer_loader(struct JHPlayer* self, struct ByteArray *stream);
+void JHPlayer_initialize(struct JHPlayer* self);
+void JHPlayer_process(struct JHPlayer* self);
+
+void JHPlayer_defaults(struct JHPlayer* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+void JHPlayer_ctor(struct JHPlayer* self, struct Amiga *amiga) {
+	CLASS_CTOR_DEF(JHPlayer);
+	// original constructor code goes here
+	//super(amiga);
+	AmigaPlayer_ctor(&self->super, amiga);
+	//voices = new Vector.<JHVoice>(4, true);
+	unsigned i = 0;
+	for(; i < JHPLAYER_MAX_VOICES; i++) {
+		JHVoice_ctor(&self->voices[i], i);
+		if(i) self->voices[i - 1].next = &self->voices[i];
+	}
+	/*
+	voices[0] = new JHVoice(0);
+	voices[0].next = voices[1] = new JHVoice(1);
+	voices[1].next = voices[2] = new JHVoice(2);
+	voices[2].next = voices[3] = new JHVoice(3);*/
+	
+	//vtable
+	self->super.super.loader = JHPlayer_loader;
+	self->super.super.process = JHPlayer_process;
+	self->super.super.initialize = JHPlayer_initialize;
+	
+	self->super.super.min_filesize = 8;
+}
+
+struct JHPlayer* JHPlayer_new(struct Amiga *amiga) {
+	CLASS_NEW_BODY(JHPlayer, amiga);
+}
 
 //override
-void process() {
+void JHPlayer_process(struct JHPlayer* self) {
       var chan:AmigaChannel, int loop; int period; int pos1; int pos2; sample:AmigaSample, int value; voice:JHVoice = voices[0];
 
       if (--tick == 0) {
@@ -617,10 +641,10 @@ void process() {
 
         voice = voice->next;
       }
-    }
+}
 
 //override
-void initialize() {
+void JHPlayer_initialize(struct JHPlayer* self) {
       var voice:JHVoice = voices[0];
       super->initialize();
 
@@ -651,7 +675,7 @@ void initialize() {
     }
 
 //override
-void loader(stream:ByteArray) {
+void JHPlayer_loader(struct JHPlayer* self, struct ByteArray *stream) {
       var int headers; int i; int id; int len; int pos; sample:AmigaSample, song:JHSong, int songsData; int tracks; int value;
 
       base = periods = 0;
@@ -835,18 +859,5 @@ void loader(stream:ByteArray) {
       }
 
       self->stream = stream;
-    }
-
-    private const
-      PERIODS : Vector.<int> = Vector.<int>([
-        1712,1616,1524,1440,1356,1280,1208,1140,1076,1016,
-         960, 906, 856, 808, 762, 720, 678, 640, 604, 570,
-         538, 508, 480, 453, 428, 404, 381, 360, 339, 320,
-         302, 285, 269, 254, 240, 226, 214, 202, 190, 180,
-         170, 160, 151, 143, 135, 127, 120, 113, 113, 113,
-         113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
-        3424,3232,3048,2880,2712,2560,2416,2280,2152,2032,
-        1920,1812,6848,6464,6096,5760,5424,5120,4832,4560,
-        4304,4064,3840,3624]);
-  }
 }
+
