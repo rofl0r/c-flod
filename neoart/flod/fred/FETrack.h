@@ -1,7 +1,7 @@
 #ifndef FETRACK_H
 #define FETRACK_H
 
-#define FETRACK_MAX_DATA 4
+#define FETRACK_MAX_DATA 256
 
 struct FETrack {
 	int track_data[FETRACK_MAX_DATA];
