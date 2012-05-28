@@ -476,7 +476,7 @@ void D1Player_loader(struct D1Player* self, struct ByteArray *stream) {
 				len = sample->super.length;
 			}
 
-			sample->super.pointer = self->super.amiga->store(stream, len);
+			sample->super.pointer = Amiga_store(self->super.amiga, stream, len, -1);
 			sample->super.loopPtr = sample->super.pointer + sample->super.loop;
 			self->samples[i] = sample;
 		}
@@ -484,7 +484,7 @@ void D1Player_loader(struct D1Player* self, struct ByteArray *stream) {
 	}
 
 	sample = new D1Sample();
-	sample->super.pointer = sample->super.loopPtr = self->super.amiga->memory->length;
+	sample->super.pointer = sample->super.loopPtr = self->super.amiga->vector_count_memory;
 	sample->super.length  = sample->super.repeat  = 2;
 	self->samples[20] = sample;
 	self->super.super.version = 1;
