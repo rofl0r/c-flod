@@ -100,13 +100,14 @@ void JHPlayer_process(struct JHPlayer* self) {
 							if (value == -1) {
 								if (voice->trackPos == self->song->length) {
 									voice->trackPos = 0;
-									CoreMixer_set_complete(self->super.amiga->super, 1);
+									CoreMixer_set_complete(&self->super.amiga->super, 1);
 								}
 
 								ByteArray_set_position(self->stream,  voice->trackPtr + voice->trackPos);
 								value = self->stream->readUnsignedByte(self->stream);
 								voice->trackTransp = self->stream->readByte(self->stream);
-								pos1 = self->stream[ByteArray_get_position(self->stream)];
+								unsigned idxx = ByteArray_get_position(self->stream);
+								pos1 = ByteArray_getUnsignedByte(self->stream, idxx);
 
 								if ((self->super.super.variant > 3) && (pos1 > 127)) {
 									pos2 = (pos1 >> 4) & 15;
@@ -125,7 +126,7 @@ void JHPlayer_process(struct JHPlayer* self) {
 
 										voice->volFade = pos2;
 									} else if (pos2 == 8) {
-										CoreMixer_set_complete(self->super.amiga->super, 1);
+										CoreMixer_set_complete(&self->super.amiga->super, 1);
 									} else if (pos2 == 14) {
 										self->super.super.speed = pos1;
 									}
@@ -191,7 +192,7 @@ void JHPlayer_process(struct JHPlayer* self) {
 				if (voice->patternPos == self->patternLen || (value & 127) == 1) {
 					if (voice->trackPos == self->song->length) {
 						voice->trackPos = 0;
-						CoreMixer_set_complete(self->super.amiga->super, 1);
+						CoreMixer_set_complete(&self->super.amiga->super, 1);
 					}
 
 					ByteArray_set_position(self->stream,  voice->trackPtr + voice->trackPos);
@@ -199,7 +200,7 @@ void JHPlayer_process(struct JHPlayer* self) {
 					voice->trackTransp = self->stream->readByte(self->stream);
 					voice->volTransp = self->stream->readByte(self->stream);
 
-					if (voice->volTransp == -128) CoreMixer_set_complete(self->super.amiga->super, 1);
+					if (voice->volTransp == -128) CoreMixer_set_complete(&self->super.amiga->super, 1);
 
 					voice->patternPtr = self->patterns + (value * self->patternLen);
 					voice->patternPos = 0;
@@ -250,7 +251,7 @@ void JHPlayer_process(struct JHPlayer* self) {
 			}
 			voice = voice->next;
 		}
-		voice = self->voices[0];
+		voice = &self->voices[0];
 	}
 
 	while (voice) {
@@ -284,7 +285,11 @@ void JHPlayer_process(struct JHPlayer* self) {
 						ByteArray_set_position(self->stream,  voice->frqseqPtr + voice->frqseqPos);
 						break;
 					case -30:
-						sample = self->samples[self->stream->readUnsignedByte(self->stream)];
+					{
+						unsigned idxx = self->stream->readUnsignedByte(self->stream);
+						assert_op(idxx, <, JHPLAYER_MAX_SAMPLES);
+						sample = &self->samples[idxx];
+					}
 						voice->sample = -1;
 
 						voice->loopPtr = sample->loopPtr;
@@ -306,7 +311,12 @@ void JHPlayer_process(struct JHPlayer* self) {
 						voice->frqseqPos += 3;
 						break;
 					case -28:
-						sample = self->samples[self->stream->readUnsignedByte(self->stream)];
+					{
+						unsigned idxx = self->stream->readUnsignedByte(self->stream);
+						assert_op(idxx, <, JHPLAYER_MAX_SAMPLES);
+						
+						sample = &self->samples[idxx];
+					}
 						voice->loopPtr = sample->loopPtr;
 						voice->repeat  = sample->repeat;
 
@@ -318,7 +328,7 @@ void JHPlayer_process(struct JHPlayer* self) {
 						break;
 					case -27:
 						if (self->super.super.variant < 2) break;
-						sample = self->samples[self->stream->readUnsignedByte(self->stream)];
+						sample = &self->samples[self->stream->readUnsignedByte(self->stream)];
 						AmigaChannel_set_enabled(chan, 0);
 						voice->enabled = 1;
 
@@ -379,7 +389,8 @@ void JHPlayer_process(struct JHPlayer* self) {
 							value = self->stream->readUnsignedByte(self->stream);
 
 							if (value != voice->sample) {
-								sample = self->samples[value];
+								assert_op(value, <, JHPLAYER_MAX_SAMPLES);
+								sample = &self->samples[value];
 								voice->sample = value;
 
 								voice->loopPtr = sample->loopPtr;
@@ -404,7 +415,9 @@ void JHPlayer_process(struct JHPlayer* self) {
 						break;
 					case -23:
 						if (self->super.super.variant < 2) break;
-						sample = self->samples[self->stream->readUnsignedByte(self->stream)];
+						unsigned idxx = self->stream->readUnsignedByte(self->stream);
+						assert_op(idxx, <, JHPLAYER_MAX_SAMPLES);
+						sample = &self->samples[idxx];
 						voice->sample = -1;
 						voice->enabled = 1;
 
@@ -659,13 +672,14 @@ void JHPlayer_initialize(struct JHPlayer* self) {
 	
 	CorePlayer_initialize(&self->super.super);
 
-	self->song  = self->songs[self->super.super.playSong];
+	self->song  = &self->songs[self->super.super.playSong];
 	self->super.super.speed = self->song->speed;
 	self->super.super.tick  = (self->coso || self->super.super.variant > 1) ? 1 : self->super.super.speed;
 
 	while (voice) {
 		JHVoice_initialize(voice);
-		voice->channel = self->super.amiga->channels[voice->index];
+		assert_op(voice->index, <, AMIGA_MAX_CHANNELS);
+		voice->channel = &self->super.amiga->channels[voice->index];
 		voice->trackPtr = self->song->pointer + (voice->index * 3);
 
 		if (self->coso) {
@@ -707,7 +721,7 @@ void JHPlayer_loader(struct JHPlayer* self, struct ByteArray *stream) {
 	if(is_str(test, "COSO")) self->coso = 1;
 	else {
 		ByteArray_set_position(stream, 0);
-		value = stream->readUnsignedShort();
+		value = stream->readUnsignedShort(stream);
 		if (value == 0x6000 || value == 0x6002 || value == 0x600e || value == 0x6016) ;
 		else return;
 	}
@@ -762,9 +776,13 @@ void JHPlayer_loader(struct JHPlayer* self, struct ByteArray *stream) {
 		self->samplesData = stream->readUnsignedInt(stream);
 
 		ByteArray_set_position(stream,  0);
+		/* FIXME we can't write to a ByteArray, since it could be a file
+		 * we have to detect which code reads those values and pass them directly*/
+		/*
 		stream->writeInt(0x1000000);
 		stream->writeInt(0xe1);
 		stream->writeShort(0xffff);
+		*/
 
 		len = ((self->samplesData - headers) / 10) - 1;
 		self->super.super.lastSong = (headers - songsData) / 6;
