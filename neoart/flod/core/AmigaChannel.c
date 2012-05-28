@@ -40,7 +40,7 @@ struct AmigaChannel* AmigaChannel_new(int index) {
 }
 
 int AmigaChannel_get_enabled(struct AmigaChannel* self) {
-	return 0;
+	return self->audena;
 }
 
 void AmigaChannel_set_enabled(struct AmigaChannel* self, int value) {
