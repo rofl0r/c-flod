@@ -16,6 +16,9 @@ currently done:
 - bp soundmon
 - rob hubbard (only v1)
 - "fred editor" player
+- jochen hippel and COSO players.
+  (there are a few tunes (maybe 3-5 %) that are not working correctly.
+   they dont work in uade/original flod either.)
 - pseudo barebone flashlib
 - libao and wave writer backends.
 
