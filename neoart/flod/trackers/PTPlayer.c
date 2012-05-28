@@ -341,7 +341,6 @@ The 6 and 8 channel mod files differ from the normal mods in two ways:
 			self->chans = 6;
 			goto chn_print;
 		} else {
-			printf("header not found, got %s\n", id);
 			return;
 		}
 	}

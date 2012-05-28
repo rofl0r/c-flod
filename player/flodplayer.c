@@ -352,8 +352,6 @@ doneloop:
 	
 	backend_info[backend_type].close_func(&writer.backend);
 	
-	printf("finished playing %s\n", argv[startarg]);
-	
 	close_keyboard();
 	
 	return 0;
