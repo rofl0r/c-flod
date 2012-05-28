@@ -15,33 +15,54 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->deltamusic {
-  import flash.utils.*;
-  import neoart.flod.core.*;
 
-  public final class D1Player extends AmigaPlayer {
-    private var
-      pointers : Vector.<int>,
-      tracks   : Vector.<AmigaStep>,
-      patterns : Vector.<AmigaRow>,
-      samples  : Vector.<D1Sample>,
-      voices   : Vector.<D1Voice>;
+#include "D1Player.h"
+#include "../flod_internal.h"
 
-     void D1Player(amiga:Amiga = null) {
-      super(amiga);
-      PERIODS->fixed = true;
+static const unsigned short PERIODS[] = {
+	   0,6848,6464,6096,5760,5424,5120,4832,4560,4304,4064,3840,
+	3616,3424,3232,3048,2880,2712,2560,2416,2280,2152,2032,1920,
+	1808,1712,1616,1524,1440,1356,1280,1208,1140,1076, 960, 904,
+	 856, 808, 762, 720, 678, 640, 604, 570, 538, 508, 480, 452,
+	 428, 404, 381, 360, 339, 320, 302, 285, 269, 254, 240, 226,
+	 214, 202, 190, 180, 170, 160, 151, 143, 135, 127, 120, 113,
+	 113, 113, 113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+};
 
-      samples = new Vector.<D1Sample>(21, true);
-      voices  = new Vector.<D1Voice>(4, true);
+void D1Player_loader(struct D1Player* self, struct ByteArray *stream);
+void D1Player_initialize(struct D1Player* self);
+void D1Player_process(struct D1Player* self);
 
-      voices[0] = new D1Voice(0);
-      voices[0].next = voices[1] = new D1Voice(1);
-      voices[1].next = voices[2] = new D1Voice(2);
-      voices[2].next = voices[3] = new D1Voice(3);
-    }
+void D1Player_defaults(struct D1Player* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+void D1Player_ctor(struct D1Player* self, struct Amiga *amiga) {
+	CLASS_CTOR_DEF(D1Player);
+	// original constructor code goes here
+	AmigaPlayer_ctor(&self->super, amiga);
+
+	unsigned i;
+	for (i = 0; i < D1PLAYER_MAX_VOICES; i++) {
+		D1Voice_ctor(&self->voices[i], i);
+		if(i) self->voices[i - 1].next = &self->voices[i];
+	}
+	
+	//vtable
+	self->super.super.loader = D1Player_loader;
+	self->super.super.process = D1Player_process;
+	self->super.super.initialize = D1Player_initialize;
+	self->super.super.min_filesize = 64;
+}
+
+struct D1Player* D1Player_new(struct Amiga *amiga) {
+	CLASS_NEW_BODY(D1Player, amiga);
+}
+
 
 //override
-void process() {
+void D1Player_process(struct D1Player* self) {
       var int adsr; chan:AmigaChannel, int loop; row:AmigaRow, sample:D1Sample, int value; voice:D1Voice = voices[0];
 
       while (voice) {
@@ -327,10 +348,10 @@ void process() {
         }
         voice = voice->next;
       }
-    }
+}
 
 //override
-void initialize() {
+void D1Player_initialize(struct D1Player* self) {
       var voice:D1Voice = voices[0];
       super->initialize();
 
@@ -342,10 +363,10 @@ void initialize() {
         voice->sample  = samples[20];
         voice = voice->next;
       }
-    }
+}
 
 //override
-void loader(stream:ByteArray) {
+void D1Player_loader(struct D1Player* self, struct ByteArray *stream) {
       var data:Vector.<int>, int i; id:String, int index; int j; int len; int position; row:AmigaRow, sample:D1Sample, step:AmigaStep, int value;
       id = stream->readMultiByte(4, ENCODING);
       if (id != "ALL ") return;
@@ -444,16 +465,4 @@ void loader(stream:ByteArray) {
       sample->length  = sample->repeat  = 2;
       samples[20] = sample;
       version = 1;
-    }
-
-    private const
-      PERIODS:Vector.<int> = Vector.<int>([
-        0000,6848,6464,6096,5760,5424,5120,4832,4560,4304,4064,3840,
-        3616,3424,3232,3048,2880,2712,2560,2416,2280,2152,2032,1920,
-        1808,1712,1616,1524,1440,1356,1280,1208,1140,1076,0960,0904,
-        0856,0808,0762,0720,0678,0640,0604,0570,0538,0508,0480,0452,
-        0428,0404,0381,0360,0339,0320,0302,0285,0269,0254,0240,0226,
-        0214,0202,0190,0180,0170,0160,0151,0143,0135,0127,0120,0113,
-        0113,0113,0113,0113,0113,0113,0113,0113,0113,0113,0113,0113]);
-  }
 }
