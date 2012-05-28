@@ -75,19 +75,19 @@ void D1Player_process(struct D1Player* self) {
 		chan = voice->channel;
 
 		if (--voice->speed == 0) {
-			voice->speed = speed;
+			voice->speed = self->super.super.speed;
 
 			if (voice->patternPos == 0) {
-				voice->step = tracks[int(pointers[voice->index] + voice->trackPos)];
+				voice->step = self->tracks[int(self->pointers[voice->index] + voice->trackPos)];
 
 				if (voice->step->pattern < 0) {
 					voice->trackPos = voice->step->transpose;
-					voice->step = tracks[int(pointers[voice->index] + voice->trackPos)];
+					voice->step = self->tracks[int(self->pointers[voice->index] + voice->trackPos)];
 				}
 				voice->trackPos++;
 			}
 
-			row = patterns[int(voice->step->pattern + voice->patternPos)];
+			row = self->patterns[int(voice->step->pattern + voice->patternPos)];
 			if (row->effect) voice->row = row;
 
 			if (row->note) {
@@ -96,9 +96,9 @@ void D1Player_process(struct D1Player* self) {
 				voice->note = row->note + voice->step->transpose;
 				voice->arpeggioPos = voice->pitchBend = voice->status = 0;
 
-				sample = voice->sample = samples[row->sample];
-				if (!sample->synth) chan->pointer = sample->pointer;
-				chan->length = sample->length;
+				sample = voice->sample = self->samples[row->sample];
+				if (!sample->synth) chan->pointer = sample->super.pointer;
+				chan->length = sample->super.length;
 
 				voice->tableCtr   = voice->tablePos = 0;
 				voice->vibratoCtr = sample->vibratoWait;
@@ -122,7 +122,7 @@ void D1Player_process(struct D1Player* self) {
 					voice->tablePos++;
 
 					if (value >= 0) {
-						chan->pointer = sample->pointer + (value << 5);
+						chan->pointer = sample->super.pointer + (value << 5);
 						loop = 0;
 					} else if (value != -1) {
 						sample->tableDelay = value & 127;
@@ -175,7 +175,7 @@ void D1Player_process(struct D1Player* self) {
 					break;
 				case 1:
 					value = row->param & 15;
-					if (value) speed = value;
+					if (value) self->super.super.speed = value;
 					break;
 				case 2:
 					voice->pitchBend -= row->param;
@@ -184,7 +184,7 @@ void D1Player_process(struct D1Player* self) {
 					voice->pitchBend += row->param;
 					break;
 				case 4:
-					amiga->filter->active = row->param;
+					self->super.amiga->filter->active = row->param;
 					break;
 				case 5:
 					sample->vibratoWait = row->param;
@@ -204,7 +204,7 @@ void D1Player_process(struct D1Player* self) {
 				case 10:
 					value = row->param;
 					if (value > 64) value = 64;
-					sample->volume = 64;
+					sample->super.volume = 64;
 					break;
 				case 11:
 					sample->arpeggio[0] = row->param;
@@ -309,10 +309,10 @@ void D1Player_process(struct D1Player* self) {
 				voice->decayCtr = sample->decayDelay;
 				value -= sample->decayStep;
 
-				if (value <= sample->volume) {
+				if (value <= sample->super.volume) {
 				adsr |= 6;
 				voice->status |= 6;
-				value = sample->volume;
+				value = sample->super.volume;
 				}
 			} else {
 				voice->decayCtr--;
@@ -346,11 +346,11 @@ void D1Player_process(struct D1Player* self) {
 		chan->enabled = 1;
 
 		if (!sample->synth) {
-			if (sample->loop) {
-				chan->pointer = sample->loopPtr;
-				chan->length  = sample->repeat;
+			if (sample->super.loop) {
+				chan->pointer = sample->super.loopPtr;
+				chan->length  = sample->super.repeat;
 			} else {
-				chan->pointer = amiga->loopPtr;
+				chan->pointer = self->super.amiga->loopPtr;
 				chan->length  = 2;
 			}
 		}
@@ -400,9 +400,9 @@ void D1Player_loader(struct D1Player* self, struct ByteArray *stream) {
 
 	//pointers = new Vector.<int>(4, true);
 	for (i = 1; i < 4; ++i)
-		pointers[i] = pointers[j] + (data[j++] >> 1) - 1;
+		self->pointers[i] = self->pointers[j] + (data[j++] >> 1) - 1;
 
-	len = pointers[3] + (data[3] >> 1) - 1;
+	len = self->pointers[3] + (data[3] >> 1) - 1;
 	tracks = new Vector.<AmigaStep>(len, true);
 	index = position + data[1] - 2;
 	stream->position = position;
@@ -421,11 +421,11 @@ void D1Player_loader(struct D1Player* self, struct ByteArray *stream) {
 			step->pattern   = ((value >> 2) & 0x3fc0) >> 2;
 			step->transpose = stream->readByte();
 		}
-		tracks[i] = step;
+		self->tracks[i] = step;
 	}
 
 	len = data[4] >> 2;
-	patterns = new Vector.<AmigaRow>(len, true);
+	self->patterns = new Vector.<AmigaRow>(len, true);
 
 	for (i = 0; i < len; ++i) {
 		row = new AmigaRow();
@@ -433,13 +433,13 @@ void D1Player_loader(struct D1Player* self, struct ByteArray *stream) {
 		row->note   = stream->readUnsignedByte();
 		row->effect = stream->readUnsignedByte() & 31;
 		row->param  = stream->readUnsignedByte();
-		patterns[i] = row;
+		self->patterns[i] = row;
 	}
 
 	index = 5;
 
 	for (i = 0; i < 20; ++i) {
-		samples[i] = null;
+		self->samples[i] = null;
 
 		if (data[index] != 0) {
 			sample = new D1Sample();
@@ -450,7 +450,7 @@ void D1Player_loader(struct D1Player* self, struct ByteArray *stream) {
 			sample->sustain      = stream->readUnsignedShort();
 			sample->releaseStep  = stream->readUnsignedByte();
 			sample->releaseDelay = stream->readUnsignedByte();
-			sample->volume       = stream->readUnsignedByte();
+			sample->super.volume = stream->readUnsignedByte();
 			sample->vibratoWait  = stream->readUnsignedByte();
 			sample->vibratoStep  = stream->readUnsignedByte();
 			sample->vibratoLen   = stream->readUnsignedByte();
@@ -462,9 +462,9 @@ void D1Player_loader(struct D1Player* self, struct ByteArray *stream) {
 			for (j = 0; j < 8; ++j)
 				sample->arpeggio[j] = stream->readByte();
 
-			sample->length = stream->readUnsignedShort();
-			sample->loop   = stream->readUnsignedShort();
-			sample->repeat = stream->readUnsignedShort() << 1;
+			sample->super.length = stream->readUnsignedShort();
+			sample->super.loop   = stream->readUnsignedShort();
+			sample->super.repeat = stream->readUnsignedShort() << 1;
 			sample->synth  = sample->synth ? 0 : 1;
 
 			if (sample->synth) {
@@ -473,19 +473,19 @@ void D1Player_loader(struct D1Player* self, struct ByteArray *stream) {
 
 				len = data[index] - 78;
 			} else {
-				len = sample->length;
+				len = sample->super.length;
 			}
 
-			sample->pointer = amiga->store(stream, len);
-			sample->loopPtr = sample->pointer + sample->loop;
-			samples[i] = sample;
+			sample->super.pointer = self->super.amiga->store(stream, len);
+			sample->super.loopPtr = sample->super.pointer + sample->super.loop;
+			self->samples[i] = sample;
 		}
 		index++;
 	}
 
 	sample = new D1Sample();
-	sample->pointer = sample->loopPtr = amiga->memory->length;
-	sample->length  = sample->repeat  = 2;
-	samples[20] = sample;
-	version = 1;
+	sample->super.pointer = sample->super.loopPtr = self->super.amiga->memory->length;
+	sample->super.length  = sample->super.repeat  = 2;
+	self->samples[20] = sample;
+	self->super.super.version = 1;
 }
