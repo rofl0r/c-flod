@@ -32,6 +32,10 @@ void ByteArray_ctor(struct ByteArray* self) {
 	self->writeBytes = ByteArray_writeBytes;
 	self->writeFloat = ByteArray_writeFloat;
 	
+	self->set_position = ByteArray_set_position;
+	self->set_position_rel = ByteArray_set_position_rel;
+	self->get_position = ByteArray_get_position;
+	
 	self->bytesAvailable = ByteArray_bytesAvailable;
 	
 #ifdef IS_LITTLE_ENDIAN
@@ -182,7 +186,7 @@ off_t ByteArray_readBytes(struct ByteArray* self, struct ByteArray *dest, off_t 
 	if(dest->type != BAT_MEMSTREAM) {
 		abort();
 	}
-	ByteArray_readMultiByte(self, &dest->start_addr[start], len);
+	self->readMultiByte(self, &dest->start_addr[start], len);
 	return len;
 }
 
@@ -196,7 +200,7 @@ unsigned int ByteArray_readUnsignedInt(struct ByteArray* self) {
 		unsigned int intval;
 		unsigned char charval[sizeof(unsigned int)];
 	} buf;
-	ByteArray_readMultiByte(self, (char*) buf.charval, 4);
+	self->readMultiByte(self, (char*) buf.charval, 4);
 	if(self->endian != self->sys_endian) {
 		buf.intval = byteswap32(buf.intval);
 	}
@@ -208,7 +212,7 @@ int ByteArray_readInt(struct ByteArray* self) {
 		unsigned int intval;
 		unsigned char charval[sizeof(unsigned int)];
 	} buf;
-	ByteArray_readMultiByte(self, (char*) buf.charval, 4);
+	self->readMultiByte(self, (char*) buf.charval, 4);
 	if(self->endian != self->sys_endian) {
 		buf.intval = byteswap32(buf.intval);
 	}
@@ -220,7 +224,7 @@ unsigned short ByteArray_readUnsignedShort(struct ByteArray* self) {
 		unsigned short intval;
 		unsigned char charval[sizeof(unsigned short)];
 	} buf;
-	ByteArray_readMultiByte(self, (char*) buf.charval, 2);
+	self->readMultiByte(self, (char*) buf.charval, 2);
 	if(self->endian != self->sys_endian) {
 		buf.intval = byteswap16(buf.intval);
 	}
@@ -232,7 +236,7 @@ short ByteArray_readShort(struct ByteArray* self) {
 		unsigned short intval;
 		unsigned char charval[sizeof(unsigned short)];
 	} buf;
-	ByteArray_readMultiByte(self, (char*) buf.charval, 2);
+	self->readMultiByte(self, (char*) buf.charval, 2);
 	if(self->endian != self->sys_endian) {
 		buf.intval = byteswap16(buf.intval);
 	}
@@ -243,7 +247,7 @@ unsigned char ByteArray_readUnsignedByte(struct ByteArray* self) {
 	union {
 		unsigned char intval;
 	} buf;
-	ByteArray_readMultiByte(self, (char*) &buf.intval, 1);
+	self->readMultiByte(self, (char*) &buf.intval, 1);
 	return buf.intval;
 }
 
@@ -251,16 +255,25 @@ signed char ByteArray_readByte(struct ByteArray* self) {
 	union {
 		signed char intval;
 	} buf;
-	ByteArray_readMultiByte(self, (char*) &buf.intval, 1);
+	self->readMultiByte(self, (char*) &buf.intval, 1);
 	return buf.intval;
 }
 
 /* equivalent to foo = self[x]; (pos stays unchanged) */
 unsigned char ByteArray_getUnsignedByte(struct ByteArray* self, off_t index) {
-	assert_op(self->type, ==, BAT_MEMSTREAM);
+	//assert_op(self->type, ==, BAT_MEMSTREAM);
 	assert_op(index, <, self->size);
-	assert_op(self->start_addr, !=, 0);
-	return (self->start_addr[index]);
+	if(self->type == BAT_MEMSTREAM) {
+		assert_op(self->start_addr, !=, 0);
+		return (self->start_addr[index]);
+	} else {
+		off_t save = self->pos;
+		unsigned char res;
+		ByteArray_set_position(self, index);
+		res = ByteArray_readUnsignedByte(self);
+		ByteArray_set_position(self, save);
+		return res;
+	}
 }
 
 /* equivalent to self[x] = what (pos stays unchanged) */

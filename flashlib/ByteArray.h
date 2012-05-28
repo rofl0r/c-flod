@@ -46,6 +46,9 @@ struct ByteArray {
 	off_t (*writeUTFBytes) (struct ByteArray* self, char* what);
 	off_t (*writeBytes) (struct ByteArray* self, struct ByteArray* what);
 	off_t (*writeFloat) (struct ByteArray* self, float what);
+	int (*set_position_rel) (struct ByteArray* self, int rel);
+	int (*set_position) (struct ByteArray* self, off_t pos);
+	off_t (*get_position) (struct ByteArray* self);
 };
 
 void ByteArray_defaults(struct ByteArray* self);
