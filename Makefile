@@ -27,10 +27,11 @@ SOUNDFX_SRCS = $(sort $(wildcard neoart/flod/soundfx/*.c))
 BPSOUNDMON_SRCS = $(sort $(wildcard neoart/flod/soundmon/*.c))
 HUBBARD_SRCS = $(sort $(wildcard neoart/flod/hubbard/*.c))
 FREDED_SRCS = $(sort $(wildcard neoart/flod/fred/*.c))
+HIPPEL_SRCS = $(sort $(wildcard neoart/flod/hippel/*.c))
 
 ALL_PLAYER_SRCS = $(WHITTAKER_SRCS) $(FUTURECOMPOSER_SRCS) $(TRACKER_SRCS) \
 $(FASTTRACKER_SRCS) $(DIGITALMUGICIAN_SRCS) $(SIDMON_SRCS) $(SOUNDFX_SRCS) \
-$(BPSOUNDMON_SRCS) $(HUBBARD_SRCS) $(FREDED_SRCS)
+$(BPSOUNDMON_SRCS) $(HUBBARD_SRCS) $(FREDED_SRCS) $(HIPPEL_SRCS)
 
 #FILELOADER_SRCS = neoart/flod/FileLoader.c
 #PLAYER_SRCS = demos/Demo5.c
