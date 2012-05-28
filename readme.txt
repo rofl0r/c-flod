@@ -19,6 +19,7 @@ currently done:
 - jochen hippel and COSO players.
   (there are a few tunes (maybe 3-5 %) that are not working correctly.
    they dont work in uade/original flod either.)
+- DeltaMusic 1
 - pseudo barebone flashlib
 - libao and wave writer backends.
 
