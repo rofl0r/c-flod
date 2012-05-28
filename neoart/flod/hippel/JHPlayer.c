@@ -425,6 +425,8 @@ void JHPlayer_process(struct JHPlayer* self) {
 
 						ByteArray_set_position(self->stream,  pos1);
 						pos1 = voice->loopPtr + 1;
+						assert_op(pos1, <, AMIGA_MAX_MEMORY);
+						assert_op(voice->loopPtr, <, AMIGA_MAX_MEMORY);
 						self->super.amiga->memory[pos1] = self->super.amiga->memory[voice->loopPtr];
 
 						voice->volseqPos  = 0;
@@ -818,11 +820,15 @@ void JHPlayer_loader(struct JHPlayer* self, struct ByteArray *stream) {
 	}
 
 	ByteArray_set_position(stream,  headers);
-	self->samples = new Vector.<AmigaSample>(len, true);
+	//self->samples = new Vector.<AmigaSample>(len, true);
+	assert_op(len, <=, JHPLAYER_MAX_SAMPLES);
 	value = 0;
 
 	for (i = 0; i < len; ++i) {
-		sample = new AmigaSample();
+		//sample = new AmigaSample();
+		sample = &self->samples[i];
+		AmigaSample_ctor(sample);
+		
 		if (!self->coso) sample->name = stream->readMultiByte(stream, 18, ENCODING);
 
 		sample->pointer = stream->readUnsignedInt(stream);
@@ -833,29 +839,34 @@ void JHPlayer_loader(struct JHPlayer* self, struct ByteArray *stream) {
 
 		if (sample->loopPtr & 1) sample->loopPtr--;
 		value += sample->length;
-		self->samples[i] = sample;
+		//self->samples[i] = sample;
 	}
 
 	ByteArray_set_position(stream,  self->samplesData);
 	Amiga_store(self->super.amiga, stream, value, -1);
 
 	ByteArray_set_position(stream,  songsData);
-	self->songs = new Vector.<JHSong>();
+	//self->songs = new Vector.<JHSong>();
+	assert_op(self->super.super.lastSong, <=, JHPLAYER_MAX_SONGS);
 	value = 0;
 
 	for (i = 0; i < self->super.super.lastSong; ++i) {
-		song = new JHSong();
+		//song = new JHSong();
+		song = &self->songs[i];
+		JHSong_ctor(song);
+		
 		song->pointer = stream->readUnsignedShort(stream);
 		song->length  = stream->readUnsignedShort(stream) - song->pointer + 1;
 		song->speed   = stream->readUnsignedShort(stream);
 
 		song->pointer = (song->pointer * 12) + tracks;
 		song->length *= 12;
-		if (song->length > 12) self->songs[value++] = song;
+		//if (song->length > 12) self->songs[value++] = song;
+		// FIXME the original code removed "empty" songs from the list
 	}
 
-	self->songs->fixed = true;
-	self->super.super.lastSong = self->songs->length - 1;
+	//self->songs->fixed = true;
+	//self->super.super.lastSong = self->songs->length - 1;
 
 	if (!self->coso) {
 		ByteArray_set_position(stream,  0);
