@@ -29,7 +29,28 @@ enum KeyboardCommand {
 	KC_QUIT,
 	KC_NEXT,
 	KC_SKIP,
+	KC_PLUS,
+	KC_MINUS,
+	KC_FAIL,
 };
+
+static void report(enum KeyboardCommand kc, char* file) {
+	const char *kc_files[] = {
+		[KC_FAIL]  = "failed",
+		[KC_PLUS]  = "plus",
+		[KC_MINUS] = "minus",
+	};
+	char buf[100];
+	snprintf(buf, sizeof(buf), "%s/.flod.%s.txt", getenv("HOME"), kc_files[kc]);
+	int fd = open(buf, O_WRONLY | O_CREAT | O_APPEND, 0660);
+	if(fd == -1) {
+		perror(buf);
+		return;
+	}
+	write(fd, file, strlen(file));
+	write(fd, "\n", 1);
+	close(fd);
+}
 
 int check_keyboard(void) {
 	if(kbhit()) {
@@ -47,6 +68,10 @@ int check_keyboard(void) {
 				return KC_NEXT;
 			case '.':
 				return KC_SKIP;
+			case '+':
+				return KC_PLUS;
+			case '-':
+				return KC_MINUS;
 			default:
 				break;
 		}
@@ -54,8 +79,10 @@ int check_keyboard(void) {
 	return KC_NONE;
 }
 
+char* tune;
 void trap_handler(int signum) {
 	close_keyboard();
+	report(KC_FAIL, tune);
 	_exit(1);
 }
 
@@ -237,6 +264,7 @@ int main(int argc, char** argv) {
 	}
 	
 	printf("couldn't find a player for %s\n", argv[startarg]);
+	report(KC_FAIL, argv[startarg]);
 	return 1;
 
 	union {
@@ -263,6 +291,7 @@ play:
 	hardware.core.wave = &wave;
 	
 	init_keyboard();
+	tune = argv[startarg];
 	signal(SIGTRAP, trap_handler);
 	
 play_song:
@@ -295,14 +324,27 @@ play_song:
 		}
 		enum KeyboardCommand kc;
 ck:
-		if((kc = check_keyboard()) == KC_QUIT) break;
-		else if(kc == KC_PAUSE) paused = !paused;
-		else if(kc == KC_SKIP) skip += 10;
+		switch((kc = check_keyboard())) {
+			case KC_QUIT: goto doneloop;
+			case KC_PAUSE: 
+				paused = !paused;
+				break;
+			case KC_SKIP:
+				skip += 10;
+				break;
+			case KC_MINUS:
+			case KC_PLUS:
+				report(kc, argv[startarg]);
+			default:
+				break;
+		}
 		if(paused) {
 			sleep(1);
 			goto ck;
 		}
+		
 	}
+doneloop:
 	
 	if(++player.core.playSong <= player.core.lastSong) {
 		goto play_song;
