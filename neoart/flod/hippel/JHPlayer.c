@@ -71,7 +71,14 @@ struct JHPlayer* JHPlayer_new(struct Amiga *amiga) {
 
 //override
 void JHPlayer_process(struct JHPlayer* self) {
-	var chan:AmigaChannel, int loop; int period; int pos1; int pos2; sample:AmigaSample, int value; voice:JHVoice = voices[0];
+	struct AmigaChannel *chan = 0;
+	int loop = 0;
+	int period = 0;
+	int pos1 = 0;
+	int pos2 = 0;
+	struct AmigaSample *sample = 0;
+	int value = 0;
+	struct JHVoice *voice = &self->voices[0];
 
 	if (--tick == 0) {
 		tick = speed;
@@ -645,7 +652,8 @@ void JHPlayer_process(struct JHPlayer* self) {
 
 //override
 void JHPlayer_initialize(struct JHPlayer* self) {
-	var voice:JHVoice = voices[0];
+	struct JHVoice *voice = &self->voices[0];
+	
 	super->initialize();
 
 	song  = songs[playSong];
@@ -676,7 +684,16 @@ void JHPlayer_initialize(struct JHPlayer* self) {
 
 //override
 void JHPlayer_loader(struct JHPlayer* self, struct ByteArray *stream) {
-	var int headers; int i; int id; int len; int pos; sample:AmigaSample, song:JHSong, int songsData; int tracks; int value;
+	int headers = 0;
+	int i = 0;
+	int id = 0;
+	int len = 0;
+	int pos = 0;
+	struct AmigaSample *sample = 0;
+	struct JHSong *song = 0;
+	int songsData = 0; 
+	int tracks = 0; 
+	int value = 0;
 
 	base = periods = 0;
 	coso = int(stream->readMultiByte(4, ENCODING) == "COSO");
