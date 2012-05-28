@@ -1,119 +1,62 @@
-/*
-  Flod 4.1
-  2012/04/30
-  Christian Corti
-  Neoart Costa Rica
+#include "JHVoice.h"
+#include "../flod_internal.h"
+void JHVoice_defaults(struct JHVoice* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
 
-  Last Update: Flod 4.0 - 2012/03/08
+void JHVoice_ctor(struct JHVoice* self, int index) {
+	CLASS_CTOR_DEF(JHVoice);
+	// original constructor code goes here
+	self->index = index;
+}
 
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+struct JHVoice* JHVoice_new(int index) {
+	CLASS_NEW_BODY(JHVoice, index);
+}
 
-  This work is licensed under the Creative Commons Attribution-Noncommercial-Share Alike 3.0 Unported License.
-  To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
-  Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
-*/
-package neoart->flod->hippel {
-  import neoart.flod.core.*;
-
-  public final class JHVoice {
-    internal var
- int index;
-      next        : JHVoice,
-      channel     : AmigaChannel,
- int enabled;
- int cosoCounter;
- int cosoSpeed;
- int trackPtr;
- int trackPos;
- int trackTransp;
- int patternPtr;
- int patternPos;
- int frqseqPtr;
- int frqseqPos;
- int volseqPtr;
- int volseqPos;
- int sample;
- int loopPtr;
- int repeat;
- int tick;
- int note;
- int transpose;
- int info;
- int infoPrev;
- int volume;
- int volCounter;
- int volSpeed;
- int volSustain;
- int volTransp;
- int volFade;
- int portaDelta;
- int vibrato;
- int vibDelay;
- int vibDelta;
- int vibDepth;
- int vibSpeed;
- int slide;
- int sldActive;
- int sldDone;
- int sldCounter;
- int sldSpeed;
- int sldDelta;
- int sldPointer;
- int sldLen;
- int sldEnd;
- int sldLoopPtr;
-
-     void JHVoice( int index) {
-      self->index = index;
-    }
-
-    internal function initialize():void {
-      channel     = null;
-      enabled     = 0;
-      cosoCounter = 0;
-      cosoSpeed   = 0;
-      trackPtr    = 0
-      trackPos    = 12;
-      trackTransp = 0;
-      patternPtr  = 0;
-      patternPos  = 0;
-      frqseqPtr   = 0;
-      frqseqPos   = 0;
-      volseqPtr   = 0;
-      volseqPos   = 0;
-      sample      = -1;
-      loopPtr     = 0;
-      repeat      = 0;
-      tick        = 0;
-      note        = 0;
-      transpose   = 0;
-      info        = 0;
-      infoPrev    = 0;
-      volume      = 0;
-      volCounter  = 1;
-      volSpeed    = 1;
-      volSustain  = 0;
-      volTransp   = 0;
-      volFade     = 100;
-      portaDelta  = 0;
-      vibrato     = 0;
-      vibDelay    = 0;
-      vibDelta    = 0;
-      vibDepth    = 0;
-      vibSpeed    = 0;
-      slide       = 0;
-      sldActive   = 0;
-      sldDone     = 0;
-      sldCounter  = 0;
-      sldSpeed    = 0;
-      sldDelta    = 0;
-      sldPointer  = 0;
-      sldLen      = 0;
-      sldEnd      = 0;
-      sldLoopPtr  = 0;
-    }
-  }
+void JHVoice_initialize(struct JHVoice* self) {
+	self->channel     = null;
+	self->enabled     = 0;
+	self->cosoCounter = 0;
+	self->cosoSpeed   = 0;
+	self->trackPtr    = 0;
+	self->trackPos    = 12;
+	self->trackTransp = 0;
+	self->patternPtr  = 0;
+	self->patternPos  = 0;
+	self->frqseqPtr   = 0;
+	self->frqseqPos   = 0;
+	self->volseqPtr   = 0;
+	self->volseqPos   = 0;
+	self->sample      = -1;
+	self->loopPtr     = 0;
+	self->repeat      = 0;
+	self->tick        = 0;
+	self->note        = 0;
+	self->transpose   = 0;
+	self->info        = 0;
+	self->infoPrev    = 0;
+	self->volume      = 0;
+	self->volCounter  = 1;
+	self->volSpeed    = 1;
+	self->volSustain  = 0;
+	self->volTransp   = 0;
+	self->volFade     = 100;
+	self->portaDelta  = 0;
+	self->vibrato     = 0;
+	self->vibDelay    = 0;
+	self->vibDelta    = 0;
+	self->vibDepth    = 0;
+	self->vibSpeed    = 0;
+	self->slide       = 0;
+	self->sldActive   = 0;
+	self->sldDone     = 0;
+	self->sldCounter  = 0;
+	self->sldSpeed    = 0;
+	self->sldDelta    = 0;
+	self->sldPointer  = 0;
+	self->sldLen      = 0;
+	self->sldEnd      = 0;
+	self->sldLoopPtr  = 0;
 }
