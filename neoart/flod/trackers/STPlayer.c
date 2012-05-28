@@ -68,7 +68,7 @@ static int isLegal(char *text) {
 	if (!text[i]) return 0;
 
 	while(text[i]) {
-		if (text[i] < 32 || text[i] > 127) return 0;
+		if (text[i] != '\n' && (text[i] < 32 || text[i] > 127)) return 0;
 		i++;
 	}
 	return 1;
@@ -263,6 +263,40 @@ void STPlayer_initialize(struct STPlayer* self) {
 	}
 }
 
+static int is_ust_tune(struct STPlayer* self, struct ByteArray *stream) {
+	int score = 0; 
+	char zero_a = 0;
+	char buf[15];
+	char zero_b = 0;
+	
+	if (ByteArray_get_length(stream) <= self->super.super.min_filesize) return 0;
+	
+	self->title_buf[21] = 0;
+	stream->readMultiByte(stream, self->title_buf, 20);
+	self->super.super.title = self->title_buf;
+	score += self->super.super.title[0] && isLegal(self->super.super.title);
+	
+	stream->readMultiByte(stream, buf, sizeof(buf));
+	score += buf[0] && isLegal(buf) && strlen(buf) >= 4;
+	if(score && is_str(buf, "st-0")) score += 2;
+	
+	ByteArray_set_position(stream, 0x32 - 1);
+	stream->readMultiByte(stream, buf, sizeof(buf));
+	score += buf[0] < 32 && buf[1] && isLegal(buf + 1) && strlen(buf + 1) >= 4;
+	if(score && is_str(buf + 1, "st-0")) score += 2;
+	
+	ByteArray_set_position(stream, 0x50 - 1);
+	stream->readMultiByte(stream, buf, sizeof(buf));
+	score += buf[0] < 32 && buf[1] && isLegal(buf + 1) && strlen(buf + 1) >= 4;
+	if(score && is_str(buf + 1, "st-0")) score += 2;
+	
+	ByteArray_set_position(stream, 0x6e - 1);
+	stream->readMultiByte(stream, buf, sizeof(buf));
+	score += buf[0] < 32 && buf[1] && isLegal(buf + 1) && strlen(buf + 1) >= 4;
+	if(score && is_str(buf + 1, "st-0")) score += 2;
+	return score;
+}
+
 //override
 void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 	int higher = 0;
@@ -274,21 +308,11 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 	int size = 0; 
 	int value = 0;
 	
-	if (ByteArray_get_length(stream) <= self->super.super.min_filesize) return;
-
-	
-	self->title_buf[21] = 0;
-	stream->readMultiByte(stream, self->title_buf, 20);
-	self->super.super.title = self->title_buf;
-	score += isLegal(self->super.super.title);
+	if((score = is_ust_tune(self, stream)) < 3) return;
 
 	self->super.super.version = ULTIMATE_SOUNDTRACKER;
 	ByteArray_set_position(stream, 42);
-	// FIXME this player has a very weak format detection mechanism.
-	// it goes half the way through the loader routine using 
-	// gatecrashing.XM, and then hits the assertion below labeled
-	// "weak spot". therefore it should always be tried last,
-	// until it has been fixed.
+
 	for (i = 1; i < 16; ++i) {
 		value = stream->readUnsignedShort(stream);
 
@@ -337,12 +361,19 @@ void STPlayer_loader(struct STPlayer* self, struct ByteArray *stream) {
 	higher += 256;
 	//FIXME
 	//patterns = new Vector.<AmigaRow>(higher, true);
+	//if(higher >= STPLAYER_MAX_PATTERNS) {
+		/* the format detection is very weak, therefore we do this check
+		 * to prevent a crash. */
+	//	return;
+	//}
+	assert_op(higher, <=, STPLAYER_MAX_PATTERNS);
 	
-	// "weak spot"
-	assert_op(higher, <, STPLAYER_MAX_PATTERNS);
-
 	i = (ByteArray_get_length(stream) - size - 600) >> 2;
 	if (higher > i) higher = i;
+	
+	// "weak spot"
+	assert_op(higher, <=, STPLAYER_MAX_PATTERNS);
+	
 
 	for (i = 0; i < higher; ++i) {
 		//FIXME
