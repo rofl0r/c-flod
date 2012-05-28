@@ -91,7 +91,7 @@ void D1Player_process(struct D1Player* self) {
 			if (row->effect) voice->row = row;
 
 			if (row->note) {
-				chan->enabled = 0;
+				AmigaChannel_set_enabled(chan, 0);
 				voice->row = row;
 				voice->note = row->note + voice->step->transpose;
 				voice->arpeggioPos = voice->pitchBend = voice->status = 0;
@@ -285,7 +285,7 @@ void D1Player_process(struct D1Player* self) {
 			voice->period = 0;
 		}
 
-		chan->period = value + voice->vibratoPeriod;
+		AmigaChannel_set_period(chan, value + voice->vibratoPeriod);
 		adsr  = voice->status & 14;
 		value = voice->volume;
 
@@ -342,8 +342,8 @@ void D1Player_process(struct D1Player* self) {
 			}
 		}
 
-		chan->volume  = voice->volume = value;
-		chan->enabled = 1;
+		AmigaChannel_set_volume(chan, (voice->volume = value));
+		AmigaChannel_set_enabled(chan, 1);
 
 		if (!sample->synth) {
 			if (sample->super.loop) {
