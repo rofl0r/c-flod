@@ -153,7 +153,7 @@ void JHPlayer_process(struct JHPlayer* self) {
 								voice->portaDelta = 0;
 
 								if (value >= 0) {
-									if (self->super.super.variant == 1) chan->enabled = 0;
+									if (self->super.super.variant == 1) AmigaChannel_set_enabled(chan, 0);
 									value = (voice->info & 31) + voice->volTransp;
 									ByteArray_set_position(self->stream,  self->volseqs + (value << 1));
 									ByteArray_set_position(self->stream,  self->stream->readUnsignedShort(self->stream));
@@ -222,7 +222,7 @@ void JHPlayer_process(struct JHPlayer* self) {
 					voice->info = self->stream->readByte(self->stream);
 
 					if (value >= 0) {
-						if (self->super.super.variant == 1) chan->enabled = 0;
+						if (self->super.super.variant == 1) AmigaChannel_set_enabled(chan, 0);
 						value = (voice->info & 31) + voice->volTransp;
 						ByteArray_set_position(self->stream,  self->volseqs + (value << 6));
 
@@ -291,7 +291,7 @@ void JHPlayer_process(struct JHPlayer* self) {
 						voice->repeat  = sample->repeat;
 						voice->enabled = 1;
 
-						chan->enabled = 0;
+						AmigaChannel_set_enabled(chan, 0);
 						chan->pointer = sample->pointer;
 						chan->length  = sample->length;
 
@@ -319,7 +319,7 @@ void JHPlayer_process(struct JHPlayer* self) {
 					case -27:
 						if (self->super.super.variant < 2) break;
 						sample = self->samples[self->stream->readUnsignedByte(self->stream)];
-						chan->enabled  = 0;
+						AmigaChannel_set_enabled(chan, 0);
 						voice->enabled = 1;
 
 						if (self->super.super.variant == 2) {
@@ -386,7 +386,7 @@ void JHPlayer_process(struct JHPlayer* self) {
 								voice->repeat  = sample->repeat;
 								voice->enabled = 1;
 
-								chan->enabled = 0;
+								AmigaChannel_set_enabled(chan, 0);
 								chan->pointer = sample->pointer;
 								chan->length  = sample->length;
 							}
@@ -410,7 +410,7 @@ void JHPlayer_process(struct JHPlayer* self) {
 
 						pos2 = self->stream->readUnsignedByte(self->stream);
 						pos1 = ByteArray_get_position(self->stream);
-						chan->enabled = 0;
+						AmigaChannel_set_enabled(chan, 0);
 
 						ByteArray_set_position(self->stream,  self->samplesData + sample->pointer + 4);
 						
@@ -642,7 +642,7 @@ void JHPlayer_process(struct JHPlayer* self) {
 		chan->volume = value;
 
 		if (voice->enabled) {
-			chan->enabled = 1;
+			AmigaChannel_set_enabled(chan, 1);
 			chan->pointer = voice->loopPtr;
 			chan->length  = voice->repeat;
 		}
