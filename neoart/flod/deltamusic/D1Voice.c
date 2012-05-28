@@ -1,78 +1,42 @@
-/*
-  Flod 4.1
-  2012/04/30
-  Christian Corti
-  Neoart Costa Rica
+#include "D1Voice.h"
+#include "../flod_internal.h"
 
-  Last Update: Flod 3.0 - 2012/02/08
+void D1Voice_defaults(struct D1Voice* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
 
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+void D1Voice_ctor(struct D1Voice* self, int index) {
+	CLASS_CTOR_DEF(D1Voice);
+	// original constructor code goes here
+	self->index = index;
+}
 
-  This work is licensed under the Creative Commons Attribution-Noncommercial-Share Alike 3.0 Unported License.
-  To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
-  Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
-*/
-package neoart->flod->deltamusic {
-  import neoart.flod.core.*;
+struct D1Voice* D1Voice_new(int index) {
+	CLASS_NEW_BODY(D1Voice, index);
+}
 
-  public final class D1Voice {
-    internal var
- int index;
-      next          : D1Voice,
-      channel       : AmigaChannel,
-      sample        : D1Sample,
- int trackPos;
- int patternPos;
- int status;
- int speed;
-      step          : AmigaStep,
-      row           : AmigaRow,
- int note;
- int period;
- int arpeggioPos;
- int pitchBend;
- int tableCtr;
- int tablePos;
- int vibratoCtr;
- int vibratoDir;
- int vibratoPos;
- int vibratoPeriod;
- int volume;
- int attackCtr;
- int decayCtr;
- int releaseCtr;
- int sustain;
-
-     void D1Voice( int index) {
-      self->index = index;
-    }
-
-    internal function initialize():void {
-      sample        = null;
-      trackPos      = 0;
-      patternPos    = 0;
-      status        = 0;
-      speed         = 1;
-      step          = null;
-      row           = null;
-      note          = 0;
-      period        = 0;
-      arpeggioPos   = 0;
-      pitchBend     = 0;
-      tableCtr      = 0;
-      tablePos      = 0;
-      vibratoCtr    = 0;
-      vibratoDir    = 0;
-      vibratoPos    = 0;
-      vibratoPeriod = 0;
-      volume        = 0;
-      attackCtr     = 0;
-      decayCtr      = 0;
-      releaseCtr    = 0;
-      sustain       = 1;
-    }
-  }
+void D1Voice_initialize(struct D1Voice* self) {
+	self->sample        = null;
+	self->trackPos      = 0;
+	self->patternPos    = 0;
+	self->status        = 0;
+	self->speed         = 1;
+	self->step          = null;
+	self->row           = null;
+	self->note          = 0;
+	self->period        = 0;
+	self->arpeggioPos   = 0;
+	self->pitchBend     = 0;
+	self->tableCtr      = 0;
+	self->tablePos      = 0;
+	self->vibratoCtr    = 0;
+	self->vibratoDir    = 0;
+	self->vibratoPos    = 0;
+	self->vibratoPeriod = 0;
+	self->volume        = 0;
+	self->attackCtr     = 0;
+	self->decayCtr      = 0;
+	self->releaseCtr    = 0;
+	self->sustain       = 1;
 }
