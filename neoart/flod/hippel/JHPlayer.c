@@ -655,14 +655,14 @@ void JHPlayer_process(struct JHPlayer* self) {
 void JHPlayer_initialize(struct JHPlayer* self) {
 	struct JHVoice *voice = &self->voices[0];
 	
-	self->super->initialize();
+	CorePlayer_initialize(&self->super.super);
 
 	self->song  = self->songs[self->super.super.playSong];
 	self->super.super.speed = self->song->speed;
 	self->super.super.tick  = (self->coso || self->super.super.variant > 1) ? 1 : self->super.super.speed;
 
 	while (voice) {
-		voice->initialize();
+		JHVoice_initialize(voice);
 		voice->channel = self->super.amiga->channels[voice->index];
 		voice->trackPtr = self->song->pointer + (voice->index * 3);
 
@@ -837,7 +837,7 @@ void JHPlayer_loader(struct JHPlayer* self, struct ByteArray *stream) {
 	}
 
 	ByteArray_set_position(stream,  self->samplesData);
-	self->super.amiga->store(stream, value);
+	Amiga_store(self->super.amiga, stream, value, -1);
 
 	ByteArray_set_position(stream,  songsData);
 	self->songs = new Vector.<JHSong>();
