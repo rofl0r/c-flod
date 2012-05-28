@@ -391,12 +391,12 @@ void D1Player_loader(struct D1Player* self, struct ByteArray *stream) {
 	struct AmigaStep *step = 0;
 	int value = 0;
 	
-	id = stream->readMultiByte(4, ENCODING);
-	if (id != "ALL ") return;
+	stream->readMultiByte(stream, id, 4);
+	if (!is_str(id, "ALL ")) return;
 
 	position = 104;
 	//data = new Vector.<int>(25 ,true);
-	for (i = 0; i < 25; ++i) data[i] = stream->readUnsignedInt();
+	for (i = 0; i < 25; ++i) data[i] = stream->readUnsignedInt(stream);
 
 	//pointers = new Vector.<int>(4, true);
 	for (i = 1; i < 4; ++i)
@@ -414,12 +414,12 @@ void D1Player_loader(struct D1Player* self, struct ByteArray *stream) {
 
 		if (value == 0xffff || ByteArray_get_position(stream) == index) {
 			step->pattern   = -1;
-			step->transpose = stream->readUnsignedShort();
+			step->transpose = stream->readUnsignedShort(stream);
 			index += data[j++];
 		} else {
 			ByteArray_set_position_rel(stream, -1);
 			step->pattern   = ((value >> 2) & 0x3fc0) >> 2;
-			step->transpose = stream->readByte();
+			step->transpose = stream->readByte(stream);
 		}
 		self->tracks[i] = step;
 	}
@@ -429,10 +429,10 @@ void D1Player_loader(struct D1Player* self, struct ByteArray *stream) {
 
 	for (i = 0; i < len; ++i) {
 		row = new AmigaRow();
-		row->sample = stream->readUnsignedByte();
-		row->note   = stream->readUnsignedByte();
-		row->effect = stream->readUnsignedByte() & 31;
-		row->param  = stream->readUnsignedByte();
+		row->sample = stream->readUnsignedByte(stream);
+		row->note   = stream->readUnsignedByte(stream);
+		row->effect = stream->readUnsignedByte(stream) & 31;
+		row->param  = stream->readUnsignedByte(stream);
 		self->patterns[i] = row;
 	}
 
@@ -443,33 +443,33 @@ void D1Player_loader(struct D1Player* self, struct ByteArray *stream) {
 
 		if (data[index] != 0) {
 			sample = new D1Sample();
-			sample->attackStep   = stream->readUnsignedByte();
-			sample->attackDelay  = stream->readUnsignedByte();
-			sample->decayStep    = stream->readUnsignedByte();
-			sample->decayDelay   = stream->readUnsignedByte();
-			sample->sustain      = stream->readUnsignedShort();
-			sample->releaseStep  = stream->readUnsignedByte();
-			sample->releaseDelay = stream->readUnsignedByte();
-			sample->super.volume = stream->readUnsignedByte();
-			sample->vibratoWait  = stream->readUnsignedByte();
-			sample->vibratoStep  = stream->readUnsignedByte();
-			sample->vibratoLen   = stream->readUnsignedByte();
-			sample->pitchBend    = stream->readByte();
-			sample->portamento   = stream->readUnsignedByte();
-			sample->synth        = stream->readUnsignedByte();
-			sample->tableDelay   = stream->readUnsignedByte();
+			sample->attackStep   = stream->readUnsignedByte(stream);
+			sample->attackDelay  = stream->readUnsignedByte(stream);
+			sample->decayStep    = stream->readUnsignedByte(stream);
+			sample->decayDelay   = stream->readUnsignedByte(stream);
+			sample->sustain      = stream->readUnsignedShort(stream);
+			sample->releaseStep  = stream->readUnsignedByte(stream);
+			sample->releaseDelay = stream->readUnsignedByte(stream);
+			sample->super.volume = stream->readUnsignedByte(stream);
+			sample->vibratoWait  = stream->readUnsignedByte(stream);
+			sample->vibratoStep  = stream->readUnsignedByte(stream);
+			sample->vibratoLen   = stream->readUnsignedByte(stream);
+			sample->pitchBend    = stream->readByte(stream);
+			sample->portamento   = stream->readUnsignedByte(stream);
+			sample->synth        = stream->readUnsignedByte(stream);
+			sample->tableDelay   = stream->readUnsignedByte(stream);
 
 			for (j = 0; j < 8; ++j)
-				sample->arpeggio[j] = stream->readByte();
+				sample->arpeggio[j] = stream->readByte(stream);
 
-			sample->super.length = stream->readUnsignedShort();
-			sample->super.loop   = stream->readUnsignedShort();
-			sample->super.repeat = stream->readUnsignedShort() << 1;
+			sample->super.length = stream->readUnsignedShort(stream);
+			sample->super.loop   = stream->readUnsignedShort(stream);
+			sample->super.repeat = stream->readUnsignedShort(stream) << 1;
 			sample->synth  = sample->synth ? 0 : 1;
 
 			if (sample->synth) {
 				for (j = 0; j < 48; ++j)
-					sample->table[j] = stream->readByte();
+					sample->table[j] = stream->readByte(stream);
 
 				len = data[index] - 78;
 			} else {
