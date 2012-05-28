@@ -100,7 +100,7 @@ void JHPlayer_process(struct JHPlayer* self) {
 							if (value == -1) {
 								if (voice->trackPos == self->song->length) {
 									voice->trackPos = 0;
-									self->super.amiga->complete = 1;
+									CoreMixer_set_complete(self->super.amiga->super, 1);
 								}
 
 								ByteArray_set_position(self->stream,  voice->trackPtr + voice->trackPos);
@@ -125,7 +125,7 @@ void JHPlayer_process(struct JHPlayer* self) {
 
 										voice->volFade = pos2;
 									} else if (pos2 == 8) {
-										self->super.amiga->complete = 1;
+										CoreMixer_set_complete(self->super.amiga->super, 1);
 									} else if (pos2 == 14) {
 										self->super.super.speed = pos1;
 									}
@@ -191,7 +191,7 @@ void JHPlayer_process(struct JHPlayer* self) {
 				if (voice->patternPos == self->patternLen || (value & 127) == 1) {
 					if (voice->trackPos == self->song->length) {
 						voice->trackPos = 0;
-						self->super.amiga->complete = 1;
+						CoreMixer_set_complete(self->super.amiga->super, 1);
 					}
 
 					ByteArray_set_position(self->stream,  voice->trackPtr + voice->trackPos);
@@ -199,7 +199,7 @@ void JHPlayer_process(struct JHPlayer* self) {
 					voice->trackTransp = self->stream->readByte(self->stream);
 					voice->volTransp = self->stream->readByte(self->stream);
 
-					if (voice->volTransp == -128) self->super.amiga->complete = 1;
+					if (voice->volTransp == -128) CoreMixer_set_complete(self->super.amiga->super, 1);
 
 					voice->patternPtr = self->patterns + (value * self->patternLen);
 					voice->patternPos = 0;
