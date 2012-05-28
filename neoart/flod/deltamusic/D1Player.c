@@ -78,16 +78,24 @@ void D1Player_process(struct D1Player* self) {
 			voice->speed = self->super.super.speed;
 
 			if (voice->patternPos == 0) {
-				voice->step = self->tracks[int(self->pointers[voice->index] + voice->trackPos)];
+				assert_op(voice->index, <, D1PLAYER_MAX_VOICES);
+				unsigned idxx = self->pointers[voice->index] + voice->trackPos;
+				assert_op(idxx, <, D1PLAYER_MAX_TRACKS);
+				voice->step = &self->tracks[idxx];
 
 				if (voice->step->pattern < 0) {
 					voice->trackPos = voice->step->transpose;
-					voice->step = self->tracks[int(self->pointers[voice->index] + voice->trackPos)];
+					assert_op(voice->index, <, D1PLAYER_MAX_VOICES);
+					idxx = self->pointers[voice->index] + voice->trackPos;
+					assert_op(idxx, <, D1PLAYER_MAX_TRACKS);
+					voice->step = &self->tracks[idxx];
 				}
 				voice->trackPos++;
 			}
 
-			row = self->patterns[int(voice->step->pattern + voice->patternPos)];
+			unsigned idxx = voice->step->pattern + voice->patternPos;
+			assert_op(idxx, <, D1PLAYER_MAX_PATTERNS);
+			row = &self->patterns[idxx];
 			if (row->effect) voice->row = row;
 
 			if (row->note) {
@@ -278,7 +286,10 @@ void D1Player_process(struct D1Player* self) {
 		if (sample->portamento)
 			value = voice->period;
 		else {
-			value = PERIODS[int(voice->note + sample->arpeggio[voice->arpeggioPos])];
+			assert_op(voice->arpeggioPos, <, D1SAMPLE_MAX_ARPEGGIO);
+			unsigned idxx = voice->note + sample->arpeggio[voice->arpeggioPos];
+			assert_op(idxx, <, ARRAY_SIZE(PERIODS));
+			value = PERIODS[idxx];
 			voice->arpeggioPos = ++voice->arpeggioPos & 7;
 			value -= (sample->vibratoLen * sample->vibratoStep);
 			value += voice->pitchBend;
@@ -403,14 +414,19 @@ void D1Player_loader(struct D1Player* self, struct ByteArray *stream) {
 		self->pointers[i] = self->pointers[j] + (data[j++] >> 1) - 1;
 
 	len = self->pointers[3] + (data[3] >> 1) - 1;
-	tracks = new Vector.<AmigaStep>(len, true);
+	//tracks = new Vector.<AmigaStep>(len, true);
+	assert_op(len, <=, D1PLAYER_MAX_TRACKS);
+	
 	index = position + data[1] - 2;
 	ByteArray_set_position(stream, position);
 	j = 1;
 
 	for (i = 0; i < len; ++i) {
-		step  = new AmigaStep();
-		value = stream->readUnsignedShort();
+		//step  = new AmigaStep();
+		step = &self->tracks[i];
+		AmigaStep_ctor(step);
+		
+		value = stream->readUnsignedShort(stream);
 
 		if (value == 0xffff || ByteArray_get_position(stream) == index) {
 			step->pattern   = -1;
@@ -421,19 +437,23 @@ void D1Player_loader(struct D1Player* self, struct ByteArray *stream) {
 			step->pattern   = ((value >> 2) & 0x3fc0) >> 2;
 			step->transpose = stream->readByte(stream);
 		}
-		self->tracks[i] = step;
+		//self->tracks[i] = step;
 	}
 
 	len = data[4] >> 2;
-	self->patterns = new Vector.<AmigaRow>(len, true);
+	//self->patterns = new Vector.<AmigaRow>(len, true);
+	assert_op(len, <=, D1PLAYER_MAX_PATTERNS);
 
 	for (i = 0; i < len; ++i) {
-		row = new AmigaRow();
+		//row = new AmigaRow();
+		row = &self->patterns[i];
+		AmigaRow_ctor(row);
+		
 		row->sample = stream->readUnsignedByte(stream);
 		row->note   = stream->readUnsignedByte(stream);
 		row->effect = stream->readUnsignedByte(stream) & 31;
 		row->param  = stream->readUnsignedByte(stream);
-		self->patterns[i] = row;
+		//self->patterns[i] = row;
 	}
 
 	index = 5;
@@ -442,7 +462,10 @@ void D1Player_loader(struct D1Player* self, struct ByteArray *stream) {
 		self->samples[i] = null;
 
 		if (data[index] != 0) {
-			sample = new D1Sample();
+			//sample = new D1Sample();
+			sample = &self->samples[i];
+			D1Sample_ctor(sample);
+			
 			sample->attackStep   = stream->readUnsignedByte(stream);
 			sample->attackDelay  = stream->readUnsignedByte(stream);
 			sample->decayStep    = stream->readUnsignedByte(stream);
@@ -478,14 +501,14 @@ void D1Player_loader(struct D1Player* self, struct ByteArray *stream) {
 
 			sample->super.pointer = Amiga_store(self->super.amiga, stream, len, -1);
 			sample->super.loopPtr = sample->super.pointer + sample->super.loop;
-			self->samples[i] = sample;
+			//self->samples[i] = sample;
 		}
 		index++;
 	}
 
-	sample = new D1Sample();
+	sample = &self->samples[20];//new D1Sample();
 	sample->super.pointer = sample->super.loopPtr = self->super.amiga->vector_count_memory;
 	sample->super.length  = sample->super.repeat  = 2;
-	self->samples[20] = sample;
+	//self->samples[20] = sample;
 	self->super.super.version = 1;
 }

@@ -3,13 +3,13 @@
 #include "../core/AmigaSample.h"
 
 //fixed
-#define D1SAMPLE_ARPEGGIO_MAX 8
-#define D1SAMPLE_TABLE_MAX 48
+#define D1SAMPLE_MAX_ARPEGGIO 8
+#define D1SAMPLE_MAX_TABLE 48
 
 struct D1Sample {
 	struct AmigaSample super;
-	int arpeggio[D1SAMPLE_ARPEGGIO_MAX];
-	int table[D1SAMPLE_TABLE_MAX];
+	int arpeggio[D1SAMPLE_MAX_ARPEGGIO];
+	int table[D1SAMPLE_MAX_TABLE];
 	int synth;
 	int attackStep;
 	int attackDelay;
