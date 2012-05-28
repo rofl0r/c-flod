@@ -104,7 +104,8 @@ void D1Player_process(struct D1Player* self) {
 				voice->note = row->note + voice->step->transpose;
 				voice->arpeggioPos = voice->pitchBend = voice->status = 0;
 
-				sample = voice->sample = self->samples[row->sample];
+				assert_op(row->sample, <, D1PLAYER_MAX_SAMPLES);
+				sample = voice->sample = &self->samples[row->sample];
 				if (!sample->synth) chan->pointer = sample->super.pointer;
 				chan->length = sample->super.length;
 
@@ -379,7 +380,7 @@ void D1Player_initialize(struct D1Player* self) {
 
 	while (voice) {
 		D1Voice_initialize(voice);
-		voice->channel = self->super.amiga->channels[voice->index];
+		voice->channel = &self->super.amiga->channels[voice->index];
 		voice->sample  = &self->samples[20];
 		voice = voice->next;
 	}
@@ -459,7 +460,7 @@ void D1Player_loader(struct D1Player* self, struct ByteArray *stream) {
 	index = 5;
 
 	for (i = 0; i < 20; ++i) {
-		self->samples[i] = null;
+		//self->samples[i] = null;
 
 		if (data[index] != 0) {
 			//sample = new D1Sample();
