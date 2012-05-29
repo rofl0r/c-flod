@@ -122,7 +122,7 @@ void D2Player_process(struct D2Player* self) {
 			row = voice->row = self->patterns[int(voice->step->pattern + voice->patternPos)];
 
 			if (row->note) {
-				chan->enabled = 0;
+				AmigaChannel_set_enabled(chan, 0);
 				voice->note = row->note;
 				voice->period = PERIODS[int(row->note + voice->step->transpose)];
 
@@ -267,12 +267,12 @@ void D2Player_process(struct D2Player* self) {
 		}
 
 		voice->vibratoPeriod -= (sample->pitchBend - voice->pitchBend);
-		chan->period = voice->finalPeriod + voice->vibratoPeriod;
+		AmigaChannel_set_period(chan, voice->finalPeriod + voice->vibratoPeriod);
 
 		value = (voice->volume >> 2) & 63;
 		if (value > voice->volumeMax) value = voice->volumeMax;
-		chan->volume  = value;
-		chan->enabled = 1;
+		AmigaChannel_set_volume(chan, value);
+		AmigaChannel_set_enabled(chan, 1);
 
 		voice = voice->next;
 	}
