@@ -330,15 +330,15 @@ void D2Player_loader(struct D2Player* self, struct ByteArray *stream) {
 	int value = 0;
 	
 	ByteArray_set_position(stream, 3014);
-	id = stream->readMultiByte(4, ENCODING);
-	if (id != ".FNL") return;
+	stream->readMultiByte(stream, id, 4);
+	if (!is_str(id, ".FNL")) return;
 
 	ByteArray_set_position(stream, 4042);
 	//data = new Vector.<int>(12, true);
 
 	for (i = 0; i < 4; ++i) {
-		self->data[i + 4] = stream->readUnsignedShort() >> 1;
-		value = stream->readUnsignedShort() >> 1;
+		self->data[i + 4] = stream->readUnsignedShort(stream) >> 1;
+		value = stream->readUnsignedShort(stream) >> 1;
 		self->data[i + 8] = value;
 		len += value;
 	}
@@ -351,11 +351,11 @@ void D2Player_loader(struct D2Player* self, struct ByteArray *stream) {
 	for (i = 0; i < len; ++i) {
 		step = &self->tracks[i];
 		AmigaStep_ctor(step);
-		step->pattern   = stream->readUnsignedByte() << 4;
-		step->transpose = stream->readByte();
+		step->pattern   = stream->readUnsignedByte(stream) << 4;
+		step->transpose = stream->readByte(stream);
 	}
 
-	len = stream->readUnsignedInt() >> 2;
+	len = stream->readUnsignedInt(stream) >> 2;
 	self->patterns_count = len;
 	assert_op(len, <=, D2PLAYER_MAX_PATTERNS);
 	//patterns = new Vector.<AmigaRow>(len, true);
@@ -363,14 +363,14 @@ void D2Player_loader(struct D2Player* self, struct ByteArray *stream) {
 	for (i = 0; i < len; ++i) {
 		row = &self->patterns[i];
 		AmigaRow_ctor(row);
-		row->note   = stream->readUnsignedByte();
-		row->sample = stream->readUnsignedByte();
-		row->effect = stream->readUnsignedByte() - 1;
-		row->param  = stream->readUnsignedByte();
+		row->note   = stream->readUnsignedByte(stream);
+		row->sample = stream->readUnsignedByte(stream);
+		row->effect = stream->readUnsignedByte(stream) - 1;
+		row->param  = stream->readUnsignedByte(stream);
 	}
 
 	ByteArray_set_position_rel(stream, +254);
-	value = stream->readUnsignedShort();
+	value = stream->readUnsignedShort(stream);
 	position = ByteArray_get_position(stream);
 	ByteArray_set_position_rel(stream, -256);
 
@@ -378,7 +378,7 @@ void D2Player_loader(struct D2Player* self, struct ByteArray *stream) {
 	//offsets = new Vector.<int>(128, true);
 
 	for (i = 0; i < 128; ++i) {
-		j = stream->readUnsignedShort();
+		j = stream->readUnsignedShort(stream);
 		if (j != value) offsets[len++] = j;
 	}
 
@@ -391,29 +391,29 @@ void D2Player_loader(struct D2Player* self, struct ByteArray *stream) {
 		sample = &self->samples[i];
 		D2Sample_ctor(sample);
 		
-		sample->super.length = stream->readUnsignedShort() << 1;
-		sample->super.loop   = stream->readUnsignedShort();
-		sample->super.repeat = stream->readUnsignedShort() << 1;
+		sample->super.length = stream->readUnsignedShort(stream) << 1;
+		sample->super.loop   = stream->readUnsignedShort(stream);
+		sample->super.repeat = stream->readUnsignedShort(stream) << 1;
 
 		for (j = 0; j < 15; ++j)
-		sample->volumes[j] = stream->readUnsignedByte();
+		sample->volumes[j] = stream->readUnsignedByte(stream);
 		for (j = 0; j < 15; ++j)
-		sample->vibratos[j] = stream->readUnsignedByte();
+		sample->vibratos[j] = stream->readUnsignedByte(stream);
 
-		sample->pitchBend = stream->readUnsignedShort();
-		sample->synth     = stream->readByte();
-		sample->index     = stream->readUnsignedByte();
+		sample->pitchBend = stream->readUnsignedShort(stream);
+		sample->synth     = stream->readByte(stream);
+		sample->index     = stream->readUnsignedByte(stream);
 
 		for (j = 0; j < 48; ++j)
-		sample->table[j] = stream->readUnsignedByte();
+		sample->table[j] = stream->readUnsignedByte(stream);
 	}
 
-	len = stream->readUnsignedInt();
+	len = stream->readUnsignedInt(stream);
 	Amiga_store(self->super.amiga, stream, len, -1);
 
 	ByteArray_set_position_rel(stream, +64);
 	for (i = 0; i < 8; ++i)
-		offsets[i] = stream->readUnsignedInt();
+		offsets[i] = stream->readUnsignedInt(stream);
 
 	len = self->samples_count;
 	position = ByteArray_get_position(stream);
@@ -428,7 +428,7 @@ void D2Player_loader(struct D2Player* self, struct ByteArray *stream) {
 
 	ByteArray_set_position(stream, 3018);
 	for (i = 0; i < 1024; ++i)
-		self->arpeggios[i] = stream->readByte();
+		self->arpeggios[i] = stream->readByte(stream);
 
 	sample = &self->samples[len];
 	D2Sample_ctor(sample);
