@@ -6,9 +6,9 @@
 #include "D2Sample.h"
 #include "D2Voice.h"
 
-#define D2PLAYER_MAX_SAMPLES 4
-#define D2PLAYER_MAX_PATTERNS 4
-#define D2PLAYER_MAX_TRACKS 4
+#define D2PLAYER_MAX_SAMPLES 37
+#define D2PLAYER_MAX_PATTERNS 2336
+#define D2PLAYER_MAX_TRACKS 628
 
 //fixed
 #define D2PLAYER_MAX_ARPEGGIOS 1024
