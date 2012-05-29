@@ -113,25 +113,28 @@ void D2Player_process(struct D2Player* self) {
 		}
 
 		if (self->super.super.tick == 0) {
+			unsigned idxx;
 			if (voice->patternPos == 0) {
-				unsigned idxx = voice->trackPtr + voice->trackPos;
+				idxx = voice->trackPtr + voice->trackPos;
 				assert_op(idxx, <, D2PLAYER_MAX_TRACKS);
-				voice->step = self->tracks[idxx];
+				voice->step = &self->tracks[idxx];
 
 				if (++voice->trackPos == voice->trackLen)
 				voice->trackPos = voice->restart;
 			}
-			row = voice->row = self->patterns[int(voice->step->pattern + voice->patternPos)];
+			idxx = voice->step->pattern + voice->patternPos;
+			assert_op(idxx, <, D2PLAYER_MAX_PATTERNS);
+			row = voice->row = &self->patterns[idxx];
 
 			if (row->note) {
 				AmigaChannel_set_enabled(chan, 0);
 				voice->note = row->note;
-				unsigned idxx = row->note + voice->step->transpose;
+				idxx = row->note + voice->step->transpose;
 				assert_op(idxx, <, ARRAY_SIZE(PERIODS));
 				voice->period = PERIODS[idxx];
 
 				assert_op(row->sample, <, D2PLAYER_MAX_SAMPLES);
-				sample = voice->sample = self->samples[row->sample];
+				sample = voice->sample = &self->samples[row->sample];
 
 				if (sample->synth < 0) {
 					chan->pointer = sample->super.pointer;
@@ -231,9 +234,10 @@ void D2Player_process(struct D2Player* self) {
 		if (voice->volumeSustain) {
 			voice->volumeSustain--;
 		} else {
-			value = sample->volumes[voice->volumePos];
-			level = sample->volumes[int(voice->volumePos + 1)];
 			unsigned idxx;
+			assert_op(voice->volumePos + 1, <, D2SAMPLE_MAX_VOLUMES);
+			value = sample->volumes[voice->volumePos];
+			level = sample->volumes[voice->volumePos + 1];
 
 			if (level < voice->volume) {
 				voice->volume -= value;
@@ -266,7 +270,9 @@ void D2Player_process(struct D2Player* self) {
 				if (voice->finalPeriod > voice->period) voice->finalPeriod = voice->period;
 			}
 		}
-		value = self->arpeggios[int(voice->arpeggioPtr + voice->arpeggioPos)];
+		unsigned idxx = voice->arpeggioPtr + voice->arpeggioPos;
+		assert_op(idxx, <, D2PLAYER_MAX_ARPEGGIOS);
+		value = self->arpeggios[idxx];
 
 		if (value == -128) {
 			voice->arpeggioPos = 0;
@@ -308,8 +314,8 @@ void D2Player_initialize(struct D2Player* self) {
 		voice->channel = &self->super.amiga->channels[voice->index];
 		voice->sample  = &self->samples[self->samples_count - 1];
 		voice->trackPtr = self->data[voice->index];
-		voice->restart  = self->data[int(voice->index + 4)];
-		voice->trackLen = self->data[int(voice->index + 8)];
+		voice->restart  = self->data[voice->index + 4];
+		voice->trackLen = self->data[voice->index + 8];
 		voice = voice->next;
 	}
 }
