@@ -314,11 +314,11 @@ void D2Player_loader(struct D2Player* self, struct ByteArray *stream) {
 	struct AmigaStep *step = 0;
 	int value = 0;
 	
-	stream->position = 3014;
+	ByteArray_set_position(stream, 3014);
 	id = stream->readMultiByte(4, ENCODING);
 	if (id != ".FNL") return;
 
-	stream->position = 4042;
+	ByteArray_set_position(stream, 4042);
 	data = new Vector.<int>(12, true);
 
 	for (i = 0; i < 4; ++i) {
@@ -351,10 +351,10 @@ void D2Player_loader(struct D2Player* self, struct ByteArray *stream) {
 		self->patterns[i] = row;
 	}
 
-	stream->position += 254;
+	ByteArray_set_position_rel(stream, +254);
 	value = stream->readUnsignedShort();
-	position = stream->position;
-	stream->position -= 256;
+	position = ByteArray_get_position(stream);
+	ByteArray_set_position_rel(stream, -256);
 
 	len = 1;
 	offsets = new Vector.<int>(128, true);
@@ -367,7 +367,7 @@ void D2Player_loader(struct D2Player* self, struct ByteArray *stream) {
 	self->samples = new Vector.<D2Sample>(len);
 
 	for (i = 0; i < len; ++i) {
-		stream->position = position + offsets[i];
+		ByteArray_set_position(stream, position + offsets[i]);
 		sample = new D2Sample();
 		sample->super.length = stream->readUnsignedShort() << 1;
 		sample->super.loop   = stream->readUnsignedShort();
@@ -391,22 +391,22 @@ void D2Player_loader(struct D2Player* self, struct ByteArray *stream) {
 	len = stream->readUnsignedInt();
 	self->super.amiga->store(stream, len);
 
-	stream->position += 64;
+	ByteArray_set_position_rel(stream, +64);
 	for (i = 0; i < 8; ++i)
 		offsets[i] = stream->readUnsignedInt();
 
 	len = self->samples->length;
-	position = stream->position;
+	position = ByteArray_get_position(stream);
 
 	for (i = 0; i < len; ++i) {
 		sample = self->samples[i];
 		if (sample->synth >= 0) continue;
-		stream->position = position + offsets[sample->index];
+		ByteArray_set_position(stream, position + offsets[sample->index]);
 		sample->super.pointer = self->super.amiga->store(stream, sample->super.length);
 		sample->super.loopPtr = sample->super.pointer + sample->super.loop;
 	}
 
-	stream->position = 3018;
+	ByteArray_set_position(stream, 3018);
 	for (i = 0; i < 1024; ++i)
 		self->arpeggios[i] = stream->readByte();
 
