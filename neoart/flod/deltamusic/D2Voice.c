@@ -1,86 +1,46 @@
-/*
-  Flod 4.1
-  2012/04/30
-  Christian Corti
-  Neoart Costa Rica
+#include "D2Voice.h"
+#include "../flod_internal.h"
 
-  Last Update: Flod 3.0 - 2012/02/08
+void D2Voice_defaults(struct D2Voice* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
 
-  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES
-  OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE
-  LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR
-  IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+void D2Voice_ctor(struct D2Voice* self, int index) {
+	CLASS_CTOR_DEF(D2Voice);
+	// original constructor code goes here
+	self->index = index;
+}
 
-  This work is licensed under the Creative Commons Attribution-Noncommercial-Share Alike 3.0 Unported License.
-  To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
-  Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
-*/
-package neoart->flod->deltamusic {
-  import neoart.flod.core.*;
+struct D2Voice* D2Voice_new(int index) {
+	CLASS_NEW_BODY(D2Voice, index);
+}
 
-  public final class D2Voice {
-    internal var
- int index;
-      next           : D2Voice,
-      channel        : AmigaChannel,
-      sample         : D2Sample,
- int trackPtr;
- int trackPos;
- int trackLen;
- int patternPos;
- int restart;
-      step           : AmigaStep,
-      row            : AmigaRow,
- int note;
- int period;
- int finalPeriod;
- int arpeggioPtr;
- int arpeggioPos;
- int pitchBend;
- int portamento;
- int tableCtr;
- int tablePos;
- int vibratoCtr;
- int vibratoDir;
- int vibratoPos;
- int vibratoPeriod;
- int vibratoSustain;
- int volume;
- int volumeMax;
- int volumePos;
- int volumeSustain;
-
-     void D2Voice( int index) {
-      self->index = index;
-    }
-
-    internal function initialize():void {
-      sample         = null;
-      trackPtr       = 0;
-      trackPos       = 0;
-      trackLen       = 0;
-      patternPos     = 0;
-      restart        = 0;
-      step           = null;
-      row            = null;
-      note           = 0;
-      period         = 0;
-      finalPeriod    = 0;
-      arpeggioPtr    = 0;
-      arpeggioPos    = 0;
-      pitchBend      = 0;
-      portamento     = 0;
-      tableCtr       = 0;
-      tablePos       = 0;
-      vibratoCtr     = 0;
-      vibratoDir     = 0;
-      vibratoPos     = 0;
-      vibratoPeriod  = 0;
-      vibratoSustain = 0;
-      volume         = 0;
-      volumeMax      = 63;
-      volumePos      = 0;
-      volumeSustain  = 0;
-    }
-  }
+void D2Voice_initialize(struct D2Voice* self) {
+	self->sample         = null;
+	self->trackPtr       = 0;
+	self->trackPos       = 0;
+	self->trackLen       = 0;
+	self->patternPos     = 0;
+	self->restart        = 0;
+	self->step           = null;
+	self->row            = null;
+	self->note           = 0;
+	self->period         = 0;
+	self->finalPeriod    = 0;
+	self->arpeggioPtr    = 0;
+	self->arpeggioPos    = 0;
+	self->pitchBend      = 0;
+	self->portamento     = 0;
+	self->tableCtr       = 0;
+	self->tablePos       = 0;
+	self->vibratoCtr     = 0;
+	self->vibratoDir     = 0;
+	self->vibratoPos     = 0;
+	self->vibratoPeriod  = 0;
+	self->vibratoSustain = 0;
+	self->volume         = 0;
+	self->volumeMax      = 63;
+	self->volumePos      = 0;
+	self->volumeSustain  = 0;
 }
