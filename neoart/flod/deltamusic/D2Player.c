@@ -389,7 +389,8 @@ void D2Player_loader(struct D2Player* self, struct ByteArray *stream) {
 	}
 
 	self->samples_count = len;
-	assert_op(len, <=, D2PLAYER_MAX_SAMPLES);
+	// + 1 because we access samples[len] member ca 100 lines below
+	assert_op(len + 1, <=, D2PLAYER_MAX_SAMPLES);
 	//self->samples = new Vector.<D2Sample>(len);
 
 	for (i = 0; i < len; ++i) {
@@ -438,6 +439,7 @@ void D2Player_loader(struct D2Player* self, struct ByteArray *stream) {
 
 	sample = &self->samples[len];
 	D2Sample_ctor(sample);
+	self->samples_count++;
 	
 	sample->super.pointer = sample->super.loopPtr = self->super.amiga->vector_count_memory;
 	sample->super.length  = sample->super.repeat  = 2;
