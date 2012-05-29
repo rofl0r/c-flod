@@ -15,35 +15,56 @@
   To view a copy of this license, visit http://creativecommons.org/licenses/by-nc-sa/3.0/ or send a letter to
   Creative Commons, 171 Second Street, Suite 300, San Francisco, California, 94105, USA.
 */
-package neoart->flod->deltamusic {
-  import flash.utils.*;
-  import neoart.flod.core.*;
 
-  public final class D2Player extends AmigaPlayer {
-    private var
-      tracks    : Vector.<AmigaStep>,
-      patterns  : Vector.<AmigaRow>,
-      samples   : Vector.<D2Sample>,
-      data      : Vector.<int>,
-      arpeggios : Vector.<int>,
-      voices    : Vector.<D2Voice>,
-      noise     : uint;
+#include "D2Player.h"
+#include "../flod_internal.h"
 
-     void D2Player(amiga:Amiga = null) {
-      super(amiga);
-      PERIODS->fixed = true;
+static const unsigned short PERIODS[] = {
+           0,6848,6464,6096,5760,5424,5120,4832,4560,4304,4064,3840,
+        3616,3424,3232,3048,2880,2712,2560,2416,2280,2152,2032,1920,
+        1808,1712,1616,1524,1440,1356,1280,1208,1140,1076,1016, 960,
+         904, 856, 808, 762, 720, 678, 640, 604, 570, 538, 508, 480,
+         452, 428, 404, 381, 360, 339, 320, 302, 285, 269, 254, 240,
+         226, 214, 202, 190, 180, 170, 160, 151, 143, 135, 127, 120,
+         113, 113, 113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
+         113,
+};
 
-      arpeggios = new Vector.<int>(1024, true);
-      voices    = new Vector.<D2Voice>(4, true);
+void D2Player_loader(struct D2Player* self, struct ByteArray *stream);
+void D2Player_process(struct D2Player* self);
+void D2Player_initialize(struct D2Player* self);
 
-      voices[0] = new D2Voice(0);
-      voices[0].next = voices[1] = new D2Voice(1);
-      voices[1].next = voices[2] = new D2Voice(2);
-      voices[2].next = voices[3] = new D2Voice(3);
-    }
+void D2Player_defaults(struct D2Player* self) {
+	CLASS_DEF_INIT();
+	// static initializers go here
+}
+
+void D2Player_ctor(struct D2Player* self, struct Amiga *amiga) {
+	CLASS_CTOR_DEF(D2Player);
+	// original constructor code goes here
+	AmigaPlayer_ctor(&self->super, amiga);
+
+	unsigned i;
+	for (i = 0; i < D2PLAYER_MAX_VOICES; i++) {
+		D2Voice_ctor(&self->voices[i], i);
+		if(i) self->voices[i - 1].next = &self->voices[i];
+	}
+	
+	//vtable
+	self->super.super.loader = D2Player_loader;
+	self->super.super.process = D2Player_process;
+	self->super.super.initialize = D2Player_initialize;
+	
+	self->super.super.min_filesize = 3018;
+	
+}
+
+struct D2Player* D2Player_new(struct Amiga *amiga) {
+	CLASS_NEW_BODY(D2Player, amiga);
+}
 
 //override
-void process() {
+void D2Player_process(struct D2Player* self) {
       var chan:AmigaChannel, i:int = 0, int level; row:AmigaRow, sample:D2Sample, int value; voice:D2Voice = voices[0];
 
       for (; i < 64;) {
@@ -247,32 +268,31 @@ void process() {
 
         voice = voice->next;
       }
-    }
+}
 
 //override
-void initialize() {
-      var voice:D2Voice = voices[0];
-      super->initialize();
+void D2Player_initialize(struct D2Player* self) {
+	struct D2Voice *voice = &self->voices[0];
+	
+	CorePlayer_initialize(&self->super.super);
+	
+	self->super.super.speed = 5;
+	self->super.super.tick  = 1;
+	self->noise = 0;
 
-      speed = 5;
-      tick  = 1;
-      noise = 0;
-
-      while (voice) {
-        voice->initialize();
-        voice->channel  = amiga->channels[voice->index];
-        voice->sample   = samples[int(samples->length - 1)];
-
-        voice->trackPtr = data[voice->index];
-        voice->restart  = data[int(voice->index + 4)];
-        voice->trackLen = data[int(voice->index + 8)];
-
-        voice = voice->next;
-      }
-    }
+	while (voice) {
+		D2Voice_initialize(voice);
+		voice->channel = &self->super.amiga->channels[voice->index];
+		voice->sample  = &self->samples[self->samples->length - 1]; // FIXME
+		voice->trackPtr = self->data[voice->index];
+		voice->restart  = self->data[int(voice->index + 4)];
+		voice->trackLen = self->data[int(voice->index + 8)];
+		voice = voice->next;
+	}
+}
 
 //override
-void loader(stream:ByteArray) {
+void D2Player_loader(struct D2Player* self, struct ByteArray *stream) {
       var int i; id:String, int j; int len; offsets:Vector.<int>, int position; row:AmigaRow, sample:D2Sample, step:AmigaStep, int value;
       stream->position = 3014;
       id = stream->readMultiByte(4, ENCODING);
@@ -386,17 +406,6 @@ void loader(stream:ByteArray) {
       }
 
       version = 2;
-    }
 
-    private const
-      PERIODS: Vector.<int> = Vector.<int>([
-           0,6848,6464,6096,5760,5424,5120,4832,4560,4304,4064,3840,
-        3616,3424,3232,3048,2880,2712,2560,2416,2280,2152,2032,1920,
-        1808,1712,1616,1524,1440,1356,1280,1208,1140,1076,1016, 960,
-         904, 856, 808, 762, 720, 678, 640, 604, 570, 538, 508, 480,
-         452, 428, 404, 381, 360, 339, 320, 302, 285, 269, 254, 240,
-         226, 214, 202, 190, 180, 170, 160, 151, 143, 135, 127, 120,
-         113, 113, 113, 113, 113, 113, 113, 113, 113, 113, 113, 113,
-         113]);
-  }
 }
+
