@@ -114,7 +114,9 @@ void D2Player_process(struct D2Player* self) {
 
 		if (self->super.super.tick == 0) {
 			if (voice->patternPos == 0) {
-				voice->step = self->tracks[int(voice->trackPtr + voice->trackPos)];
+				unsigned idxx = voice->trackPtr + voice->trackPos;
+				assert_op(idxx, <, D2PLAYER_MAX_TRACKS);
+				voice->step = self->tracks[idxx];
 
 				if (++voice->trackPos == voice->trackLen)
 				voice->trackPos = voice->restart;
@@ -124,8 +126,11 @@ void D2Player_process(struct D2Player* self) {
 			if (row->note) {
 				AmigaChannel_set_enabled(chan, 0);
 				voice->note = row->note;
-				voice->period = PERIODS[int(row->note + voice->step->transpose)];
+				unsigned idxx = row->note + voice->step->transpose;
+				assert_op(idxx, <, ARRAY_SIZE(PERIODS));
+				voice->period = PERIODS[idxx];
 
+				assert_op(row->sample, <, D2PLAYER_MAX_SAMPLES);
 				sample = voice->sample = self->samples[row->sample];
 
 				if (sample->synth < 0) {
@@ -169,7 +174,7 @@ void D2Player_process(struct D2Player* self) {
 					voice->volumeMax = row->param & 63;
 					break;
 				case 6:
-					self->super.amiga->volume = row->param;
+					Amiga_set_volume(self->super.amiga, row->param);
 					break;
 				case 7:
 					voice->arpeggioPtr = (row->param & 63) << 4;
@@ -207,7 +212,9 @@ void D2Player_process(struct D2Player* self) {
 		else voice->vibratoPeriod += value;
 
 		if (--voice->vibratoCtr == 0) {
-			voice->vibratoCtr = sample->vibratos[int(voice->vibratoPos + 1)];
+			unsigned idxx = voice->vibratoPos + 1;
+			assert_op(idxx, <, D2SAMPLE_MAX_VIBRATOS);
+			voice->vibratoCtr = sample->vibratos[idxx];
 			voice->vibratoDir = ~voice->vibratoDir;
 		}
 
@@ -216,7 +223,9 @@ void D2Player_process(struct D2Player* self) {
 		} else {
 			voice->vibratoPos += 3;
 			if (voice->vibratoPos == 15) voice->vibratoPos = 12;
-			voice->vibratoSustain = sample->vibratos[int(voice->vibratoPos + 2)];
+			unsigned idxx = voice->vibratoPos + 2;
+			assert_op(idxx, <, D2SAMPLE_MAX_VIBRATOS);
+			voice->vibratoSustain = sample->vibratos[idxx];
 		}
 
 		if (voice->volumeSustain) {
@@ -224,13 +233,16 @@ void D2Player_process(struct D2Player* self) {
 		} else {
 			value = sample->volumes[voice->volumePos];
 			level = sample->volumes[int(voice->volumePos + 1)];
+			unsigned idxx;
 
 			if (level < voice->volume) {
 				voice->volume -= value;
 				if (voice->volume < level) {
 					voice->volume = level;
 					voice->volumePos += 3;
-					voice->volumeSustain = sample->volumes[int(voice->volumePos - 1)];
+					idxx = voice->volumePos - 1;
+					assert_op(idxx, <, D2SAMPLE_MAX_VOLUMES);
+					voice->volumeSustain = sample->volumes[idxx];
 				}
 			} else {
 				voice->volume += value;
@@ -238,7 +250,9 @@ void D2Player_process(struct D2Player* self) {
 					voice->volume = level;
 					voice->volumePos += 3;
 					if (voice->volumePos == 15) voice->volumePos = 12;
-					voice->volumeSustain = sample->volumes[int(voice->volumePos - 1)];
+					idxx = voice->volumePos - 1;
+					assert_op(idxx, <, D2SAMPLE_MAX_VOLUMES);
+					voice->volumeSustain = sample->volumes[idxx];
 				}
 			}
 		}
@@ -263,6 +277,7 @@ void D2Player_process(struct D2Player* self) {
 		if (voice->portamento == 0) {
 			value = voice->note + voice->step->transpose + value;
 			if (value < 0) value = 0;
+			assert_op(value, <, ARRAY_SIZE(PERIODS));
 			voice->finalPeriod = PERIODS[value];
 		}
 
@@ -291,7 +306,7 @@ void D2Player_initialize(struct D2Player* self) {
 	while (voice) {
 		D2Voice_initialize(voice);
 		voice->channel = &self->super.amiga->channels[voice->index];
-		voice->sample  = &self->samples[self->samples->length - 1]; // FIXME
+		voice->sample  = &self->samples[self->samples_count - 1];
 		voice->trackPtr = self->data[voice->index];
 		voice->restart  = self->data[int(voice->index + 4)];
 		voice->trackLen = self->data[int(voice->index + 8)];
@@ -299,8 +314,8 @@ void D2Player_initialize(struct D2Player* self) {
 	}
 }
 
-
-#define STACK_MAX_OFFSETS 4
+//fixed
+#define STACK_MAX_OFFSETS 128
 //override
 void D2Player_loader(struct D2Player* self, struct ByteArray *stream) {
 	int i = 0; 
@@ -319,36 +334,39 @@ void D2Player_loader(struct D2Player* self, struct ByteArray *stream) {
 	if (id != ".FNL") return;
 
 	ByteArray_set_position(stream, 4042);
-	data = new Vector.<int>(12, true);
+	//data = new Vector.<int>(12, true);
 
 	for (i = 0; i < 4; ++i) {
-		self->data[int(i + 4)] = stream->readUnsignedShort() >> 1;
+		self->data[i + 4] = stream->readUnsignedShort() >> 1;
 		value = stream->readUnsignedShort() >> 1;
-		self->data[int(i + 8)] = value;
+		self->data[i + 8] = value;
 		len += value;
 	}
 
 	value = len;
-	for (i = 3; i > 0; --i) self->data[i] = (value -= self->data[int(i + 8)]);
-	tracks = new Vector.<AmigaStep>(len, true);
+	for (i = 3; i > 0; --i) self->data[i] = (value -= self->data[i + 8]);
+	assert_op(len, <=, D2PLAYER_MAX_TRACKS);
+	//tracks = new Vector.<AmigaStep>(len, true);
 
 	for (i = 0; i < len; ++i) {
-		step = new AmigaStep();
+		step = &self->tracks[i];
+		AmigaStep_ctor(step);
 		step->pattern   = stream->readUnsignedByte() << 4;
 		step->transpose = stream->readByte();
-		self->tracks[i] = step;
 	}
 
 	len = stream->readUnsignedInt() >> 2;
-	patterns = new Vector.<AmigaRow>(len, true);
+	self->patterns_count = len;
+	assert_op(len, <=, D2PLAYER_MAX_PATTERNS);
+	//patterns = new Vector.<AmigaRow>(len, true);
 
 	for (i = 0; i < len; ++i) {
-		row = new AmigaRow();
+		row = &self->patterns[i];
+		AmigaRow_ctor(row);
 		row->note   = stream->readUnsignedByte();
 		row->sample = stream->readUnsignedByte();
 		row->effect = stream->readUnsignedByte() - 1;
 		row->param  = stream->readUnsignedByte();
-		self->patterns[i] = row;
 	}
 
 	ByteArray_set_position_rel(stream, +254);
@@ -357,18 +375,22 @@ void D2Player_loader(struct D2Player* self, struct ByteArray *stream) {
 	ByteArray_set_position_rel(stream, -256);
 
 	len = 1;
-	offsets = new Vector.<int>(128, true);
+	//offsets = new Vector.<int>(128, true);
 
 	for (i = 0; i < 128; ++i) {
 		j = stream->readUnsignedShort();
 		if (j != value) offsets[len++] = j;
 	}
 
-	self->samples = new Vector.<D2Sample>(len);
+	self->samples_count = len;
+	assert_op(len, <=, D2PLAYER_MAX_SAMPLES);
+	//self->samples = new Vector.<D2Sample>(len);
 
 	for (i = 0; i < len; ++i) {
 		ByteArray_set_position(stream, position + offsets[i]);
-		sample = new D2Sample();
+		sample = &self->samples[i];
+		D2Sample_ctor(sample);
+		
 		sample->super.length = stream->readUnsignedShort() << 1;
 		sample->super.loop   = stream->readUnsignedShort();
 		sample->super.repeat = stream->readUnsignedShort() << 1;
@@ -384,25 +406,23 @@ void D2Player_loader(struct D2Player* self, struct ByteArray *stream) {
 
 		for (j = 0; j < 48; ++j)
 		sample->table[j] = stream->readUnsignedByte();
-
-		self->samples[i] = sample;
 	}
 
 	len = stream->readUnsignedInt();
-	self->super.amiga->store(stream, len);
+	Amiga_store(self->super.amiga, stream, len, -1);
 
 	ByteArray_set_position_rel(stream, +64);
 	for (i = 0; i < 8; ++i)
 		offsets[i] = stream->readUnsignedInt();
 
-	len = self->samples->length;
+	len = self->samples_count;
 	position = ByteArray_get_position(stream);
 
 	for (i = 0; i < len; ++i) {
-		sample = self->samples[i];
+		sample = &self->samples[i];
 		if (sample->synth >= 0) continue;
 		ByteArray_set_position(stream, position + offsets[sample->index]);
-		sample->super.pointer = self->super.amiga->store(stream, sample->super.length);
+		sample->super.pointer = Amiga_store(self->super.amiga, stream, sample->super.length, -1);
 		sample->super.loopPtr = sample->super.pointer + sample->super.loop;
 	}
 
@@ -410,18 +430,17 @@ void D2Player_loader(struct D2Player* self, struct ByteArray *stream) {
 	for (i = 0; i < 1024; ++i)
 		self->arpeggios[i] = stream->readByte();
 
-	sample = new D2Sample();
-	sample->super.pointer = sample->super.loopPtr = self->super.amiga->memory->length;
+	sample = &self->samples[len];
+	D2Sample_ctor(sample);
+	
+	sample->super.pointer = sample->super.loopPtr = self->super.amiga->vector_count_memory;
 	sample->super.length  = sample->super.repeat  = 2;
 
-	self->samples[len] = sample;
-	self->samples->fixed = true;
-
-	len = self->patterns->length;
-	j = self->samples->length - 1;
+	len = self->patterns_count;
+	j = self->samples_count - 1;
 
 	for (i = 0; i < len; ++i) {
-		row = self->patterns[i];
+		row = &self->patterns[i];
 		if (row->sample > j) row->sample = 0;
 	}
 
