@@ -65,7 +65,13 @@ struct D2Player* D2Player_new(struct Amiga *amiga) {
 
 //override
 void D2Player_process(struct D2Player* self) {
-	var chan:AmigaChannel, i:int = 0, int level; row:AmigaRow, sample:D2Sample, int value; voice:D2Voice = voices[0];
+	struct AmigaChannel *chan = 0;
+	int i = 0;
+	int level = 0; 
+	struct AmigaRow *row = 0; 
+	struct D2Sample *sample = 0;
+	int value = 0; 
+	struct D2Voice *voice = &self->voices[0];
 
 	for (; i < 64;) {
 		self->noise = (self->noise << 7) | (self->noise >>> 25);
@@ -292,9 +298,21 @@ void D2Player_initialize(struct D2Player* self) {
 	}
 }
 
+
+#define STACK_MAX_OFFSETS 4
 //override
 void D2Player_loader(struct D2Player* self, struct ByteArray *stream) {
-	var int i; id:String, int j; int len; offsets:Vector.<int>, int position; row:AmigaRow, sample:D2Sample, step:AmigaStep, int value;
+	int i = 0; 
+	char id[4];
+	int j = 0;
+	int len = 0;
+	int offsets[STACK_MAX_OFFSETS] = {0};
+	int position = 0;
+	struct AmigaRow *row = 0;
+	struct D2Sample *sample = 0;
+	struct AmigaStep *step = 0;
+	int value = 0;
+	
 	stream->position = 3014;
 	id = stream->readMultiByte(4, ENCODING);
 	if (id != ".FNL") return;
