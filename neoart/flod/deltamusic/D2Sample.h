@@ -6,11 +6,12 @@
 #define D2SAMPLE_MAX_VIBRATOS 15
 #define D2SAMPLE_MAX_VOLUMES 15
 
+
 struct D2Sample {
 	struct AmigaSample super;
-	table     : Vector.<int>,
-	vibratos  : Vector.<int>,
-	volumes   : Vector.<int>;
+	int table[D2SAMPLE_MAX_TABLE];
+	int vibratos[D2SAMPLE_MAX_VIBRATOS];
+	int volumes[D2SAMPLE_MAX_VOLUMES];
 	int index;
 	int pitchBend;
 	int synth;
