@@ -19,5 +19,5 @@ int AoWriter_write(struct AoWriter *self, void* buffer, size_t bufsize) {
 }
 
 int AoWriter_close(struct AoWriter *self) {
-	ao_close(self->device);
+	return ao_close(self->device);
 }
