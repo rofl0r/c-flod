@@ -29,7 +29,7 @@ void CoreMixer_ctor(struct CoreMixer* self) {
 	CLASS_CTOR_DEF(CoreMixer);
 	/* original constructor code goes here */
 	PFUNC();
-	CoreMixer_set_bufferSize(self, 8192);
+	CoreMixer_set_bufferSize(self, COREMIXER_MAX_BUFFER);
 	//self->bufferSize = 8192;
 	
 	//vtable
@@ -83,7 +83,7 @@ int CoreMixer_get_bufferSize(struct CoreMixer* self) {
 void CoreMixer_set_bufferSize(struct CoreMixer* self, int value) {
 	PFUNC();
 	int i = 0; int len = 0;
-	if (value == len || value < 2048) return;
+	//if (value == len || value < 2048) return;
 	assert_op(value, <=, COREMIXER_MAX_BUFFER);
 
 	len = self->vector_count_buffer;

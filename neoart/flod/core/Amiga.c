@@ -38,7 +38,7 @@ void Amiga_ctor(struct Amiga* self) {
 	
 	CoreMixer_ctor(&self->super);
 	self->super.type = CM_AMIGA;
-	CoreMixer_set_bufferSize((struct CoreMixer*) self, 8192);
+	CoreMixer_set_bufferSize((struct CoreMixer*) self, COREMIXER_MAX_BUFFER);
 	self->filter = AmigaFilter_new();
 	
 	unsigned int i;
