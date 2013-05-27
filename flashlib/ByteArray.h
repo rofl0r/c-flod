@@ -1,6 +1,10 @@
 #ifndef BYTEARRAY_H
 #define BYTEARRAY_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -55,7 +59,11 @@ void ByteArray_defaults(struct ByteArray* self);
 void ByteArray_ctor(struct ByteArray* self);
 struct ByteArray* ByteArray_new(void);
 
+void ByteArray_set_endian(struct ByteArray* self, enum ByteArray_Endianess endian);
+enum ByteArray_Endianess ByteArray_get_endian(struct ByteArray* self);
+
 int ByteArray_open_file(struct ByteArray* self, char* filename);
+void ByteArray_close_file(struct ByteArray *self);
 int ByteArray_open_mem(struct ByteArray* self, char* data, size_t size);
 void ByteArray_clear(struct ByteArray* self);
 
@@ -91,5 +99,11 @@ unsigned char ByteArray_getUnsignedByte(struct ByteArray* self, off_t index);
 void ByteArray_setUnsignedByte(struct ByteArray* self, off_t index, unsigned char what);
 
 void ByteArray_dump_to_file(struct ByteArray* self, char* filename);
+
+#ifdef __cplusplus
+}
+#endif
+
+//RcB: DEP "ByteArray.c"
 
 #endif
