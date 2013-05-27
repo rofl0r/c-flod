@@ -59,4 +59,6 @@ void Amiga_reset(struct Amiga* self);
 void Amiga_fast(struct Amiga* self);
 void Amiga_memory_set_length(struct Amiga *self, unsigned len);
 
+//RcB: DEP "Amiga.c"
+
 #endif

@@ -67,5 +67,6 @@ int CorePlayer_play(struct CorePlayer* self);
 void CorePlayer_stop(struct CorePlayer* self);
 #endif
 
+//RcB: DEP "CorePlayer.c"
 
 #endif

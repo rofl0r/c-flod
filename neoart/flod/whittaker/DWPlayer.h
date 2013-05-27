@@ -73,4 +73,6 @@ void DWPlayer_process(struct DWPlayer* self);
 void DWPlayer_initialize(struct DWPlayer* self);
 void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream);
 
+//RcB: DEP "DWPlayer.c"
+
 #endif

@@ -23,4 +23,6 @@ void DWSample_ctor(struct DWSample* self);
 
 struct DWSample* DWSample_new(void);
 
+//RcB: DEP "DWSample.c"
+
 #endif

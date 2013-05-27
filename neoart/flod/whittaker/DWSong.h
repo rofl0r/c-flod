@@ -17,4 +17,6 @@ void DWSong_defaults(struct DWSong* self);
 void DWSong_ctor(struct DWSong* self);
 struct DWSong* DWSong_new(void);
 
+//RcB: DEP "DWSong.c"
+
 #endif

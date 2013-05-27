@@ -25,4 +25,6 @@ void AmigaPlayer_set_stereo(struct AmigaPlayer* self, Number value);
 void AmigaPlayer_set_volume(struct AmigaPlayer* self, Number value);
 void AmigaPlayer_toggle(struct AmigaPlayer* self, int index);
 
+//RcB: DEP "AmigaPlayer.c"
+
 #endif

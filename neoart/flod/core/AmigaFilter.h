@@ -36,4 +36,6 @@ struct AmigaFilter* AmigaFilter_new(void);
 void AmigaFilter_initialize(struct AmigaFilter* self);
 void AmigaFilter_process(struct AmigaFilter* self, int model, struct Sample* sample);
 
+//RcB: DEP "AmigaFilter.c"
+
 #endif
