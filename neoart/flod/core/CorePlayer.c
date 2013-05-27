@@ -109,11 +109,18 @@ void CorePlayer_initialize(struct CorePlayer* self) {
 	self->tick = 0;
 	CoreMixer_initialize(self->hardware);
 	PFUNC();
+// FIXME we shouldnt pull in sb/amiga code if we don't need it
+// using a compile-time flag like below is only a workaround.
+#ifndef FLOD_NO_AMIGA
 	if(self->hardware->type == CM_AMIGA)
 		Amiga_initialize((struct Amiga*) self->hardware);
-	else if(self->hardware->type == CM_SOUNDBLASTER)
+	else
+#endif
+#ifndef FLOD_NO_SOUNDBLASTER
+	if(self->hardware->type == CM_SOUNDBLASTER)
 		Soundblaster_initialize((struct Soundblaster*) self->hardware);
 	else
+#endif
 		abort();
 
 	self->hardware->samplesTick = 110250 / self->tempo;
