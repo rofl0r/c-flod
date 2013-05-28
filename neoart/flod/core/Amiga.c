@@ -133,6 +133,8 @@ void Amiga_reset(struct Amiga* self) {
       //self->memory = new Vector.<int>();
       //memset(self->memory, 0, sizeof(self->memory));
       self->vector_count_memory = 0;
+      // we need to set memory_fixed to false so that Amiga_initialize will set correct memory bounds.
+      self->memory_fixed = false;
 }
 
 #define HARDWARE_FROM_AMIGA
