@@ -434,7 +434,7 @@ void DWPlayer_initialize(struct DWPlayer* self) {
 	self->delayCounter  = 0;
 	self->fadeSpeed     = 0;
 	self->fadeCounter   = 0;
-
+	
 	if (self->wave) {
 		self->waveDir = 0;
 		self->wavePos = self->wave->super.pointer + self->waveCenter;
@@ -496,6 +496,8 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 	//self->readMix = "readUnsignedShort";
 	self->readLen = 2;
 	self->super.super.variant = 0;
+	self->vector_count_songs = 0;
+	self->vector_count_samples = 0;
 
 	if (stream->readUnsignedShort(stream) == 0x48e7) {                               //movem.l
 		ByteArray_set_position(stream, 4);
