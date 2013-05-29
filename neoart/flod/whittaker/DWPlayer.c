@@ -45,10 +45,10 @@ void DWPlayer_ctor(struct DWPlayer* self, struct Amiga* amiga) {
 	}
 
 	//add vtable
-	self->super.super.process = DWPlayer_process;
-	self->super.super.loader = DWPlayer_loader;
+	self->super.super.process = (void*) DWPlayer_process;
+	self->super.super.loader = (void*) DWPlayer_loader;
 	
-	self->super.super.initialize = DWPlayer_initialize;
+	self->super.super.initialize = (void*) DWPlayer_initialize;
 	
 	// TODO: this is not very accurate...
 	self->super.super.min_filesize = 64;
@@ -124,11 +124,11 @@ void DWPlayer_process(struct DWPlayer* self) {
 
 			if (sample->super.loopPtr < 0) {
 				chan->pointer = self->super.amiga->loopPtr;
-				assert_op(chan->pointer, <, AMIGA_MAX_MEMORY);
+				assert_op(chan->pointer, <, (int) AMIGA_MAX_MEMORY);
 				chan->length  = self->super.amiga->loopLen;
 			} else {
 				chan->pointer = sample->super.pointer + sample->super.loopPtr;
-				assert_op(chan->pointer, <, AMIGA_MAX_MEMORY);
+				assert_op(chan->pointer, <, (int) AMIGA_MAX_MEMORY);
 				chan->length  = sample->super.length  - sample->super.loopPtr;
 			}
 		}
@@ -145,7 +145,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 						voice->speed = self->super.super.speed * (value + 33);
 					} else if (value >= self->com2) {
 						value -= self->com2;
-						assert_op(value, <, self->vector_count_samples);
+						assert_op(value, <, (int) self->vector_count_samples);
 						voice->sample = sample = &self->samples[value];
 					} else if (value >= self->com3) {
 						pos = ByteArray_get_position(self->stream);
@@ -219,7 +219,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 									//chan->enabled = 0;
 								} else {
 									chan->pointer = self->super.amiga->loopPtr;
-									assert_op(chan->pointer, <, AMIGA_MAX_MEMORY);
+									assert_op(chan->pointer, <, (int) AMIGA_MAX_MEMORY);
 									chan->length  = self->super.amiga->loopLen;
 								}
 
@@ -307,7 +307,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 					}
 
 					chan->pointer = sample->super.pointer;
-					assert_op(chan->pointer, <, AMIGA_MAX_MEMORY);
+					assert_op(chan->pointer, <, (int) AMIGA_MAX_MEMORY);
 					chan->length  = sample->super.length;
 					AmigaChannel_set_volume(chan, volume);
 					//chan->volume  = volume;
@@ -674,7 +674,6 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 				??? | loopPtr |
 				x32 | S32 ?   |
 				 */
-				retry:
 				for (i = 0; i < total; ++i) {
 					//sample = DWSample_new();
 					sample = &self->samples[i];

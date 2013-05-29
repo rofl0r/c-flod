@@ -56,28 +56,29 @@ struct CorePlayer* CorePlayer_new(struct CoreMixer *hardware) {
 
 void CorePlayer_set_force(struct CorePlayer* self, int value) {
 	self->version = 0;
+	(void) value;
 }
 
 /* stubs */
-void CorePlayer_process(struct CorePlayer* self) {}
+void CorePlayer_process(struct CorePlayer* self) { (void) self; }
 
-void CorePlayer_setup(struct CorePlayer* self) {}
+void CorePlayer_setup(struct CorePlayer* self) { (void) self; }
 
-void CorePlayer_set_ntsc(struct CorePlayer* self, int value) { }
+void CorePlayer_set_ntsc(struct CorePlayer* self, int value) { (void) self; (void) value; }
 
-void CorePlayer_set_stereo(struct CorePlayer* self, Number value) { }
+void CorePlayer_set_stereo(struct CorePlayer* self, Number value) { (void) self; (void) value; }
 
-void CorePlayer_set_volume(struct CorePlayer* self, Number value) { }
+void CorePlayer_set_volume(struct CorePlayer* self, Number value) { (void) self; (void) value; }
 
-void CorePlayer_toggle(struct CorePlayer* self, int index) {}
+void CorePlayer_toggle(struct CorePlayer* self, int index) { (void) self; (void) index; }
 
-void CorePlayer_reset(struct CorePlayer* self) { }
+void CorePlayer_reset(struct CorePlayer* self) { (void) self; }
 
-void CorePlayer_loader(struct CorePlayer* self, struct ByteArray *stream) { }
+void CorePlayer_loader(struct CorePlayer* self, struct ByteArray *stream) { (void) self; (void) stream; }
 
 /* callback function for EVENT_SAMPLE_DATA */
-void CorePlayer_fast(struct CorePlayer* self) {}
-void CorePlayer_accurate(struct CorePlayer* self) {}
+void CorePlayer_fast(struct CorePlayer* self) { (void) self; }
+void CorePlayer_accurate(struct CorePlayer* self) { (void) self; }
 
 int CorePlayer_load(struct CorePlayer* self, struct ByteArray *stream) {
 	PFUNC();

@@ -55,8 +55,8 @@ void Amiga_ctor(struct Amiga* self) {
 	self->channels[2].next = self->channels[3] = AmigaChannel_new(3); */
 	
 	// vtable
-	self->super.fast = Amiga_fast;
-	self->super.accurate = Amiga_fast; // simply use the fast one
+	self->super.fast = (void*) Amiga_fast;
+	self->super.accurate = (void*) Amiga_fast; // simply use the fast one
 }
 
 struct Amiga* Amiga_new(void) {
@@ -204,7 +204,7 @@ void Amiga_fast(struct Amiga* self) {
 						chan->delay--;
 					} else if (--chan->timer < 1.0f) { 
 						if (!chan->mute) {
-							assert_op(chan->audloc, <, self->vector_count_memory);
+							assert_op(chan->audloc, <, (int) self->vector_count_memory);
 							//assert_op(chan->audloc, <, AMIGA_MAX_MEMORY);
 							value = self->memory[chan->audloc] * 0.0078125f;
 							chan->ldata = value * lvol;

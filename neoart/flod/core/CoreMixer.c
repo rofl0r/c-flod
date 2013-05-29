@@ -48,8 +48,8 @@ void CoreMixer_reset(struct CoreMixer* self) {
 		Amiga_reset((struct Amiga*)self);
 }
 
-void CoreMixer_fast(struct CoreMixer* self) {}
-void CoreMixer_accurate(struct CoreMixer* self) {}
+void CoreMixer_fast(struct CoreMixer* self) { (void) self; }
+void CoreMixer_accurate(struct CoreMixer* self) {(void) self; }
 
 //js function reset
 void CoreMixer_initialize(struct CoreMixer* self) {
@@ -75,6 +75,7 @@ void CoreMixer_set_complete(struct CoreMixer* self, int value) {
 }
 
 int CoreMixer_get_bufferSize(struct CoreMixer* self) {
+	(void) self;
 	return COREMIXER_MAX_BUFFER;
 	//return self->vector_count_buffer;
 	//return self->buffer->length; 

@@ -161,14 +161,14 @@ int ByteArray_open_mem(struct ByteArray* self, char* data, size_t size) {
 void ByteArray_readMultiByte(struct ByteArray* self, char* buffer, size_t len) {
 	if(self->type == BAT_MEMSTREAM) {
 		assert_op(self->start_addr, !=, 0);
-		assert_op(self->pos + len, <=, self->size);
+		assert_op((off_t) (self->pos + len), <=, self->size);
 		memcpy(buffer, &self->start_addr[self->pos], len);
 	} else {
 		ssize_t ret = read(self->fd, buffer, len);
 		if(ret == -1) {
 			read_error();
 			return;
-		} else if(ret != len) {
+		} else if(ret != (ssize_t) len) {
 			read_error_short();
 			self->pos += len;
 			return;
@@ -360,7 +360,7 @@ off_t ByteArray_writeMem(struct ByteArray* self, unsigned char* what, size_t len
 		assert_dbg(0);
 		return 0;
 	}
-	if(self->pos + len > self->size) {
+	if((off_t)(self->pos + len) > self->size) {
 		fprintf(stderr, "oob write attempted");
 		assert_dbg(0);
 		return 0;
