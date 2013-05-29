@@ -62,7 +62,7 @@ struct ByteArray* ByteArray_new(void);
 void ByteArray_set_endian(struct ByteArray* self, enum ByteArray_Endianess endian);
 enum ByteArray_Endianess ByteArray_get_endian(struct ByteArray* self);
 
-int ByteArray_open_file(struct ByteArray* self, char* filename);
+int ByteArray_open_file(struct ByteArray* self, const char* filename);
 void ByteArray_close_file(struct ByteArray *self);
 int ByteArray_open_mem(struct ByteArray* self, char* data, size_t size);
 void ByteArray_clear(struct ByteArray* self);
