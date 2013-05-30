@@ -187,7 +187,7 @@ void DWPlayer_process(struct DWPlayer* self) {
 										temp = ByteArray_readUnsignedShort(self->stream);
 									} else if (self->readLen == 4) {
 										temp = ByteArray_readUnsignedInt(self->stream);
-									}
+									} else abort();
 									ByteArray_set_position(self->stream, self->base + temp);
 									//ByteArray_set_position(self->stream, self->base + self->stream[readMix]());
 									voice->trackPos = self->readLen;
@@ -461,6 +461,8 @@ void DWPlayer_initialize(struct DWPlayer* self) {
 			temp = ByteArray_readUnsignedShort(self->stream);
 		} else if (self->readLen == 4) {
 			temp = ByteArray_readUnsignedInt(self->stream);
+		} else {
+			abort();
 		}
 		//voice->patternPos = self->base + self->stream[readMix]();
 		voice->patternPos = self->base + temp;
@@ -594,7 +596,7 @@ void DWPlayer_loader(struct DWPlayer* self, struct ByteArray *stream) {
 				temp = ByteArray_readUnsignedShort(stream);
 			} else if (self->readLen == 4) {
 				temp = ByteArray_readUnsignedInt(stream);
-			}
+			} else abort();
 			//value = self->base + stream[readMix]();
 			value = self->base + temp;
 			if (value < lower) lower = value;
