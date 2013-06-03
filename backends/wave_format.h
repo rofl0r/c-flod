@@ -53,4 +53,12 @@ typedef struct {
 	RIFF_SUBCHUNK2_HEADER sub2;
 } WAVE_HEADER_COMPLETE;
 
+static inline void* waveheader_get_data(const WAVE_HEADER_COMPLETE* hdr) {
+	return (void*) (hdr+1);
+}
+
+static inline unsigned waveheader_get_datasize(const WAVE_HEADER_COMPLETE* hdr) {
+	return hdr->riff_hdr.filesize_minus_8 + 8 - sizeof(*hdr);
+}
+
 #endif
