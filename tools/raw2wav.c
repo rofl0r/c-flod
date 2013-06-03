@@ -13,58 +13,8 @@ LICENSE: GPL v2
 #include <fcntl.h>
 #include <string.h>
 #include <sys/stat.h>
+#include "../backends/wave_format.h"
 
-typedef union {
-	unsigned char chars[2];
-	unsigned short shrt;
-} u_char2;
-
-
-//all values are LITTLE endian unless otherwise specified...
-typedef struct {
-	char text_RIFF[4];
-	/*
-	ChunkSize:  36 + SubChunk2Size, or more precisely:
-	4 + (8 + SubChunk1Size) + (8 + SubChunk2Size)
-	This is the size of the rest of the chunk 
-	following this number.  This is the size of the 
-	entire file in bytes minus 8 bytes for the
-	two fields not included in this count:
-	ChunkID and ChunkSize.	 * */
-	unsigned int filesize_minus_8;
-	char text_WAVE[4];
-} RIFF_HEADER;
-
-typedef struct {
-	char text_fmt[4];
-	unsigned int formatheadersize; /* Subchunk1Size    16 for PCM.  This is the size of the
-                               rest of the Subchunk which follows this number. */
-	u_char2 format; /* big endian, PCM = 1 (i.e. Linear quantization)
-                               Values other than 1 indicate some 
-                               form of compression. */
-	unsigned short channels; //Mono = 1, Stereo = 2, etc
-	unsigned int samplerate;
-	unsigned int bytespersec; // ByteRate == SampleRate * NumChannels * BitsPerSample/8
-	unsigned short blockalign; /* == NumChannels * BitsPerSample/8
-                               The number of bytes for one sample including
-                               all channels. */
-	unsigned short bitwidth; //BitsPerSample    8 bits = 8, 16 bits = 16, etc.
-} WAVE_HEADER;
-
-typedef struct {
-	char text_data[4]; //Contains the letters "data"
-	unsigned int data_size; /* == NumSamples * NumChannels * BitsPerSample/8
-                               This is the number of bytes in the data.
-                               You can also think of this as the size
-                               of the read of the subchunk following this 
-                               number.*/
-} RIFF_SUBCHUNK2_HEADER;
-
-typedef struct {
-	RIFF_HEADER riff_hdr;
-	WAVE_HEADER wave_hdr;
-	RIFF_SUBCHUNK2_HEADER sub2;
-} WAVE_HEADER_COMPLETE;
 
 size_t getfilesize(char *filename) {
 	struct stat st;
