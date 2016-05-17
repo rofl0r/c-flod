@@ -1,4 +1,5 @@
 #include "../../../include/endianness.h"
+#include <stdint.h>
 #include <math.h>
 #ifdef __GNUC__
 #define likely(x)       __builtin_expect((x),1)
@@ -14,7 +15,7 @@
 #define denormalZ(X) (X)
 #define denormal(X) denormalB(X)
 
-union float_repr { float __f; __uint32_t __i; };
+union float_repr { float __f; uint32_t __i; };
 #define floatrepr(f) (((union __float_repr){ (float)(f) }).__i)
 
 /* this one uses the original behaviour */
