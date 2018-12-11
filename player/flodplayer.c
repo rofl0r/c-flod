@@ -2,6 +2,7 @@
 
 #include "../backends/wavewriter.h"
 #include "../backends/aowriter.h"
+#include "../backends/sdlwriter.h"
 
 #include "../flashlib/ByteArray.h"
 
@@ -178,6 +179,7 @@ static const hardware_ctor_func hardware_ctors[] = {
 enum BackendType {
 	BE_WAVE,
 	BE_AO,
+	BE_SDL,
 	BE_MAX,
 };
 
@@ -202,6 +204,12 @@ static const struct BackendInfo {
 		.init_func  = (backend_init_func)  AoWriter_init,
 		.write_func = (backend_write_func) AoWriter_write,
 		.close_func = (backend_close_func) AoWriter_close,
+	},
+	[BE_SDL] = {
+		.name = "SdlWriter",
+		.init_func  = (backend_init_func)  SdlWriter_init,
+		.write_func = (backend_write_func) SdlWriter_write,
+		.close_func = (backend_close_func) SdlWriter_close,
 	},
 };
 
@@ -238,12 +246,16 @@ int main(int argc, char** argv) {
 	for(startarg = 1; startarg < argc; startarg++) {
 		if(argv[startarg][0] == '-' && argv[startarg][1] == 'w')
 			backend_type = BE_WAVE;
+		else if(argv[startarg][0] == '-' && argv[startarg][1] == 's')
+			backend_type = BE_SDL;
 		else
 			break;
 	}
 	if(startarg == argc) {
-		printf("usage: %s [-w] filename.mod\n"
-		       "where -w means write output to foo.wav instead of audio device\n", argv[0]);
+		printf("usage: %s [-w/s] filename.mod\n"
+		       "-w means write output to foo.wav instead of audio device\n",
+		       "-s means use sdl audio backend\n",
+		       argv[0]);
 		return 1;
 	}
 
@@ -283,6 +295,7 @@ int main(int argc, char** argv) {
 		struct Backend backend;
 		struct WaveWriter ww;
 		struct AoWriter ao;
+		struct SdlWriter sdl;
 	} writer;
 
 play:
