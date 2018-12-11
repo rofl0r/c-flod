@@ -70,10 +70,10 @@ clean:
 	$(CC) $(CFLAGS) $(INC) -c -o $@ $<
 
 flodplayer: $(OBJS)
-	$(CC) $(LDFLAGS) -o $@ $(OBJS) -lm -lao
+	$(CC) -o $@ $(OBJS) -lm -lao $(LDFLAGS)
 
 flod_demo.out: $(OBJS)
-	$(CC) $(LDFLAGS)-o $@ $(OBJS) -lm -lao
+	$(CC) -o $@ $(OBJS) -lm -lao $(LDFLAGS)
 
 libflod.a: $(OBJS)
 	rm -f $@
