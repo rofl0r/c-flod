@@ -5,4 +5,5 @@
 *.out
 *.rcb
 *.wav
-
+flodplayer
+config.mak
