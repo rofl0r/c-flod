@@ -21,8 +21,7 @@ int SdlWriter_init(struct SdlWriter *self, void* data);
 int SdlWriter_write(struct SdlWriter *self, void* buffer, size_t bufsize);
 int SdlWriter_close(struct SdlWriter *self);
 
-//RcB: DEP "sdlwriter.c"
-//RcB: LINK "-lSDL_sound"
-//RcB: LINK "-lpthread"
+#pragma RcB2 DEP "sdlwriter.c"
+#pragma RcB2 LINK "-lSDL_sound" "-lpthread"
 
 #endif

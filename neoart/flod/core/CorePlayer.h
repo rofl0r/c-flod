@@ -67,6 +67,6 @@ int CorePlayer_play(struct CorePlayer* self);
 void CorePlayer_stop(struct CorePlayer* self);
 #endif
 
-//RcB: DEP "CorePlayer.c"
+#pragma RcB2 DEP "CorePlayer.c"
 
 #endif

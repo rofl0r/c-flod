@@ -47,6 +47,6 @@ void CoreMixer_reset(struct CoreMixer* self);
 void CoreMixer_fast(struct CoreMixer* self);
 void CoreMixer_accurate(struct CoreMixer* self);
 
+#pragma RcB2 DEP "CoreMixer.c"
 
-//RcB: DEP "CoreMixer.c"
-#endif 
+#endif

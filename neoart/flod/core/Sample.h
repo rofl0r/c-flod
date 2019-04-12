@@ -20,7 +20,7 @@ void Sample_ctor(struct Sample* self);
 
 struct Sample* Sample_new(void);
 
-//RcB: DEP "Sample.c"
+#pragma RcB2 DEP "Sample.c"
 
 #endif
 

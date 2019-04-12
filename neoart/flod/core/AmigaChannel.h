@@ -38,7 +38,7 @@ void AmigaChannel_set_volume(struct AmigaChannel* self, int value);
 void AmigaChannel_resetData(struct AmigaChannel* self);
 void AmigaChannel_initialize(struct AmigaChannel* self);
 
-//RcB: DEP "AmigaChannel.c"
+#pragma RcB2 DEP "AmigaChannel.c"
 
 #endif
  

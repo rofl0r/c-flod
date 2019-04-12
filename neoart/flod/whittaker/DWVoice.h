@@ -44,6 +44,6 @@ struct DWVoice* DWVoice_new(int index, int bitFlag);
 
 void DWVoice_initialize(struct DWVoice* self);
 
-//RcB: DEP "DWVoice.c"
+#pragma RcB2 DEP "DWVoice.c"
 
 #endif

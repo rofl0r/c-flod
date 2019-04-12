@@ -18,7 +18,7 @@ int AoWriter_init(struct AoWriter *self, void* data);
 int AoWriter_write(struct AoWriter *self, void* buffer, size_t bufsize);
 int AoWriter_close(struct AoWriter *self);
 
-//RcB: DEP "aowriter.c"
-//RcB: LINK "-lao"
+#pragma RcB2 DEP "aowriter.c"
+#pragma RcB2 LINK "-lao"
 
 #endif

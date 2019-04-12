@@ -55,4 +55,6 @@ struct SBChannel* SBChannel_new(void);
 
 void SBChannel_initialize(struct SBChannel* self);
 
+#pragma RcB2 DEP "SBChannel.c"
+
 #endif
